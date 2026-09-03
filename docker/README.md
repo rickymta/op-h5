@@ -148,6 +148,47 @@ docker compose -f docker-compose.image.yml up -d
 
 Cập nhật sau này: sửa Excel/PHP → push → CI build → trên server `pull && up -d` (chỉ service có image mới bị tạo lại; DB không đụng).
 
+## 6c. Build thẳng trên server (không cần CI/GHCR)
+
+Dockerfile không compile gì — chỉ `COPY` JAR/Excel/PHP vào image (riêng `php` cài 2 extension, ~1 phút). Server 4 CPU / 8 GB build thoải mái; cần thêm ~2.5 GB đĩa (clone + image). `docker-compose.image.yml` có sẵn `build:` nên cùng một file dùng được cả `pull` lẫn `build`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | bash     # MODE=build mặc định
+```
+
+Script cài Docker + git + git-lfs, clone repo vào `/opt/tcg/src` (kéo 8 JAR qua LFS — **611 MB trong quota 1 GB/tháng**, giống một lần CI), rồi `docker compose build console php nginx`. Cập nhật sau này:
+
+```bash
+cd /opt/tcg/src && git pull && git lfs pull
+cd docker && docker compose -f docker-compose.image.yml up -d --build
+```
+
+Chọn cách nào: **build trên server** nếu chỉ có một server và không muốn quản lý GHCR; **CI + pull** nếu nhiều server hoặc muốn máy chạy game không cần git. Cả hai đều dùng `.env` + entrypoint để điền secrets/IP, nên image không bao giờ chứa mật khẩu.
+
+Kiểm tra sau clone: `ls -la /opt/tcg/src/server/statistic/*.jar` phải ~104 MB; nếu chỉ 130 byte là LFS pointer chưa được kéo (`git lfs pull`).
+
+## 6d. Tài nguyên client — `res/ sound/ spine/` (1.6 GB, 11.000 file)
+
+Không nằm trong git (LFS free chỉ 1 GB) và không nằm trong image. Mount vào container từ `ASSETS_DIR` (mặc định `/opt/tcg/assets`). Ba cách lấy, theo thứ tự nên dùng:
+
+1. **rsync từ server cũ sang server mới** — nhanh nhất, không qua máy bạn, tên file trong `res/` toàn ASCII nên không lo hỏng encoding:
+   ```bash
+   rsync -avz --progress root@<server-cu>:/www/wwwroot/game/res   /opt/tcg/assets/
+   rsync -avz --progress root@<server-cu>:/www/wwwroot/game/sound /opt/tcg/assets/
+   rsync -avz --progress root@<server-cu>:/www/wwwroot/game/spine /opt/tcg/assets/
+   ```
+   Chạy lại lệnh là đồng bộ tiếp phần thiếu (an toàn khi đứt giữa chừng).
+2. **WinSCP từ máy bạn** — kéo `website/game/{res,sound,spine}` vào `/opt/tcg/assets/`. Bật *UTF-8 encoding for filenames* dù tên là ASCII, cho thành thói quen.
+3. **GitHub Release** — nếu muốn server mới sau này chỉ cần `curl`: nén một lần rồi đính vào release (≤ 2 GB/file, không tính vào LFS):
+   ```bash
+   tar -C website/game -czf client-assets.tar.gz res sound spine
+   gh release create assets-v1 client-assets.tar.gz -t "Client assets" -n "res/ sound/ spine/ cua website/game"
+   # tren server:
+   curl -L https://github.com/rickymta/op-h5/releases/download/assets-v1/client-assets.tar.gz | tar -xz -C /opt/tcg/assets
+   ```
+
+Các tài nguyên client còn lại (`libs/`, `bmFont/`, `icon/`, `iconshop/`, `img/`, `assets/`, `static/`, `utility/`, ~60 MB) **đã nằm trong git và trong image** `op-h5-nginx`/`op-h5-php`. 23 file client thiếu (MISSING-FILES.md A7) là thiếu ngay trên server cũ — rsync không mang về được.
+
 ## 7. Những gì chưa chắc — đọc trước lần `up` đầu
 
 1. **nginx rewrite là suy đoán.** File nginx gốc không có trong snapshot; `nginx/game.conf` dựng từ mã PHP. 4 endpoint `/user/login.php|register.php|email.php|quenmatkhau.php` được map tạm về `api/config.php?act=…` — kiểm tra đăng nhập/đăng ký web ngay sau khi lên.

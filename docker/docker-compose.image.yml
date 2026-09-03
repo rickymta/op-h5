@@ -102,6 +102,11 @@ services:
 
   console:
     <<: *java
+    # `build:` chi dat o console: `docker compose build` dung 1 lan, cac service Java khac
+    # dung lai image cung ten. Khong co Docker o may dev thi bo qua build, `pull` tu GHCR.
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.server
     working_dir: /h5/server/console
     command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CONSOLE:-512m}", "-jar", "tcg-console-server-0.0.1-SNAPSHOT.jar"]
     mem_limit: 800m
@@ -206,6 +211,9 @@ services:
 
   php:
     image: ${IMAGE_PHP:-ghcr.io/rickymta/op-h5-php:latest}
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
     network_mode: host
     restart: unless-stopped
     env_file: .env
@@ -221,6 +229,9 @@ services:
 
   nginx:
     image: ${IMAGE_NGINX:-ghcr.io/rickymta/op-h5-nginx:latest}
+    build:
+      context: ..
+      dockerfile: docker/nginx/Dockerfile
     network_mode: host
     restart: unless-stopped
     env_file: .env
