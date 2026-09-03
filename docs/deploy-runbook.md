@@ -64,22 +64,30 @@ sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql
 
 ## Bước 2 — Bootstrap server mới (10–20 phút)
 
+**Ubuntu — trước bootstrap:** mở port cho client và kiểm tra compose plugin (`apt install docker.io` không kèm plugin):
+
 ```bash
-# [MỚI]
-curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | bash
+ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw status numbered
+docker compose version || apt-get install -y docker-compose-plugin
+apt-get install -y rsync curl
 ```
 
-Script làm: cài Docker + git + git-lfs, tạo swap 4 GB, **tải `client-assets.tar.gz` từ release vào `/opt/tcg/assets`**, clone repo vào `/opt/tcg/src` (kéo 8 JAR qua LFS, 611 MB), `docker compose build console php nginx`, kiểm tra port trống.
+`443` chưa dùng: client bundle hardcode `http://PUBLIC_HOST:9000` nên trang phải là `http://`; bật HTTPS sau sẽ gặp mixed-content, cần sửa bundle. Host network nên `ufw` **có** tác dụng với container (khác bridge network); các port nội bộ vẫn đóng.
+
+
+```bash
+# [MỚI]
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | MODE=pull bash
+```
+
+`MODE=pull` (khuyến nghị — image đã build sẵn và public trên GHCR): tạo swap 4 GB, **tải `client-assets.tar.gz` từ release vào `/opt/tcg/assets`**, lấy thư mục `docker/` về `/opt/tcg/docker`, kiểm tra port. Không cần git/LFS trên server. (`MODE=build` = clone + build tại chỗ, tốn 611 MB LFS.)
 
 Điểm kiểm tra khi script kết thúc:
 
 ```bash
 ls /opt/tcg/assets/res | wc -l                              # 10584
-ls -la /opt/tcg/src/server/statistic/*.jar                  # ~104 MB, KHÔNG phải 130 byte
-docker images | grep op-h5                                  # 3 image: server, php, nginx
+ls /opt/tcg/docker                                          # docker-compose.image.yml, .env, initdb/, ...
 ```
-
-Nếu `statistic/*.jar` chỉ 130 byte → LFS chưa kéo: `cd /opt/tcg/src && git lfs pull`.
 
 ---
 
@@ -87,9 +95,9 @@ Nếu `statistic/*.jar` chỉ 130 byte → LFS chưa kéo: `cd /opt/tcg/src && g
 
 ```bash
 # [MỚI]
-rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mysql/       /opt/tcg/src/docker/initdb/mysql/
-rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mongo/dump/  /opt/tcg/src/docker/initdb/mongo/dump/
-ls /opt/tcg/src/docker/initdb/mysql/ /opt/tcg/src/docker/initdb/mongo/dump/
+rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mysql/       /opt/tcg/docker/initdb/mysql/
+rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mongo/dump/  /opt/tcg/docker/initdb/mongo/dump/
+ls /opt/tcg/docker/initdb/mysql/ /opt/tcg/docker/initdb/mongo/dump/
 ```
 
 (Không rsync `res/` nữa — đã có từ release.)
@@ -100,7 +108,7 @@ ls /opt/tcg/src/docker/initdb/mysql/ /opt/tcg/src/docker/initdb/mongo/dump/
 
 ```bash
 # [MỚI]
-cd /opt/tcg/src/docker && nano .env
+cd /opt/tcg/docker && nano .env
 ```
 
 Bắt buộc điền: `PUBLIC_HOST`, `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD` (phải **khớp dump** — DB được tạo với đúng mật khẩu này), và các secret PHP. `ASSETS_DIR=/opt/tcg/assets` giữ nguyên. Heap giữ mặc định lần đầu.
@@ -118,7 +126,7 @@ grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PA
 Lên hạ tầng trước, đợi import dump xong (lần đầu MySQL import vài phút):
 
 ```bash
-# [MỚI]  cd /opt/tcg/src/docker
+# [MỚI]  cd /opt/tcg/docker
 docker compose -f docker-compose.image.yml up -d mysql mongo rabbitmq
 docker compose -f docker-compose.image.yml logs -f mysql | grep -m1 'ready for connections'     # Ctrl+C khi thấy
 docker compose -f docker-compose.image.yml ps                                                    # 3 container "healthy"
@@ -164,7 +172,7 @@ Từ máy khác: mở `http://PUBLIC_HOST/play-game` — client phải nạp đ�
 ## Bước 7 — Sau khi ổn định
 
 - **Hạ heap theo số đo**: sau 30 phút, `docker stats` → sửa `JAVA_XMX_*`/`mem_limit`, `$C up -d` (chỉ service đổi bị tạo lại).
-- **Cron dọn log Java** (SSD 40 GB): `echo '0 4 * * * docker compose -f /opt/tcg/src/docker/docker-compose.image.yml exec -T game find /h5/server -path "*/.logs/*" -name "*.log" -mtime +7 -delete' | crontab -` (tương tự các service khác, hoặc chấp nhận log mất khi container tạo lại).
+- **Cron dọn log Java** (SSD 40 GB): `echo '0 4 * * * docker compose -f /opt/tcg/docker/docker-compose.image.yml exec -T game find /h5/server -path "*/.logs/*" -name "*.log" -mtime +7 -delete' | crontab -` (tương tự các service khác, hoặc chấp nhận log mất khi container tạo lại).
 - **Backup** hàng ngày: xem `docker/README.md` mục 6.
 - **Tắt server cũ** khi đã xác nhận người chơi vào được server mới.
 
