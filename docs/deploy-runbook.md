@@ -6,6 +6,79 @@ Làm **theo đúng thứ tự**, mỗi bước có điểm kiểm tra. Ký hiệ
 
 ---
 
+## Tóm tắt lệnh — bản rút gọn để copy (Ubuntu, Docker đã cài, ufw đã mở 22/80/443)
+
+Trạng thái 2026-09-04: repo + release `assets-v1` + image GHCR (public, CI xanh 3/3) đã sẵn. Chưa chạy bước nào trên server mới. Ký hiệu `[PC]` máy Windows, `[CŨ]` pgaming, `[MỚI]` Ubuntu. Lệnh Linux chạy bằng root.
+
+**1 `[PC]` Lấy secrets** (13 giá trị, bảng ở Bước 0 bên dưới):
+```bash
+cd E:/DATA/Games/HacTacHuyenThoaiH5/game && python tools/mask-secrets.py --restore
+# ... chép giá trị ra một chỗ ...
+python tools/mask-secrets.py --mask && python tools/mask-secrets.py --check
+```
+Chọn `PUBLIC_HOST` = IP public server mới; dùng `http://` (client hardcode `http://…:9000`, chưa dùng 443).
+
+**2 `[CŨ]` Dump DB** (chưa tắt server cũ):
+```bash
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/prepare-dumps.sh -o /tmp/prepare-dumps.sh
+export MYSQL_PW='<root mysql>' MONGO_PW='<mongo abc123>' && bash /tmp/prepare-dumps.sh
+sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql && ls /tmp/tcg-dumps/mysql /tmp/tcg-dumps/mongo/dump
+```
+Phải có `00-tcg.sql stat.sql web.sql cdks.sql game_s1.sql` + thư mục Mongo `tcg statistic cross-yzx1 group-offical`.
+
+**3 `[MỚI]` Port + compose + rsync:**
+```bash
+ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw status numbered
+docker compose version || apt-get install -y docker-compose-plugin
+apt-get install -y rsync curl
+```
+
+**4 `[MỚI]` Bootstrap** (swap 4 GB, tải 1.33 GB assets từ release, lấy `docker/` về `/opt/tcg/docker`):
+```bash
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | MODE=pull bash
+ls /opt/tcg/assets/res | wc -l && ls /opt/tcg/docker          # 10584
+```
+
+**5 `[MỚI]` Kéo dump:**
+```bash
+rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mysql/      /opt/tcg/docker/initdb/mysql/
+rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mongo/dump/ /opt/tcg/docker/initdb/mongo/dump/
+```
+
+**6 `[MỚI]` `.env`:**
+```bash
+cd /opt/tcg/docker && nano .env
+grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD)=$' .env && echo "CON TRONG" || echo OK
+```
+Ba mật khẩu MySQL/Mongo/MQ **phải đúng như server cũ** (dump tạo bằng chúng).
+
+**7 `[MỚI]` Hạ tầng + import dump:**
+```bash
+cd /opt/tcg/docker && docker compose -f docker-compose.image.yml pull
+docker compose -f docker-compose.image.yml up -d mysql mongo rabbitmq
+docker compose -f docker-compose.image.yml logs -f mysql | grep -m1 'ready for connections'     # Ctrl+C khi thấy
+docker compose -f docker-compose.image.yml exec mysql mysql -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= .env | cut -d= -f2-)" -e "SHOW DATABASES; SELECT code,name,ws_port FROM tcg.srv_game;"
+```
+Thiếu DB → `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 7.
+
+**8 `[MỚI]` Lên toàn bộ:**
+```bash
+docker compose -f docker-compose.image.yml up -d
+watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, tất cả healthy
+```
+
+**9 `[MỚI]` Kiểm tra:**
+```bash
+docker compose -f docker-compose.image.yml logs game | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory'; echo "(rong = tot)"
+curl -s http://127.0.0.1:9999/status; echo; curl -sI http://127.0.0.1/play-game | head -1
+docker stats --no-stream
+```
+Từ máy khác: `http://PUBLIC_HOST/play-game` → đăng ký → vào game. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
+
+Ba chỗ dễ vấp: mật khẩu `.env` không khớp dump (6); volume cũ chặn import (7); nginx rewrite là suy đoán từ mã PHP, đăng ký/đăng nhập web có thể cần chỉnh `nginx/game.conf` (9).
+
+---
+
 ## Bước 0 — Chuẩn bị trên PC (10 phút)
 
 **0.1 Gom secrets thành `secrets.env`** (file này đã gitignored, chỉ ở PC):
