@@ -1,0 +1,117 @@
+name: build-images
+
+# Build 3 image (server / php / nginx) va day len GHCR. Server chi can `docker compose pull`.
+#
+# LFS: 8 fat JAR (611 MB) la LFS object. Free plan chi co 1 GB bandwidth/thang, nen LFS
+# duoc cache trong Actions cache (10 GB/repo) — chi lan build dau tien ton bandwidth.
+#
+# Chay tay: Actions -> build-images -> Run workflow. Tu dong: moi push vao main cham toi
+# server/, website/game/, docker/.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'website/game/**'
+      - 'docker/**'
+      - '.dockerignore'
+      - '.github/workflows/build-images.yml'
+
+concurrency:
+  group: build-images
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (khong keo LFS ngay)
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Danh sach LFS object -> key cache
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Cache LFS objects
+        id: lfs-cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Keo LFS (chi khi cache miss) va checkout file that
+        run: |
+          git lfs pull
+          git lfs checkout
+          ls -la server/statistic/*.jar server/game/tcg-game.jar
+
+      - name: Dung tag
+        id: meta
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "owner_lc=${OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push server
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.server
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-server:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-server:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=server
+          cache-to: type=gha,mode=max,scope=server
+
+      - name: Build & push php
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/php/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-php:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-php:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=php
+          cache-to: type=gha,mode=max,scope=php
+
+      - name: Build & push nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-nginx:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-nginx:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,mode=max,scope=nginx
+
+      - name: Tom tat
+        run: |
+          echo "### Image da day len GHCR" >> "$GITHUB_STEP_SUMMARY"
+          for i in server php nginx; do
+            echo "- \`${REGISTRY}/${{ steps.meta.outputs.owner_lc }}/op-h5-$i:${{ steps.meta.outputs.sha }}\` (+ latest)" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Lan dau: vao Packages -> op-h5-server/php/nginx -> Package settings -> Change visibility -> Public, de server pull khong can login." >> "$GITHUB_STEP_SUMMARY"

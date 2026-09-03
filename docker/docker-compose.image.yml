@@ -1,0 +1,240 @@
+# PHUONG AN 2: server chi PULL image tu GHCR, khong can upload JAR/Excel/PHP.
+# (Phuong an 1 - upload cay thu muc + bind mount - la docker-compose.yml.)
+#
+# Tren server:
+#   cd /opt/tcg/docker && cp .env.example .env && nano .env     # dien secrets + PUBLIC_HOST
+#   docker compose -f docker-compose.image.yml pull
+#   docker compose -f docker-compose.image.yml up -d
+#
+# Bat buoc co san tren host (khong nam trong image):
+#   /opt/tcg/res/            <- website/game/res (1.5 GB) + sound/ + spine/, upload 1 lan bang WinSCP
+#   docker/initdb/mysql/*.sql, docker/initdb/mongo/dump/   <- dump tu server cu (lan dau)
+#
+# Bo nho/CPU/network giong docker-compose.yml (host network, heap da cat cho may 8 GB).
+
+x-java: &java
+  image: ${IMAGE_SERVER:-ghcr.io/rickymta/op-h5-server:latest}
+  network_mode: host
+  restart: unless-stopped
+  env_file: .env
+  environment:
+    TZ: Asia/Ho_Chi_Minh
+  # log file cua logback nam trong /h5/server/<svc>/.logs ben trong container:
+  #   docker compose -f docker-compose.image.yml exec game tail -f .logs/game-s1/info.log
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+x-java-health: &java-health
+  interval: 15s
+  timeout: 5s
+  retries: 40
+  start_period: 90s
+
+services:
+  mysql:
+    image: mysql:8.0
+    network_mode: host
+    restart: unless-stopped
+    command: --defaults-extra-file=/etc/mysql/conf.d/tcg.cnf
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/tcg.cnf:/etc/mysql/conf.d/tcg.cnf:ro
+      - ./initdb/mysql:/docker-entrypoint-initdb.d:ro
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpu_shares: 768
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  mongo:
+    image: mongo:4.4
+    network_mode: host
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip", "127.0.0.1", "--auth", "--wiredTigerCacheSizeGB", "0.25"]
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-abc123}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?dat trong .env}
+    volumes:
+      - mongo-data:/data/db
+      - ./initdb/mongo:/docker-entrypoint-initdb.d:ro
+    mem_limit: 640m
+    mem_reservation: 320m
+    cpu_shares: 512
+    healthcheck:
+      test: ["CMD-SHELL", "mongo --quiet --eval 'db.adminCommand(\"ping\").ok' 127.0.0.1/admin | grep -q 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?dat trong .env}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpu_shares: 256
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  console:
+    <<: *java
+    working_dir: /h5/server/console
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CONSOLE:-512m}", "-jar", "tcg-console-server-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 800m
+    cpu_shares: 512
+    depends_on:
+      mysql: { condition: service_healthy }
+      mongo: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9999'"]
+
+  world:
+    <<: *java
+    working_dir: /h5/server/world
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_WORLD:-640m}", "-jar", "tcg-world-server-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 950m
+    cpu_shares: 512
+    depends_on: { console: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/10086'"]
+
+  meta:
+    <<: *java
+    working_dir: /h5/server/meta
+    command: ["java", "-Xms64m", "-Xmx${JAVA_XMX_META:-320m}", "-jar", "tcg-meta-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 560m
+    cpu_shares: 256
+    depends_on: { world: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/12345'"]
+
+  statistic:
+    <<: *java
+    working_dir: /h5/server/statistic
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_STATISTIC:-512m}", "-jar", "tcg-stat-server-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 800m
+    cpu_shares: 256
+    depends_on: { meta: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/7788'"]
+
+  pay:
+    <<: *java
+    working_dir: /h5/server/pay
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_PAY:-384m}", "-jar", "tcg-pay-server-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 640m
+    cpu_shares: 256
+    depends_on: { statistic: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/10010'"]
+
+  group:
+    <<: *java
+    working_dir: /h5/server/group
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_GROUP:-640m}", "-jar", "tcg-group.jar", "--v=0", "--gc=group-offical", "--p=30001"]
+    mem_limit: 950m
+    cpu_shares: 512
+    depends_on: { pay: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/30001'"]
+
+  game:
+    <<: *java
+    working_dir: /h5/server/game
+    command: ["java", "-Xms256m", "-Xmx${JAVA_XMX_GAME:-1024m}", "-jar", "tcg-game.jar", "--v=0", "--sc=${GAME_SRV_CODE:-s1}"]
+    mem_limit: 1400m
+    mem_reservation: 768m
+    cpu_shares: 1024
+    depends_on: { group: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      start_period: 150s
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8001'"]
+
+  login:
+    <<: *java
+    working_dir: /h5/server/login
+    command: ["java", "-Xms64m", "-Xmx${JAVA_XMX_LOGIN:-320m}", "-jar", "tcg-login-server-0.0.1-SNAPSHOT.jar"]
+    mem_limit: 560m
+    cpu_shares: 256
+    depends_on: { game: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9000'"]
+
+  cross:
+    <<: *java
+    working_dir: /h5/server/cross
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CROSS:-640m}", "-jar", "tcg-cross.jar", "--v=0", "--cc=cross-yzx1", "--p=20001"]
+    mem_limit: 950m
+    cpu_shares: 512
+    depends_on: { login: { condition: service_healthy } }
+    healthcheck:
+      <<: *java-health
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/20001'"]
+
+  php:
+    image: ${IMAGE_PHP:-ghcr.io/rickymta/op-h5-php:latest}
+    network_mode: host
+    restart: unless-stopped
+    env_file: .env
+    environment: { TZ: Asia/Ho_Chi_Minh }
+    volumes:
+      - ${ASSETS_DIR:-/opt/tcg/assets}/res:/www/wwwroot/game/res:ro
+      - ${ASSETS_DIR:-/opt/tcg/assets}/sound:/www/wwwroot/game/sound:ro
+      - ${ASSETS_DIR:-/opt/tcg/assets}/spine:/www/wwwroot/game/spine:ro
+      - web-runtime:/www/wwwroot/game/api/temp
+    mem_limit: 192m
+    cpu_shares: 256
+    logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
+
+  nginx:
+    image: ${IMAGE_NGINX:-ghcr.io/rickymta/op-h5-nginx:latest}
+    network_mode: host
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ${ASSETS_DIR:-/opt/tcg/assets}/res:/www/wwwroot/game/res:ro
+      - ${ASSETS_DIR:-/opt/tcg/assets}/sound:/www/wwwroot/game/sound:ro
+      - ${ASSETS_DIR:-/opt/tcg/assets}/spine:/www/wwwroot/game/spine:ro
+    depends_on: [php]
+    mem_limit: 96m
+    cpu_shares: 256
+    logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
+
+volumes:
+  mysql-data:
+  mongo-data:
+  rabbitmq-data:
+  web-runtime:

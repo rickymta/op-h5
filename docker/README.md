@@ -116,6 +116,38 @@ docker compose exec -T mysql mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --all-dat
 docker compose exec -T mongo mongodump --archive -u abc123 -p "$MONGO_PASSWORD" --authenticationDatabase admin | gzip > /backup/mongo-$(date +%F).gz
 ```
 
+## 6b. Phương án 2 — server chỉ pull image, không upload JAR
+
+`.github/workflows/build-images.yml` build 3 image mỗi khi push vào `main` (hoặc chạy tay ở tab Actions) và đẩy lên GHCR:
+
+| Image | Chứa | Điền lúc start |
+|---|---|---|
+| `ghcr.io/rickymta/op-h5-server` | temurin 8 + toàn bộ `server/` (JAR, lib, Excel, config placeholder) | `server-entrypoint.sh`: `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD`, `PUBLIC_HOST` |
+| `ghcr.io/rickymta/op-h5-php` | php-fpm 7.4 + `website/game` (trừ media) | `web-entrypoint.sh`: các secret PHP + `PUBLIC_HOST` |
+| `ghcr.io/rickymta/op-h5-nginx` | nginx + file tĩnh `website/game` (trừ media) | `PUBLIC_HOST` vào bundle client |
+
+Image **không chứa secret** (an toàn public). `res/ sound/ spine/` (1.6 GB) không nằm trong git nên không nằm trong image → upload một lần vào `ASSETS_DIR` rồi mount.
+
+Trên server mới:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | bash
+```
+
+Script cài Docker, tạo swap 4 GB, lấy thư mục `docker/` về `/opt/tcg/docker`, in danh sách việc còn lại (điền `.env`, upload assets + dump). Rồi:
+
+```bash
+cd /opt/tcg/docker
+docker compose -f docker-compose.image.yml pull
+docker compose -f docker-compose.image.yml up -d
+```
+
+**Lần đầu** phải vào GitHub → Packages → từng package `op-h5-server/php/nginx` → Package settings → *Change visibility* → Public; nếu không, server phải `docker login ghcr.io` bằng PAT có quyền `read:packages`.
+
+**Giới hạn LFS:** free plan 1 GB bandwidth/tháng; mỗi lần CI kéo 8 JAR tốn 611 MB. Workflow cache LFS trong Actions cache nên chỉ lần build đầu (và khi JAR đổi) tốn bandwidth. Nếu hết quota: chờ tháng sau hoặc mua data pack.
+
+Cập nhật sau này: sửa Excel/PHP → push → CI build → trên server `pull && up -d` (chỉ service có image mới bị tạo lại; DB không đụng).
+
 ## 7. Những gì chưa chắc — đọc trước lần `up` đầu
 
 1. **nginx rewrite là suy đoán.** File nginx gốc không có trong snapshot; `nginx/game.conf` dựng từ mã PHP. 4 endpoint `/user/login.php|register.php|email.php|quenmatkhau.php` được map tạm về `api/config.php?act=…` — kiểm tra đăng nhập/đăng ký web ngay sau khi lên.

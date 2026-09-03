@@ -27,7 +27,12 @@ git clone https://github.com/rickymta/op-h5.git
 
 Các JAR này **đã được vá bytecode** để đọc file Excel tên tiếng Anh (CLAUDE.md mục 14). Thay JAR mới từ nhà phát hành thì phải chạy lại `python tools/patch-excel-names.py --apply`.
 
-## Trước khi đưa lên server
+## Hai cách đưa lên server
+
+1. **Pull image** (khuyến nghị, không cần chuyển JAR): CI (`.github/workflows/build-images.yml`) build 3 image lên GHCR; trên server `curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | bash` rồi `docker compose -f docker-compose.image.yml pull && up -d`. Secrets/IP điền qua `docker/.env` lúc container start. Xem [docker/README.md](docker/README.md) mục 6b.
+2. **Upload cây thư mục + bind mount** (`docker/docker-compose.yml`): điền secrets tại chỗ rồi WinSCP/rsync toàn bộ lên server.
+
+## Trước khi đưa lên server (cách 2)
 
 ```bash
 python tools/set-server-host.py <IP-hoặc-domain> --apply   # thay 192.168.1.69 còn lại

@@ -1,0 +1,24 @@
+# build context = thu muc goc repo. Chi lay nhung gi image can.
+.git
+.github
+_backup-*
+excel-staging
+build
+reconstructed
+docs
+tools
+website/home
+website/game/res
+website/game/sound
+website/game/spine
+website/game/home.zip
+server/*/.logs
+server/**/*.log
+server/erl_crash.dump
+server/login/*.keystore
+server/excel/release/*%3F*
+website/game/utility/*%3F*
+docker/initdb
+docker/.env
+secrets.env
+*.md

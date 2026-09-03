@@ -1,0 +1,21 @@
+# Image chung cho 9 service Java: JAR + lib + Excel + config (placeholder) nuong san.
+# Secrets va IP duoc dien luc container khoi dong (server-entrypoint.sh) tu bien moi truong,
+# nen image nay an toan de public tren GHCR.
+#
+# build tu thu muc goc repo:
+#   docker build -f docker/Dockerfile.server -t ghcr.io/rickymta/op-h5-server:latest .
+FROM eclipse-temurin:8-jre-jammy
+
+ENV TZ=Asia/Ho_Chi_Minh \
+    JAVA_TOOL_OPTIONS="-XX:+UseSerialGC -XX:MaxMetaspaceSize=160m -XX:ReservedCodeCacheSize=48m -Xss512k -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=25 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Ho_Chi_Minh"
+
+# Cay server/ tru log, backup, pid, file rac %3F, keystore (xem .dockerignore o goc repo)
+COPY server/ /h5/server/
+COPY docker/server-entrypoint.sh /usr/local/bin/tcg-entrypoint
+RUN chmod +x /usr/local/bin/tcg-entrypoint \
+ && find /h5/server -name '.logs' -type d -prune -exec rm -rf {} + \
+ && rm -f /h5/server/erl_crash.dump
+
+WORKDIR /h5/server
+ENTRYPOINT ["tcg-entrypoint"]
+# command that do docker-compose dat: ["java", "-Xmx...", "-jar", "..."] voi working_dir tung service
