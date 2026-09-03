@@ -179,13 +179,15 @@ Không nằm trong git (LFS free chỉ 1 GB) và không nằm trong image. Mount
    ```
    Chạy lại lệnh là đồng bộ tiếp phần thiếu (an toàn khi đứt giữa chừng).
 2. **WinSCP từ máy bạn** — kéo `website/game/{res,sound,spine}` vào `/opt/tcg/assets/`. Bật *UTF-8 encoding for filenames* dù tên là ASCII, cho thành thói quen.
-3. **GitHub Release** — nếu muốn server mới sau này chỉ cần `curl`: nén một lần rồi đính vào release (≤ 2 GB/file, không tính vào LFS):
+3. **GitHub Release `assets-v1`** — `server-bootstrap.sh` tự tải và giải nén nếu `/opt/tcg/assets/res` còn trống (≤ 2 GB/file, không tính vào LFS, băng thông không giới hạn với repo public). Đóng gói từ bản `/www` kéo ở server cũ:
    ```bash
-   tar -C website/game -czf client-assets.tar.gz res sound spine
-   gh release create assets-v1 client-assets.tar.gz -t "Client assets" -n "res/ sound/ spine/ cua website/game"
-   # tren server:
+   tar -C www/wwwroot/game -cf - res sound spine | gzip -1 > build/client-assets.tar.gz
+   sha256sum build/client-assets.tar.gz > build/client-assets.tar.gz.sha256
+   gh release create assets-v1 build/client-assets.tar.gz build/client-assets.tar.gz.sha256 -t "Client assets" -n "res/ sound/ spine/ cua website/game, lay tu server pgaming 2026-09-03"
+   # tren server (bootstrap lam tu dong; lam tay:)
    curl -L https://github.com/rickymta/op-h5/releases/download/assets-v1/client-assets.tar.gz | tar -xz -C /opt/tcg/assets
    ```
+   Cập nhật assets sau này: tạo tag mới `assets-v2` và đặt `ASSETS_URL` khi chạy bootstrap.
 
 Các tài nguyên client còn lại (`libs/`, `bmFont/`, `icon/`, `iconshop/`, `img/`, `assets/`, `static/`, `utility/`, ~60 MB) **đã nằm trong git và trong image** `op-h5-nginx`/`op-h5-php`. 23 file client thiếu (MISSING-FILES.md A7) là thiếu ngay trên server cũ — rsync không mang về được.
 

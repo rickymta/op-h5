@@ -21,6 +21,9 @@ website/game/gm/log/
 server/excel/release/*%3F*
 website/game/utility/*%3F*
 
+# ---- ban keo nguyen /www tu server cu (1.6 GB, dung de dong goi release) — KHONG push
+www/
+
 # ---- media client lon: chuyen bang WinSCP, khong qua git (res/ 1.5 GB ~ 10.584 file)
 website/game/res/
 website/game/sound/

@@ -27,8 +27,18 @@ if ! swapon --show | grep -q /swapfile; then
 fi
 swapon --show
 
-echo "== 3/6 Thu muc $BASE (assets = res/ sound/ spine/ cua client, xem README muc 6c)"
+echo "== 3/6 Thu muc $BASE + tai nguyen client (res/ sound/ spine/ tu GitHub Release)"
 mkdir -p "$BASE/assets"
+ASSETS_URL="${ASSETS_URL:-https://github.com/$REPO/releases/download/assets-v1/client-assets.tar.gz}"
+if [ -d "$BASE/assets/res" ] && [ "$(ls -A "$BASE/assets/res" 2>/dev/null | wc -l)" -gt 1000 ]; then
+  echo "  assets da co ($(ls "$BASE/assets/res" | wc -l) file trong res/), bo qua tai"
+elif curl -fsIL "$ASSETS_URL" >/dev/null 2>&1; then
+  echo "  tai $ASSETS_URL (~1.5 GB)"
+  curl -fL --retry 3 --progress-bar "$ASSETS_URL" | tar -xz -C "$BASE/assets"
+  echo "  res: $(ls "$BASE/assets/res" | wc -l) file, sound: $(ls "$BASE/assets/sound" | wc -l), spine: $(ls "$BASE/assets/spine" | wc -l)"
+else
+  echo "  !! khong tai duoc $ASSETS_URL — rsync tu server cu hoac WinSCP (xem cuoi script)"
+fi
 
 if [ "$MODE" = "build" ]; then
   echo "== 4/6 git + git-lfs, clone $REPO (LFS ~611 MB — tinh vao quota 1 GB/thang)"
