@@ -444,7 +444,7 @@ Lấy file ra khỏi server với tên ASCII an toàn: `tools/stage-excel-for-do
 
 ## 15. Triển khai bằng Docker (máy 4 CPU / 8 GB / 40 GB SSD)
 
-Toàn bộ nằm trong `docker/` — đọc [docker/README.md](docker/README.md) trước khi làm gì. Điểm cốt lõi:
+Toàn bộ nằm trong `docker/` — đọc [docker/README.md](docker/README.md) trước khi làm gì; quy trình chuyển server theo thứ tự có điểm kiểm tra ở [docs/deploy-runbook.md](docs/deploy-runbook.md). Tài nguyên client ở GitHub Release `assets-v1` (`client-assets.tar.gz`, 1.33 GB, sha256 `ca828abb…`), bootstrap tự tải. Điểm cốt lõi:
 
 - **`network_mode: host` cho mọi container.** Cấu hình (file lẫn dòng trong MySQL `tcg.srv_game`/`cloud_server`) đều trỏ `127.0.0.1`; host network là cách duy nhất không phải sửa dữ liệu trong DB. Phải tắt MySQL/Mongo/MQ/Java cũ trên máy trước khi `up`. Chỉ Linux.
 - **Thứ tự khởi động** = `start.sh` gốc, ép bằng `depends_on` + healthcheck TCP: `console → world → meta → statistic → pay → group → game → login → cross → web`. Toàn chuỗi 5–8 phút.

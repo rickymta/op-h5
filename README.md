@@ -6,6 +6,7 @@
 |---|---|
 | Kiến trúc, lệnh vận hành, cấu hình hai tầng, API console, những gì đã sửa | [CLAUDE.md](CLAUDE.md) |
 | Chạy bằng Docker trên máy 4 CPU / 8 GB / 40 GB | [docker/README.md](docker/README.md) |
+| **Triển khai lên server mới — từng bước có điểm kiểm tra** | [docs/deploy-runbook.md](docs/deploy-runbook.md) |
 | File còn thiếu / cách xử lý | [MISSING-FILES.md](MISSING-FILES.md) |
 | Tra cứu 200 file Excel (Anh ↔ Trung ↔ Việt) | [docs/excel-index.md](docs/excel-index.md) |
 | Tái tạo file Excel thiếu từ bytecode | [docs/missing-excel-reconstruction.md](docs/missing-excel-reconstruction.md) |
