@@ -1,0 +1,35 @@
+# ---- KHONG BAO GIO push: log (in ra toan bo config ke ca mat khau), backup, staging, build
+server/*/.logs/
+server/**/*.log
+_backup-*/
+excel-staging/
+build/
+server/erl_crash.dump
+*.pid
+
+# ---- secrets / du lieu runtime
+secrets.env
+docker/.env
+docker/initdb/mysql/*.sql
+docker/initdb/mongo/dump/
+server/login/*.keystore
+website/game/api/temp/
+website/game/gm/user/log/
+website/game/gm/log/
+
+# ---- rac ten file hong encoding (ban trung da xac minh MD5)
+server/excel/release/*%3F*
+website/game/utility/*%3F*
+
+# ---- media client lon: chuyen bang WinSCP, khong qua git (res/ 1.5 GB ~ 10.584 file)
+website/game/res/
+website/game/sound/
+website/game/spine/
+website/game/home.zip
+
+# ---- IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store

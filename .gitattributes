@@ -1,0 +1,21 @@
+# 8 fat JAR (56-105 MB) qua Git LFS. GitHub tu choi file > 100 MB trong git thuong.
+# tcg-game.jar (9 MB) va server/game/lib/*.jar (97 file, lon nhat 7 MB) o git thuong.
+server/console/tcg-console-server-0.0.1-SNAPSHOT.jar filter=lfs diff=lfs merge=lfs -text
+server/login/tcg-login-server-0.0.1-SNAPSHOT.jar     filter=lfs diff=lfs merge=lfs -text
+server/meta/tcg-meta-0.0.1-SNAPSHOT.jar              filter=lfs diff=lfs merge=lfs -text
+server/pay/tcg-pay-server-0.0.1-SNAPSHOT.jar         filter=lfs diff=lfs merge=lfs -text
+server/statistic/tcg-stat-server-0.0.1-SNAPSHOT.jar  filter=lfs diff=lfs merge=lfs -text
+server/world/tcg-world-server-0.0.1-SNAPSHOT.jar     filter=lfs diff=lfs merge=lfs -text
+server/cross/tcg-cross.jar                           filter=lfs diff=lfs merge=lfs -text
+server/group/tcg-group.jar                           filter=lfs diff=lfs merge=lfs -text
+
+# binary khac: khong diff, giu nguyen line ending
+*.jar  -text
+*.xlsx -text
+*.xlsm -text
+*.png  -text
+*.ttf  -text
+*.wav  -text
+*.sk   -text
+# script chay tren Linux: luon LF
+*.sh   text eol=lf

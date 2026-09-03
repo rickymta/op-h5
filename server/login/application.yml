@@ -1,0 +1,23 @@
+server:
+  port: 9000
+logging:
+  config: file:logback.xml
+
+tcg:
+  # eg.
+  note: application.properties application.yml
+  secret: __TCG_SECRET__
+
+  # Console config
+  console-net-process:
+    #
+    scheme: http
+    # Console IP
+    host: 127.0.0.1
+    #
+    ssl: false
+    #
+    port: 9999
+  # efun config
+  efun-online: ../log/efun_online.log
+  efun-port: ../log/efun_port.log

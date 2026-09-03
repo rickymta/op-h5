@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "starting meta server"
+nohup java -Xms512m -Xmx1128m -jar tcg-meta-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+echo $! | sudo tee /var/run/tcg-meta.pid

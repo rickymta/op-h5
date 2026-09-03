@@ -1,0 +1,2 @@
+<p class="admin_copyright"> &copy; <?php echo date('Y'); ?>      GM Hệ thống vì thiên sứ tài nguyên cung cấp</p>
+<p>Thiên sứ tài nguyên lưới, miễn phí download tài nguyên, điểm kích đằng sau kết nối liền có thể tiến vào:<a href="http://lt.mcdanan.com" style="color:red">http://lt.mcdanan.com</a></p>

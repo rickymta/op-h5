@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "starting pay server"
+nohup java -Xms128m -Xmx1024m -jar tcg-pay-server-0.0.1-SNAPSHOT.jar >/dev/null 2>&1 &
+echo $! | sudo tee /var/run/tcg-pay.pid

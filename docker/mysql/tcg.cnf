@@ -1,0 +1,26 @@
+[mysqld]
+# May 8 GB dung chung voi 9 JVM + Mongo + MQ -> giu MySQL o ~500 MB.
+innodb_buffer_pool_size = 192M
+innodb_log_file_size    = 64M
+innodb_log_buffer_size  = 8M
+innodb_flush_method     = O_DIRECT
+performance_schema      = OFF
+skip-log-bin                          # khong can replication; tiet kiem SSD 40 GB
+max_connections         = 250         # 9 service x pool druid + PHP
+table_open_cache        = 400
+tmp_table_size          = 32M
+max_heap_table_size     = 32M
+sort_buffer_size        = 512K
+read_rnd_buffer_size    = 512K
+key_buffer_size         = 8M
+
+# JDBC URL cua server dung serverTimezone=Asia/Ho_Chi_Minh; dat cung tz cho nhat quan.
+default-time-zone       = '+07:00'
+
+# PHP PDO/mysqli cu va driver 8.0.23 deu on voi native password; tranh loi caching_sha2.
+default-authentication-plugin = mysql_native_password
+
+character-set-server    = utf8mb4
+collation-server        = utf8mb4_general_ci
+sql_mode                = STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+bind-address            = 127.0.0.1   # host network: chi nghe loopback, khong lo ra ngoai

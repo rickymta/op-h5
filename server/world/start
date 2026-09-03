@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "starting world server"
+nohup java -Xms128m -Xmx512m -jar tcg-world-server-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+echo $! | sudo tee /var/run/tcg-world.pid

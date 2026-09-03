@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "starting game server"
+nohup java -Xms128m -Xmx1128m -jar tcg-game.jar  --v=0 --sc=s3 >/dev/null 2>&1 &
+echo $! | sudo tee /var/run/tcg-game3.pid

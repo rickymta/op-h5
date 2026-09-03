@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "starting group server"
+nohup java -Xms128m -Xmx512m -jar tcg-group.jar  --v=0 --gc=group-offical --p=30001 >/dev/null 2>&1 &
+echo $! | sudo tee /var/run/tcg-group.pid

@@ -1,0 +1,1073 @@
+0:0|Kim tệ
+0:1|Nguyên bảo
+0:2|Ngân lượng
+0:3|Nhân vật chính kinh nghiệm
+0:4|Anh hùng kinh nghiệm
+0:5|Hữu nghị điểm
+0:6|Hồn tinh
+0:7|Tiên tổ kết tinh
+0:8|Hòe ấm lá
+0:10|Càn khôn tệ
+0:11|Diễn võ trường danh vọng
+0:12|Tiên minh cống hiến
+0:13|Tầm bảo điểm tích lũy
+0:14|Vinh dự
+0:15|Thường ngày sinh động độ
+0:16|VIP Điểm tích lũy
+0:17|Tuần thường sinh động độ
+0:18|Vượt phục thang trời thi đấu điểm tích lũy
+0:19|Vượt phục sân thi đấu công huân
+0:20|Vượt phục đẳng cấp thi đấu điểm tích lũy
+4:606013|3 Tinh ngẫu nhiên mảnh vỡ
+4:606001|4 Tinh ngẫu nhiên mảnh vỡ
+4:606002|5 Tinh ngẫu nhiên mảnh vỡ
+4:606003|4 Tinh nhân tộc mảnh vỡ
+4:606004|4 Tinh Tiên Tộc mảnh vỡ
+4:606005|4 Tinh yêu tộc mảnh vỡ
+4:606006|4 Tinh Thần tộc mảnh vỡ
+4:606007|4 Tinh ma tộc mảnh vỡ
+4:606008|5 Tinh nhân tộc mảnh vỡ
+4:606009|5 Tinh Tiên Tộc mảnh vỡ
+4:606010|5 Tinh yêu tộc mảnh vỡ
+4:606011|5 Tinh Thần tộc mảnh vỡ
+4:606012|5 Tinh ma tộc mảnh vỡ
+4:606014|4 Tinh Thần Ma mảnh vỡ
+4:606015|5 Tinh Thần Ma mảnh vỡ
+2:19000100|Làm thô đoản kiếm
+2:19000101|Tinh xảo đoản kiếm
+2:19000102|Thông mây đoản kiếm
+2:19000103|Đỡ chỉ riêng phiến
+2:19000104|Đốt hoa đoản kiếm
+2:19000105|Nghê thường pháp trượng
+2:19000106|Tử Tiêu trường kiếm
+2:19000107|Hướng nghi pháp trượng
+2:19000108|Bạch giả pháp trượng
+2:19000109|Mây lục pháp trượng
+2:19000110|Quỷ Vương trường kiếm
+2:19000111|Động Huyền đạo kiếm
+2:19000112|Trạm lư trường kiếm
+2:19000113|Tử Lân cự kiếm
+2:19000114|Lưu hà quạt lông
+2:19000115|Long Tước cự kiếm
+2:19000116|Cung điện khổng lồ chiến nhận
+2:19000200|Làm thô áo vải
+2:19000201|Tinh xảo đạo bào
+2:19000202|Thông Vân Chiến áo
+2:19000203|Đỡ chỉ riêng vạt áo bào
+2:19000204|Đốt hoa vạt áo bào
+2:19000205|Nghê thường vũ y
+2:19000206|Tử Tiêu chiến giáp
+2:19000207|Hướng nghi pháp bào
+2:19000208|Bạch giả áo choàng
+2:19000209|Mây lục pháp bào
+2:19000210|Quỷ Vương Chiến Giáp
+2:19000211|Động Huyền đạo bào
+2:19000212|Trạm lư chiến giáp
+2:19000213|Tử Lân chiến giáp
+2:19000214|Lưu hà pháp bào
+2:19000215|Long Tước chiến giáp
+2:19000216|Cung điện khổng lồ chiến giáp
+2:19000300|Làm thô khăn trùm đầu
+2:19000301|Tinh xảo mào đầu
+2:19000302|Thông đám mây quan
+2:19000303|Đỡ chỉ riêng pháp quan
+2:19000304|Đốt hoa chiến nón trụ
+2:19000305|Nghê thường mào đầu
+2:19000306|Tử Tiêu chiến nón trụ
+2:19000307|Hướng nghi mào đầu
+2:19000308|Bạch giả mào đầu
+2:19000309|Mây lục mào đầu
+2:19000310|Quỷ Vương chiến nón trụ
+2:19000311|Động Huyền đạo quan
+2:19000312|Trạm lư chiến nón trụ
+2:19000313|Tử Lân chiến nón trụ
+2:19000314|Lưu hà mào đầu
+2:19000315|Long Tước chiến nón trụ
+2:19000316|Cung điện khổng lồ chiến nón trụ
+2:19000400|Làm thô giày vải
+2:19000401|Tinh xảo ủng ngắn
+2:19000402|Thông mây ủng ngắn
+2:19000403|Đỡ chỉ riêng ủng ngắn
+2:19000404|Đốt hoa giày chiến
+2:19000405|Nghê thường ủng ngắn
+2:19000406|Tử Tiêu giày chiến
+2:19000407|Hướng nghi ủng ngắn
+2:19000408|Bạch giả ủng ngắn
+2:19000409|Mây lục ủng ngắn
+2:19000410|Quỷ Vương giày chiến
+2:19000411|Động Huyền đạo giày
+2:19000412|Trạm lư giày chiến
+2:19000413|Tử Lân giày chiến
+2:19000414|Lưu hà vũ giày
+2:19000415|Long Tước giày chiến
+2:19000416|Cung điện khổng lồ giày chiến
+2:20000111|Tinh · Động Huyền đạo kiếm
+2:20000112|Tinh · Trạm lư trường kiếm
+2:20000113|Tinh · Tử Lân cự kiếm
+2:20000114|Tinh · Lưu hà quạt lông
+2:20000115|Tinh · Long Tước cự kiếm
+2:20000116|Tinh · Cung điện khổng lồ chiến nhận
+2:20000211|Tinh · Động Huyền đạo bào
+2:20000212|Tinh · Trạm lư chiến giáp
+2:20000213|Tinh · Tử Lân chiến giáp
+2:20000214|Tinh · Lưu hà pháp bào
+2:20000215|Tinh · Long Tước chiến giáp
+2:20000216|Tinh · Cung điện khổng lồ chiến giáp
+2:20000311|Tinh · Động Huyền đạo quan
+2:20000312|Tinh · Trạm lư chiến nón trụ
+2:20000313|Tinh · Tử Lân chiến nón trụ
+2:20000314|Tinh · Lưu hà mào đầu
+2:20000315|Tinh · Long Tước chiến nón trụ
+2:20000316|Tinh · Cung điện khổng lồ chiến nón trụ
+2:20000411|Tinh · Động Huyền đạo giày
+2:20000412|Tinh · Trạm lư giày chiến
+2:20000413|Tinh · Tử Lân giày chiến
+2:20000414|Tinh · Lưu hà vũ giày
+2:20000415|Tinh · Long Tước giày chiến
+2:20000416|Tinh · Cung điện khổng lồ giày chiến
+2:20000417|Tuyệt thế · Hạo Thiên Chùy
+2:20000418|Tuyệt thế · Kình thiên giáp
+2:20000419|Tuyệt thế · Phong Hỏa Luân
+2:20000420|Tuyệt thế · La Sát quan
+5:1|Mặt trăng ấn
+5:2|Hổ phương ấn
+5:3|Bạch Trạch ấn
+5:4|Huyền Vũ ấn
+5:5|Long Tước ấn
+5:10001|Chân Long ấn
+5:10002|Chân Long ấn
+5:10003|Chân Long ấn
+5:10004|Chân Long ấn
+5:10005|Chân Long ấn
+5:10006|Chân Long ấn
+5:10007|Chân Long ấn
+5:10008|Chân Long ấn
+5:10009|Chân Long ấn
+5:10010|Chân Long ấn
+5:10011|Chân Long ấn
+5:10012|Chân Long ấn
+5:10013|Chân Long ấn
+5:10014|Chân Long ấn
+5:10015|Chân Long ấn
+5:10016|Chân Long ấn
+5:20001|Long hồn
+6:10001|Tý Thử
+6:10002|Tý Thử
+6:10003|Tý Thử
+6:10004|Tý Thử
+6:10011|Sửu Ngưu
+6:10012|Sửu Ngưu
+6:10013|Sửu Ngưu
+6:10014|Sửu Ngưu
+6:10021|Dần Hổ
+6:10022|Dần Hổ
+6:10023|Dần Hổ
+6:10024|Dần Hổ
+6:10031|Mão Thỏ
+6:10032|Mão Thỏ
+6:10033|Mão Thỏ
+6:10034|Mão Thỏ
+6:10041|Thìn Long
+6:10042|Thìn Long
+6:10043|Thìn Long
+6:10044|Thìn Long
+6:10051|Tị Xà
+6:10052|Tị Xà
+6:10053|Tị Xà
+6:10054|Tị Xà
+6:10061|Buổi trưa ngựa
+6:10062|Buổi trưa ngựa
+6:10063|Buổi trưa ngựa
+6:10064|Buổi trưa ngựa
+6:10071|Vị Dương
+6:10072|Vị Dương
+6:10073|Vị Dương
+6:10074|Vị Dương
+6:10081|Thân Hầu
+6:10082|Thân Hầu
+6:10083|Thân Hầu
+6:10084|Thân Hầu
+6:10091|Dậu Kê
+6:10092|Dậu Kê
+6:10093|Dậu Kê
+6:10094|Dậu Kê
+6:10101|Tuất Cẩu
+6:10102|Tuất Cẩu
+6:10103|Tuất Cẩu
+6:10104|Tuất Cẩu
+6:10111|Hợi Trư
+6:10112|Hợi Trư
+6:10113|Hợi Trư
+6:10114|Hợi Trư
+6:20001|Thanh Long
+6:20002|Thanh Long
+6:20011|Bạch Hổ
+6:20012|Bạch Hổ
+6:20021|Chu Tước
+6:20022|Chu Tước
+6:20031|Huyền Vũ
+6:20032|Huyền Vũ
+6:20041|Thao Thiết
+6:20042|Thao Thiết
+6:20051|Kỳ Lân
+6:20052|Kỳ Lân
+6:20061|Quỳ Ngưu
+6:20062|Quỳ Ngưu
+6:20071|Phượng Hoàng
+6:20072|Phượng Hoàng
+6:20081|Câu Trần
+6:20082|Câu Trần
+6:20091|Đào Ngột
+6:20092|Đào Ngột
+6:30001|Thú hồn kinh nghiệm ( Nhỏ )
+6:30002|Thú hồn kinh nghiệm ( Lớn )
+7:100101|Phiên Thiên Ấn
+7:200101|Thanh Long rơi
+7:300101|Hoa sen bảo sách
+7:400101|Trảm Tiên Phi Đao
+7:500101|Long Uyên thương
+7:600101|Cô hồng kiếm
+7:1000101|Long Vương cái sọt
+7:2000101|Tinh kim đồng tiền
+7:3000101|Lửa anh thương
+7:4000101|Thái hư thần giáp
+7:5000101|Đông Hoàng Chung
+7:6000101|Lạc Nhật Cung
+7:7000101|Bên trên bảo thấm kim bá
+7:8000101|Áng mây phiêu
+7:9000101|Thần Nông đỉnh
+7:10000101|Vong ưu
+7:11000101|Ánh trăng
+7:12000101|Lão Long bố mưa
+7:13000101|Hỗn Thiên Lăng
+7:14000101|Hổ phách đao
+7:15000101|Mộng cảnh di châu
+7:16000101|Muối biển trân châu con trai
+7:17000101|Tùy tâm đáng tin binh
+7:18000101|Phù thế thanh hoan
+7:19000101|Như Ý Kim Cô Bổng
+7:20000101|Vĩnh Dạ
+7:21000101|Bông tuyết linh
+7:22000101|Hộp kiếm
+7:23000101|Trảm hồn
+7:24000101|Ly Long ấn
+7:25000101|Ngũ thải Thần thạch
+7:26000101|Huyền Hỏa Giám
+7:27000101|Làm thích
+7:28000101|Mộ chỉ riêng
+7:29000101|Tinh hồng chi mắt
+7:30000101|Toa la bảo trượng
+7:31000101|Ly châu
+7:32000101|Bèo tấm
+7:33000101|Linh Lung Bảo Tháp
+7:34000101|Gấm lan cà sa
+7:35000101|Chú oán
+7:36000101|Ngũ sắc thần quang
+7:37000101|Tam Bảo Ngọc Như Ý
+7:38000101|Hoàng việt
+7:39000101|Hỗn Thiết Côn
+7:40000101|Vu độc con rối
+7:41000101|Huyết liên đài
+8:100001|Trời · Phiên Thiên Ấn
+8:100002|· Phiên Thiên Ấn
+8:100003|Huyền · Phiên Thiên Ấn
+8:100004|Hoàng · Phiên Thiên Ấn
+8:200001|Trời · Thanh Long rơi
+8:200002|· Thanh Long rơi
+8:200003|Huyền · Thanh Long rơi
+8:200004|Hoàng · Thanh Long rơi
+8:300001|Trời · Hoa sen bảo sách
+8:300002|· Hoa sen bảo sách
+8:300003|Huyền · Hoa sen bảo sách
+8:300004|Hoàng · Hoa sen bảo sách
+8:400001|Trời · Trảm Tiên Phi Đao
+8:400002|· Trảm Tiên Phi Đao
+8:400003|Huyền · Trảm Tiên Phi Đao
+8:400004|Hoàng · Trảm Tiên Phi Đao
+8:500001|Trời · Long Uyên thương
+8:500002|· Long Uyên thương
+8:500003|Huyền · Long Uyên thương
+8:500004|Hoàng · Long Uyên thương
+8:600001|Trời · Cô hồng kiếm
+8:600002|· Cô hồng kiếm
+8:600003|Huyền · Cô hồng kiếm
+8:600004|Hoàng · Cô hồng kiếm
+8:1000001|Trời · Long Vương cái sọt
+8:1000002|· Long Vương cái sọt
+8:1000003|Huyền · Long Vương cái sọt
+8:1000004|Hoàng · Long Vương cái sọt
+8:2000001|Trời · Tinh kim đồng tiền
+8:2000002|· Tinh kim đồng tiền
+8:2000003|Huyền · Tinh kim đồng tiền
+8:2000004|Hoàng · Tinh kim đồng tiền
+8:3000001|Trời · Lửa anh thương
+8:3000002|· Lửa anh thương
+8:3000003|Huyền · Lửa anh thương
+8:3000004|Hoàng · Lửa anh thương
+8:4000001|Trời · Thái hư thần giáp
+8:4000002|· Thái hư thần giáp
+8:4000003|Huyền · Thái hư thần giáp
+8:4000004|Hoàng · Thái hư thần giáp
+8:5000001|Trời · Đông Hoàng Chung
+8:5000002|· Đông Hoàng Chung
+8:5000003|Huyền · Đông Hoàng Chung
+8:5000004|Hoàng · Đông Hoàng Chung
+8:6000001|Trời · Lạc Nhật Cung
+8:6000002|· Lạc Nhật Cung
+8:6000003|Huyền · Lạc Nhật Cung
+8:6000004|Hoàng · Lạc Nhật Cung
+8:7000001|Trời · Bên trên bảo thấm kim bá
+8:7000002|· Bên trên bảo thấm kim bá
+8:7000003|Huyền · Bên trên bảo thấm kim bá
+8:7000004|Hoàng · Bên trên bảo thấm kim bá
+8:8000001|Trời · Áng mây phiêu
+8:8000002|· Áng mây phiêu
+8:8000003|Huyền · Áng mây phiêu
+8:8000004|Hoàng · Áng mây phiêu
+8:9000001|Trời · Thần Nông đỉnh
+8:9000002|· Thần Nông đỉnh
+8:9000003|Huyền · Thần Nông đỉnh
+8:9000004|Hoàng · Thần Nông đỉnh
+8:10000001|Trời · Vong ưu
+8:10000002|· Vong ưu
+8:10000003|Huyền · Vong ưu
+8:10000004|Hoàng · Vong ưu
+8:11000001|Trời · Ánh trăng
+8:11000002|· Ánh trăng
+8:11000003|Huyền · Ánh trăng
+8:11000004|Hoàng · Ánh trăng
+8:12000001|Trời · Lão Long bố mưa
+8:12000002|· Lão Long bố mưa
+8:12000003|Huyền · Lão Long bố mưa
+8:12000004|Hoàng · Lão Long bố mưa
+8:13000001|Trời · Hỗn Thiên Lăng
+8:13000002|· Hỗn Thiên Lăng
+8:13000003|Huyền · Hỗn Thiên Lăng
+8:13000004|Hoàng · Hỗn Thiên Lăng
+8:14000001|Trời · Hổ phách đao
+8:14000002|· Hổ phách đao
+8:14000003|Huyền · Hổ phách đao
+8:14000004|Hoàng · Hổ phách đao
+8:15000001|Trời · Mộng cảnh di châu
+8:15000002|· Mộng cảnh di châu
+8:15000003|Huyền · Mộng cảnh di châu
+8:15000004|Hoàng · Mộng cảnh di châu
+8:16000001|Trời · Muối biển trân châu con trai
+8:16000002|· Muối biển trân châu con trai
+8:16000003|Huyền · Muối biển trân châu con trai
+8:16000004|Hoàng · Muối biển trân châu con trai
+8:17000001|Trời · Tùy tâm đáng tin binh
+8:17000002|· Tùy tâm đáng tin binh
+8:17000003|Huyền · Tùy tâm đáng tin binh
+8:17000004|Hoàng · Tùy tâm đáng tin binh
+8:18000001|Trời · Phù thế thanh hoan
+8:18000002|· Phù thế thanh hoan
+8:18000003|Huyền · Phù thế thanh hoan
+8:18000004|Hoàng · Phù thế thanh hoan
+8:19000001|Trời · Như Ý Kim Cô Bổng
+8:19000002|· Như Ý Kim Cô Bổng
+8:19000003|Huyền · Như Ý Kim Cô Bổng
+8:19000004|Hoàng · Như Ý Kim Cô Bổng
+8:20000001|Trời · Vĩnh Dạ
+8:20000002|· Vĩnh Dạ
+8:20000003|Huyền · Vĩnh Dạ
+8:20000004|Hoàng · Vĩnh Dạ
+8:21000001|Trời · Bông tuyết linh
+8:21000002|· Bông tuyết linh
+8:21000003|Huyền · Bông tuyết linh
+8:21000004|Hoàng · Bông tuyết linh
+8:22000001|Trời · Hộp kiếm
+8:22000002|· Hộp kiếm
+8:22000003|Huyền · Hộp kiếm
+8:22000004|Hoàng · Hộp kiếm
+8:23000001|Trời · Trảm hồn
+8:23000002|· Trảm hồn
+8:23000003|Huyền · Trảm hồn
+8:23000004|Hoàng · Trảm hồn
+8:24000001|Trời · Ly Long ấn
+8:24000002|· Ly Long ấn
+8:24000003|Huyền · Ly Long ấn
+8:24000004|Hoàng · Ly Long ấn
+8:25000001|Trời · Ngũ thải Thần thạch
+8:25000002|· Ngũ thải Thần thạch
+8:25000003|Huyền · Ngũ thải Thần thạch
+8:25000004|Hoàng · Ngũ thải Thần thạch
+8:26000001|Trời · Huyền Hỏa Giám
+8:26000002|· Huyền Hỏa Giám
+8:26000003|Huyền · Huyền Hỏa Giám
+8:26000004|Hoàng · Huyền Hỏa Giám
+8:27000001|Trời · Làm thích
+8:27000002|· Làm thích
+8:27000003|Huyền · Làm thích
+8:27000004|Hoàng · Làm thích
+8:28000001|Trời · Mộ chỉ riêng
+8:28000002|· Mộ chỉ riêng
+8:28000003|Huyền · Mộ chỉ riêng
+8:28000004|Hoàng · Mộ chỉ riêng
+8:29000001|Trời · Tinh hồng chi mắt
+8:29000002|· Tinh hồng chi mắt
+8:29000003|Huyền · Tinh hồng chi mắt
+8:29000004|Hoàng · Tinh hồng chi mắt
+8:30000001|Trời · Toa la bảo trượng
+8:30000002|· Toa la bảo trượng
+8:30000003|Huyền · Toa la bảo trượng
+8:30000004|Hoàng · Toa la bảo trượng
+8:31000001|Trời · Ly châu
+8:31000002|· Ly châu
+8:31000003|Huyền · Ly châu
+8:31000004|Hoàng · Ly châu
+8:32000001|Trời · Bèo tấm
+8:32000002|· Bèo tấm
+8:32000003|Huyền · Bèo tấm
+8:32000004|Hoàng · Bèo tấm
+8:33000001|Trời · Linh Lung Bảo Tháp
+8:33000002|· Linh Lung Bảo Tháp
+8:33000003|Huyền · Linh Lung Bảo Tháp
+8:33000004|Hoàng · Linh Lung Bảo Tháp
+8:34000001|Trời · Gấm lan cà sa
+8:34000002|· Gấm lan cà sa
+8:34000003|Huyền · Gấm lan cà sa
+8:34000004|Hoàng · Gấm lan cà sa
+8:35000001|Trời · Chú oán
+8:35000002|· Chú oán
+8:35000003|Huyền · Chú oán
+8:35000004|Hoàng · Chú oán
+8:36000001|Trời · Ngũ sắc thần quang
+8:36000002|· Ngũ sắc thần quang
+8:36000003|Huyền · Ngũ sắc thần quang
+8:36000004|Hoàng · Ngũ sắc thần quang
+8:37000001|Trời · Tam Bảo Ngọc Như Ý
+8:37000002|· Tam Bảo Ngọc Như Ý
+8:37000003|Huyền · Tam Bảo Ngọc Như Ý
+8:37000004|Hoàng · Tam Bảo Ngọc Như Ý
+8:38000001|Trời · Hoàng việt
+8:38000002|· Hoàng việt
+8:38000003|Huyền · Hoàng việt
+8:38000004|Hoàng · Hoàng việt
+8:39000001|Trời · Hỗn Thiết Côn
+8:39000002|· Hỗn Thiết Côn
+8:39000003|Huyền · Hỗn Thiết Côn
+8:39000004|Hoàng · Hỗn Thiết Côn
+8:40000001|Trời · Vu độc con rối
+8:40000002|· Vu độc con rối
+8:40000003|Huyền · Vu độc con rối
+8:40000004|Hoàng · Vu độc con rối
+8:41000001|Trời · Huyết liên đài
+8:41000002|· Huyết liên đài
+8:41000003|Huyền · Huyết liên đài
+8:41000004|Hoàng · Huyết liên đài
+3:100001|Tiến giai thạch
+3:100002|Thái Ất tinh kim
+3:100003|Hạo dương thạch
+3:100004|Mạ vàng phấn
+3:100007|Thiên Khải tinh văn tảng đá
+3:100008|Bích ngọc tủy
+3:100009|Thiên giới Thần thạch
+3:100010|Liệt Dương tín vật
+3:100011|Thần trang mảnh vỡ
+3:100013|Hiền giả di vật
+3:100014|Tiên linh di vật
+3:100015|Yêu Tổ di vật
+3:100016|Ma Hoàng di vật
+3:100017|Cổ Thần di vật
+3:100018|Tín ngưỡng chi lực
+3:100024|Linh bàn thờ
+3:100025|Mệnh ký
+3:100026|Mệnh cách
+3:100028|Đổi thành tinh hoa
+3:100029|Làn da mảnh vỡ
+3:100030|Máu anh thạch
+3:100031|Tẩy luyện thạch
+3:100032|Hoàng cấp hồn đan
+3:100033|Huyền cấp hồn đan
+3:100034|Địa cấp hồn đan
+3:100035|Thiên cấp hồn đan
+3:100036|Thú hồn mảnh vỡ
+3:100047|Quán ma chi bình · Người
+3:100048|Quán ma chi bình · Tiên
+3:100049|Quán ma chi bình · Yêu
+3:100050|Quán ma chi bình · Thần
+3:100051|Quán ma chi bình · Ma
+3:100057|Thời gian tinh hoa
+3:100059|Hồn đan
+3:100096|Quán ma chi bình
+3:100210|Thời gian đồng hồ cát
+3:100212|Huyền thiết
+3:100213|Thần thiết
+3:100214|Vẫn thạch tinh hoa
+3:100215|Động thiên hồng ngọc
+3:100216|Kỳ Lân tiên ngọc
+3:100217|Tiên Khí tinh hoa
+3:100224|Tu vi đan
+3:100225|Bí kíp
+3:100227|Thông linh bài
+3:100228|Cầm tinh khiến
+3:100229|Thánh Thú khiến
+3:100230|Cộng minh thủy tinh
+3:100100|Triện ấn: Thần ân
+3:100101|Triện ấn: Pháp liền
+3:100102|Triện ấn: Giáp dày
+3:100103|Triện ấn: Sạch sẽ
+3:100104|Triện ấn: Tự hạn chế
+3:100105|Triện ấn: Kháng khống
+3:100106|Triện ấn: Né tránh
+3:100107|Triện ấn: Khép lại
+3:100108|Triện ấn: Miễn tổn thương
+3:100109|Triện ấn: Thần tốc
+3:100110|Triện ấn: Trí tuệ
+3:100111|Triện ấn: Thần võ
+3:100112|Triện ấn: Truy kích
+3:100113|Triện ấn: Bạo tập
+3:100114|Triện ấn: Nổi giận
+3:100115|Triện ấn: Cuồng bạo
+3:100116|Triện ấn: Máu giận
+3:100117|Triện ấn: Che chở
+3:100118|Triện ấn: Chiến rống
+3:100119|Triện ấn: Dịch bệnh
+3:100120|Triện ấn: Câu hồn
+3:100121|Triện ấn: Xua tan
+3:100122|Triện ấn: Mãnh kích
+3:100123|Triện ấn: Trào phúng
+3:100124|Triện ấn: Giảm tốc
+3:100125|Triện ấn: Hi sinh
+3:100126|Triện ấn: Áp chế
+3:100127|Triện ấn: Nhắm chuẩn
+3:100128|Triện ấn: Tái sinh
+3:100129|Triện ấn: Trùng sinh
+3:100130|Triện ấn: Dừng bạo
+3:100131|Triện ấn: Ma giáp
+3:100132|Triện ấn: Chiến giáp
+3:100133|Triện ấn: Nghị nặng
+3:100134|Triện ấn: Xuyên thấu
+3:100135|Triện ấn: Khống tràng
+3:100136|Triện ấn: Vật liền
+3:100137|Triện ấn: Hút máu
+3:100138|Triện ấn: Viện hộ
+3:100139|Triện ấn: Phản tổn thương
+3:100140|Triện ấn: Dũng mãnh
+3:100141|Triện ấn: Hiểu ý
+3:100142|Triện ấn: Lưu động
+3:100143|Triện ấn: Tránh hiểm
+3:100144|Triện ấn: Hồi hồn
+3:100145|Triện ấn: Diệt hồn
+3:40101|Cấp thấp phụ ma: Lôi đình
+3:40102|Trung cấp phụ ma: Lôi đình
+3:40103|Cao cấp phụ ma: Lôi đình
+3:40201|Cấp thấp phụ ma: Tẩm bổ
+3:40202|Trung cấp phụ ma: Tẩm bổ
+3:40203|Cao cấp phụ ma: Tẩm bổ
+3:40301|Cấp thấp phụ ma: Đạp gió
+3:40302|Trung cấp phụ ma: Đạp gió
+3:40303|Cao cấp phụ ma: Đạp gió
+3:40401|Cấp thấp phụ ma: Sáng tạo càng
+3:40402|Trung cấp phụ ma: Sáng tạo càng
+3:40403|Cao cấp phụ ma: Sáng tạo càng
+3:40501|Cấp thấp phụ ma: Cứng cỏi
+3:40502|Trung cấp phụ ma: Cứng cỏi
+3:40503|Cao cấp phụ ma: Cứng cỏi
+3:300001|Cố định gói quà -1 
+3:300002|Cố định gói quà -2
+3:300003|Cố định gói quà -3
+3:300004|Cố định gói quà -4
+3:300005|Q Bầy gói quà
+3:300006|Manh mới gói quà
+3:300007|Hộ lá gan tiến giai gói quà
+3:300008|Đề nghị gói quà
+3:300009|BUG Gói quà
+3:300010|Đánh giá gói quà
+3:300011|Anh hùng mạo hiểm hào lễ
+3:300012|Anh hùng làn da gói quà
+3:300013|Phiên Thiên Ấn gói quà
+3:300014|Thanh Long rơi gói quà
+3:300015|Hoa sen bảo sách gói quà
+3:300016|Trảm Tiên Phi Đao gói quà
+3:300017|Long Vương cái sọt gói quà
+3:300018|Tinh kim đồng tiền gói quà
+3:300019|Lửa anh thương gói quà
+3:300020|Thái hư thần giáp gói quà
+3:300021|Đông Hoàng Chung gói quà
+3:300022|Lạc Nhật Cung gói quà
+3:300023|Bên trên bảo thấm kim bá gói quà
+3:300024|Áng mây phiêu gói quà
+3:300025|Thần Nông đỉnh gói quà
+3:300026|Vong ưu gói quà
+3:300027|Ánh trăng gói quà
+3:300028|Lão Long bố mưa gói quà
+3:300029|Hỗn Thiên Lăng gói quà
+3:300030|Hổ phách đao gói quà
+3:400001|Ngẫu nhiên gói quà -1
+3:400002|Ngẫu nhiên gói quà -2
+3:400003|Ngẫu nhiên gói quà -3
+3:400004|Ngẫu nhiên gói quà -4
+3:400005|May mắn tầm bảo gói quà
+3:400006|Cao cấp tầm bảo gói quà
+3:400007|3 Tinh trang bị gói quà
+3:400008|2 Tinh trang bị gói quà
+3:400009|Huyền cấp thú hồn gói quà
+3:400010|May mắn điểm tướng gói quà
+3:400011|Di vật ngẫu nhiên gói quà
+3:400012|Triệu hoán gói quà
+3:400013|Mảnh vỡ gói quà
+3:400014|Hoàng cấp thú hồn gói quà
+3:400015|Địa cấp thú hồn ngẫu nhiên
+3:400016|Mạ vàng phấn gói quà lớn
+3:400017|Ngẫu nhiên triện ấn gói quà
+3:400018|Thiên cấp thú hồn gói quà
+3:400019|Mỗi ngày thủ mạo xưng quý tộc
+3:400020|Mỗi ngày thủ mạo xưng tôn hưởng
+3:400021|1 Tinh trang bị gói quà
+3:400022|Tam hệ anh hùng ngẫu nhiên
+3:400023|Thần Ma ngẫu nhiên gói quà
+3:400024|3 Tinh cam trang gói quà
+3:400025|Thú hồn gói quà
+3:400026|Thú hồn gói quà
+3:400027|Thú hồn gói quà
+3:400028|Thú hồn gói quà
+3:400029|Thú hồn gói quà
+3:400030|Thú hồn gói quà
+3:400031|Mỗi ngày thủ mạo xưng gói quà
+3:400032|Đỏ 1 Trang bị ngẫu nhiên
+3:400033|Đỏ 2 Trang bị ngẫu nhiên
+3:400034|Thông dụng Tiên Khí ngẫu nhiên
+3:400035|Đỏ 3 Trang bị ngẫu nhiên
+3:400036|Cấp thấp phụ ma tự do
+3:400037|Trung cấp phụ ma tự do
+3:400038|Cao cấp phụ ma tự do
+3:400039|Tiên Khí mảnh vỡ ngẫu nhiên
+3:400040|Phúc địa trân tàng
+3:400041|Phong thần khiến gói quà
+3:400042|Thiên địa thú hồn ngẫu nhiên
+3:400043|Chuyên môn Tiên Khí ngẫu nhiên
+3:400044|Lá cây ngẫu nhiên gói quà
+3:400045|Thú hồn tiến giai gói quà
+3:500001|Tự do gói quà -1
+3:500002|Tự do gói quà -2
+3:500003|Tự do gói quà -3
+3:500004|Nhân tộc tự do gói quà
+3:500005|Tiên Tộc tự do gói quà
+3:500006|Yêu tộc tự do gói quà
+3:500007|Thần tộc tự do gói quà
+3:500008|Ma tộc tự do gói quà
+3:500009|Tam hệ anh hùng tự do
+3:500010|Thần Ma tự do gói quà
+3:500011|Triện ấn tự do gói quà
+3:500012|Địa cấp thú hồn tự do
+3:500013|Thiên cấp thú hồn ngẫu nhiên
+3:500014|Thiên cấp thú hồn tự do
+3:500015|Quán ma chi bình gói quà
+3:500016|Di vật tự do gói quà
+3:500017|4 Tinh cam trang tự do
+3:500018|Hồn đan tự do gói quà
+3:500019|Di vật tự do gói quà
+3:500020|Cực phẩm thú hồn gói quà
+3:500021|Thiên cấp thú hồn ngẫu nhiên
+3:500022|Anh hùng tự do gói quà
+3:500023|Đỏ 2 Trang bị tự do
+3:500024|Đỏ 3 Trang bị tự do
+3:500025|Thông dụng Tiên Khí tự do
+3:500026|Chuyên môn Tiên Khí tự do
+3:500027|Tiên Khí mảnh vỡ tự do
+3:500028|Tiên Khí mảnh vỡ ngẫu nhiên
+3:500029|Địa cấp thú hồn tự do
+3:500030|Thiên cấp thú hồn tự do
+3:500031|Nhân tộc Tiên Khí tự do
+3:500032|Tiên Tộc Tiên Khí tự do
+3:500033|Yêu tộc Tiên Khí tự do
+3:500034|Thần tộc Tiên Khí tự do
+3:500035|Ma tộc Tiên Khí tự do
+3:500036|Nhân tộc Tiên Khí mảnh vỡ
+3:500037|Tiên Tộc Tiên Khí mảnh vỡ
+3:500038|Yêu tộc Tiên Khí mảnh vỡ
+3:500039|Thần tộc Tiên Khí mảnh vỡ
+3:500040|Ma tộc Tiên Khí mảnh vỡ
+3:500041|Chủng tộc huy chương tự do
+3:500042|Tiên Khí mảnh vỡ tự do
+3:500043|Tiên Khí tự do gói quà
+3:500044|Bánh Trung thu tự do hộp quà
+3:500045|Tiên Khí lui trở về tự do
+3:500046|Làn da mảnh vỡ tự do
+3:500047|Tiên Khí mảnh vỡ tự do
+3:500048|Tiên Khí mảnh vỡ tự do
+3:500049|Tiên Khí mảnh vỡ tự do
+3:500050|Tiên Khí mảnh vỡ tự do
+3:500052|Lá cây tự do gói quà
+3:500053|Chỉ định Thần Ma tự do
+3:500054|Tam hệ anh hùng tự do
+3:560001|Ngày lễ đèn lồng
+3:560002|Long Tước chi tư
+3:570001|Đồ cất giữ gói quà
+3:100005|Phổ thông tầm bảo khoán
+3:100006|Cao cấp tầm bảo khoán
+3:100021|Phổ thông điểm tướng khoán
+3:100022|Cao cấp điểm tướng khoán
+3:100023|Diễn võ trường khiêu chiến khoán
+3:100027|Treo thưởng đổi mới khoán
+3:100037|Tiểu thanh tân hồng bao
+3:100038|Cấp cao khí quyển hồng bao
+3:100039|Chí tôn thổ hào hồng bao
+3:100044|Tinh anh điểm tướng khoán
+3:100058|Linh vũ
+3:100061|Liệt thiên
+3:100062|Càn khôn bí chìa
+3:100063|Rút thưởng khoán
+3:100064|Ngọc như ý
+3:100065|Xá Lợi
+3:100072|Bạch long châu
+3:100073|Binh phù
+3:100074|Cận trời bí chìa
+3:100075|Hỏa tinh
+3:100077|Cầu nguyện khiến
+3:100084|Quân công
+3:100089|Bảo rương bí chìa
+3:100098|Long châu
+3:100208|Thí luyện điểm tích lũy
+3:100209|Mê cung điểm tích lũy
+3:100211|Thang trời điểm tích lũy
+3:100219|Công huân
+3:100222|Đẳng cấp điểm tích lũy
+3:100226|Bàn quay khoán
+3:1000010|5 Tinh thông dụng anh linh
+3:1000011|5 Tinh nhân tộc anh linh
+3:1000012|5 Tinh Tiên Tộc anh linh
+3:1000013|5 Tinh yêu tộc anh linh
+3:1000014|5 Tinh Thần tộc anh linh
+3:1000015|5 Tinh ma tộc anh linh
+3:1000016|9 Tinh thông dụng anh linh
+3:1000017|9 Tinh nhân tộc anh linh
+3:1000018|9 Tinh Tiên Tộc anh linh
+3:1000019|9 Tinh yêu tộc anh linh
+3:1000020|9 Tinh Thần tộc anh linh
+3:1000021|9 Tinh ma tộc anh linh
+3:1000022|10 Tinh thông dụng anh linh
+3:100040|Nhanh chóng tác chiến đặc quyền
+3:100041|Đồ đằng Thánh Điện đặc quyền
+3:100042|Treo thưởng cao cấp đặc quyền
+3:100043|Treo thưởng hào Ward quyền
+3:100045|Nữ Oa thạch
+3:100046|Đúc lại đan
+3:1000001|Nhỏ kim tệ túi (24 Giờ )
+3:1000002|Ít kinh nghiệm túi (24 Giờ )
+3:100053|Hoàng cấp tạp vật
+3:100054|Huyền cấp tạp vật
+3:100055|Địa cấp tạp vật
+3:100056|Thiên cấp tạp vật
+3:10022||Tạp vật
+3:200027|Học tập điểm tích lũy
+3:200028|Thần tượng điểm tích lũy
+3:200029|Phòng ăn điểm tích lũy
+3:200030|Âm Dương Ngư phù
+3:200031|Công thành khiến
+3:200032|Di chuyển khiến
+3:200035|Bí đỏ đầu
+3:200036|Manh chó khẩu phần lương thực
+3:200037|Khai Thiên Phủ
+3:200038|Danh vọng điểm tích lũy
+3:200039|Bông tuyết
+3:200040|Vảy rồng
+3:900001|Cử thế vô song
+3:900002|Khó gặp địch thủ
+3:900003|Dũng quan tam quân
+3:900004|Nội trắc dũng giả
+3:900005|Phong thần dũng sĩ
+3:900006|Ưu nhã quý tộc
+3:900007|Siêu phàm đại sư
+3:900008|Khinh thường tông sư
+3:900009|Mạnh nhất vương giả
+3:900010|Âu hoàng phụ thể
+3:900011|Âu hoàng phụ thể
+3:900012|Đăng phong tạo cực
+3:900013|Đứng hàng đầu
+3:900014|Thang trời đạt nhân
+3:900015|Mê cung thủ vệ
+3:900016|Lôi đài đạt nhân
+3:900017|Tuyệt thế dũng giả
+3:900018|Lôi đài vương giả
+3:900019|Tam giới chung chủ
+3:900020|Đại La Kim Tiên
+3:900021|Thái Ất Chân Tiên
+3:900022|Tiêu dao Tán Tiên
+3:900023|Ngũ Cốc Phong Đăng
+3:900024|Không làm thì không có ăn
+3:900025|Vương giả chi đỉnh
+3:900026|Trận đấu mùa giải truyền kỳ
+3:900027|Trận đấu mùa giải vinh quang
+3:1200001|Có một không hai
+3:1200002|Siêu quần xuất chúng
+3:1200003|Xuất trần
+3:800001|Lục lâm du hiệp
+3:800002|Vương giả chi phong
+3:800003|Ưu nhã quý tộc
+3:800004|Đăng phong tạo cực
+3:800005|Lôi đài vương giả
+3:800006|Mệnh lý đại sư
+3:800007|Sách âm thanh leng keng
+3:800008|Vinh quang vương giả
+3:800009|Kim thu tháng mười
+3:800010|Kim kha ngọc lá
+3:800011|Phi long tại thiên
+3:800012|Phượng Vũ Cửu Thiên
+3:800013|bilibili Chuyên môn
+3:800014|oppo Chuyên môn
+3:800015|taptap Chuyên môn
+3:800016|vivo Chuyên môn
+3:800017|Hoa vì chuyên môn
+3:800018|Chín du lịch chuyên môn
+3:800019|Tiểu Mễ chuyên môn
+3:800020|Ứng dụng bảo chuyên môn
+3:800021|Quỷ ảnh trò chơi
+3:800022|Thiên Diệp công xưởng
+3:800032|Tài nguyên cuồn cuộn
+3:1100001|Công thành đại sư
+3:1100002|Mười bước một giết
+3:1100003|Thành tấn tổn thương
+3:1300001|Đỉnh phong
+3:1300002|Trác tuyệt
+3:1300003|Phong thái
+3:700001|Đầu đường truyền thuyết
+3:700002|Đầu đường truyền thuyết
+3:700003|Đầu đường đường bá
+3:700004|Đầu đường đường bá
+3:700005|Tương lai chiến sĩ
+3:700006|Ngọt ngào hoa hồng
+3:700007|Săn tâm xạ thủ
+3:700008|Ngày mùa hè tiệc tùng
+3:700009|Bao nhiêu số luận
+3:700010|Thần tượng luyện tập sinh
+3:700011|Thỏ nữ lang
+3:700012|Âm dương kiếm khách
+3:700013|Ác linh dũng sĩ
+3:700014|Manh trạch bảo bối
+3:700015|Sáng Thế Thần
+3:700016|Giáng Sinh bảo bối
+3:700017|Băng sương long duệ
+3:720001|Đầu đường truyền thuyết (7 Trời )
+3:720002|Đầu đường đường bá (7 Trời )
+3:720003|Tương lai chiến sĩ (7 Trời )
+3:720004|Ngọt ngào hoa hồng (7 Trời )
+3:720005|Săn tâm xạ thủ (7 Trời )
+3:720006|Ngày mùa hè tiệc tùng (7 Trời )
+3:720007|Bao nhiêu số luận (7 Trời )
+3:720008|Thần tượng luyện tập sinh (7 Trời )
+3:720009|Thỏ nữ lang (7 Trời )
+3:720010|Âm dương kiếm khách (7 Trời )
+3:720011|Ác linh dũng sĩ (7 Trời )
+3:720012|Manh trạch bảo bối (7 Trời )
+3:720013|Sáng Thế Thần (7 Trời )
+3:710005|Tương lai chiến sĩ ( Mảnh vỡ )
+3:710006|Đầu đường truyền thuyết ( Mảnh vỡ )
+3:710007|Đầu đường đường bá ( Mảnh vỡ )
+3:100052|Bánh chưng
+3:100060|Điện thờ
+3:100066|Nhân tộc huy chương
+3:100067|Tiên Tộc huy chương
+3:100068|Yêu tộc huy chương
+3:100069|Thần tộc huy chương
+3:100070|Ma tộc huy chương
+3:100071|Tác chiến vật tư
+3:100076|Phong thần khiến
+3:100078|Năm nhân bánh Trung thu
+3:100079|Trăm quả bánh Trung thu
+3:100080|Trứng Hoàng Nguyệt bánh
+3:100081|Chà bông bánh Trung thu
+3:100082|Chiếu thư
+3:100083|Linh năng kết tinh
+3:100085|Mị ảnh châu
+3:100086|Ngọn nến
+3:100087|Nam Hồng Mã Não
+3:100088|Mười ba hương
+3:100090|Lá phong
+3:100091|Bách lá
+3:100092|Hạnh lá
+3:100093|Lá phong đỏ
+3:100094|Bách lá lục
+3:100095|Hạnh lá hoàng
+3:100097|Tước linh
+3:100099|Tâm nguyện bình
+3:100201|Thất thải vảy rồng
+3:100202|Cẩm nang
+3:100203|Công lao
+3:100204|Tiên lộ
+3:100205|Mạn Đà La
+3:100206|Thiên Sơn tuyết liên
+3:100207|Bàn đào
+3:100218|Băng côn
+3:100220|Luyện tập sách
+3:100221|Phác nghiễn
+3:100223|Bánh kẹo
+3:500051|Chia sẻ hồng bao
+3:200033|Chia sẻ điểm tích lũy
+7:52000101|Ảnh nhận
+7:54000101|Hỏa diễm vương miện
+7:55000101|Tín ngưỡng
+7:58000101|Hỗn độn thủy tinh
+7:59000101|Bát Hoang huyết nhận
+7:44000101|Rực lửa Kim Liên
+7:51000101|Huyền Vũ phá Thiên Cung
+3:700045|Ánh sáng chiến thần
+3:700046|Phấn hồng thiên sứ
+3:700047|Cơ giáp chiến thần
+1:101401|Lý Tĩnh 5
+1:101410|Lý Tĩnh 14
+1:101501|Đặng Thiền Ngọc 5
+1:101510|Đặng Thiền Ngọc 14
+1:101601|Hằng Nga 5
+1:101610|Hằng Nga 14
+1:101701|Hậu Nghệ 5
+1:101710|Hậu Nghệ 14
+1:101801|Cơ Phát 5
+1:101810|Cơ Phát 14
+1:102001|Na Tra 5
+1:102010|Na Tra 14
+1:102101|Khương Tử Nha 5
+1:102110|Khương Tử Nha 14
+1:102201|Lôi Chấn Tử 5
+1:102210|Lôi Chấn Tử 14
+1:102301|Hoa Mộc Lan 5
+1:102310|Hoa Mộc Lan 14
+1:102401|Trầm hương 5
+1:102410|Trầm hương 14
+1:200902|Thái Bạch Kim Tinh 5
+1:201002|Nguyệt lão 5
+1:201102|Chức Nữ 5
+1:201202|Hà Bá 5
+1:201302|Vũ Sư 5
+1:201401|Thiên Bồng nguyên soái 5
+1:201410|Thiên Bồng nguyên soái 14
+1:201501|Quyển Liêm Đại Tướng 5
+1:201510|Quyển Liêm Đại Tướng 14
+1:201601|Nam Cực tiên tử 5
+1:201610|Nam Cực tiên tử 14
+1:201701|Lộc duyên thượng tiên 5
+1:201710|Lộc duyên thượng tiên 14
+1:201801|Đấu Chiến Thắng Phật 5
+1:201810|Đấu Chiến Thắng Phật 14
+1:202001|Thông Thiên giáo chủ 5
+1:202010|Thông Thiên giáo chủ 14
+1:202101|Nguyên Thủy Thiên Tôn 5
+1:202110|Nguyên Thủy Thiên Tôn 14
+1:202201|Vân Trung Tử 5
+1:202210|Vân Trung Tử 14
+1:202301|Bạch long 5
+1:202310|Bạch long 14
+1:202401|Huyền Trang 5
+1:202410|Huyền Trang 14
+1:202501|Thổ địa 5
+1:202510|Thổ địa 14
+1:202601|Ẩu cơ 5
+1:202610|Ẩu cơ 14
+1:300902|Ngân giác đại vương 5
+1:301002|Quỷ Tướng 5
+1:301102|Kim Giác đại vương 5
+1:301202|Bàn Tơ 5
+1:301302|Dạ Xoa 5
+1:301401|Hồng hài nhi 5
+1:301410|Hồng hài nhi 14
+1:301501|Thạch Cơ 5
+1:301510|Thạch Cơ 14
+1:301601|Hỗn Thiên Đại Thánh 5
+1:301610|Hỗn Thiên Đại Thánh 14
+1:301701|Ngưu Ma Vương 5
+1:301710|Ngưu Ma Vương 14
+1:301801|Giơ cao thương 5
+1:301810|Giơ cao thương 14
+1:301901|Kim Ô 5
+1:301910|Kim Ô 14
+1:302001|Ngao Bính 5
+1:302010|Ngao Bính 14
+1:302101|Bạch Cốt phu nhân 5
+1:302110|Bạch Cốt phu nhân 14
+1:302201|Ðát Kỷ 5
+1:302210|Ðát Kỷ 14
+1:302301|Khổng Tuyên 5
+1:302310|Khổng Tuyên 14
+1:302401|Man châu 5
+1:302410|Man châu 14
+1:400202|Dao Cơ 5
+1:400302|Nữ Bạt 5
+1:400402|Giám binh 5
+1:400502|Lạc Thần 5
+1:400601|Bàn Cổ 5
+1:400610|Bàn Cổ 14
+1:400701|Thần Nông 5
+1:400710|Thần Nông 14
+1:400801|Nữ Oa 5
+1:400810|Nữ Oa 14
+1:400901|Côn 5
+1:400910|Côn 14
+1:401001|Ngọc Đế 5
+1:401010|Ngọc Đế 14
+1:401201|Cộng Công 5
+1:401210|Cộng Công 14
+1:401301|Chúc Dung 5
+1:401310|Chúc Dung 14
+1:401401|Cửu Thiên Huyền Nữ 5
+1:401410|Cửu Thiên Huyền Nữ 14
+1:401501|Dương Tiễn 5
+1:401510|Dương Tiễn 14
+1:401601|Mẹ tổ 5
+1:401610|Mẹ tổ 14
+1:401701|Tam thánh mẫu 5
+1:401710|Tam thánh mẫu 14
+1:401801|Phách rồng 5
+1:401810|Phách rồng 14
+1:401901|Tây Vương Mẫu 5
+1:401910|Tây Vương Mẫu 14
+1:402001|Mai liễu thật 5
+1:402010|Mai liễu thật 14
+1:402101|Hồng Quân 5
+1:402110|Hồng Quân 14
+1:500202|Tham Lang 5
+1:500302|Phá Quân 5
+1:500402|Hắc vô thường 5
+1:500502|Bạch vô thường 5
+1:500601|Xi Vưu 5
+1:500610|Xi Vưu 14
+1:500701|Mạnh bà 5
+1:500710|Mạnh bà 14
+1:500801|Hình Thiên 5
+1:500810|Hình Thiên 14
+1:500901|Ma · Ngộ Không 5
+1:500910|Ma · Ngộ Không 14
+1:501001|Hoàng Tuyền 5
+1:501010|Hoàng Tuyền 14
+1:501101|Diêm Quân 5
+1:501110|Diêm Quân 14
+1:501201|Đông Hoàng Thái Nhất 5
+1:501210|Đông Hoàng Thái Nhất 14
+1:501301|Chúc Long 5
+1:501310|Chúc Long 14
+1:501401|Dạ Mị 5
+1:501410|Dạ Mị 14
+1:501501|Linh môi ma nữ 5
+1:501510|Linh môi ma nữ 14
+1:501601|Minh Hà 5
+1:501610|Minh Hà 14
+1:501701|Vô thiên 5
+1:501710|Vô thiên 14
+1:501801|Tu La 5
+1:501810|Tu La 14
+1:600101|Ảnh 5
+1:600110|Ảnh 14
+1:600201|Viêm 5
+1:600210|Viêm 14
+1:600301|Chỉ riêng 5
+1:600310|Chỉ riêng 14
+1:600401|Ngự 5
+1:600410|Ngự 14
+1:600501|Máu 5
+1:600510|Máu 14
+1:601201|Hỗn độn Hoa Mộc Lan 5
+1:601210|Hỗn độn Hoa Mộc Lan 14
+1:601301|Hỗn độn Khương Tử Nha 5
+1:601310|Hỗn độn Khương Tử Nha 14
+1:601401|Hỗn độn Lý Tĩnh 5
+1:601410|Hỗn độn Lý Tĩnh 14
+1:601501|Hỗn độn Hằng Nga 5
+1:601510|Hỗn độn Hằng Nga 14
+1:601601|Hỗn độn Minh Hà 5
+1:601610|Hỗn độn Minh Hà 14
+1:80111|Võ Thần thăng cảnh giới dùng
+1:910010|Tuyệt thế · Võ Thần 14
+3:510003|64 Vị anh hùng gói quà lớn
+3:510004|12 Ức thay mặt tệ gói quà lớn
+7:91000101|Bạo Thiên Tinh
