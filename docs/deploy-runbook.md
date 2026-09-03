@@ -58,7 +58,7 @@ sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql
 
 (Trên cùng máy, `PUBLIC_HOST` cũng được vì host network; cross/group gọi nhau qua IP public của chính máy.)
 
-**Không tắt server cũ lúc này** — vẫn cần nó để rsync assets ở bước 3. Nếu muốn dữ liệu "đóng băng" (không ai chơi trong lúc chuyển), tắt game trước khi dump: `/h5/server/stop.sh` (script này **xoá log**).
+**Không tắt server cũ lúc này** — bước 3 còn rsync dump từ nó, và nó là đường lùi nếu server mới trục trặc. Nếu muốn dữ liệu "đóng băng" (không ai chơi trong lúc chuyển), tắt game trước khi dump: `/h5/server/stop.sh` (script này **xoá log**).
 
 ---
 
