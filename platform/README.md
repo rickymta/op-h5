@@ -120,6 +120,40 @@ user_id  game_code  game_username  khoa_rieng
 1        tamquoc    id000000001    7E2E7663…
 ```
 
+## Nối cổng nạp tiền hiện có vào ví
+
+Tích hợp thẻ cào / bank / MoMo **vẫn ở tầng PHP**, không viết lại. Chúng đang chạy với
+API key và chữ ký thật của nhà cung cấp; viết lại bằng Go nghĩa là chuyển cả phần rủi
+ro nhất sang mã chưa chạy ngày nào.
+
+Thay vào đó, khi nhà cung cấp **đã xác nhận** thanh toán, callback PHP gọi một API nội
+bộ để tiền vào sổ cái ID thay vì cột `web.user.xu`:
+
+```php
+require_once __DIR__ . '/id_wallet.php';
+// $taskId là mã giao dịch của nhà cung cấp — dùng làm khoá chống trùng
+$r = id_wallet_topup($username, $soXu, 'the-' . $taskId, 'Nạp thẻ ' . $mang, $taskId);
+if (!$r['ok']) { error_log('nạp ví ID thất bại: ' . $r['error']); }
+```
+
+Xác thực bằng HMAC trên thân request (`hex(HMAC_SHA256(secret, "<timestamp>." . body))`,
+đặt ở `X-Timestamp` + `X-Signature`), không phải token người dùng — bên gọi là tiến
+trình server, không có ai đăng nhập.
+
+Hai biến môi trường cho php-fpm (`env[...]` trong pool, hoặc `.env`):
+
+| Biến | Ý nghĩa |
+|---|---|
+| `ID_BASE_URL` | mặc định `http://127.0.0.1:8080` |
+| `ID_INTERNAL_SECRET` | **phải trùng** `ID_INTERNAL_SECRET` của dịch vụ ID |
+
+`idempotency_key` là **bắt buộc** và phải gắn với mã giao dịch của nhà cung cấp: mọi
+cổng thanh toán đều bắn lại callback khi không nhận được 200, và không có khoá này thì
+mỗi lần bắn lại là một lần cộng tiền.
+
+Nạp thủ công (đền bù, hỗ trợ) làm ở trang quản trị `/nap-tay` — bắt buộc ghi lý do và
+mọi lần nạp đều vào nhật ký.
+
 ## Biến môi trường
 
 | Biến | Bắt buộc | Mặc định |

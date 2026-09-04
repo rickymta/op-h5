@@ -80,10 +80,12 @@ func main() {
 	mux.HandleFunc("POST /dang-nhap", s.doLogin)
 	mux.HandleFunc("POST /dang-xuat", s.doLogout)
 	mux.HandleFunc("GET /nhat-ky", s.requireAdmin(s.auditPage))
+	mux.HandleFunc("GET /nap-tay", s.requireAdmin(s.walletPage))
 	// API: trang dung fetch, va cong cu ngoai cung goi duoc.
 	mux.HandleFunc("GET /api/fleet", s.requireAdminAPI(s.apiFleet))
 	mux.HandleFunc("POST /api/servers/{game}/{srv}", s.requireWrite(s.apiUpdateServer))
 	mux.HandleFunc("POST /api/devices/{game}/{device}", s.requireWrite(s.apiUpdateDevice))
+	mux.HandleFunc("POST /api/wallet/topup", s.requireWrite(s.apiTopup))
 	mux.HandleFunc("GET /healthz", s.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

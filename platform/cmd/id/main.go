@@ -70,7 +70,8 @@ func main() {
 		CodeTTL: cfg.AuthCodeTTL, SessionTTL: cfg.SessionTTL,
 		CookieSecur: cfg.CookieSecure, Tpl: tpl,
 	}
-	api := &apiServer{db: db, users: users, sessions: sessions, wallet: wal, log: log, secure: cfg.CookieSecure}
+	api := &apiServer{db: db, users: users, sessions: sessions, wallet: wal, log: log,
+		secure: cfg.CookieSecure, internalSecret: os.Getenv("ID_INTERNAL_SECRET")}
 	pages := &pageServer{api: api, tpl: tpl}
 
 	mux := http.NewServeMux()
@@ -88,6 +89,8 @@ func main() {
 	mux.HandleFunc("GET /tai-khoan", pages.accountPage)
 	mux.HandleFunc("POST /api/register", api.register)
 	mux.HandleFunc("POST /api/password", api.changePassword)
+	// --- noi bo: callback cong thanh toan o tang PHP goi vao ---
+	mux.HandleFunc("POST /internal/wallet/topup", api.internalTopup)
 	mux.HandleFunc("GET /api/me", api.me)
 	mux.HandleFunc("GET /api/wallet/balance", api.balance)
 	mux.HandleFunc("GET /api/wallet/history", api.history)

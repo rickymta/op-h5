@@ -6,15 +6,18 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
+	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
 const adminCookie = "op_admin"
@@ -198,6 +201,10 @@ func (s *server) auditPage(w http.ResponseWriter, r *http.Request, a *admin) {
 		}
 	}
 	s.render(w, "audit.html", map[string]any{"Admin": a, "Items": items})
+}
+
+func (s *server) walletPage(w http.ResponseWriter, r *http.Request, a *admin) {
+	s.render(w, "wallet.html", map[string]any{"Admin": a})
 }
 
 // ---------------------------------------------------------------- API
@@ -445,4 +452,54 @@ func (s *server) fleetView(ctx context.Context) ([]GameView, error) {
 		out = append(out, gv)
 	}
 	return out, nil
+}
+
+// ---------------------------------------------------------------- nap tay
+
+// apiTopup cong Xu vao vi mot nguoi choi. Dung cho den bu / ho tro.
+//
+// Moi lan nap deu vao nhat ky kem so tien va ly do: day la duong duy nhat tao tien
+// ma khong qua cong thanh toan, nen phai truy nguoc duoc ai lam va vi sao.
+func (s *server) apiTopup(w http.ResponseWriter, r *http.Request, a *admin) {
+	var in struct {
+		Username string `json:"username"`
+		Amount   int64  `json:"amount"`
+		Reason   string `json:"reason"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "dữ liệu không đọc được")
+		return
+	}
+	if in.Amount <= 0 {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "số Xu phải lớn hơn 0")
+		return
+	}
+	if strings.TrimSpace(in.Reason) == "" {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "phải ghi lý do")
+		return
+	}
+	ctx := r.Context()
+
+	var uid int64
+	if err := s.db.QueryRowContext(ctx,
+		`SELECT id FROM users WHERE username = ?`, strings.ToLower(strings.TrimSpace(in.Username))).
+		Scan(&uid); err != nil {
+		httpx.Error(w, http.StatusNotFound, "user_not_found", "Không tìm thấy tài khoản.")
+		return
+	}
+
+	// Khoa gan voi admin + thoi diem: bam hai lan trong cung mot giay khong cong hai lan,
+	// nhung nap lai co chu y vao giay sau thi van duoc.
+	idem := fmt.Sprintf("admin-%d-%d-%d", a.ID, uid, time.Now().Unix())
+	wal := &wallet.Service{DB: s.db}
+	txn, err := wal.Topup(ctx, uid, in.Amount, idem, "admin:"+a.Username, in.Reason)
+	if err != nil {
+		s.log.Error("nap tay", "err", err, "user", uid)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được giao dịch.")
+		return
+	}
+	bal, _ := wal.Balance(ctx, uid)
+	s.audit(ctx, a.ID, "wallet_topup", in.Username,
+		fmt.Sprintf(`{"amount":%d,"reason":%q,"txn":%d}`, in.Amount, in.Reason, txn))
+	httpx.JSON(w, http.StatusOK, map[string]any{"txn": txn, "balance": bal})
 }

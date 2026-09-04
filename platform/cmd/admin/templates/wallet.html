@@ -1,0 +1,47 @@
+{{define "wallet.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Nạp tay</title></head><body>
+{{template "nav" .}}
+<main>
+  <h2>Nạp Xu thủ công</h2>
+  <p class="sub">Đây là đường duy nhất tạo Xu mà không qua cổng thanh toán. Mọi lần nạp đều vào nhật ký kèm số tiền và lý do.</p>
+
+  <div class="card" style="max-width:520px">
+    <div id="msg"></div>
+    <form id="f">
+      <div style="margin-bottom:14px">
+        <label for="u" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Tài khoản người chơi</label>
+        <input id="u" style="width:100%;padding:8px 10px;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px"
+               autocapitalize="none" spellcheck="false" required>
+      </div>
+      <div style="margin-bottom:14px">
+        <label for="a" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Số Xu</label>
+        <input id="a" type="number" min="1" step="1"
+               style="width:100%;padding:8px 10px;font-family:var(--mono);font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px" required>
+      </div>
+      <div style="margin-bottom:16px">
+        <label for="r_" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Lý do <span class="muted">(bắt buộc, sẽ vào nhật ký)</span></label>
+        <input id="r_" placeholder="ví dụ: đền bù sự cố mất kết nối 04/09"
+               style="width:100%;padding:8px 10px;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px" required>
+      </div>
+      <button type="submit">Nạp</button>
+    </form>
+  </div>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var m = document.getElementById('msg');
+  m.innerHTML = '';
+  var r = await fetch('/api/wallet/topup', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username:u.value.trim(), amount:parseInt(a.value,10), reason:r_.value.trim()})});
+  var d = await r.json().catch(function(){ return {}; });
+  if (r.ok) {
+    m.innerHTML = '<p class="warnbox" style="background:var(--sea-bg);color:var(--sea);border-left-color:var(--sea)">' +
+      'Đã nạp. Số dư mới: ' + d.balance.toLocaleString('vi-VN') + ' Xu (giao dịch #' + d.txn + ').</p>';
+    document.getElementById('f').reset();
+  } else {
+    m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>';
+  }
+});
+</script>
+</body></html>{{end}}

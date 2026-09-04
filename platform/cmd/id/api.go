@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"html/template"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -21,6 +22,8 @@ type apiServer struct {
 	wallet   *wallet.Service
 	log      *slog.Logger
 	secure   bool
+	// internalSecret ky cac lenh nap tien tu tang PHP. Rong = tat endpoint do.
+	internalSecret string
 }
 
 // decodeJSON doc than request JSON voi gioi han kich thuoc.
@@ -138,4 +141,80 @@ func (a *apiServer) history(w http.ResponseWriter, r *http.Request) {
 		out = append(out, row)
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{"items": out})
+}
+
+// ---------------------------------------------------------------- nap tien noi bo
+
+// internalTopup nhan lenh nap tien tu cac callback cong thanh toan o tang PHP.
+//
+// Vi sao khong viet lai tich hop the cao / bank / MoMo o day: chung dang chay o tang
+// PHP voi API key va chu ky that cua nha cung cap. Viet lai nghia la chuyen ca phan
+// rui ro nhat sang ma moi chua chay ngay nao. Thay vao do PHP giu nguyen phan doi
+// thoai voi nha cung cap, va khi nha cung cap da xac nhan thi goi endpoint nay de
+// tien vao so cai.
+//
+// Xac thuc bang HMAC tren than request (xem internal/wallet/internalapi.go), khong
+// phai token nguoi dung: ben goi la tien trinh server, khong co ai dang nhap.
+func (a *apiServer) internalTopup(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 8<<10))
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "không đọc được dữ liệu")
+		return
+	}
+	if err := wallet.VerifySignature(a.internalSecret,
+		r.Header.Get("X-Timestamp"), r.Header.Get("X-Signature"), body); err != nil {
+		switch {
+		case errors.Is(err, wallet.ErrNotConfigured):
+			httpx.Error(w, http.StatusServiceUnavailable, "not_configured",
+				"API nạp tiền nội bộ chưa được cấu hình (ID_INTERNAL_SECRET).")
+		default:
+			// Khong noi ro sai o dau: chu ky sai hay timestamp lech deu la "khong hop le".
+			a.log.Warn("nap tien noi bo: xac thuc that bai", "err", err, "ip", httpx.ClientIP(r))
+			httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Chữ ký không hợp lệ.")
+		}
+		return
+	}
+
+	var in struct {
+		Username  string `json:"username"`
+		UserID    int64  `json:"user_id"`
+		Amount    int64  `json:"amount"`
+		IdemKey   string `json:"idempotency_key"`
+		Reference string `json:"reference"`
+		Memo      string `json:"memo"`
+	}
+	if err := json.Unmarshal(body, &in); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "JSON không hợp lệ")
+		return
+	}
+	if in.Amount <= 0 {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "amount phải lớn hơn 0")
+		return
+	}
+	if in.IdemKey == "" {
+		// Bat buoc: khong co khoa nay thi callback ban lai se cong tien hai lan.
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "thiếu idempotency_key")
+		return
+	}
+
+	ctx := r.Context()
+	uid := in.UserID
+	if uid == 0 {
+		u, err := a.users.ByUsername(ctx, in.Username)
+		if err != nil {
+			httpx.Error(w, http.StatusNotFound, "user_not_found", "Không tìm thấy tài khoản.")
+			return
+		}
+		uid = u.ID
+	}
+
+	txn, err := a.wallet.Topup(ctx, uid, in.Amount, in.IdemKey, in.Reference, in.Memo)
+	if err != nil {
+		a.log.Error("nap tien noi bo", "err", err, "user", uid)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được giao dịch.")
+		return
+	}
+	bal, _ := a.wallet.Balance(ctx, uid)
+	a.log.Info("nap tien noi bo", "user", uid, "amount", in.Amount, "txn", txn, "ref", in.Reference)
+	httpx.JSON(w, http.StatusOK, map[string]any{"txn": txn, "user_id": uid, "balance": bal})
 }
