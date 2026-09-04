@@ -133,6 +133,13 @@ type Adapter struct {
 	// Ma hoa game_secret truoc khi luu (32 byte, base64)
 	SecretEncKey string
 
+	// Console cua game — dung de phat vat pham cho cac lenh quy doi
+	ConsoleBaseURL  string
+	ConsoleUser     string
+	ConsolePassword string
+	ConsolePayMode  string // "manual" (mot buoc) hoac "approval" (hai buoc)
+	GrantInterval   time.Duration
+
 	// Cong giu cho: ve cap cho phien moi song bao lau truoc khi het han
 	TicketTTL time.Duration
 	// Chu ky doc lai onlineNum tu login server
@@ -155,13 +162,18 @@ func LoadAdapter() (Adapter, error) {
 		ClientID: l.req("ADAPTER_CLIENT_ID"),
 		// Client cong khai (chi PKCE, secret_hash = NULL trong oauth_clients) khong co
 		// secret — de trong la hop le, khong phai thieu cau hinh.
-		ClientSecret: l.opt("ADAPTER_CLIENT_SECRET", ""),
-		RedirectURI:  l.req("ADAPTER_REDIRECT_URI"),
-		LoginBaseURL: l.opt("ADAPTER_LOGIN_BASE_URL", "http://127.0.0.1:9000"),
-		TcgSecret:    l.req("TCG_SECRET"),
-		SecretEncKey: l.req("ADAPTER_SECRET_ENC_KEY"),
-		TicketTTL:    l.optDur("ADAPTER_TICKET_TTL", 60*time.Second),
-		PollInterval: l.optDur("ADAPTER_POLL_INTERVAL", 10*time.Second),
+		ClientSecret:    l.opt("ADAPTER_CLIENT_SECRET", ""),
+		RedirectURI:     l.req("ADAPTER_REDIRECT_URI"),
+		LoginBaseURL:    l.opt("ADAPTER_LOGIN_BASE_URL", "http://127.0.0.1:9000"),
+		TcgSecret:       l.req("TCG_SECRET"),
+		SecretEncKey:    l.req("ADAPTER_SECRET_ENC_KEY"),
+		ConsoleBaseURL:  l.opt("ADAPTER_CONSOLE_BASE_URL", "http://127.0.0.1:9999"),
+		ConsoleUser:     l.req("ADAPTER_CONSOLE_USER"),
+		ConsolePassword: l.req("ADAPTER_CONSOLE_PASSWORD"),
+		ConsolePayMode:  l.opt("ADAPTER_CONSOLE_PAY_MODE", "manual"),
+		GrantInterval:   l.optDur("ADAPTER_GRANT_INTERVAL", 15*time.Second),
+		TicketTTL:       l.optDur("ADAPTER_TICKET_TTL", 60*time.Second),
+		PollInterval:    l.optDur("ADAPTER_POLL_INTERVAL", 10*time.Second),
 	}
 	return c, l.missing.Err()
 }

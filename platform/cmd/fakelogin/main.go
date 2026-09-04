@@ -64,7 +64,11 @@ type state struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":9000", "dia chi lang nghe")
+	addr := flag.String("addr", ":9000", "dia chi lang nghe (login server)")
+	consoleAddr := flag.String("console-addr", "", "neu dat, mo them mot console gia o dia chi nay")
+	consoleUser := flag.String("console-user", "gm", "tai khoan console gia")
+	consolePass := flag.String("console-pass", "gm", "mat khau console gia")
+	failFirst := flag.Int("fail-first", 0, "so lan dau tien /gm/pay/manual co y tra loi (de thu co che thu lai)")
 	secret := flag.String("secret", "", "tcg.secret bat buoc khi dang ky")
 	srvSpec := flag.String("servers", "s1:8001:0,s2:8002:0", "danh sach code:wsPort:online")
 	flag.Parse()
@@ -178,9 +182,84 @@ func main() {
 		ok(w, n)
 	})
 
+	if *consoleAddr != "" {
+		go serveFakeConsole(*consoleAddr, *consoleUser, *consolePass, *failFirst)
+	}
+
 	log.Printf("fake login server tren %s, %d server", *addr, len(st.servers))
 	if err := http.ListenAndServe(*addr, mux); err != nil {
 		log.Print(err)
 		os.Exit(1)
+	}
+}
+
+// consoleState ghi lai nhung gi da duoc phat, de test doi chieu.
+type consoleState struct {
+	mu        sync.Mutex
+	token     string
+	delivered []map[string]any
+	failLeft  int
+	// seen chong phat trung theo platformOrderId, giong mot console that nen lam.
+	seen map[string]bool
+}
+
+// serveFakeConsole mo mot console gia noi dung giao thuc that:
+// POST /staff/login -> token, roi POST /gm/pay/manual voi header Login-Token.
+func serveFakeConsole(addr, user, pass string, failFirst int) {
+	cs := &consoleState{token: "console-token-abc", failLeft: failFirst, seen: map[string]bool{}}
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprint(w, "<html><body>fake console</body></html>")
+	})
+
+	mux.HandleFunc("/staff/login", func(w http.ResponseWriter, r *http.Request) {
+		var in struct{ Username, Password, Secret string }
+		_ = json.NewDecoder(r.Body).Decode(&in)
+		if in.Username != user || in.Password != pass {
+			fail(w, 1, "tai khoan hoac mat khau khong dung")
+			return
+		}
+		ok(w, cs.token)
+	})
+
+	mux.HandleFunc("/gm/pay/manual", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Login-Token") != cs.token {
+			fail(w, 1, "请先登录")
+			return
+		}
+		var rec map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&rec); err != nil {
+			fail(w, 1, "body khong doc duoc")
+			return
+		}
+		cs.mu.Lock()
+		defer cs.mu.Unlock()
+		if cs.failLeft > 0 {
+			cs.failLeft--
+			fail(w, 500, "console gia co y that bai de thu co che thu lai")
+			return
+		}
+		orderID, _ := rec["platformOrderId"].(string)
+		if cs.seen[orderID] {
+			// Console that chong trung theo ma don; ta mo phong dung nhu vay.
+			ok(w, nil)
+			return
+		}
+		cs.seen[orderID] = true
+		cs.delivered = append(cs.delivered, rec)
+		ok(w, nil)
+	})
+
+	// Chi co o ban gia: doc lai nhung gi da phat de test doi chieu.
+	mux.HandleFunc("/_test/delivered", func(w http.ResponseWriter, r *http.Request) {
+		cs.mu.Lock()
+		defer cs.mu.Unlock()
+		ok(w, cs.delivered)
+	})
+
+	log.Printf("fake console tren %s", addr)
+	if err := http.ListenAndServe(addr, mux); err != nil {
+		log.Print(err)
 	}
 }

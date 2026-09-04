@@ -20,9 +20,12 @@ import (
 
 	"github.com/rickymta/op-h5/platform/internal/capacity"
 	"github.com/rickymta/op-h5/platform/internal/config"
+	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/gameacct"
+	"github.com/rickymta/op-h5/platform/internal/grants"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/store"
+	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
 // loginSource bien LoginClient thanh nguon so lieu tai cho capacity.Tracker.
@@ -71,9 +74,19 @@ func main() {
 	}
 	tracker := capacity.NewTracker(loginSource{loginClient}, db, cfg.GameCode, cfg.TicketTTL, log)
 
+	consoleClient := console.New(cfg.ConsoleBaseURL, cfg.ConsoleUser, cfg.ConsolePassword, cfg.TcgSecret)
+	worker := &grants.Worker{
+		DB: db, Console: consoleClient, GameCode: cfg.GameCode, Log: log,
+		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "id"),
+		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "web"),
+		CurrencyCode: envOr("ADAPTER_CURRENCY_CODE", "VND"),
+		Mode:         cfg.ConsolePayMode,
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go tracker.Run(ctx, cfg.PollInterval)
+	go worker.Run(ctx, cfg.GrantInterval)
 
 	srv := &adapterServer{
 		cfg:     cfg,
@@ -81,6 +94,9 @@ func main() {
 		mapper:  mapper,
 		tracker: tracker,
 		login:   loginClient,
+		wallet:  &wallet.Service{DB: db},
+		console: consoleClient,
+		worker:  worker,
 		db:      db,
 		log:     log,
 		// Host cong khai dien vao URL WebSocket tra cho client: login server chi biet
@@ -95,6 +111,8 @@ func main() {
 	mux.HandleFunc("GET /auth/logout", srv.logout)
 	mux.HandleFunc("GET /api/servers", srv.listServers)
 	mux.HandleFunc("POST /api/session", srv.createSession)
+	mux.HandleFunc("GET /api/packages", srv.listPackages)
+	mux.HandleFunc("POST /api/convert", srv.convert)
 	mux.HandleFunc("GET /healthz", srv.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

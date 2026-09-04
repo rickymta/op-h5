@@ -5,14 +5,19 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/capacity"
 	"github.com/rickymta/op-h5/platform/internal/config"
+	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/gameacct"
+	"github.com/rickymta/op-h5/platform/internal/grants"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
+	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
 type adapterServer struct {
@@ -21,6 +26,9 @@ type adapterServer struct {
 	mapper     *gameacct.Mapper
 	tracker    *capacity.Tracker
 	login      *gameacct.LoginClient
+	wallet     *wallet.Service
+	console    *console.Client
+	worker     *grants.Worker
 	db         *sql.DB
 	log        *slog.Logger
 	publicHost string
@@ -318,4 +326,125 @@ func (s *adapterServer) health(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+// ---------------------------------------------------------------- quy doi Xu -> vat pham
+
+type packageView struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	PriceXu   int64  `json:"price_xu"`
+	ItemName  string `json:"item_name"`
+	ItemCount int    `json:"item_count"`
+}
+
+// listPackages tra ve bang gia cua game nay.
+func (s *adapterServer) listPackages(w http.ResponseWriter, r *http.Request) {
+	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
+	if err != nil {
+		s.log.Error("doc bang gia", "err", err)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được bảng giá.")
+		return
+	}
+	out := make([]packageView, 0, len(pkgs))
+	for _, p := range pkgs {
+		out = append(out, packageView{
+			ID: p.ID, Name: p.Name, PriceXu: p.PriceXu,
+			ItemName: p.ItemName, ItemCount: p.ItemCount,
+		})
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"packages": out})
+}
+
+type convertRequest struct {
+	PackageID string `json:"package_id"`
+	SrvCode   string `json:"srv_code"`
+	RoleID    string `json:"role_id"`
+	// IdemKey cho phep client thu lai an toan sau khi mat mang: goi lai voi cung
+	// khoa se tra ve dung giao dich cu chu khong tru them lan nua.
+	IdemKey string `json:"idempotency_key"`
+}
+
+// convert tru Xu trong vi ID va xep mot lenh phat hang.
+//
+// KHONG nhan so tien tu client: gia lay tu bang game_packages. Ham nay chi ghi lenh,
+// viec goi console do tien trinh nen lam — mat ket noi giua chung chi lam cham chu
+// khong lam mat tien.
+func (s *adapterServer) convert(w http.ResponseWriter, r *http.Request) {
+	uid, ok := s.currentUser(r)
+	if !ok {
+		httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Chưa đăng nhập.")
+		return
+	}
+	var in convertRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Dữ liệu không đọc được.")
+		return
+	}
+	if in.PackageID == "" || in.SrvCode == "" {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Thiếu gói hoặc máy chủ.")
+		return
+	}
+	if len(in.IdemKey) > 100 {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "idempotency_key quá dài.")
+		return
+	}
+
+	ctx := r.Context()
+	// Can accountUid de console biet phat cho tai khoan nao trong game.
+	id, _, err := s.mapper.Ensure(ctx, uid)
+	if err != nil {
+		s.log.Error("tra cuu tai khoan game", "err", err, "user", uid)
+		httpx.Error(w, http.StatusBadGateway, "game_unavailable", "Máy chủ game đang bận, thử lại sau.")
+		return
+	}
+	if !id.AccountUID.Valid || id.AccountUID.String == "" {
+		httpx.Error(w, http.StatusConflict, "no_game_account",
+			"Hãy vào game một lần trước khi quy đổi.")
+		return
+	}
+
+	// Khoa mac dinh gan voi (user, goi, server, role) trong cung mot phut, de nguoi
+	// choi bam hai lan vi sot ruot khong bi tru hai lan.
+	idem := in.IdemKey
+	if idem == "" {
+		idem = fmt.Sprintf("conv-%d-%s-%s-%s-%d", uid, s.cfg.GameCode, in.SrvCode,
+			in.PackageID, time.Now().Unix()/60)
+	} else {
+		idem = fmt.Sprintf("conv-%d-%s", uid, idem)
+	}
+
+	txn, err := s.wallet.Convert(ctx, wallet.ConvertInput{
+		UserID: uid, GameCode: s.cfg.GameCode, SrvCode: in.SrvCode,
+		RoleID: in.RoleID, AccountUID: id.AccountUID.String,
+		PackageID: in.PackageID, IdemKey: idem,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, wallet.ErrInsufficient):
+			httpx.Error(w, http.StatusPaymentRequired, "insufficient", "Số dư không đủ.")
+		case errors.Is(err, wallet.ErrPackageUnknown):
+			httpx.Error(w, http.StatusNotFound, "unknown_package", "Gói quy đổi không tồn tại.")
+		default:
+			s.log.Error("quy doi", "err", err, "user", uid)
+			httpx.Error(w, http.StatusInternalServerError, "server_error", "Không thực hiện được.")
+		}
+		return
+	}
+
+	// Chay ngay mot vong phat hang de nguoi choi khong phai doi het chu ky. That bai
+	// o day khong sao: lenh van nam trong bang va se duoc thu lai.
+	go func() {
+		bg, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if _, err := s.worker.Tick(bg); err != nil {
+			s.log.Warn("phat hang ngay sau quy doi that bai", "err", err)
+		}
+	}()
+
+	bal, _ := s.wallet.Balance(ctx, uid)
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"txn": txn, "balance": bal,
+		"message": "Đã trừ Xu. Vật phẩm sẽ vào hòm thư trong ít phút.",
+	})
 }

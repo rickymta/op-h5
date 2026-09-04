@@ -133,14 +133,53 @@ func (s *Service) Topup(ctx context.Context, userID, amount int64, idemKey, refe
 	return txnID, nil
 }
 
-// Convert tru vi de doi sang tien trong game va tao mot lenh phat hang o trang thai
-// 'pending'. Viec goi sang game do tien trinh khac lam, nen mat ket noi giua chung
-// khong lam mat tien: lenh van con do va se duoc thu lai.
-func (s *Service) Convert(ctx context.Context, userID, amount int64, gameCode, srvCode, roleID, packageID, idemKey string) (txnID int64, err error) {
-	if amount <= 0 {
-		return 0, ErrBadAmount
+// Package mo ta mot goi quy doi, doc tu bang game_packages.
+type Package struct {
+	ID        string
+	Name      string
+	PriceXu   int64
+	ItemTid   int
+	ItemCount int
+	ItemName  string
+}
+
+// ErrPackageUnknown bao goi khong ton tai hoac da bi an.
+var ErrPackageUnknown = errors.New("gói quy đổi không tồn tại")
+
+// lookupPackage doc goi trong cung giao dich dang mo.
+func lookupPackage(ctx context.Context, tx *sql.Tx, gameCode, packageID string) (Package, error) {
+	var p Package
+	p.ID = packageID
+	err := tx.QueryRowContext(ctx, `
+		SELECT name, price_xu, item_tid, item_count, item_name
+		  FROM game_packages
+		 WHERE game_code = ? AND package_id = ? AND status = 'active'`,
+		gameCode, packageID).Scan(&p.Name, &p.PriceXu, &p.ItemTid, &p.ItemCount, &p.ItemName)
+	if errors.Is(err, sql.ErrNoRows) {
+		return p, ErrPackageUnknown
 	}
-	if id, ok, err := s.existingTxn(ctx, idemKey); err != nil {
+	return p, err
+}
+
+// ConvertInput la tham so cua mot lenh quy doi.
+type ConvertInput struct {
+	UserID     int64
+	GameCode   string
+	SrvCode    string
+	RoleID     string
+	AccountUID string
+	PackageID  string
+	IdemKey    string
+}
+
+// Convert tru vi de doi sang vat pham trong game va tao mot lenh phat hang o trang
+// thai 'pending'. Viec goi sang console do tien trinh khac lam (package grants), nen
+// mat ket noi giua chung khong lam mat tien: lenh van con do va se duoc thu lai.
+//
+// SO TIEN LAY TU BANG game_packages, khong nhan tu ben goi. Nhan so tien tu client
+// nghia la ai cung mua duoc goi dat nhat voi gia mot dong.
+func (s *Service) Convert(ctx context.Context, in ConvertInput) (txnID int64, err error) {
+	if id, ok, err := s.existingTxn(ctx, in.IdemKey); err != nil {
 		return 0, err
 	} else if ok {
 		return id, nil
@@ -152,7 +191,15 @@ func (s *Service) Convert(ctx context.Context, userID, amount int64, gameCode, s
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	userAcc, err := userAccount(ctx, tx, userID)
+	pkg, err := lookupPackage(ctx, tx, in.GameCode, in.PackageID)
+	if err != nil {
+		return 0, err
+	}
+	if pkg.PriceXu <= 0 {
+		return 0, ErrBadAmount
+	}
+
+	userAcc, err := userAccount(ctx, tx, in.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -164,7 +211,7 @@ func (s *Service) Convert(ctx context.Context, userID, amount int64, gameCode, s
 		Scan(&bal); err != nil {
 		return 0, err
 	}
-	if bal.Int64 < amount {
+	if bal.Int64 < pkg.PriceXu {
 		return 0, ErrInsufficient
 	}
 	revenue, err := systemAccount(ctx, tx, "game_revenue")
@@ -174,10 +221,10 @@ func (s *Service) Convert(ctx context.Context, userID, amount int64, gameCode, s
 
 	res, err := tx.ExecContext(ctx,
 		`INSERT INTO ledger_txns (kind, idempotency_key, memo) VALUES ('convert',?,?)`,
-		idemKey, fmt.Sprintf("%s/%s %s", gameCode, srvCode, packageID))
+		in.IdemKey, fmt.Sprintf("%s/%s %s", in.GameCode, in.SrvCode, pkg.Name))
 	if err != nil {
 		if isDuplicateKey(err) {
-			if id, ok, e := s.existingTxn(ctx, idemKey); e == nil && ok {
+			if id, ok, e := s.existingTxn(ctx, in.IdemKey); e == nil && ok {
 				return id, nil
 			}
 		}
@@ -186,19 +233,45 @@ func (s *Service) Convert(ctx context.Context, userID, amount int64, gameCode, s
 	if txnID, err = res.LastInsertId(); err != nil {
 		return 0, err
 	}
-	if err = insertEntries(ctx, tx, txnID, [][2]int64{{userAcc, -amount}, {revenue, amount}}); err != nil {
+	if err = insertEntries(ctx, tx, txnID, [][2]int64{{userAcc, -pkg.PriceXu}, {revenue, pkg.PriceXu}}); err != nil {
 		return 0, err
 	}
 	if _, err = tx.ExecContext(ctx, `
-		INSERT INTO game_grants (txn_id, game_code, srv_code, user_id, role_id, package_id, amount_xu)
-		VALUES (?,?,?,?,?,?,?)`,
-		txnID, gameCode, srvCode, userID, nullIfEmpty(roleID), packageID, amount); err != nil {
+		INSERT INTO game_grants
+		  (txn_id, game_code, srv_code, user_id, account_uid, role_id, package_id,
+		   item_tid, item_count, item_name, amount_xu)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+		txnID, in.GameCode, in.SrvCode, in.UserID, nullIfEmpty(in.AccountUID),
+		nullIfEmpty(in.RoleID), in.PackageID,
+		pkg.ItemTid, pkg.ItemCount, pkg.ItemName, pkg.PriceXu); err != nil {
 		return 0, err
 	}
 	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
 	return txnID, nil
+}
+
+// Packages liet ke cac goi dang mo cua mot game, de client hien bang gia.
+func (s *Service) Packages(ctx context.Context, gameCode string) ([]Package, error) {
+	rows, err := s.DB.QueryContext(ctx, `
+		SELECT package_id, name, price_xu, item_tid, item_count, item_name
+		  FROM game_packages WHERE game_code = ? AND status = 'active'
+		 ORDER BY sort_order, price_xu`, gameCode)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var out []Package
+	for rows.Next() {
+		var p Package
+		if err := rows.Scan(&p.ID, &p.Name, &p.PriceXu, &p.ItemTid, &p.ItemCount, &p.ItemName); err != nil {
+			return nil, err
+		}
+		out = append(out, p)
+	}
+	return out, rows.Err()
 }
 
 func insertEntries(ctx context.Context, tx *sql.Tx, txnID int64, pairs [][2]int64) error {

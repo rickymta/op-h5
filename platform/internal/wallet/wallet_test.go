@@ -3,6 +3,7 @@ package wallet
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"os"
 	"strings"
 	"sync"
@@ -54,6 +55,18 @@ func newUser(t *testing.T, db *sql.DB) int64 {
 		t.Fatalf("tao vi: %v", err)
 	}
 	return id
+}
+
+// seedPackage tao mot goi quy doi cho test.
+func seedPackage(t *testing.T, db *sql.DB, gameCode, pkgID string, price int64) {
+	t.Helper()
+	if _, err := db.Exec(`
+		INSERT INTO game_packages (game_code, package_id, name, price_xu, item_tid, item_count, item_name)
+		VALUES (?,?,?,?,?,?,?)
+		ON DUPLICATE KEY UPDATE price_xu = VALUES(price_xu), status = 'active'`,
+		gameCode, pkgID, "Goi "+pkgID, price, 1001, 1, "Kim nguyen bao"); err != nil {
+		t.Fatalf("tao goi: %v", err)
+	}
 }
 
 func TestTopupThenBalance(t *testing.T) {
@@ -108,7 +121,11 @@ func TestConvertDebitsAndCreatesGrant(t *testing.T) {
 	if _, err := s.Topup(ctx, uid, 100_000, "nap-"+t.Name(), "", ""); err != nil {
 		t.Fatalf("Topup: %v", err)
 	}
-	txn, err := s.Convert(ctx, uid, 30_000, "haitac", "s1", "role-9", "goi-30k", "doi-"+t.Name())
+	seedPackage(t, db, "haitac", "goi-30k", 30_000)
+	txn, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", RoleID: "role-9",
+		AccountUID: "uid-1", PackageID: "goi-30k", IdemKey: "doi-" + t.Name(),
+	})
 	if err != nil {
 		t.Fatalf("Convert: %v", err)
 	}
@@ -136,7 +153,11 @@ func TestConvertRejectsInsufficientBalance(t *testing.T) {
 	if _, err := s.Topup(ctx, uid, 10_000, "nap-"+t.Name(), "", ""); err != nil {
 		t.Fatalf("Topup: %v", err)
 	}
-	if _, err := s.Convert(ctx, uid, 99_999, "haitac", "s1", "", "goi", "doi-"+t.Name()); err == nil {
+	seedPackage(t, db, "haitac", "goi-lon", 99_999)
+	if _, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+		PackageID: "goi-lon", IdemKey: "doi-" + t.Name(),
+	}); err == nil {
 		t.Fatal("tieu qua so du ma van cho qua")
 	}
 	bal, _ := s.Balance(ctx, uid)
@@ -156,6 +177,7 @@ func TestConcurrentConvertDoesNotOverdraw(t *testing.T) {
 	if _, err := s.Topup(ctx, uid, 100_000, "nap-"+t.Name(), "", ""); err != nil {
 		t.Fatalf("Topup: %v", err)
 	}
+	seedPackage(t, db, "haitac", "goi-20k", 20_000)
 
 	const n = 8
 	var wg sync.WaitGroup
@@ -165,8 +187,11 @@ func TestConcurrentConvertDoesNotOverdraw(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 			// Moi lan doi 20000; chi 5 lan duoc phep thanh cong.
-			if _, err := s.Convert(ctx, uid, 20_000, "haitac", "s1", "", "goi",
-				"song-song-"+t.Name()+"-"+string(rune('a'+i))); err == nil {
+			if _, err := s.Convert(ctx, ConvertInput{
+				UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+				PackageID: "goi-20k",
+				IdemKey:   "song-song-" + t.Name() + "-" + string(rune('a'+i)),
+			}); err == nil {
 				okCount <- 1
 			}
 		}(i)
@@ -201,8 +226,12 @@ func TestRejectsNonPositiveAmount(t *testing.T) {
 	if _, err := s.Topup(ctx, uid, -5, "k2-"+t.Name(), "", ""); err == nil {
 		t.Error("nap so am phai bi tu choi")
 	}
-	if _, err := s.Convert(ctx, uid, -5, "haitac", "s1", "", "g", "k3-"+t.Name()); err == nil {
-		t.Error("quy doi so am phai bi tu choi")
+	seedPackage(t, db, "haitac", "goi-am", -5)
+	if _, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+		PackageID: "goi-am", IdemKey: "k3-" + t.Name(),
+	}); err == nil {
+		t.Error("goi co gia am phai bi tu choi")
 	}
 }
 
@@ -216,7 +245,11 @@ func TestLedgerStaysBalanced(t *testing.T) {
 	if _, err := s.Topup(ctx, uid, 80_000, "nap-"+t.Name(), "", ""); err != nil {
 		t.Fatalf("Topup: %v", err)
 	}
-	if _, err := s.Convert(ctx, uid, 25_000, "haitac", "s1", "", "goi", "doi-"+t.Name()); err != nil {
+	seedPackage(t, db, "haitac", "goi-25k", 25_000)
+	if _, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+		PackageID: "goi-25k", IdemKey: "doi-" + t.Name(),
+	}); err != nil {
 		t.Fatalf("Convert: %v", err)
 	}
 	var unbalanced int
@@ -228,5 +261,59 @@ func TestLedgerStaysBalanced(t *testing.T) {
 	}
 	if unbalanced != 0 {
 		t.Errorf("%d giao dich khong can bang", unbalanced)
+	}
+}
+
+func TestConvertRejectsUnknownPackage(t *testing.T) {
+	db := testDB(t)
+	s := &Service{DB: db}
+	ctx := context.Background()
+	uid := newUser(t, db)
+
+	if _, err := s.Topup(ctx, uid, 100_000, "nap-"+t.Name(), "", ""); err != nil {
+		t.Fatalf("Topup: %v", err)
+	}
+	_, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+		PackageID: "goi-khong-ton-tai", IdemKey: "doi-" + t.Name(),
+	})
+	if !errors.Is(err, ErrPackageUnknown) {
+		t.Errorf("goi la phai bi tu choi voi ErrPackageUnknown, duoc %v", err)
+	}
+	if bal, _ := s.Balance(ctx, uid); bal != 100_000 {
+		t.Errorf("so du khong duoc doi khi goi khong hop le: %d", bal)
+	}
+}
+
+// Diem then chot ve bao mat: gia LAY TU DB. Ben goi khong the ap gia cua rieng minh.
+func TestConvertPriceComesFromDatabase(t *testing.T) {
+	db := testDB(t)
+	s := &Service{DB: db}
+	ctx := context.Background()
+	uid := newUser(t, db)
+
+	if _, err := s.Topup(ctx, uid, 100_000, "nap-"+t.Name(), "", ""); err != nil {
+		t.Fatalf("Topup: %v", err)
+	}
+	seedPackage(t, db, "haitac", "goi-dat", 90_000)
+	txn, err := s.Convert(ctx, ConvertInput{
+		UserID: uid, GameCode: "haitac", SrvCode: "s1", AccountUID: "uid-1",
+		PackageID: "goi-dat", IdemKey: "doi-" + t.Name(),
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if bal, _ := s.Balance(ctx, uid); bal != 10_000 {
+		t.Errorf("phai tru dung 90000 theo bang gia, so du con %d", bal)
+	}
+	var amount int64
+	var tid, count int
+	if err := db.QueryRow(
+		`SELECT amount_xu, item_tid, item_count FROM game_grants WHERE txn_id = ?`, txn).
+		Scan(&amount, &tid, &count); err != nil {
+		t.Fatalf("doc game_grants: %v", err)
+	}
+	if amount != 90_000 || tid != 1001 || count != 1 {
+		t.Errorf("lenh phat hang = (%d, tid=%d, count=%d), muon (90000, 1001, 1)", amount, tid, count)
 	}
 }
