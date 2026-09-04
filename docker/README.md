@@ -93,7 +93,7 @@ Toàn bộ chuỗi mất **5–8 phút** trên 4 CPU (game một mình ~50 s par
 docker compose ps                                          # tất cả "healthy"
 docker compose logs game | grep -E '找不到excel|找不到sheet|加载错误'   # rỗng = Excel đủ
 docker compose logs group | grep -iE 'OutOfMemory|GC overhead'         # rỗng = heap đủ
-curl -s http://127.0.0.1:9999/status; echo
+curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get
 curl -sI http://127.0.0.1/play-game | head -1              # 200 = nginx + php ok
 docker stats --no-stream                                   # đo RAM thật, chỉnh .env
 ```

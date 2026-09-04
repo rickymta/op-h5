@@ -5,7 +5,9 @@
 # build tu thu muc goc repo:
 #   docker build -f docker/php/Dockerfile -t ghcr.io/rickymta/op-h5-php:latest .
 FROM php:7.4-fpm-alpine
-RUN docker-php-ext-install -j2 pdo_mysql mysqli \
+# bash: web-entrypoint.sh dung #!/bin/bash; image alpine khong co san bash.
+RUN apk add --no-cache bash \
+ && docker-php-ext-install -j2 pdo_mysql mysqli \
  && rm -rf /tmp/* /var/cache/apk/* \
  && mkdir -p /var/lib/php/sessions && chown www-data:www-data /var/lib/php/sessions
 COPY website/game/ /www/wwwroot/game/

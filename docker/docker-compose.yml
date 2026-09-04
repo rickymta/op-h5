@@ -124,7 +124,7 @@ services:
       rabbitmq: { condition: service_healthy }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9999'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:9999/"]
 
   world:
     <<: *java
@@ -135,7 +135,7 @@ services:
     depends_on: { console: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/10086'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:10086/"]
 
   meta:
     <<: *java
@@ -146,7 +146,7 @@ services:
     depends_on: { world: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/12345'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:12345/"]
 
   statistic:
     <<: *java
@@ -157,7 +157,7 @@ services:
     depends_on: { meta: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/7788'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:7788/"]
 
   pay:
     <<: *java
@@ -168,7 +168,7 @@ services:
     depends_on: { statistic: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/10010'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:10010/"]
 
   group:
     <<: *java
@@ -180,7 +180,7 @@ services:
     depends_on: { pay: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/30001'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:30001/"]
 
   game:
     <<: *java
@@ -193,6 +193,7 @@ services:
     healthcheck:
       <<: *java-health
       start_period: 150s
+      # 8001 la port WebSocket (Netty), khong tra loi HTTP -> van dung TCP connect.
       test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8001'"]
   # Them game server thu 2: copy khoi `game`, doi ten `game2`, --sc=s2, port health theo
   # wsPort cua s2 trong tcg.srv_game, va depends_on: { game: { condition: service_healthy } }.
@@ -207,7 +208,7 @@ services:
     depends_on: { game: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9000'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:9000/"]
 
   cross:
     <<: *java
@@ -218,13 +219,17 @@ services:
     depends_on: { login: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/20001'"]
+      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:20001/"]
 
   # ------------------------------------------------------------------ web (client + cong nap + GM)
   php:
-    build: ./php
+    # Dockerfile COPY tu goc repo (website/game, docker/...) -> context phai la thu muc cha.
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
     network_mode: host          # php-fpm nghe 127.0.0.1:9001 (9000 da bi login server dung)
     restart: unless-stopped
+    env_file: .env              # web-entrypoint can PUBLIC_HOST + cac secret PHP
     environment: { TZ: Asia/Ho_Chi_Minh }
     volumes:
       - ${WEBSITE_DIR:-../website}/game:/www/wwwroot/game

@@ -70,7 +70,7 @@ watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, t�
 **9 `[MỚI]` Kiểm tra:**
 ```bash
 docker compose -f docker-compose.image.yml logs game | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory'; echo "(rong = tot)"
-curl -s http://127.0.0.1:9999/status; echo; curl -sI http://127.0.0.1/play-game | head -1
+curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get; curl -sI http://127.0.0.1/play-game | head -1
 docker stats --no-stream
 ```
 Từ máy khác: `http://PUBLIC_HOST/play-game` → đăng ký → vào game. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
@@ -233,7 +233,7 @@ $C logs console   | grep -E 'Started|ERROR' | tail -3
 $C logs game      | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory' ; echo "(rỗng = Excel đủ, heap đủ)"
 $C logs group     | grep -iE 'OutOfMemory|GC overhead' ; echo "(rỗng = OK)"
 $C logs game      | grep -m1 '游戏启动配置'              # in toàn bộ cấu hình đã resolve (wsPort, mongo, cross)
-curl -s http://127.0.0.1:9999/status; echo
+curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get
 curl -sI http://127.0.0.1/play-game | head -1              # HTTP/1.1 200
 docker stats --no-stream                                   # RAM thật từng container
 ```

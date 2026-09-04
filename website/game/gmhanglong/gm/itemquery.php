@@ -5,7 +5,7 @@ if($_POST){
 	if($_POST['keyword']=='' && $_POST['keyword1']==''){
 	$return=array(array('key'=>0,'val'=>'请选择'));
 	echo(json_encode($return));
-	break;
+	exit;
 	}	
 	if($key=trim($_POST['keyword1'])){
 	$return=array(array('key'=>0,'val'=>'请选择'));
@@ -42,7 +42,7 @@ if($_POST){
 	}
     fclose($file);
 	echo(json_encode($return));	
-	break;
+	exit;
 	//邮件
 	}elseif($key=trim($_POST['keyword'])){		
 	$return=array(array('key'=>0,'val'=>'请选择'));

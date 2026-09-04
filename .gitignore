@@ -29,6 +29,8 @@ website/game/res/
 website/game/sound/
 website/game/spine/
 website/game/home.zip
+# marker cua web-entrypoint (host cong khai da ap dung)
+website/game/.public-host
 
 # ---- IDE / OS
 .idea/
