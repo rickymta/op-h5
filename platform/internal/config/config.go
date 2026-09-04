@@ -153,7 +153,9 @@ func LoadAdapter() (Adapter, error) {
 		},
 		Issuer:       l.req("ADAPTER_ISSUER"),
 		ClientID:     l.req("ADAPTER_CLIENT_ID"),
-		ClientSecret: l.req("ADAPTER_CLIENT_SECRET"),
+		// Client cong khai (chi PKCE, secret_hash = NULL trong oauth_clients) khong co
+		// secret — de trong la hop le, khong phai thieu cau hinh.
+		ClientSecret: l.opt("ADAPTER_CLIENT_SECRET", ""),
 		RedirectURI:  l.req("ADAPTER_REDIRECT_URI"),
 		LoginBaseURL: l.opt("ADAPTER_LOGIN_BASE_URL", "http://127.0.0.1:9000"),
 		TcgSecret:    l.req("TCG_SECRET"),

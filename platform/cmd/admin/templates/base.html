@@ -1,0 +1,81 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#EEF1F4;--surface:#fff;--surface2:#E4E9ED;--text:#0D1620;--muted:#4A5A68;
+    --line:#C9D3DA;--brass:#8A6317;--sea:#1F6A63;--amber:#94600F;--signal:#9E2F24;
+    --sea-bg:#DCEAE8;--amber-bg:#F5E7CE;--signal-bg:#F4DEDA;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0D1620;--surface:#152130;--surface2:#1D2B3B;--text:#DFE7EC;--muted:#A3B3C0;
+          --line:#2A3B4D;--brass:#D9A945;--sea:#4FB3A6;--amber:#E0A63F;--signal:#E0685A;
+          --sea-bg:#12312E;--amber-bg:#33280F;--signal-bg:#3A1E1A;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:20px;padding:14px 24px;
+         border-bottom:1px solid var(--line);background:var(--surface)}
+  header h1{margin:0;font-size:16px;letter-spacing:-.01em}
+  header nav{display:flex;gap:16px;margin-left:auto;align-items:center;font-size:14px}
+  header a{color:var(--brass);text-decoration:none}
+  header a:hover{text-decoration:underline}
+  header .who{color:var(--muted);font-family:var(--mono);font-size:12px}
+  main{max-width:1180px;margin:0 auto;padding:24px}
+  h2{font-size:18px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 16px;font-family:var(--mono)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
+        padding:18px 20px;margin-bottom:20px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+           color:var(--muted);font-weight:500}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;
+        padding:2px 8px;border-radius:2px;white-space:nowrap}
+  .pill.ok{background:var(--sea-bg);color:var(--sea)}
+  .pill.warn{background:var(--amber-bg);color:var(--amber)}
+  .pill.crit{background:var(--signal-bg);color:var(--signal)}
+  .pill.unknown{background:var(--surface2);color:var(--muted)}
+  .bar{height:5px;background:var(--surface2);border-radius:2px;overflow:hidden;min-width:90px}
+  .bar i{display:block;height:100%;background:var(--sea)}
+  .bar i.warn{background:var(--amber)} .bar i.crit{background:var(--signal)}
+  input[type=number]{width:78px;padding:4px 6px;font-family:var(--mono);font-size:13px;
+        color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px}
+  select{padding:4px 6px;font-size:13px;color:var(--text);background:var(--bg);
+         border:1px solid var(--line);border-radius:3px}
+  button{padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--bg);
+         background:var(--brass);border:0;border-radius:3px}
+  button:hover{filter:brightness(1.08)}
+  button.ghost{background:transparent;color:var(--brass);border:1px solid var(--line)}
+  .err{background:var(--signal-bg);color:var(--signal);border-left:3px solid var(--signal);
+       padding:10px 12px;font-size:13px;margin:0 0 14px}
+  .warnbox{background:var(--amber-bg);color:var(--amber);border-left:3px solid var(--amber);
+       padding:10px 12px;font-size:13px;margin:0 0 14px}
+  .muted{color:var(--muted)}
+  #toast{position:fixed;right:20px;bottom:20px;background:var(--surface);border:1px solid var(--line);
+         border-left:3px solid var(--sea);padding:10px 14px;font-size:13px;border-radius:3px;
+         opacity:0;transition:opacity .2s;pointer-events:none}
+  #toast.show{opacity:1}
+  #toast.bad{border-left-color:var(--signal)}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+{{end}}
+
+{{define "nav"}}
+<header>
+  <h1>Quản trị nền tảng</h1>
+  <nav>
+    <a href="/">Đội máy chủ</a>
+    <a href="/nhat-ky">Nhật ký</a>
+    <span class="who">{{.Admin.Username}} · {{.Admin.Role}}</span>
+    <form method="POST" action="/dang-xuat" style="margin:0">
+      <button class="ghost" type="submit">Thoát</button>
+    </form>
+  </nav>
+</header>
+{{end}}

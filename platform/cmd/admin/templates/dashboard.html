@@ -1,0 +1,118 @@
+{{define "dashboard.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đội máy chủ</title></head><body>
+{{template "nav" .}}
+<main>
+  <h2>Đội máy chủ</h2>
+  <p class="sub">Ngưỡng ở đây chính là ngưỡng cổng giới hạn của Adapter đọc. Sửa xong có tác dụng ở nhịp đọc số liệu kế tiếp.</p>
+
+  {{if not .Games}}
+    <div class="card"><p class="muted">Chưa có game nào. Thêm một dòng vào bảng <code>games</code>
+      (code, name, adapter_url) rồi tải lại trang.</p></div>
+  {{end}}
+
+  {{range .Games}}
+  <div class="card">
+    <h2>{{.Name}} <span class="muted" style="font-size:13px">· {{.Code}}</span></h2>
+    {{if .Reachable}}
+      <p class="sub">Toàn game: {{.Online}} / {{.SoftTotal}} = {{.Utilization}}% ngưỡng mềm</p>
+    {{else}}
+      <p class="err">Không đọc được tải trực tiếp từ Adapter: {{.Error}}<br>
+        Cấu hình bên dưới vẫn sửa được, nhưng cột “đang chơi” chưa có số liệu.</p>
+    {{end}}
+
+    <table>
+      <thead><tr>
+        <th>Máy chủ</th><th>Máy vật lý</th><th>Dải</th><th>Đang chơi</th>
+        <th>Ngưỡng mềm</th><th>Biên tràn</th><th>Chặn ở</th><th>Trạng thái</th><th>Gợi ý</th><th></th>
+      </tr></thead>
+      <tbody>
+      {{$game := .Code}}
+      {{range .Servers}}
+        <tr data-game="{{$game}}" data-srv="{{.SrvCode}}">
+          <td><strong>{{.SrvCode}}</strong> <span class="muted">{{.Name}}</span></td>
+          <td class="num muted">{{.DeviceCode}}</td>
+          <td><span class="pill {{bandClass .Band}}">{{.Label}}</span></td>
+          <td class="num">
+            {{.Online}}
+            <div class="bar"><i class="{{bandClass .Band}}" style="width:{{if .HardLimit}}{{pct .Online .HardLimit}}{{else}}0{{end}}%"></i></div>
+          </td>
+          <td><input type="number" class="soft" value="{{.SoftLimit}}" min="0" max="100000"></td>
+          <td><input type="number" class="ovf" value="{{.OverflowPct}}" min="0" max="100">%</td>
+          <td class="num muted">{{.HardLimit}}</td>
+          <td><select class="status">
+            {{$s := .Status}}
+            <option value="running" {{if eq $s "running"}}selected{{end}}>đang chạy</option>
+            <option value="maintain" {{if eq $s "maintain"}}selected{{end}}>bảo trì</option>
+            <option value="closed" {{if eq $s "closed"}}selected{{end}}>đóng</option>
+            <option value="merged" {{if eq $s "merged"}}selected{{end}}>đã gộp</option>
+          </select></td>
+          <td><input type="checkbox" class="rec" {{if .Recommend}}checked{{end}}
+                     title="Nhận người chơi mới"></td>
+          <td><button class="save">Lưu</button></td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+
+    {{if .Devices}}
+    <p class="sub" style="margin-top:22px">Trần máy vật lý — tầng thứ hai: hai máy chủ đều còn chỗ nhưng cộng lại vượt sức máy thì vẫn chặn.</p>
+    <table>
+      <thead><tr><th>Máy</th><th>Tên</th><th>Đang chơi</th><th>Trần</th><th></th></tr></thead>
+      <tbody>
+      {{range .Devices}}
+        <tr data-game="{{$game}}" data-device="{{.DeviceCode}}">
+          <td class="num"><strong>{{.DeviceCode}}</strong></td>
+          <td class="muted">{{.Name}}</td>
+          <td class="num">{{.Online}}
+            <div class="bar"><i class="{{if .MaxOnline}}{{if gt (pct .Online .MaxOnline) 90}}crit{{else if gt (pct .Online .MaxOnline) 75}}warn{{end}}{{end}}"
+                 style="width:{{if .MaxOnline}}{{pct .Online .MaxOnline}}{{else}}0{{end}}%"></i></div>
+          </td>
+          <td><input type="number" class="maxonline" value="{{.MaxOnline}}" min="0"></td>
+          <td><button class="saveDevice">Lưu</button></td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{end}}
+  </div>
+  {{end}}
+</main>
+<div id="toast"></div>
+<script>
+function toast(msg, bad){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show' + (bad ? ' bad' : '');
+  setTimeout(function(){ t.className = ''; }, 2600);
+}
+async function send(url, body, btn){
+  btn.disabled = true;
+  try {
+    var r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'},
+                             body: JSON.stringify(body)});
+    var d = await r.json().catch(function(){ return {}; });
+    if (r.ok) toast('Đã lưu. Có tác dụng ở nhịp đọc số liệu kế tiếp.');
+    else toast(d.error_description || d.message || ('Lỗi HTTP ' + r.status), true);
+  } catch (e) { toast('Không gửi được: ' + e.message, true); }
+  btn.disabled = false;
+}
+document.querySelectorAll('button.save').forEach(function(b){
+  b.addEventListener('click', function(){
+    var tr = b.closest('tr');
+    send('/api/servers/' + tr.dataset.game + '/' + tr.dataset.srv, {
+      soft_limit:   parseInt(tr.querySelector('.soft').value, 10),
+      overflow_pct: parseInt(tr.querySelector('.ovf').value, 10),
+      recommend:    tr.querySelector('.rec').checked,
+      status:       tr.querySelector('.status').value
+    }, b);
+  });
+});
+document.querySelectorAll('button.saveDevice').forEach(function(b){
+  b.addEventListener('click', function(){
+    var tr = b.closest('tr');
+    send('/api/devices/' + tr.dataset.game + '/' + tr.dataset.device, {
+      max_online: parseInt(tr.querySelector('.maxonline').value, 10)
+    }, b);
+  });
+});
+</script>
+</body></html>{{end}}

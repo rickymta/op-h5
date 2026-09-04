@@ -1,0 +1,20 @@
+{{define "audit.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Nhật ký thao tác</title></head><body>
+{{template "nav" .}}
+<main>
+  <h2>Nhật ký thao tác</h2>
+  <p class="sub">200 mục gần nhất. Công cụ GM cũ chỉ được bảo vệ bằng một chuỗi tĩnh và không ghi lại ai làm gì.</p>
+  <div class="card">
+    {{if .Items}}
+    <table>
+      <thead><tr><th>Thời điểm</th><th>Người</th><th>Thao tác</th><th>Đối tượng</th><th>Chi tiết</th></tr></thead>
+      <tbody>
+      {{range .Items}}
+        <tr><td class="num">{{.At}}</td><td>{{.Who}}</td><td><code>{{.Action}}</code></td>
+            <td class="num">{{.Target}}</td><td class="muted">{{.Detail}}</td></tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}<p class="muted">Chưa có thao tác nào.</p>{{end}}
+  </div>
+</main></body></html>{{end}}

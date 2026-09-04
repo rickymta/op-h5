@@ -1,0 +1,20 @@
+{{define "login.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đăng nhập quản trị</title>
+<style>body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.box{width:100%;max-width:360px}label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+.f{margin-bottom:14px}.f input{width:100%;padding:9px 11px;font-size:15px;color:var(--text);
+background:var(--bg);border:1px solid var(--line);border-radius:3px}
+.box button{width:100%;padding:10px;margin-top:6px}</style>
+</head><body>
+<main class="box"><div class="card">
+  <h2>Quản trị nền tảng</h2>
+  <p class="sub">Tài khoản quản trị, không phải tài khoản người chơi.</p>
+  {{if .Error}}<p class="err">Tài khoản hoặc mật khẩu không đúng.</p>{{end}}
+  <form method="POST" action="/dang-nhap">
+    <div class="f"><label for="u">Tài khoản</label>
+      <input id="u" name="username" autocomplete="username" required autofocus></div>
+    <div class="f"><label for="p">Mật khẩu</label>
+      <input id="p" name="password" type="password" autocomplete="current-password" required></div>
+    <button type="submit">Đăng nhập</button>
+  </form>
+</div></main></body></html>{{end}}
