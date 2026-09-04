@@ -1,0 +1,39 @@
+{{define "reset.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đặt lại mật khẩu</title></head><body>
+{{template "nav" .}}
+<main>
+  <h1>Đặt mật khẩu mới</h1>
+  {{if .Valid}}
+  <p class="sub">Sau khi đổi, mọi phiên đăng nhập khác sẽ bị đăng xuất.</p>
+  <div class="card">
+    <div id="msg"></div>
+    <form id="f">
+      <input type="hidden" id="tok" value="{{.Token}}">
+      <div class="f"><label for="p">Mật khẩu mới</label>
+        <input id="p" type="password" autocomplete="new-password" required autofocus>
+        <p class="sub" style="margin:6px 0 0;font-size:12px">Từ 8 ký tự trở lên.</p></div>
+      <button class="full" type="submit">Đổi mật khẩu</button>
+    </form>
+  </div>
+  {{else}}
+  <div class="card">
+    <p class="err">Liên kết không hợp lệ hoặc đã hết hạn.</p>
+    <p class="sub" style="margin:12px 0 0">Liên kết chỉ dùng được một lần và có hiệu lực 30 phút.
+      <a href="/quen-mat-khau">Gửi lại liên kết mới</a>.</p>
+  </div>
+  {{end}}
+</main>
+<script>
+var f = document.getElementById('f');
+if (f) f.addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var m = document.getElementById('msg');
+  m.innerHTML = '';
+  var r = await fetch('/api/password/reset', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token: tok.value, new_password: p.value})});
+  var d = await r.json().catch(function(){ return {}; });
+  if (r.ok) { m.innerHTML = '<p class="okmsg">' + d.message + '</p>'; f.style.display='none'; }
+  else m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>';
+});
+</script>
+</body></html>{{end}}

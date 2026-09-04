@@ -11,6 +11,7 @@ import (
 
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
+	"github.com/rickymta/op-h5/platform/internal/mail"
 	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
@@ -24,6 +25,10 @@ type apiServer struct {
 	secure   bool
 	// internalSecret ky cac lenh nap tien tu tang PHP. Rong = tat endpoint do.
 	internalSecret string
+	resets         *identity.Resets
+	mail           *mail.Sender
+	// publicURL dung de dung lien ket trong email.
+	publicURL string
 }
 
 // decodeJSON doc than request JSON voi gioi han kich thuoc.

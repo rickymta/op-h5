@@ -1,0 +1,33 @@
+{{define "forgot.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Quên mật khẩu</title></head><body>
+{{template "nav" .}}
+<main>
+  <h1>Quên mật khẩu</h1>
+  <p class="sub">Nhập email đã dùng khi đăng ký. Chúng tôi sẽ gửi liên kết đặt lại mật khẩu.</p>
+  <div class="card">
+    {{if .Enabled}}
+    <div id="msg"></div>
+    <form id="f">
+      <div class="f"><label for="e">Email</label>
+        <input id="e" type="email" autocomplete="email" required autofocus></div>
+      <button class="full" type="submit">Gửi liên kết</button>
+    </form>
+    {{else}}
+    <p class="err">Chức năng khôi phục mật khẩu chưa được bật. Vui lòng liên hệ hỗ trợ.</p>
+    {{end}}
+  </div>
+</main>
+<script>
+var f = document.getElementById('f');
+if (f) f.addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var m = document.getElementById('msg');
+  m.innerHTML = '';
+  var r = await fetch('/api/password/forgot', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email: e.value.trim()})});
+  var d = await r.json().catch(function(){ return {}; });
+  if (r.ok) { m.innerHTML = '<p class="okmsg">' + d.message + '</p>'; f.reset(); }
+  else m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>';
+});
+</script>
+</body></html>{{end}}

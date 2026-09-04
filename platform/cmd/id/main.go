@@ -11,12 +11,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/config"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
+	"github.com/rickymta/op-h5/platform/internal/mail"
 	"github.com/rickymta/op-h5/platform/internal/oidc"
 	"github.com/rickymta/op-h5/platform/internal/store"
 	"github.com/rickymta/op-h5/platform/internal/wallet"
@@ -60,6 +63,18 @@ func main() {
 	}
 
 	users := &identity.Repo{DB: db, MaxAttempts: cfg.LoginMaxAttempt, Window: cfg.LoginWindow}
+	resets := &identity.Resets{DB: db}
+	mailer := mail.New(mail.Config{
+		Host:     os.Getenv("ID_SMTP_HOST"),
+		Port:     envInt("ID_SMTP_PORT", 587),
+		Username: os.Getenv("ID_SMTP_USER"),
+		Password: os.Getenv("ID_SMTP_PASSWORD"),
+		From:     os.Getenv("ID_SMTP_FROM"),
+		FromName: envOr2("ID_SMTP_FROM_NAME", "Cổng game"),
+	})
+	if !mailer.Enabled() {
+		log.Warn("chua cau hinh SMTP: chuc nang khoi phuc mat khau se tat (dat ID_SMTP_HOST va ID_SMTP_FROM)")
+	}
 	sessions := &identity.Sessions{DB: db, TTL: cfg.SessionTTL}
 	wal := &wallet.Service{DB: db}
 
@@ -71,7 +86,8 @@ func main() {
 		CookieSecur: cfg.CookieSecure, Tpl: tpl,
 	}
 	api := &apiServer{db: db, users: users, sessions: sessions, wallet: wal, log: log,
-		secure: cfg.CookieSecure, internalSecret: os.Getenv("ID_INTERNAL_SECRET")}
+		secure: cfg.CookieSecure, internalSecret: os.Getenv("ID_INTERNAL_SECRET"),
+		resets: resets, mail: mailer, publicURL: cfg.Issuer}
 	pages := &pageServer{api: api, tpl: tpl}
 
 	mux := http.NewServeMux()
@@ -87,8 +103,12 @@ func main() {
 	mux.HandleFunc("GET /", pages.portal)
 	mux.HandleFunc("GET /dang-ky", pages.registerPage)
 	mux.HandleFunc("GET /tai-khoan", pages.accountPage)
+	mux.HandleFunc("GET /quen-mat-khau", pages.forgotPage)
+	mux.HandleFunc("GET /dat-lai-mat-khau", pages.resetPage)
 	mux.HandleFunc("POST /api/register", api.register)
 	mux.HandleFunc("POST /api/password", api.changePassword)
+	mux.HandleFunc("POST /api/password/forgot", api.forgotPassword)
+	mux.HandleFunc("POST /api/password/reset", api.resetPassword)
 	// --- noi bo: callback cong thanh toan o tang PHP goi vao ---
 	mux.HandleFunc("POST /internal/wallet/topup", api.internalTopup)
 	mux.HandleFunc("GET /api/me", api.me)
@@ -107,7 +127,7 @@ func main() {
 		IdleTimeout:       90 * time.Second,
 	}
 
-	go cleanupLoop(ctx, log, sessions, &oidc.Store{DB: db})
+	go cleanupLoop(ctx, log, sessions, &oidc.Store{DB: db}, resets)
 
 	go func() {
 		log.Info("id server khoi dong", "addr", cfg.Addr, "issuer", cfg.Issuer, "kid", signer.Kid)
@@ -127,7 +147,23 @@ func main() {
 }
 
 // cleanupLoop don ma uy quyen, refresh token va phien da het han.
-func cleanupLoop(ctx context.Context, log *slog.Logger, sessions *identity.Sessions, st *oidc.Store) {
+func envInt(key string, def int) int {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return def
+}
+
+func envOr2(key, def string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		return v
+	}
+	return def
+}
+
+func cleanupLoop(ctx context.Context, log *slog.Logger, sessions *identity.Sessions, st *oidc.Store, resets *identity.Resets) {
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()
 	for {
@@ -140,6 +176,9 @@ func cleanupLoop(ctx context.Context, log *slog.Logger, sessions *identity.Sessi
 			}
 			if err := st.CleanupExpired(ctx); err != nil {
 				log.Warn("don token het han", "err", err)
+			}
+			if err := resets.Cleanup(ctx); err != nil {
+				log.Warn("don phieu dat lai mat khau", "err", err)
 			}
 		}
 	}

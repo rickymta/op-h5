@@ -167,6 +167,14 @@ mọi lần nạp đều vào nhật ký.
 | `ID_SESSION_TTL` | | `336h` |
 | `ID_COOKIE_SECURE` | | `true` — đặt `false` khi chạy HTTP thuần lúc dev |
 | `ID_LOGIN_MAX_ATTEMPT` / `ID_LOGIN_WINDOW` | | `10` / `15m` |
+| `ID_INTERNAL_SECRET` | | khoá HMAC cho API nạp tiền nội bộ — để trống thì tắt endpoint đó |
+| `ID_SMTP_HOST` / `ID_SMTP_PORT` | | — thiếu thì **tắt** khôi phục mật khẩu |
+| `ID_SMTP_USER` / `ID_SMTP_PASSWORD` | | để trống nếu SMTP nội bộ không cần xác thực |
+| `ID_SMTP_FROM` / `ID_SMTP_FROM_NAME` | | địa chỉ gửi; `FROM` bắt buộc để bật tính năng |
+
+**Không có "chế độ ghi log" thay cho gửi email thật.** Một đường đặt lại mật khẩu in ra
+log là một đường chiếm tài khoản cho bất kỳ ai đọc được log. Chưa cấu hình SMTP thì tính
+năng tắt hẳn, và trang `/quen-mat-khau` nói rõ điều đó.
 
 ## Test
 
