@@ -172,6 +172,23 @@ Nạp lại cấu hình khi server đang chạy — không cần restart:
 POST http://127.0.0.1:9999/srv/game/cmd/excel/reload
 ```
 
+### Nguồn JSON — `server/excel-src/` (từ 2026-09-04)
+
+Server **chỉ nạp được .xlsx** (`EExcel.load` mở file bằng POI theo tên file + tên sheet hardcode trong bytecode), nên định dạng server nạp không đổi được. Thay vào đó toàn bộ 203 workbook .xlsx (933 sheet, ~2 triệu ô) đã được xuất ra JSON để đọc/diff/sửa, và **JSON là nguồn sự thật**; xlsx trong `excel/release/` là sản phẩm biên dịch:
+
+```
+server/excel-src/<tên-file-không-đuôi>/_index.json   # tên workbook + danh sách sheet theo thứ tự
+server/excel-src/<tên-file-không-đuôi>/NN.json       # một sheet: {"sheet": "皮肤激活道具", "rows": [[...], ...], "formulas": {...}, "merged": [...]}
+python tools/excel-to-json.py            # Excel -> JSON (làm lại khi nhận Excel mới từ nhà phát hành)
+python tools/json-to-excel.py --verify   # JSON -> build/excel-regen/*.xlsx, so từng ô với bản gốc
+python tools/json-to-excel.py --probe    # chạy ExcelProbe (parser THẬT của game) trên cả hai bản, so kết quả
+python tools/json-to-excel.py --out server/excel/release   # ghi đè file server nạp, rồi POST .../excel/reload
+```
+
+Quy ước trong JSON: `rows` là **mọi dòng từ dòng 1** (dòng đầu là header), mỗi ô giữ nguyên kiểu (số là số, chuỗi là chuỗi — với server `"123"` và `123` khác nhau, xem mục 11.5), `null` là ô trống, `{"$error":"#N/A"}` ô lỗi, `{"$date":"..."}` ô ngày. Ô công thức mang **giá trị đã tính** (đúng thứ server nhìn thấy), công thức gốc chỉ nằm trong `formulas` để tham khảo — xlsx biên dịch lại không còn công thức. Tên sheet vẫn tiếng Trung và nằm trong trường `sheet` (file đặt theo số thứ tự để tránh hỏng encoding tên file). `json-to-excel.py` tự chạy `xlsx-inline-to-shared.py` cho từng file. Bảng file → lớp loader ở `docs/excel-loaders.json` (sinh bởi `tools/excel-loaders.py` từ constant pool). `.xlsm` (4 file, không được bytecode tham chiếu) và file rác `%3F` không được xuất.
+
+Muốn đưa cấu hình lên **database** thì đi qua chính đường này: DB → sinh JSON (hoặc xlsx) → `excel/reload`; server không có driver nào đọc cấu hình từ DB.
+
 ---
 
 ## 7. Console REST API
@@ -232,7 +249,7 @@ Người chơi nạp thẻ/bank/MoMo
   → game server phát vật phẩm cho nhân vật
 ```
 
-Route đẹp do nginx rewrite: `/play-game`, `/nap-tien`, `/tai-khoan`, `/lich-su`, `/tich-luy`, `/doi-knb`, `/webshop`. **File cấu hình nginx không nằm trong snapshot này.**
+Route đẹp do nginx rewrite: `/play-game`, `/nap-tien`, `/tai-khoan`, `/lich-su`, `/tich-luy`, `/doi-knb`, `/web-shop`, `/user-<act>` và `/act-<act>` → `api/config.php?act=<act>` (đăng nhập/đăng ký web đi qua `/user-mlogin`, `/user-mreg`). File nginx gốc (aaPanel) nằm ở `www/server/panel/vhost/{nginx,rewrite}/192.168.1.69.conf` (thư mục `www/` gitignored); toàn bộ rewrite đã được chép vào `docker/nginx/game.conf`.
 
 ---
 
@@ -451,12 +468,13 @@ Toàn bộ nằm trong `docker/` — đọc [docker/README.md](docker/README.md)
 - **RAM:** tổng `-Xmx` gốc ≈ 8 GB, không vừa. Heap đã cắt (mặc định tổng 4992m trong `.env.example`), `SerialGC`, `MaxMetaspaceSize=160m`, `Xss512k`; MySQL buffer pool 192M, Mongo cache 0.25 GB, MQ 256MB. Trần `mem_limit` cộng lại 9.69 GB nhưng peak không chồng nhau; **bắt buộc swap 4 GB**. Chỉ chạy 1 game server.
 - **DB phải dump từ server cũ** (`docker/prepare-dumps.sh`): không JAR nào chứa schema `tcg/stat/web/cdks` hay Mongo. Dump vào `docker/initdb/{mysql,mongo/dump}` → import tự động lần đầu.
 - **php-fpm nghe 9001**, vì 9000 là login server (host network).
-- **nginx rewrite là suy đoán** từ mã PHP (file nginx gốc không có) — kiểm tra đăng nhập web ngay sau lần `up` đầu.
+- **nginx rewrite lấy từ file gốc** `www/server/panel/vhost/rewrite/192.168.1.69.conf` (từ 2026-09-04; trước đó là suy đoán và thiếu `/user-*`, `/act-*` nên login web hỏng) — vẫn kiểm tra đăng nhập web ngay sau lần `up` đầu.
 - Trước khi upload cây `server/`: xoá 19 file rác `%3F` trong `excel/release` (`tools/fix-filenames.ps1 -Apply -RemoveDuplicates`), đổi `192.168.1.69` trong `global.conf.json` + client JS + PHP (README mục 3), và sửa `tcg.srv_cross.url` / `srv_group_device.url` / `cloud_server.host_wan` trong dump.
 - Bộ này **chưa từng được `up` thật** (máy chuẩn bị không có Docker); mới lint cú pháp compose. Lần `up` đầu là lần test.
 - **Build thẳng trên server:** `docker-compose.image.yml` có sẵn `build:` (chỉ ở `console`, `php`, `nginx`); `docker/server-bootstrap.sh` mặc định `MODE=build` — cài git+git-lfs, clone vào `/opt/tcg/src` (LFS 611 MB), `docker compose build`. Không cần GHCR/CI. `MODE=pull` để chỉ pull image.
 - **Tài nguyên client `res/ sound/ spine/`** (1.6 GB) không nằm trong git/image: rsync thẳng từ server cũ (`/www/wwwroot/game/{res,sound,spine}`) vào `ASSETS_DIR=/opt/tcg/assets`; hoặc WinSCP; hoặc đính tar.gz vào GitHub Release (≤ 2 GB/file, không tính LFS). Xem docker/README.md mục 6c–6d.
-- **Phương án 2 — image từ GHCR:** `.github/workflows/build-images.yml` build `op-h5-server` (temurin 8 + `server/`), `op-h5-php`, `op-h5-nginx` (+ `website/game` trừ media) và push lên `ghcr.io/rickymta/`. Image không chứa secret: `docker/server-entrypoint.sh` và `docker/web-entrypoint.sh` điền placeholder + `PUBLIC_HOST` từ `.env` lúc start. Compose tương ứng: `docker/docker-compose.image.yml`; server mới: `docker/server-bootstrap.sh`. `res/ sound/ spine/` phải upload riêng vào `ASSETS_DIR` (không nằm trong git/image). LFS free 1 GB bandwidth/tháng — CI cache LFS, chỉ lần build đầu tốn 611 MB. Package GHCR mặc định private → đổi sang Public một lần.
+- **Nền tảng Go `platform/`** (id :8080, adapter 127.0.0.1:8090, admin 127.0.0.1:8100) nằm sẵn trong `docker-compose.image.yml` (bản image) và `docker-compose.platform.yml` (bản có `build:`). Service one-shot `platform-seed` tạo DB MySQL `platform` và seed `oauth_clients/games/game_servers/game_devices/game_packages` — không có bước SQL tay; gói quy đổi sinh bằng `tools/gen-game-packages.py` → `docker/platform-seed/game_packages.haitac.sql`. Adapter cần `CONSOLE_ADMIN_PASSWORD` (tài khoản `admin` trong `tcg.staff`) để phát vật phẩm.
+- **Phương án 2 — image từ GHCR:** `.github/workflows/build-images.yml` build `op-h5-server` (temurin 8 + `server/`), `op-h5-php`, `op-h5-nginx` (+ `website/game` trừ media) và `op-h5-id/adapter/admin` (từ `platform/`), push lên `ghcr.io/rickymta/`. Image không chứa secret: `docker/server-entrypoint.sh` và `docker/web-entrypoint.sh` điền placeholder + `PUBLIC_HOST` từ `.env` lúc start. Compose tương ứng: `docker/docker-compose.image.yml`; server mới: `docker/server-bootstrap.sh`. `res/ sound/ spine/` phải upload riêng vào `ASSETS_DIR` (không nằm trong git/image). LFS free 1 GB bandwidth/tháng — CI cache LFS, chỉ lần build đầu tốn 611 MB. Package GHCR mặc định private → đổi sang Public một lần.
 
 ---
 

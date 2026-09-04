@@ -24,11 +24,11 @@ curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/prepare-
 export MYSQL_PW='<root mysql>' MONGO_PW='<mongo abc123>' && bash /tmp/prepare-dumps.sh
 sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql && ls /tmp/tcg-dumps/mysql /tmp/tcg-dumps/mongo/dump
 ```
-Phải có `00-tcg.sql stat.sql web.sql cdks.sql game_s1.sql` + thư mục Mongo `tcg statistic cross-yzx1 group-offical`.
+Phải có `00-tcg.sql stat.sql web.sql cdks.sql game_s1.sql` + thư mục Mongo `tcg cross-yzx1 game-s1` (+ `admin`). Server cũ **không có** `statistic` và `group-offical` — hai DB đó được service tự tạo khi chạy, không phải lỗi dump. (Dump 2026-09-05 đã nằm sẵn ở `docker/initdb/` trên PC; server cũ chạy MongoDB 5.0.6 không có `mongodump`, phải tải MongoDB Database Tools rồi bật `mongod` tạm — xem mục Bước 1.)
 
 **3 `[MỚI]` Port + compose + rsync:**
 ```bash
-ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw status numbered
+ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw allow 8080/tcp && ufw status numbered   # 8080 = he thong ID
 docker compose version || apt-get install -y docker-compose-plugin
 apt-get install -y rsync curl
 ```
@@ -47,10 +47,13 @@ rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mongo/dump/ /opt/tcg/docker/i
 
 **6 `[MỚI]` `.env`:**
 ```bash
-cd /opt/tcg/docker && nano .env
-grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD)=$' .env && echo "CON TRONG" || echo OK
+cd /opt/tcg/docker && nano .env      # PUBLIC_HOST + 14 secret PHP/Java + nen tang (xem Buoc 4)
+H=$(grep ^PUBLIC_HOST= .env | cut -d= -f2-); sed -i "s|^ID_ISSUER=.*|ID_ISSUER=http://$H:8080|; s|^ADAPTER_REDIRECT_URI=.*|ADAPTER_REDIRECT_URI=http://$H/auth/callback|" .env
+sed -i "s|^ADAPTER_SECRET_ENC_KEY=.*|ADAPTER_SECRET_ENC_KEY=$(head -c 32 /dev/urandom | base64)|; s|^ID_INTERNAL_SECRET=.*|ID_INTERNAL_SECRET=$(head -c 32 /dev/urandom | base64)|" .env
+printf 'ID_SIGNING_KEY_PEM="%s"\n' "$(openssl genrsa 2048 2>/dev/null)" >> .env
+grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD|CONSOLE_ADMIN_PASSWORD|ID_ISSUER|ADAPTER_REDIRECT_URI|ADAPTER_SECRET_ENC_KEY|ADMIN_BOOTSTRAP_USER|ADMIN_BOOTSTRAP_PASSWORD)=$' .env && echo "CON TRONG" || echo OK
 ```
-Ba mật khẩu MySQL/Mongo/MQ **phải đúng như server cũ** (dump tạo bằng chúng).
+Ba mật khẩu MySQL/Mongo/MQ **phải đúng như server cũ** (dump tạo bằng chúng). `CONSOLE_ADMIN_PASSWORD` giờ còn được adapter dùng để phát vật phẩm qua console. `ADMIN_BOOTSTRAP_USER/PASSWORD` = tài khoản owner đầu tiên của trang quản trị. `platform-seed` tự tạo DB `platform` và seed `oauth_clients/games/game_servers/game_devices/game_packages` (1962 gói từ `id.txt`) — không chạy SQL tay.
 
 **7 `[MỚI]` Hạ tầng + import dump:**
 ```bash
@@ -63,14 +66,16 @@ Thiếu DB → `docker compose -f docker-compose.image.yml down -v` rồi làm l
 
 **8 `[MỚI]` Lên toàn bộ:**
 ```bash
-docker compose -f docker-compose.image.yml up -d
-watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, tất cả healthy
+docker compose -f docker-compose.image.yml up -d          # gom ca id/adapter/admin + platform-seed
+watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, tất cả healthy; platform-seed "Exited (0)"
 ```
 
 **9 `[MỚI]` Kiểm tra:**
 ```bash
 docker compose -f docker-compose.image.yml logs game | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory'; echo "(rong = tot)"
 curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get; curl -sI http://127.0.0.1/play-game | head -1
+curl -sI http://127.0.0.1/ | head -1; curl -s http://127.0.0.1:8080/.well-known/openid-configuration | head -c 120; echo   # trang chu (adapter) 200; ID tra JSON
+docker compose -f docker-compose.image.yml logs platform-seed | tail -8       # 6 dong dem, tat ca > 0
 docker stats --no-stream
 ```
 Từ máy khác: `http://PUBLIC_HOST/play-game` → đăng ký → vào game. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
@@ -106,7 +111,7 @@ Rồi che lại ngay để không lỡ commit:
 python tools/mask-secrets.py --mask && python tools/mask-secrets.py --check     # phải "sach"
 ```
 
-**0.2 Quyết định `PUBLIC_HOST`**: IP public (hoặc domain đã trỏ) của server mới. Người chơi sẽ mở `http://PUBLIC_HOST/play-game`; client kết nối `PUBLIC_HOST:9000` (login), `:8001` (WebSocket game), `:12345`, `:7788`. **Firewall/security group phải mở 80, 9000, 8001, 12345, 7788** ra ngoài; các port còn lại (3306, 27017, 5672, 9999, 10010, 10086, 20001, 30001, 18001, 9001) chỉ nội bộ.
+**0.2 Quyết định `PUBLIC_HOST`**: IP public (hoặc domain đã trỏ) của server mới. Người chơi sẽ mở `http://PUBLIC_HOST/play-game`; client kết nối `PUBLIC_HOST:9000` (login), `:8001` (WebSocket game), `:12345`, `:7788`. **Firewall/security group phải mở 80, 9000, 8001, 12345, 7788 và 8080** (hệ thống ID: trình duyệt người chơi đăng nhập OIDC tại `http://PUBLIC_HOST:8080` khi chưa có domain) ra ngoài; các port còn lại (3306, 27017, 5672, 9999, 10010, 10086, 20001, 30001, 18001, 9001, 8090, 8100) chỉ nội bộ — adapter và admin chỉ bind 127.0.0.1.
 
 ---
 
@@ -119,13 +124,15 @@ export MYSQL_PW='<mật khẩu root mysql>' MONGO_PW='<mật khẩu mongo abc123
 bash /tmp/prepare-dumps.sh
 ```
 
-Điểm kiểm tra: `/tmp/tcg-dumps/mysql/` có `00-tcg.sql`, `stat.sql`, `web.sql`, `cdks.sql`, `game_s1.sql` (+ `game_s2…` nếu có); `/tmp/tcg-dumps/mongo/dump/` có `tcg/`, `statistic/`, `cross-yzx1/`, `group-offical/` và các DB per-server (`mongo-yzxdb1`…).
+Điểm kiểm tra: `/tmp/tcg-dumps/mysql/` có `00-tcg.sql`, `stat.sql`, `web.sql`, `cdks.sql`, `game_s1.sql` (+ `game_s2…` nếu có); `/tmp/tcg-dumps/mongo/dump/` có `tcg/`, `cross-yzx1/`, `game-s1/` (DB per-server tên `game-<srvCode>`, không phải `mongoCode`) và `admin/`. `statistic/`, `group-offical/` chỉ xuất hiện nếu service đó từng chạy — trên server cũ không có.
 
-**Sửa IP cũ trong dump** (các dòng `cloud_server.host_wan`, `srv_cross.url`, `srv_group_device.url` đang là `192.168.1.69`):
+**Server cũ (pgaming) không có `mongodump`** (MongoDB 5.0.6 cài tarball ở `/usr/local/mongodb`, `mongod` không tự bật sau reboot). Cách đã dùng 2026-09-05: tải `mongodb-database-tools-rhel70-x86_64-100.9.5.tgz` (62,6 MB, fastdl.mongodb.org) vào `/tmp`, giải nén, `mongod -f /usr/local/mongodb/mongodb.conf`, `mongodump -u abc123 --authenticationDatabase admin --out /tmp/tcg-dumps/mongo/dump`, rồi `mongod --shutdown --dbpath /usr/local/mongodb/data`. Bỏ `admin/` khi đặt vào `docker/initdb/mongo/dump/` (user `abc123` do image tạo từ `.env`; `system.version` của 5.0 không nên restore vào `mongo:4.4`).
+
+**Sửa IP cũ trong dump** (4 dòng đang là `192.168.1.69`: `cloud_device.host_wan`, `srv_cross.url`, `srv_group_device.url`, `srv_login.host_wan`):
 
 ```bash
 # [CŨ]
-grep -c '192\.168\.1\.69' /tmp/tcg-dumps/mysql/00-tcg.sql          # thường 3–5 dòng
+grep -c '192\.168\.1\.69' /tmp/tcg-dumps/mysql/00-tcg.sql          # dump 2026-09-05: đúng 4 dòng
 sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql
 ```
 
@@ -140,7 +147,7 @@ sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql
 **Ubuntu — trước bootstrap:** mở port cho client và kiểm tra compose plugin (`apt install docker.io` không kèm plugin):
 
 ```bash
-ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw status numbered
+ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw allow 8080/tcp && ufw status numbered   # 8080 = he thong ID
 docker compose version || apt-get install -y docker-compose-plugin
 apt-get install -y rsync curl
 ```
@@ -184,12 +191,26 @@ ls /opt/tcg/docker/initdb/mysql/ /opt/tcg/docker/initdb/mongo/dump/
 cd /opt/tcg/docker && nano .env
 ```
 
-Bắt buộc điền: `PUBLIC_HOST`, `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD` (phải **khớp dump** — DB được tạo với đúng mật khẩu này), và các secret PHP. `ASSETS_DIR=/opt/tcg/assets` giữ nguyên. Heap giữ mặc định lần đầu.
+Bắt buộc điền: `PUBLIC_HOST`, `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD` (phải **khớp dump** — DB được tạo với đúng mật khẩu này), `CONSOLE_ADMIN_PASSWORD` (adapter dùng tài khoản `admin` của console để phát vật phẩm) và các secret PHP. `ASSETS_DIR=/opt/tcg/assets` giữ nguyên. Heap giữ mặc định lần đầu.
+
+Nền tảng (`id`/`adapter`/`admin`) — chưa có domain thì dùng IP:
+
+```bash
+# [MỚI]
+H=$(grep ^PUBLIC_HOST= .env | cut -d= -f2-)
+sed -i "s|^ID_ISSUER=.*|ID_ISSUER=http://$H:8080|; s|^ADAPTER_REDIRECT_URI=.*|ADAPTER_REDIRECT_URI=http://$H/auth/callback|" .env
+sed -i "s|^ADAPTER_SECRET_ENC_KEY=.*|ADAPTER_SECRET_ENC_KEY=$(head -c 32 /dev/urandom | base64)|; s|^ID_INTERNAL_SECRET=.*|ID_INTERNAL_SECRET=$(head -c 32 /dev/urandom | base64)|" .env
+printf 'ID_SIGNING_KEY_PEM="%s"\n' "$(openssl genrsa 2048 2>/dev/null)" >> .env      # gia tri nhieu dong trong ngoac kep, de cuoi file
+nano .env      # ADMIN_BOOTSTRAP_USER / ADMIN_BOOTSTRAP_PASSWORD
+```
+
+Khi có domain: `ID_ISSUER=https://id.<domain>`, `ADAPTER_REDIRECT_URI=https://<game-domain>/auth/callback`, `ID_COOKIE_SECURE=true`, thêm vhost nginx `id.<domain>` → `127.0.0.1:8080`; `platform-seed` cập nhật `oauth_clients.redirect_uris` ở lần `up` kế.
 
 Kiểm tra không còn ô trống bắt buộc:
 
 ```bash
-grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD)=$' .env && echo "CON TRONG" || echo "OK"
+grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD|CONSOLE_ADMIN_PASSWORD|ID_ISSUER|ADAPTER_REDIRECT_URI|ADAPTER_SECRET_ENC_KEY|ADMIN_BOOTSTRAP_USER|ADMIN_BOOTSTRAP_PASSWORD)=$' .env && echo "CON TRONG" || echo "OK"
+grep -c 'BEGIN.*PRIVATE KEY' .env      # 1
 ```
 
 ---
@@ -212,7 +233,7 @@ docker compose -f docker-compose.image.yml exec mysql mysql -uroot -p"$(grep ^MY
 docker compose -f docker-compose.image.yml exec mongo mongo -u abc123 -p "$(grep ^MONGO_PASSWORD= .env | cut -d= -f2-)" --authenticationDatabase admin --quiet --eval 'db.adminCommand("listDatabases").databases.map(d=>d.name)'
 ```
 
-Phải thấy `tcg stat web cdks game_s1` và Mongo có `tcg`, `statistic`, DB per-server. Nếu thiếu → dump chưa import (volume đã có từ lần chạy trước): `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 5.
+Phải thấy `tcg stat web cdks game_s1` (DB `platform` xuất hiện khi `platform-seed` chạy ở bước kế) và Mongo có `tcg`, `cross-yzx1`, `game-s1` (`statistic`, `group-offical` do service tự tạo). Nếu thiếu → dump chưa import (volume đã có từ lần chạy trước): `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 5.
 
 Lên toàn bộ:
 
@@ -221,7 +242,7 @@ docker compose -f docker-compose.image.yml up -d
 watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, tất cả "healthy"
 ```
 
-Thứ tự tự động: console → world → meta → statistic → pay → group → game → login → cross → php/nginx. Nếu một service **unhealthy** lâu, xem log của nó (bước 6) — service sau sẽ không lên cho tới khi nó healthy.
+Thứ tự tự động: console → world → meta → statistic → pay → group → game → login → cross → php/nginx; song song: `platform-seed` (tạo DB `platform`, đợi `id` migrate xong rồi seed, thoát 0) và `id` → `admin`; `adapter` chờ cả `id`, `platform-seed`, `login`. Nếu một service **unhealthy** lâu, xem log của nó (bước 6). `platform-seed` ở `Exited (0)` là đúng; `Exited (1)` thì xem `logs platform-seed`.
 
 ---
 

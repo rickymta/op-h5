@@ -127,14 +127,16 @@ Compose hợp nhất map và giữ lại phụ thuộc vào `game` đã bị t�
 cùng hạ tầng. Thêm server là thêm máy, và `device_code` phải khớp máy thật vì cổng giới
 hạn tải dùng nó làm tầng thứ hai.
 
-`docker-compose.platform.yml` thêm hai dịch vụ Go (xem [platform/README.md](../platform/README.md)):
+`docker-compose.platform.yml` thêm ba dịch vụ Go và một bước seed (xem [platform/README.md](../platform/README.md)); `docker-compose.image.yml` **đã chứa sẵn** bốn service này (bản image, không `build:`), nên phương án 2 vẫn chỉ cần một file:
 
 | Dịch vụ | Cổng | Việc |
 |---|---|---|
-| `id` | 8080 | OIDC provider, danh tính, ví Xu |
-| `adapter` | 8090 | Đổi token ID → tài khoản game, **cổng giới hạn tải** |
+| `id` | 8080 (công khai) | OIDC provider, danh tính, ví Xu — `ID_ISSUER` phải là URL trình duyệt tới được |
+| `adapter` | 127.0.0.1:8090 | Đổi token ID → tài khoản game, **cổng giới hạn tải**; nginx proxy `/`, `/may-chu`, `/quy-doi`, `/choi-game`, `/auth/`, `/api/game/` |
+| `admin` | 127.0.0.1:8100 | Trang quản trị nền tảng (đội server, ngưỡng, nạp tay); vào qua `ssh -L 8100:127.0.0.1:8100` |
+| `platform-seed` | — | One-shot (mysql:8.0 + `platform-seed.sh`): tạo DB `platform`, đợi `id` migrate, upsert `oauth_clients` (từ `ADAPTER_CLIENT_ID`/`ADAPTER_REDIRECT_URI`), `games`, `game_devices` + `game_servers` (từ `tcg.srv_game`, không có thì từ `GAME_SERVERS`), `game_packages` (`platform-seed/game_packages.haitac.sql`: 1962 gói do `tools/gen-game-packages.py` sinh từ `api/id.txt` + `recharge-item.xlsx`). Chạy lại vô hại, không ghi đè tên/ngưỡng admin đã sửa. |
 
-Cả hai đọc secret từ `.env` và **dừng ngay lúc khởi động** nếu thiếu biến bắt buộc.
+Tất cả đọc secret từ `.env` và **dừng ngay lúc khởi động** nếu thiếu biến bắt buộc. Adapter phát vật phẩm qua console `:9999` bằng `ADAPTER_CONSOLE_USER` (mặc định `admin`, bảng `tcg.staff`) với mật khẩu `CONSOLE_ADMIN_PASSWORD`. Tài khoản owner đầu tiên của `admin` tạo từ `ADMIN_BOOTSTRAP_USER/PASSWORD` khi `admin_users` còn trống. PHP nhận `ID_BASE_URL`/`ID_INTERNAL_SECRET`/`ID_WALLET_ENABLED` qua pool php-fpm do `web-entrypoint.sh` sinh (`clear_env` mặc định của php-fpm chặn `.env`).
 
 ## 6. Vận hành
 
@@ -229,7 +231,7 @@ Các tài nguyên client còn lại (`libs/`, `bmFont/`, `icon/`, `iconshop/`, `
 
 ## 7. Những gì chưa chắc — đọc trước lần `up` đầu
 
-1. **nginx rewrite là suy đoán.** File nginx gốc không có trong snapshot; `nginx/game.conf` dựng từ mã PHP. 4 endpoint `/user/login.php|register.php|email.php|quenmatkhau.php` được map tạm về `api/config.php?act=…` — kiểm tra đăng nhập/đăng ký web ngay sau khi lên.
+1. **nginx rewrite đã lấy từ file gốc** (`www/server/panel/vhost/rewrite/192.168.1.69.conf`, bản copy aaPanel của server cũ, gitignored). Đăng nhập/đăng ký web thật đi qua `/user-mlogin`, `/user-mreg` → `api/config.php?act=…`; 4 đường `/user/login.php|register.php|email.php|quenmatkhau.php` không tồn tại cả trên server cũ (404), chỉ giữ map tạm. Vẫn kiểm tra đăng nhập/đăng ký web ngay sau khi lên.
 2. **Heap là ước lượng.** Không có số đo steady-state từ server cũ. Bộ số mặc định để *khởi động được* trên 8 GB; chỉnh theo `docker stats`.
 3. **Chưa từng `up` thật.** Máy chuẩn bị bộ này không có Docker; chỉ lint được cú pháp compose.
 4. **`cross` gọi group/game qua `192.168.1.69:20001`/`30001`** (giá trị trong `tcg.srv_cross.url`, `srv_group_device.url`). Với host network và IP đã đổi, cập nhật 2 cột `url` đó trong DB hoặc qua console `/srv/cross/update`, `/srv/group/conf/update`.
