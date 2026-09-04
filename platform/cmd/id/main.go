@@ -70,7 +70,8 @@ func main() {
 		CodeTTL: cfg.AuthCodeTTL, SessionTTL: cfg.SessionTTL,
 		CookieSecur: cfg.CookieSecure, Tpl: tpl,
 	}
-	api := &apiServer{users: users, sessions: sessions, wallet: wal, log: log, secure: cfg.CookieSecure}
+	api := &apiServer{db: db, users: users, sessions: sessions, wallet: wal, log: log, secure: cfg.CookieSecure}
+	pages := &pageServer{api: api, tpl: tpl}
 
 	mux := http.NewServeMux()
 	// --- OIDC ---
@@ -82,7 +83,11 @@ func main() {
 	mux.HandleFunc("GET /oauth/userinfo", srv.UserInfo)
 	mux.HandleFunc("GET /oauth/logout", srv.Logout)
 	// --- tai khoan & vi ---
+	mux.HandleFunc("GET /", pages.portal)
+	mux.HandleFunc("GET /dang-ky", pages.registerPage)
+	mux.HandleFunc("GET /tai-khoan", pages.accountPage)
 	mux.HandleFunc("POST /api/register", api.register)
+	mux.HandleFunc("POST /api/password", api.changePassword)
 	mux.HandleFunc("GET /api/me", api.me)
 	mux.HandleFunc("GET /api/wallet/balance", api.balance)
 	mux.HandleFunc("GET /api/wallet/history", api.history)

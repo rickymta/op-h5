@@ -103,7 +103,12 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
-		h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+		// Trang dang ky va tai khoan co script inline nho de goi API, nen phai cho phep
+		// 'unsafe-inline' cho script. Van KHONG cho nap script tu bat ky nguon ngoai nao
+		// (khong co host nao trong script-src), va connect-src gioi han o chinh minh.
+		h.Set("Content-Security-Policy",
+			"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "+
+				"connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
 		next.ServeHTTP(w, r)
 	})
 }

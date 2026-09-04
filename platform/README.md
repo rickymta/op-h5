@@ -10,13 +10,18 @@ nguồn thật và có test.
 
 ## Trạng thái
 
-| Thành phần | Trạng thái |
-|---|---|
-| `cmd/id` — OIDC provider, danh tính, ví | ✅ chạy được, đã kiểm chứng end-to-end |
-| `internal/capacity` — cổng giới hạn tải | ✅ logic xong, 14 test |
-| `cmd/adapter` — phiên dịch token ID → tài khoản game | ⬜ chưa làm |
-| Trang quản trị | ⬜ chưa làm |
-| Giao diện 4 bề mặt | ⬜ chưa làm |
+| Thành phần | Cổng | Trạng thái |
+|---|---|---|
+| `cmd/id` — OIDC provider, danh tính, ví, trang chủ + tài khoản | 8080 | ✅ kiểm chứng end-to-end |
+| `cmd/adapter` — token ID → tài khoản game + cổng giới hạn tải | 8090 | ✅ kiểm chứng end-to-end |
+| `cmd/admin` — theo dõi đội server, điều khiển ngưỡng | 8100 | ✅ kiểm chứng end-to-end |
+| `cmd/fakelogin` — login server giả, chỉ để phát triển | 9000 | ✅ |
+| Nhiều game trên cùng nền tảng | | ✅ kiểm chứng bằng game thứ hai |
+
+**Chưa làm:** giao diện riêng của từng game (`haitac.domain.com` vẫn dùng trang PHP cũ,
+Adapter chỉ phục vụ `/choi-game`); khôi phục mật khẩu qua email; cổng nạp tiền thật
+(các đầu nối thẻ cào/bank/MoMo vẫn ở tầng PHP cũ); tiến trình phát vật phẩm cho
+`game_grants` đang ở trạng thái `pending`.
 
 ## Vì sao logic giới hạn tải nằm ở đây, không nằm trong game
 

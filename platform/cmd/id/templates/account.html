@@ -1,0 +1,59 @@
+{{define "account.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Tài khoản</title></head><body>
+{{template "nav" .}}
+<main>
+  <h1>{{.User.Username}}</h1>
+  <p class="sub">Tham gia từ {{.JoinedAt}}</p>
+
+  <div class="card">
+    <label>Số dư ví</label>
+    <p class="balance">{{.BalanceFmt}}<small>Xu</small></p>
+    <p class="sub" style="margin:14px 0 0">Số dư là tổng của sổ cái giao dịch, không phải một con số sửa tay được.</p>
+  </div>
+
+  <div class="card">
+    <label>Đổi mật khẩu</label>
+    <div id="msg"></div>
+    <form id="pf">
+      <div class="f"><label for="old">Mật khẩu hiện tại</label>
+        <input id="old" type="password" autocomplete="current-password" required></div>
+      <div class="f"><label for="new1">Mật khẩu mới</label>
+        <input id="new1" type="password" autocomplete="new-password" required></div>
+      <button type="submit">Đổi mật khẩu</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <label>Lịch sử giao dịch</label>
+    {{if .History}}
+    <table>
+      <thead><tr><th>Thời điểm</th><th>Loại</th><th>Nội dung</th><th style="text-align:right">Số Xu</th></tr></thead>
+      <tbody>
+      {{range .History}}
+        <tr>
+          <td class="num">{{.At}}</td>
+          <td>{{.KindLabel}}</td>
+          <td class="muted">{{.Memo}}</td>
+          <td class="num {{if gt .Amount 0}}plus{{else}}minus{{end}}" style="text-align:right">
+            {{if gt .Amount 0}}+{{end}}{{.AmountFmt}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}<p class="muted" style="margin:10px 0 0">Chưa có giao dịch nào.</p>{{end}}
+  </div>
+</main>
+<script>
+document.getElementById('pf').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var m = document.getElementById('msg');
+  m.innerHTML = '';
+  var r = await fetch('/api/password', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({old_password:old.value, new_password:new1.value})});
+  var d = await r.json().catch(function(){ return {}; });
+  if (r.ok) { m.innerHTML = '<p class="okmsg">Đã đổi mật khẩu. Các phiên khác đã bị đăng xuất.</p>';
+              document.getElementById('pf').reset(); }
+  else m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>';
+});
+</script>
+</body></html>{{end}}

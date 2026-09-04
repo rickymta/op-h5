@@ -1,0 +1,78 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#EEF1F4;--surface:#fff;--surface2:#E4E9ED;--text:#0D1620;--muted:#4A5A68;
+    --line:#C9D3DA;--brass:#8A6317;--sea:#1F6A63;--signal:#9E2F24;
+    --sea-bg:#DCEAE8;--signal-bg:#F4DEDA;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0D1620;--surface:#152130;--surface2:#1D2B3B;--text:#DFE7EC;--muted:#A3B3C0;
+          --line:#2A3B4D;--brass:#D9A945;--sea:#4FB3A6;--signal:#E0685A;
+          --sea-bg:#12312E;--signal-bg:#3A1E1A;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:16px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:18px;padding:14px 24px;
+         border-bottom:1px solid var(--line);background:var(--surface)}
+  header .brand{font-weight:700;letter-spacing:-.01em}
+  header nav{margin-left:auto;display:flex;gap:16px;align-items:center;font-size:14px}
+  a{color:var(--brass)}
+  main{max-width:640px;margin:0 auto;padding:32px 24px 64px}
+  main.wide{max-width:900px}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:-.015em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
+        padding:22px 24px;margin-bottom:18px}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  .f{margin-bottom:15px}
+  .f input{width:100%;padding:10px 12px;font-size:15px;color:var(--text);
+           background:var(--bg);border:1px solid var(--line);border-radius:3px}
+  button{padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer;color:var(--bg);
+         background:var(--brass);border:0;border-radius:3px}
+  button.full{width:100%}
+  button:hover{filter:brightness(1.08)}
+  .err{background:var(--signal-bg);color:var(--signal);border-left:3px solid var(--signal);
+       padding:10px 12px;font-size:14px;margin:0 0 16px}
+  .okmsg{background:var(--sea-bg);color:var(--sea);border-left:3px solid var(--sea);
+       padding:10px 12px;font-size:14px;margin:0 0 16px}
+  .balance{font-family:var(--mono);font-size:32px;font-variant-numeric:tabular-nums;
+           letter-spacing:-.02em;margin:4px 0 0}
+  .balance small{font-size:14px;color:var(--muted);margin-left:6px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+           color:var(--muted);font-weight:500}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .plus{color:var(--sea)} .minus{color:var(--signal)}
+  .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .game{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px;
+        display:flex;flex-direction:column;gap:8px}
+  .game h2{font-size:17px;margin:0}
+  .game .code{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .game a.play{margin-top:auto;align-self:flex-start;font-weight:600;text-decoration:none;
+        background:var(--brass);color:var(--bg);padding:8px 14px;border-radius:3px;font-size:14px}
+  .muted{color:var(--muted)}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+</style>
+{{end}}
+
+{{define "nav"}}
+<header>
+  <span class="brand">Cổng game</span>
+  <nav>
+    <a href="/">Trang chủ</a>
+    {{if .User}}
+      <a href="/tai-khoan">Tài khoản</a>
+      <span class="muted" style="font-size:13px">{{.User.Username}}</span>
+      <a href="/oauth/logout">Thoát</a>
+    {{else}}
+      <a href="/dang-ky">Đăng ký</a>
+    {{end}}
+  </nav>
+</header>
+{{end}}

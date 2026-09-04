@@ -40,8 +40,8 @@ func TestVerifyRejectsMalformedHash(t *testing.T) {
 		"",
 		"khong-phai-hash",
 		"$argon2id$v=19$m=65536,t=3,p=4$chi-co-bon-phan",
-		"$bcrypt$v=19$m=65536,t=3,p=4$c2FsdA$aGFzaA",           // sai thuat toan
-		"$argon2id$v=13$m=65536,t=3,p=4$c2FsdA$aGFzaA",         // sai phien ban
+		"$bcrypt$v=19$m=65536,t=3,p=4$c2FsdA$aGFzaA",            // sai thuat toan
+		"$argon2id$v=13$m=65536,t=3,p=4$c2FsdA$aGFzaA",          // sai phien ban
 		"$argon2id$v=19$m=65536,t=3,p=4$!!!khong-base64$aGFzaA", // salt hong
 	}
 	for _, h := range bad {

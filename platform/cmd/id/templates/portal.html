@@ -1,0 +1,20 @@
+{{define "portal.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Cổng game</title></head><body>
+{{template "nav" .}}
+<main class="wide">
+  <h1>Chọn game</h1>
+  <p class="sub">Một tài khoản dùng chung cho mọi game. Nạp tiền một lần, quy đổi ở game nào tuỳ bạn.</p>
+  {{if .Games}}
+  <div class="games">
+    {{range .Games}}
+      <div class="game">
+        <h2>{{.Name}}</h2>
+        <span class="code">{{.Code}}</span>
+        {{if .SiteURL}}<a class="play" href="{{.SiteURL}}/choi-game">Chơi ngay</a>{{end}}
+      </div>
+    {{end}}
+  </div>
+  {{else}}
+    <div class="card"><p class="muted">Chưa có game nào được mở.</p></div>
+  {{end}}
+</main></body></html>{{end}}

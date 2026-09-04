@@ -1,0 +1,36 @@
+{{define "register.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đăng ký</title></head><body>
+{{template "nav" .}}
+<main>
+  <h1>Đăng ký</h1>
+  <p class="sub">Tài khoản này dùng được cho mọi game trên hệ thống.</p>
+  <div class="card">
+    <div id="msg"></div>
+    <form id="f" autocomplete="on">
+      <div class="f"><label for="u">Tài khoản</label>
+        <input id="u" name="username" autocomplete="username" autocapitalize="none"
+               spellcheck="false" required>
+        <p class="sub" style="margin:6px 0 0;font-size:12px">6–15 ký tự, chữ thường, số và gạch dưới.</p></div>
+      <div class="f"><label for="p">Mật khẩu</label>
+        <input id="p" name="password" type="password" autocomplete="new-password" required>
+        <p class="sub" style="margin:6px 0 0;font-size:12px">Từ 8 ký tự trở lên.</p></div>
+      <div class="f"><label for="e">Email <span class="muted">(để khôi phục mật khẩu)</span></label>
+        <input id="e" name="email" type="email" autocomplete="email"></div>
+      <button class="full" type="submit">Tạo tài khoản</button>
+    </form>
+  </div>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var m = document.getElementById('msg');
+  m.innerHTML = '';
+  var r = await fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username:u.value, password:p.value, email:e.value})});
+  var d = await r.json().catch(function(){ return {}; });
+  if (r.ok) { m.innerHTML = '<p class="okmsg">Tạo tài khoản thành công. Đang chuyển…</p>';
+              setTimeout(function(){ location.href = '/tai-khoan'; }, 700); }
+  else m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>';
+});
+</script>
+</body></html>{{end}}

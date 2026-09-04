@@ -332,15 +332,15 @@ func (s *server) health(w http.ResponseWriter, r *http.Request) {
 
 // GameView gom cau hinh trong DB voi so lieu tai lay tu Adapter cua game do.
 type GameView struct {
-	Code        string       `json:"code"`
-	Name        string       `json:"name"`
-	Reachable   bool         `json:"reachable"`
-	Error       string       `json:"error,omitempty"`
-	Online      int          `json:"online"`
-	SoftTotal   int          `json:"soft_total"`
-	Utilization int          `json:"utilization"`
-	Servers     []ServerRow  `json:"servers"`
-	Devices     []DeviceRow  `json:"devices"`
+	Code        string      `json:"code"`
+	Name        string      `json:"name"`
+	Reachable   bool        `json:"reachable"`
+	Error       string      `json:"error,omitempty"`
+	Online      int         `json:"online"`
+	SoftTotal   int         `json:"soft_total"`
+	Utilization int         `json:"utilization"`
+	Servers     []ServerRow `json:"servers"`
+	Devices     []DeviceRow `json:"devices"`
 }
 
 type ServerRow struct {

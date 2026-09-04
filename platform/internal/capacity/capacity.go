@@ -122,13 +122,13 @@ type DeviceState struct {
 type Reason string
 
 const (
-	ReasonOK              Reason = "ok"
-	ReasonServerFull      Reason = "server_full"
-	ReasonDeviceFull      Reason = "device_full"
-	ReasonServerClosed    Reason = "server_closed"
-	ReasonServerMaintain  Reason = "server_maintain"
-	ReasonServerUnknown   Reason = "server_unknown"
-	ReasonNoServerForNew  Reason = "no_server_for_new"
+	ReasonOK             Reason = "ok"
+	ReasonServerFull     Reason = "server_full"
+	ReasonDeviceFull     Reason = "device_full"
+	ReasonServerClosed   Reason = "server_closed"
+	ReasonServerMaintain Reason = "server_maintain"
+	ReasonServerUnknown  Reason = "server_unknown"
+	ReasonNoServerForNew Reason = "no_server_for_new"
 )
 
 // Decision la ket qua cua cong.

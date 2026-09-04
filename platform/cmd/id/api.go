@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"log/slog"
 	"net/http"
 
@@ -13,11 +15,30 @@ import (
 
 // apiServer phuc vu cac endpoint JSON cho trang tai khoan cua nguoi choi.
 type apiServer struct {
+	db       *sql.DB
 	users    *identity.Repo
 	sessions *identity.Sessions
 	wallet   *wallet.Service
 	log      *slog.Logger
 	secure   bool
+}
+
+// decodeJSON doc than request JSON voi gioi han kich thuoc.
+func decodeJSON(w http.ResponseWriter, r *http.Request, out any) error {
+	return json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(out)
+}
+
+// pageServer phuc vu cac trang HTML huong nguoi choi.
+type pageServer struct {
+	api *apiServer
+	tpl *template.Template
+}
+
+func (s *pageServer) render(w http.ResponseWriter, name string, data any) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := s.tpl.ExecuteTemplate(w, name, data); err != nil {
+		s.api.log.Error("render", "tpl", name, "err", err)
+	}
 }
 
 // currentUser lay nguoi dung tu cookie phien.

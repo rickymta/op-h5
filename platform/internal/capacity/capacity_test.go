@@ -19,9 +19,9 @@ func TestBandBoundaries(t *testing.T) {
 	}{
 		{0, BandSmooth},
 		{799, BandSmooth},
-		{800, BandBusy},  // cham dung nguong mem -> da la Dong
+		{800, BandBusy}, // cham dung nguong mem -> da la Dong
 		{919, BandBusy},
-		{920, BandFull},  // cham tran cung -> Day
+		{920, BandFull}, // cham tran cung -> Day
 		{2000, BandFull},
 	}
 	for _, c := range cases {

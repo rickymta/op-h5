@@ -78,15 +78,15 @@ func (d DB) DSN() string {
 // ID la cau hinh cua dich vu danh tinh (id.domain.com).
 type ID struct {
 	Addr            string
-	Issuer          string        // URL cong khai, vd https://id.example.com
+	Issuer          string // URL cong khai, vd https://id.example.com
 	DB              DB
-	SigningKeyPEM   string        // khoa rieng RSA dang PEM, tu bien moi truong
+	SigningKeyPEM   string // khoa rieng RSA dang PEM, tu bien moi truong
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
 	AuthCodeTTL     time.Duration
 	SessionTTL      time.Duration
 	CookieSecure    bool
-	LoginMaxAttempt int           // so lan sai toi da trong cua so
+	LoginMaxAttempt int // so lan sai toi da trong cua so
 	LoginWindow     time.Duration
 }
 
@@ -151,8 +151,8 @@ func LoadAdapter() (Adapter, error) {
 			Password: l.req("ID_DB_PASSWORD"),
 			Name:     l.opt("ID_DB_NAME", "platform"),
 		},
-		Issuer:       l.req("ADAPTER_ISSUER"),
-		ClientID:     l.req("ADAPTER_CLIENT_ID"),
+		Issuer:   l.req("ADAPTER_ISSUER"),
+		ClientID: l.req("ADAPTER_CLIENT_ID"),
 		// Client cong khai (chi PKCE, secret_hash = NULL trong oauth_clients) khong co
 		// secret — de trong la hop le, khong phai thieu cau hinh.
 		ClientSecret: l.opt("ADAPTER_CLIENT_SECRET", ""),
