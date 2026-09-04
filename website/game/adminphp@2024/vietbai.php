@@ -1,5 +1,13 @@
 <?php 
 include_once($_SERVER['DOCUMENT_ROOT'] . '/api/config.php');
+
+// Chan quyen phai dung TRUOC moi thao tac ghi. Truoc day dang bai, xoa bai va sua bai
+// deu chay o dau file, con kiem tra phien thi nam mai duoi phan hien thi -> ai cung
+// goi duoc vietbai.php?del=<id> de xoa bai ma khong can dang nhap.
+if((!empty($post) || isset($get['del'])) && empty($_SESSION['admin'])){
+	http_response_code(403);
+	exit('Chua dang nhap');
+}
 if(isset($post['post'])){
 	//game,img,price,project,noidung,content
 	if(!$post['content']){
@@ -19,15 +27,9 @@ if(isset($post['sua'])){
 	$a=$pdo->prepare("UPDATE `cms` SET `title` = ?,`content` = ? WHERE `id` = ?")->execute(array($post['title'],$post['content'],$post['id']));
 	echo "<script>alert('Sửa bài thành công!');location.href='vietbai.php'</script>";
 }
-if(isset($post['PIN'])){
-    $pin = '123456';
-    if($post['PIN'] != $pin){
-        exit('Mã PIN không đúng');
-    }else{
-        $_SESSION['admin'] = true;
-        echo "<script>alert('login thành công!');location.href='vietbai.php'</script>";
-    }
-}
+// Duong dang nhap bang ma PIN hardcode da bi bo: no cap dung $_SESSION['admin'] ma
+// ca trang quan tri tin tuong, nghia la ai biet ma do cung co toan quyen (ke ca
+// db.php?act=xu). Dang nhap qua /adminphp@2024/ bang bang admin_user nhu cac trang khac.
 ?>
 <!DOCTYPE html>
 <html lang="en">

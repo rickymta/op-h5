@@ -2,10 +2,40 @@
 error_reporting(0);
 session_start();
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-$pdo = new PDO("mysql:host=localhost;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
 $pdo->exec('set names utf8');
 $get = $_GET;
 $post = $_POST;
+
+// ---------------------------------------------------------------------------
+// Mat khau cua web.user duoc bam bang password_hash(). Hang cu con luu dang tho
+// nen ham nay chap nhan ca hai va TU NANG CAP ngay khi dang nhap dung lan dau.
+//
+// LUU Y QUAN TRONG: tcg.account.password VAN phai giu dang tho. Login server
+// (Java, khong co ma nguon) so sanh bang StringUtils.equals nen bam o do se lam
+// hong dang nhap trong game. Cho nao ghi sang tcg.account thi giu nguyen $passNew.
+// ---------------------------------------------------------------------------
+function web_password_verify($pdo, $username, $password){
+	if($username === '' || $password === ''){ return false; }
+	$stmt = $pdo->prepare("SELECT `id`, `password` FROM `user` WHERE `username` = ? LIMIT 1");
+	$stmt->execute(array($username));
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	if(!$row){ return false; }
+	$stored = (string)$row['password'];
+	if($stored === ''){ return false; }
+	// ban da bam
+	if($stored[0] === '$' && password_verify($password, $stored)){ return true; }
+	// hang cu dang tho: so sanh khong phu thuoc thoi gian roi bam lai ngay
+	if(hash_equals($stored, (string)$password)){
+		$pdo->prepare("UPDATE `user` SET `password` = ? WHERE `id` = ?")
+		    ->execute(array(password_hash($password, PASSWORD_DEFAULT), $row['id']));
+		return true;
+	}
+	return false;
+}
+function web_password_hash($password){
+	return password_hash($password, PASSWORD_DEFAULT);
+}
 $getfilter="'|(and|or)\\b.+?(>|<|=|in|like)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
 $postfilter="\\b(and|or)\\b.{1,6}?(=|>|<|\\bin\\b|\\blike\\b)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
 $cookiefilter="\\b(and|or)\\b.{1,6}?(=|>|<|\\bin\\b|\\blike\\b)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
@@ -145,13 +175,7 @@ switch($act){
 		if(!$username || !$password){
 			exit('Vui lòng nhập tài khoản và mật khẩu.');
 		}else{
-			//$result = $pdo->query("select * from user where username = '$username' and password = '$password' limit 1")->fetch();
-			$sql = "SELECT * FROM user WHERE username = :username AND password = :password";
-			$stmt = $pdo->prepare($sql);
-			$stmt->bindParam(':username', $username);
-			$stmt->bindParam(':password', $password);
-			$stmt->execute();
-			if($stmt->rowCount() > 0){
+			if(web_password_verify($pdo, $username, $password)){
 				$_SESSION['username'] = $username;
 				$pdo->prepare("UPDATE `user` SET `ip` = ?, `time` = NOW() WHERE `username` = ?")->execute(array($ip,$username));
 				exit('true');
@@ -165,17 +189,10 @@ switch($act){
 		$username = strtolower($post['username']);
 		$password = $post['password'];
 
-			$sql = "SELECT * FROM user WHERE username = :username AND password = :password";
-			$stmt = $pdo->prepare($sql);
-			$stmt->bindParam(':username', $username);
-			$stmt->bindParam(':password', $password);
-			$stmt->execute();
-
 		if(!$username || !$password){
 			exit('{"msg":"L\u01b0u \u00fd! Vui l\u00f2ng nh\u1eadp \u0111\u1ee7 c\u00e1c tr\u01b0\u1eddng!","check":"error"}');
 		}else{
-			$result = $pdo->query("select * from user where username = '$username' and password = '$password' limit 1")->fetch();
-			if($stmt->rowCount() > 0){
+			if(web_password_verify($pdo, $username, $password)){
 				$_SESSION['username'] = $username;
 				$pdo->prepare("UPDATE `user` SET `ip` = ?, `time` = NOW() WHERE `username` = ?")->execute(array($ip,$username));
 				exit('{"msg":"\u0110\u0103ng nh\u1EADp th\u00E0nh c\u00F4ng","check":"success"}');
@@ -220,7 +237,7 @@ switch($act){
 					exit('Bạn chỉ được phép tạo tối đa 2 tài khoản.');
 				}else{
 					$_SESSION['username'] = $username;
-					$pdo->prepare("INSERT INTO `user` (`username`, `password`, `email`, `ip`) VALUES (?,?,?,?)")->execute(array($username, $password, $email, $ip));
+					$pdo->prepare("INSERT INTO `user` (`username`, `password`, `email`, `ip`) VALUES (?,?,?,?)")->execute(array($username, web_password_hash($password), $email, $ip));
 					exit('true');
 				}
 		}
@@ -268,7 +285,7 @@ switch($act){
 			exit('{"msg":"Bạn chỉ được tạo tối đa 2 tài khoản!","check":"error"}');
 		}else{
 			$_SESSION['username'] = $username;
-			$pdo->prepare("INSERT INTO `user` (`username`, `password`, `email`, `ip`) VALUES (?,?,?,?)")->execute(array($username, $password, $email, $ip));
+			$pdo->prepare("INSERT INTO `user` (`username`, `password`, `email`, `ip`) VALUES (?,?,?,?)")->execute(array($username, web_password_hash($password), $email, $ip));
 			exit('{"msg":"\u0110\u0103ng k\u00FD th\u00E0nh c\u00F4ng","check":"success"}');
 		}
 	break;
@@ -282,7 +299,9 @@ switch($act){
 		$passNew =  $post['password-new'];
 		$passNew1 =$post['password1-new'];
 		$passOld = $post['password-old'];
-		$checkPwd = $pdo->query("select * from user where username = '$_SESSION[username]' limit 1")->fetch();
+		$stmtPwd = $pdo->prepare("SELECT * FROM `user` WHERE `username` = ? LIMIT 1");
+		$stmtPwd->execute(array($_SESSION['username']));
+		$checkPwd = $stmtPwd->fetch();
 		$sdt = $post['sdt'];
 		if($sdt == ''){
 			$sdt = $checkPwd['phone'];
@@ -302,7 +321,7 @@ switch($act){
 		}
 		}
 		
-		if($checkPwd['password'] != $passOld){
+		if(!web_password_verify($pdo, $_SESSION['username'], $passOld)){
 			exit('{"msg":"M\u1eadt kh\u1ea9u hi\u1ec7n t\u1ea1i kh\u00f4ng \u0111\u00fang","check":"error"}');
 		}
 		if($passNew != $passNew1){
@@ -311,7 +330,9 @@ switch($act){
 			if($passNew == null){
 				$passNew = $passOld;
 			}
-			$pdo->prepare("UPDATE `user` SET `phone` = ?, `password` = ? WHERE `username` = ?")->execute(array($sdt,$passNew,$_SESSION['username']));
+			$pdo->prepare("UPDATE `user` SET `phone` = ?, `password` = ? WHERE `username` = ?")->execute(array($sdt,web_password_hash($passNew),$_SESSION['username']));
+			// tcg.account GIU DANG THO: login server so sanh chuoi truc tiep (StringUtils.equals),
+			// bam o day se lam hong dang nhap trong game. Se bo han khi co lop Adapter.
 			$pdo->prepare("UPDATE tcg.account SET password = ? WHERE username = ?")->execute(array($passNew,$_SESSION['username']));
 			exit('{"msg":"C\u1EADp nh\u1EADt th\u00F4ng tin th\u00E0nh c\u00F4ng!","check":"success"}');
 		}

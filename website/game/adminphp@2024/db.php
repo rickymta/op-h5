@@ -2,7 +2,7 @@
 error_reporting(1);
 session_start();
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-$pdo = new PDO("mysql:host=localhost;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
 $pdo->exec('set names utf8');
 
 $getfilter="'|(and|or)\\b.+?(>|<|=|in|like)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
@@ -28,6 +28,15 @@ foreach($_COOKIE as $key=>$value){
 $post = $_POST;
 $get = $_GET;
 $act= $get['act'];
+
+// Moi thao tac tru 'login' deu phai co phien admin. Truoc day switch chay khong
+// kiem tra gi, nen bat ky ai POST db.php?act=xu cung cong duoc xu cho tai khoan.
+function requireAdmin(){
+	if(empty($_SESSION['admin'])){
+		http_response_code(403);
+		exit('Chua dang nhap');
+	}
+}
 $today = date("Y-m-d");
 $newdate = strtotime ( '-1 day' , strtotime ( $today ) ) ;
 $newdate = date ( 'Y-m-d' , $newdate );
@@ -63,7 +72,7 @@ switch ($act) {
             exit('Vui lòng nhập tài khoản và mật khẩu');
         }else{
         //    $result = $pdo->query("select * from admin_user where username = '$username' and password = '$password' ")->fetch();
-            if($stmt->rowCount() < 0){
+            if($stmt->rowCount() < 1){
                 exit('tài khoản hoặc mk ko đúng');
             }else{
                 $_SESSION['admin'] = $username;
@@ -76,6 +85,7 @@ switch ($act) {
         header('location: /admin');
     break;    
     case 'xu':
+        requireAdmin();
         $username = $post['username'];
         $xu = $post['xu'];
         $xuthat = $xu/3;
@@ -88,6 +98,7 @@ switch ($act) {
         }
     break;
     case 'xusk':
+        requireAdmin();
         $username = $post['username'];
         $xu = $post['xu'];
         if(!$username || !$xu){
@@ -99,6 +110,7 @@ switch ($act) {
     break;     
 
     case 'code':
+        requireAdmin();
         $code = $post['code'];
         $item = $post['item'];
         $loaicode = $post['loaicode'];
@@ -110,6 +122,7 @@ switch ($act) {
         }
     break;    
     case 'edit':
+        requireAdmin();
         $code = $post['code'];
         $item = $post['item'];
         $idcode = $post['idcode'];
@@ -122,10 +135,15 @@ switch ($act) {
         }
     break;     
     case 'getidcode':
-        echo $pdo->query("select * from giftcode where id = '$get[id]'")->fetch()['item'];
-    break;   
-        case 'del':
-        echo $pdo->prepare("DELETE FROM `giftcode` WHERE `id` = ?")->execute(array($get[id]));
+        requireAdmin();
+        $stmtG = $pdo->prepare("SELECT `item` FROM `giftcode` WHERE `id` = ?");
+        $stmtG->execute(array($get['id']));
+        $rowG = $stmtG->fetch(PDO::FETCH_ASSOC);
+        echo $rowG ? $rowG['item'] : '';
+    break;
+    case 'del':
+        requireAdmin();
+        echo $pdo->prepare("DELETE FROM `giftcode` WHERE `id` = ?")->execute(array($get['id']));
     break; 
 
 }

@@ -1,33 +1,58 @@
 <?php
 include '../api/config.php';
-$username = strtolower($_GET['u']); // Note: Changed from $get to $_GET
-$password = $_GET['p']; // Note: Changed from $get to $_GET
-$sql = "SELECT * FROM user WHERE username = :username AND password = :password";
-$stmt = $pdo->prepare($sql);
-$stmt->bindParam(':username', $username);
-$stmt->bindParam(':password', $password);
-$stmt->execute();
 
-if($stmt->rowCount() > 0){
-    $_SESSION['username'] = $username;
-    exit('true');
-}else{
-    // Check if the username exists, if not, insert it
-    $sql2 = "SELECT * FROM user WHERE username = :username";
-    $stmt2 = $pdo->prepare($sql2);
-    $stmt2->bindParam(':username', $username);
-    $stmt2->execute();
+// Cau noi web<->game: client LayaAir goi GET /api/getSession.php?u=&p=
+//
+// Hop dong GET KHONG doi duoc o buoc nay: chuoi goi nam trong bundle client 9,4 MB
+// da lam roi ma, khong co nguon de dung lai. Doi lai:
+//   - mat khau doi chieu qua password_hash (web_password_verify trong config.php)
+//   - nhanh tu tao tai khoan da co kiem tra dinh dang va gioi han theo IP, thay vi
+//     nhan bat ky chuoi nao nhu truoc
+//   - nginx khong ghi query string cua duong dan nay vao access log
+// Ca ba deu la bien phap tam. Ke hoach that: bo han file nay khi lop Adapter len,
+// luc do client lay token tu he thong ID chu khong gui mat khau qua URL nua.
 
-    if($stmt2->rowCount() === 0){
-        $pdo->prepare("INSERT INTO `user` (`username`, `password`, `ip`) VALUES (?,?,?)")->execute(array($username, $password, $ip)); // Note: Added $ip variable, assuming it's defined elsewhere
-        $_SESSION['username'] = $username;
-        exit('taoaccmoi');
-    } else {
-        session_destroy();
-        exit('lamgiday');
-    }
-	
+$username = strtolower(trim($_GET['u']));
+$password = $_GET['p'];
 
-    
+if($username === '' || $password === ''){
+	exit('lamgiday');
 }
-?>
+
+// Dang nhap duoc -> xong
+if(web_password_verify($pdo, $username, $password)){
+	$_SESSION['username'] = $username;
+	exit('true');
+}
+
+// Sai mat khau cho tai khoan da ton tai -> tu choi, khong tao gi them
+$stmt = $pdo->prepare("SELECT `id` FROM `user` WHERE `username` = ? LIMIT 1");
+$stmt->execute(array($username));
+if($stmt->fetch()){
+	session_destroy();
+	exit('lamgiday');
+}
+
+// Tai khoan chua co: tao moi, nhung ap dung dung cac rang buoc nhu case 'reg'
+// (truoc day nhanh nay nhan moi chuoi va khong gioi han so luong).
+$countUser = strlen($username);
+$countPwd  = strlen($password);
+if($countUser < 6 || $countUser > 15 || $countPwd < 6 || $countPwd > 15){
+	session_destroy();
+	exit('lamgiday');
+}
+if(!preg_match('/^[a-z0-9_]+$/', $username)){
+	session_destroy();
+	exit('lamgiday');
+}
+$checkIp = $pdo->prepare("SELECT COUNT(`id`) AS total FROM `user` WHERE `ip` = ?");
+$checkIp->execute(array($ip));
+if((int)$checkIp->fetch(PDO::FETCH_ASSOC)['total'] >= 2){
+	session_destroy();
+	exit('lamgiday');
+}
+
+$pdo->prepare("INSERT INTO `user` (`username`, `password`, `ip`) VALUES (?,?,?)")
+    ->execute(array($username, web_password_hash($password), $ip));
+$_SESSION['username'] = $username;
+exit('taoaccmoi');

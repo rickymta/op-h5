@@ -6,7 +6,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== '__REV_QUERY_KEY__') {
 }
 
 // Kết nối đến cơ sở dữ liệu
-$pdo = new PDO("mysql:host=localhost;dbname=web","root","__WEB_DB_PASSWORD_REV__");
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=web","root","__WEB_DB_PASSWORD_REV__");
 $pdo->exec('set names utf8');
 
 // Lấy dữ liệu từ cơ sở dữ liệu

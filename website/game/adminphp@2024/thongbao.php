@@ -1,6 +1,6 @@
 <?php
 session_start();
-$pdo = new PDO("mysql:host=localhost;dbname=tcg","root","__MYSQL_ROOT_PASSWORD__");
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=tcg","root","__MYSQL_ROOT_PASSWORD__");
 $pdo->exec('set names utf8');
 $get = $_GET;
 $post = $_POST;

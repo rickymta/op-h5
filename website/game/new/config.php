@@ -14,7 +14,7 @@ session_start();
  $_SESSION['last_post_time'] = time();
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-$pdo = new PDO("mysql:host=localhost;dbname=web","root","__MYSQL_ROOT_PASSWORD__");; // khai báo db tcg
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=web","root","__MYSQL_ROOT_PASSWORD__");; // khai báo db tcg
 $pdo->exec('set names utf8');
 
 if(!$_SESSION['username']){

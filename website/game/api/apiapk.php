@@ -1,5 +1,5 @@
 <?php
-$pdo = new PDO("mysql:host=localhost;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=web","root","__MYSQL_ROOT_PASSWORD__");
 $pdo->exec('set names utf8');
 $get = $_GET;
 $post = $_POST;
