@@ -44,3 +44,6 @@ platform/bin/
 *.pem
 *.key
 id-signing*
+
+# sinh tu dong boi gen-game-servers.sh
+docker/docker-compose.game.yml

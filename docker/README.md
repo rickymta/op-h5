@@ -100,6 +100,42 @@ docker stats --no-stream                                   # đo RAM thật, ch�
 
 Nạp lại Excel nóng sau khi sửa: `curl -X POST http://127.0.0.1:9999/srv/game/cmd/excel/reload` (cần `Login-Token` từ `POST /staff/login`).
 
+## 5b. Nhiều game server và hai dịch vụ nền tảng
+
+Compose không có vòng lặp và `--scale` không dùng được (mỗi game server cần `--sc` và
+`wsPort` riêng), nên đội server được sinh ra từ một dòng trong `.env`:
+
+```bash
+# .env:  GAME_SERVERS=s1:8001:host-01,s2:8002:host-01,s3:8003:host-02
+#                      ^   ^     ^ device_code (máy vật lý)
+#                      |   wsPort — HTTP nội bộ LUÔN là wsPort + 10000
+#                      srvCode, khớp dòng trong tcg.srv_game
+./gen-game-servers.sh --write        # -> docker-compose.game.yml
+docker compose -f docker-compose.yml -f docker-compose.game.yml \
+               -f docker-compose.platform.yml up -d
+```
+
+Bộ sinh **từ chối** trùng `srvCode`, trùng `wsPort`, và trường hợp khó thấy hơn: `wsPort`
+của server này đụng port HTTP (`wsPort+10000`) của server kia. File sinh ra tự chứa
+(không dùng `<<: *java`) vì YAML anchor không băng qua được ranh giới file trong Compose.
+
+Nó cũng vô hiệu hoá service `game` mặc định bằng profile, và thay hẳn `depends_on` của
+`login` bằng `!override` để `login` chờ **mọi** game server — nếu chỉ ghi đè thường,
+Compose hợp nhất map và giữ lại phụ thuộc vào `game` đã bị tắt.
+
+**RAM là ràng buộc thật:** mỗi game server thêm ~1,2 GB. Máy 8 GB chỉ vừa **một** server
+cùng hạ tầng. Thêm server là thêm máy, và `device_code` phải khớp máy thật vì cổng giới
+hạn tải dùng nó làm tầng thứ hai.
+
+`docker-compose.platform.yml` thêm hai dịch vụ Go (xem [platform/README.md](../platform/README.md)):
+
+| Dịch vụ | Cổng | Việc |
+|---|---|---|
+| `id` | 8080 | OIDC provider, danh tính, ví Xu |
+| `adapter` | 8090 | Đổi token ID → tài khoản game, **cổng giới hạn tải** |
+
+Cả hai đọc secret từ `.env` và **dừng ngay lúc khởi động** nếu thiếu biến bắt buộc.
+
 ## 6. Vận hành
 
 ```bash

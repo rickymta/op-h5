@@ -1,0 +1,80 @@
+# Hai dich vu cua nen tang: he thong ID va Adapter cua game.
+#
+# Dung kem file chinh:
+#   docker compose -f docker-compose.yml -f docker-compose.game.yml -f docker-compose.platform.yml up -d
+#
+# Ca hai deu network_mode: host, giong phan con lai, de goi 127.0.0.1:9000 (login server)
+# va 127.0.0.1:3306 (MySQL) ma khong phai sua gi.
+#
+# KHONG co bi mat nao trong file nay: moi gia tri nhay cam den tu .env, va thieu bien
+# bat buoc thi container dung ngay luc khoi dong chu khong chay tiep voi mac dinh.
+
+services:
+  id:
+    image: ${IMAGE_ID:-op-h5-id:latest}
+    build:
+      context: ../platform
+      dockerfile: Dockerfile
+      args: { CMD: id }
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      ID_ADDR: ":${ID_PORT:-8080}"
+      ID_ISSUER: ${ID_ISSUER:?dat trong .env — URL cong khai cua he thong ID}
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ID_SIGNING_KEY_PEM: ${ID_SIGNING_KEY_PEM:?sinh bang `openssl genrsa 2048`, dat trong .env}
+      ID_COOKIE_SECURE: ${ID_COOKIE_SECURE:-true}
+    depends_on:
+      mysql: { condition: service_healthy }
+    mem_limit: 128m
+    cpu_shares: 256
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ID_PORT:-8080}/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  adapter:
+    image: ${IMAGE_ADAPTER:-op-h5-adapter:latest}
+    build:
+      context: ../platform
+      dockerfile: Dockerfile
+      args: { CMD: adapter }
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      ADAPTER_ADDR: ":${ADAPTER_PORT:-8090}"
+      ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
+      ADAPTER_GAME_ID: ${ADAPTER_GAME_ID:-10091}
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ADAPTER_ISSUER: ${ID_ISSUER:?dat trong .env}
+      ADAPTER_CLIENT_ID: ${ADAPTER_CLIENT_ID:-haitac}
+      ADAPTER_CLIENT_SECRET: ${ADAPTER_CLIENT_SECRET:-}
+      ADAPTER_REDIRECT_URI: ${ADAPTER_REDIRECT_URI:?dat trong .env — phai khop oauth_clients.redirect_uris}
+      ADAPTER_LOGIN_BASE_URL: "http://127.0.0.1:9000"
+      TCG_SECRET: ${TCG_SECRET:?dat trong .env — phai bang secret trong env.yml}
+      ADAPTER_SECRET_ENC_KEY: ${ADAPTER_SECRET_ENC_KEY:?sinh bang `head -c 32 /dev/urandom | base64`}
+      ADAPTER_PUBLIC_HOST: ${PUBLIC_HOST:?dat trong .env}
+      ADAPTER_TLS: ${ADAPTER_TLS:-false}
+      ADAPTER_POLL_INTERVAL: ${ADAPTER_POLL_INTERVAL:-10s}
+      ADAPTER_TICKET_TTL: ${ADAPTER_TICKET_TTL:-60s}
+    depends_on:
+      id: { condition: service_healthy }
+      login: { condition: service_healthy }
+    mem_limit: 128m
+    cpu_shares: 256
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ADAPTER_PORT:-8090}/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
