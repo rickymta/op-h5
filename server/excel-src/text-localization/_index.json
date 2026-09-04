@@ -1,0 +1,33 @@
+{
+ "workbook": "text-localization.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "Sheet1",
+   "rows": 2072,
+   "cols": 6,
+   "formulas": 305
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet2",
+   "rows": 37,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "文本库",
+   "rows": 5094,
+   "cols": 5,
+   "formulas": 715
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet3",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "workbook": "primordial-era.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "莽荒纪基础",
+   "rows": 3,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "关卡基础",
+   "rows": 15,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "莽荒纪关卡",
+   "rows": 43,
+   "cols": 17,
+   "formulas": 21
+  }
+ ]
+}

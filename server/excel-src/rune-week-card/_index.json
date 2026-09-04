@@ -1,0 +1,19 @@
+{
+ "workbook": "rune-week-card.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "符文周卡活动基础",
+   "rows": 9,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "符文周卡详情",
+   "rows": 3,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "workbook": "overseas-prereg-mail.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "海外预约邮件",
+   "rows": 2,
+   "cols": 11,
+   "formulas": 0
+  }
+ ]
+}

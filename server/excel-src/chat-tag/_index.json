@@ -1,0 +1,19 @@
+{
+ "workbook": "chat-tag.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "聊天标签",
+   "rows": 19,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "聊天标签激活道具",
+   "rows": 19,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

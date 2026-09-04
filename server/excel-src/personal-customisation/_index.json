@@ -1,0 +1,33 @@
+{
+ "workbook": "personal-customisation.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "私人定制基础",
+   "rows": 84,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 7,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "私人定制商品",
+   "rows": 9,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "私人定制奖励池",
+   "rows": 34,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

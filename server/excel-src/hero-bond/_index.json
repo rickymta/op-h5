@@ -1,0 +1,26 @@
+{
+ "workbook": "hero-bond.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄羁绊",
+   "rows": 208,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "羁绊英雄星级",
+   "rows": 42,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "羁绊属性库",
+   "rows": 93,
+   "cols": 20,
+   "formulas": 0
+  }
+ ]
+}

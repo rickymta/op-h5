@@ -1,0 +1,19 @@
+{
+ "workbook": "序章.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "序章剧情",
+   "rows": 18,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "序章战斗对话",
+   "rows": 13,
+   "cols": 9,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "workbook": "兽灵技能控制.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "兽灵技能控制",
+   "rows": 24,
+   "cols": 14,
+   "formulas": 0
+  }
+ ]
+}

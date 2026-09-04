@@ -1,0 +1,47 @@
+{
+ "workbook": "race-tower.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "种族塔",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "人族塔",
+   "rows": 1001,
+   "cols": 30,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "仙族塔",
+   "rows": 1001,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "妖族塔",
+   "rows": 1001,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "神族塔",
+   "rows": 1001,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "魔族塔",
+   "rows": 1001,
+   "cols": 12,
+   "formulas": 0
+  }
+ ]
+}

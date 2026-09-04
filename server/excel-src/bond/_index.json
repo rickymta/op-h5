@@ -1,0 +1,47 @@
+{
+ "workbook": "bond.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "真英雄羁绊",
+   "rows": 172,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "获得英雄奖励",
+   "rows": 63,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "皮肤羁绊",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "原型对应羁绊组",
+   "rows": 79,
+   "cols": 11,
+   "formulas": 62
+  },
+  {
+   "file": "05.json",
+   "name": "羁绊组",
+   "rows": 58,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet1",
+   "rows": 29,
+   "cols": 12,
+   "formulas": 0
+  }
+ ]
+}

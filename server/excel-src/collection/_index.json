@@ -1,0 +1,152 @@
+{
+ "workbook": "collection.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "藏品穿戴要求",
+   "rows": 7,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "藏品基础",
+   "rows": 144,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "藏品随机属性组",
+   "rows": 271,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "藏品礼包",
+   "rows": 23,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "功能配置",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "藏品随机英雄组",
+   "rows": 208,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "专属种族属性组包",
+   "rows": 63,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "专属职业属性组包",
+   "rows": 46,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "专属英雄属性组包",
+   "rows": 29,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "固定属性藏品",
+   "rows": 63,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "专属英雄技能",
+   "rows": 59,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "Sheet1",
+   "rows": 1,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "藏品回收",
+   "rows": 16,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "藏品召唤方式",
+   "rows": 10,
+   "cols": 24,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "藏品召唤阶段奖励",
+   "rows": 21,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "16.json",
+   "name": "藏品召唤作弊",
+   "rows": 21,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "17.json",
+   "name": "藏品召唤奖池组",
+   "rows": 495,
+   "cols": 14,
+   "formulas": 162
+  },
+  {
+   "file": "18.json",
+   "name": "藏品召唤对话气泡",
+   "rows": 2,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "19.json",
+   "name": "属性升级组",
+   "rows": 53,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "20.json",
+   "name": "藏品推荐",
+   "rows": 121,
+   "cols": 12,
+   "formulas": 110
+  },
+  {
+   "file": "21.json",
+   "name": "Sheet2",
+   "rows": 9,
+   "cols": 11,
+   "formulas": 0
+  }
+ ]
+}

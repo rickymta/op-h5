@@ -1,0 +1,26 @@
+{
+ "workbook": "功能开启预告.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "功能开启预告",
+   "rows": 39,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 5,
+   "cols": 3,
+   "formulas": 5
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet2",
+   "rows": 40,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

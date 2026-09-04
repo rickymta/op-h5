@@ -1,0 +1,12 @@
+{
+ "workbook": "ad-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "广告领奖",
+   "rows": 7,
+   "cols": 18,
+   "formulas": 0
+  }
+ ]
+}

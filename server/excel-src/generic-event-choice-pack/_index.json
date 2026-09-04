@@ -1,0 +1,26 @@
+{
+ "workbook": "generic-event-choice-pack.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "通用自选礼包基础",
+   "rows": 2,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "通用自选礼包奖品池",
+   "rows": 4,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "通用自选礼包奖品项",
+   "rows": 149,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

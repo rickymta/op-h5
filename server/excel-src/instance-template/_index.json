@@ -1,0 +1,159 @@
+{
+ "workbook": "instance-template.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄实例",
+   "rows": 55633,
+   "cols": 18,
+   "formulas": 2951
+  },
+  {
+   "file": "02.json",
+   "name": "一方实例",
+   "rows": 11983,
+   "cols": 12,
+   "formulas": 1111
+  },
+  {
+   "file": "03.json",
+   "name": "主角快照实例",
+   "rows": 790,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "神器实例",
+   "rows": 41,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "对手库",
+   "rows": 1428,
+   "cols": 2,
+   "formulas": 1350
+  },
+  {
+   "file": "06.json",
+   "name": "随机英雄配置",
+   "rows": 81,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "随机英雄库",
+   "rows": 452,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "藏品实例",
+   "rows": 565,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "跨服天梯实例",
+   "rows": 1001,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "装备实例",
+   "rows": 20,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "符文实例",
+   "rows": 1696,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "命格实例",
+   "rows": 1771,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "仙器实例",
+   "rows": 187,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "兽灵实例",
+   "rows": 73,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "神龙实例",
+   "rows": 81,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "16.json",
+   "name": "Sheet1",
+   "rows": 1025,
+   "cols": 28,
+   "formulas": 5135
+  },
+  {
+   "file": "17.json",
+   "name": "Sheet2",
+   "rows": 3648,
+   "cols": 22,
+   "formulas": 0
+  },
+  {
+   "file": "18.json",
+   "name": "Sheet3",
+   "rows": 51,
+   "cols": 23,
+   "formulas": 191
+  },
+  {
+   "file": "19.json",
+   "name": "Sheet4",
+   "rows": 21,
+   "cols": 13,
+   "formulas": 17
+  },
+  {
+   "file": "20.json",
+   "name": "Sheet5",
+   "rows": 62,
+   "cols": 13,
+   "formulas": 16
+  },
+  {
+   "file": "21.json",
+   "name": "Sheet6",
+   "rows": 38122,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "22.json",
+   "name": "神装技能备注",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

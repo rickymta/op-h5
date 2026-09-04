@@ -1,0 +1,47 @@
+{
+ "workbook": "mayday-carnival.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "五一狂欢基础",
+   "rows": 5,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "抽奖类型",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "抽奖次数奖励",
+   "rows": 16,
+   "cols": 8,
+   "formulas": 14
+  },
+  {
+   "file": "04.json",
+   "name": "转盘奖励",
+   "rows": 30,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "转盘奖励类型",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

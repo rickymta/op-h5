@@ -1,0 +1,12 @@
+{
+ "workbook": "monday-grand-gift.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "周一豪礼",
+   "rows": 4,
+   "cols": 18,
+   "formulas": 0
+  }
+ ]
+}

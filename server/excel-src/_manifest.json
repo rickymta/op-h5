@@ -1,0 +1,11 @@
+{
+ "source": "server/excel/release",
+ "workbooks": {
+  "text-localization.xlsx": {
+   "sheets": 4,
+   "cells": 20065,
+   "formulas": 1020,
+   "formula_no_cache": 0
+  }
+ }
+}

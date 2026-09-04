@@ -1,0 +1,12 @@
+{
+ "workbook": "checkin.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "每日签到",
+   "rows": 373,
+   "cols": 17,
+   "formulas": 0
+  }
+ ]
+}

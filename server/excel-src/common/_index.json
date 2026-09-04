@@ -1,0 +1,26 @@
+{
+ "workbook": "common.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "功能开启",
+   "rows": 287,
+   "cols": 1024,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "全局变量",
+   "rows": 497,
+   "cols": 1024,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "屏蔽字库",
+   "rows": 3993,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

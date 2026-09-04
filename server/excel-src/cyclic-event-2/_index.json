@@ -1,0 +1,110 @@
+{
+ "workbook": "cyclic-event-2.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "全服限购活动",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "全服限购活动商品",
+   "rows": 16,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "全服限购活动次数奖励",
+   "rows": 46,
+   "cols": 19,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "锦鲤活动",
+   "rows": 519,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "锦鲤活动奖励",
+   "rows": 5,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "砸金蛋活动",
+   "rows": 163,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "砸金蛋方式",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "砸金蛋奖励",
+   "rows": 30,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "兽魂周卡活动",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "兽魂周卡档位",
+   "rows": 3,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "图腾周卡活动",
+   "rows": 5,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "图腾周卡档位",
+   "rows": 2,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "召唤福利基础",
+   "rows": 3,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "召唤福利奖励",
+   "rows": 41,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "Sheet1",
+   "rows": 5,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

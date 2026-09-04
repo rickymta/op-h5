@@ -1,0 +1,33 @@
+{
+ "workbook": "totem.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "图腾基础",
+   "rows": 7,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "图腾注能",
+   "rows": 1001,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "图腾进阶",
+   "rows": 57,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "混沌图腾属性",
+   "rows": 102,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "workbook": "battle-scene-config.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "战斗场景配置",
+   "rows": 57,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

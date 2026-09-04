@@ -1,0 +1,33 @@
+{
+ "workbook": "name-pool.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "姓",
+   "rows": 258,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "名",
+   "rows": 1866,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "完整",
+   "rows": 857,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "公会名称",
+   "rows": 202,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

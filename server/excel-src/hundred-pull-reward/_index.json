@@ -1,0 +1,19 @@
+{
+ "workbook": "hundred-pull-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "百抽基础",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "百抽奖励任务",
+   "rows": 12,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

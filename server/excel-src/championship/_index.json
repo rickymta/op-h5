@@ -1,0 +1,26 @@
+{
+ "workbook": "championship.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "冠军赛回合",
+   "rows": 12,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "冠军赛排行榜奖励",
+   "rows": 12,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "冠军赛竞猜随机奖励",
+   "rows": 4,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

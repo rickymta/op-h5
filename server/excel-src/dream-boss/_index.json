@@ -1,0 +1,54 @@
+{
+ "workbook": "dream-boss.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "梦境BOSS基础",
+   "rows": 21,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "梦境BOSS梦境配置",
+   "rows": 4,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "梦境BOSS分组配置",
+   "rows": 10,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "梦境BOSS怪物池",
+   "rows": 109,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "梦境BOSS击杀奖励池",
+   "rows": 37,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "梦境BOSS追加奖励池",
+   "rows": 37,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet1",
+   "rows": 38,
+   "cols": 8,
+   "formulas": 1
+  }
+ ]
+}

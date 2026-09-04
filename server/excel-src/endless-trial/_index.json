@@ -1,0 +1,33 @@
+{
+ "workbook": "endless-trial.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "无尽试炼buff选项",
+   "rows": 9,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "无尽试炼关卡",
+   "rows": 1521,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "无尽试炼排行榜奖励",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "无尽试炼奖励展示",
+   "rows": 5,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

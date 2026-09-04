@@ -1,0 +1,19 @@
+{
+ "workbook": "lingxiao-palace.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "凌霄宝殿",
+   "rows": 3001,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "神位限制",
+   "rows": 20,
+   "cols": 19,
+   "formulas": 0
+  }
+ ]
+}

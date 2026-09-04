@@ -1,0 +1,26 @@
+{
+ "workbook": "value-pack.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "超值礼包基础",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "超值礼包页签",
+   "rows": 4,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "超值礼包商品",
+   "rows": 25,
+   "cols": 12,
+   "formulas": 0
+  }
+ ]
+}

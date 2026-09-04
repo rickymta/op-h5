@@ -1,0 +1,19 @@
+{
+ "workbook": "linked-hero.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "连线英雄关卡",
+   "rows": 16,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "连线英雄怪物",
+   "rows": 38,
+   "cols": 13,
+   "formulas": 0
+  }
+ ]
+}

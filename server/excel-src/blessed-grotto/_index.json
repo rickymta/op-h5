@@ -1,0 +1,33 @@
+{
+ "workbook": "blessed-grotto.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "我的洞天福地",
+   "rows": 11,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "掠夺",
+   "rows": 91,
+   "cols": 24,
+   "formulas": 90
+  },
+  {
+   "file": "03.json",
+   "name": "稀有道具掠夺概率",
+   "rows": 49,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 51,
+   "cols": 10,
+   "formulas": 50
+  }
+ ]
+}

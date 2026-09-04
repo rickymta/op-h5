@@ -1,0 +1,26 @@
+{
+ "workbook": "summer-battle.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "暑期大作战基础",
+   "rows": 18,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "暑期大作战积分奖励",
+   "rows": 241,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "任务类型",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

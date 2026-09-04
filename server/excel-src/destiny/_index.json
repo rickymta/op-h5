@@ -1,0 +1,103 @@
+{
+ "workbook": "destiny.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "命格基础",
+   "rows": 71,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 20,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "命格品质",
+   "rows": 5,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "命格洗练属性库",
+   "rows": 30001,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "命格原型",
+   "rows": 23,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "命格栏位",
+   "rows": 7,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "命格升级经验",
+   "rows": 71,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "命格升级属性",
+   "rows": 841,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "命格升级技能",
+   "rows": 501,
+   "cols": 5,
+   "formulas": 200
+  },
+  {
+   "file": "10.json",
+   "name": "命格商店",
+   "rows": 60,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "命格套装",
+   "rows": 3,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "修正洗練屬性庫Sheet",
+   "rows": 15001,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "瘦身命格洗练属性库",
+   "rows": 16,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "命格进阶",
+   "rows": 67,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

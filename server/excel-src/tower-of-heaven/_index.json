@@ -1,0 +1,26 @@
+{
+ "workbook": "tower-of-heaven.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "通天塔关卡",
+   "rows": 1521,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "怪物语录",
+   "rows": 42,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "通天塔通关奖励",
+   "rows": 153,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "workbook": "arena.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "竞技场机器人一方库",
+   "rows": 221,
+   "cols": 20,
+   "formulas": 215
+  },
+  {
+   "file": "02.json",
+   "name": "竞技场机器人主角库",
+   "rows": 61,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "竞技场每日奖励",
+   "rows": 12,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "竞技场赛季奖励",
+   "rows": 12,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "竞技场每周宝箱",
+   "rows": 8,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "竞技场挑战奖励",
+   "rows": 9,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

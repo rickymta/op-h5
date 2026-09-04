@@ -1,0 +1,68 @@
+{
+ "workbook": "rune.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "符文属性",
+   "rows": 109,
+   "cols": 7,
+   "formulas": 60
+  },
+  {
+   "file": "02.json",
+   "name": "符文基础",
+   "rows": 23,
+   "cols": 39,
+   "formulas": 26
+  },
+  {
+   "file": "03.json",
+   "name": "符文技能特殊洗练",
+   "rows": 5,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "符文技能",
+   "rows": 277,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "符文技能评分",
+   "rows": 185,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "符文锻造",
+   "rows": 23,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "自定义符文道具",
+   "rows": 3,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet1",
+   "rows": 139,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "符文配置对照",
+   "rows": 5,
+   "cols": 23,
+   "formulas": 0
+  }
+ ]
+}

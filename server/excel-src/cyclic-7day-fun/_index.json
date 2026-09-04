@@ -1,0 +1,19 @@
+{
+ "workbook": "cyclic-7day-fun.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "循环七天乐基础",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "循环七天乐商店",
+   "rows": 15,
+   "cols": 9,
+   "formulas": 0
+  }
+ ]
+}

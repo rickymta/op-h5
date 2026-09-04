@@ -1,0 +1,26 @@
+{
+ "workbook": "monthly-first-recharge.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "每月首充基础",
+   "rows": 11,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "每月首充奖励分组",
+   "rows": 1,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet3",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "workbook": "constellation-map.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "星宿图升级",
+   "rows": 721,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "星宿基础",
+   "rows": 29,
+   "cols": 7,
+   "formulas": 42
+  }
+ ]
+}

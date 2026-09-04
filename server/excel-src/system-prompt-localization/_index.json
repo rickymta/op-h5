@@ -1,0 +1,19 @@
+{
+ "workbook": "system-prompt-localization.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "代码提示语言",
+   "rows": 2885,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet3",
+   "rows": 58,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

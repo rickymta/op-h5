@@ -1,0 +1,68 @@
+{
+ "workbook": "baoqing-workshop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "宝青坊基础",
+   "rows": 20,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "宝青坊作弊",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "宝青坊召唤方式",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "宝青坊召唤次数奖励",
+   "rows": 26,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "宝青坊召唤分组",
+   "rows": 1122,
+   "cols": 16,
+   "formulas": 392
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet2",
+   "rows": 34,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet1",
+   "rows": 230,
+   "cols": 11,
+   "formulas": 427
+  },
+  {
+   "file": "08.json",
+   "name": "UP召唤分组Sheet2",
+   "rows": 567,
+   "cols": 23,
+   "formulas": 1175
+  },
+  {
+   "file": "09.json",
+   "name": "随机库Sheet3",
+   "rows": 10000,
+   "cols": 1,
+   "formulas": 10000
+  }
+ ]
+}

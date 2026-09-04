@@ -17,6 +17,7 @@ server/**/*.log
 server/erl_crash.dump
 server/login/*.keystore
 server/excel/release/*%3F*
+server/excel-src
 website/game/utility/*%3F*
 docker/initdb
 docker/.env

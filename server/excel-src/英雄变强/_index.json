@@ -1,0 +1,19 @@
+{
+ "workbook": "英雄变强.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄变强",
+   "rows": 25,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "资源获取",
+   "rows": 23,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

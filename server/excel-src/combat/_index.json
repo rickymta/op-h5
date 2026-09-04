@@ -1,0 +1,75 @@
+{
+ "workbook": "combat.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "阵法配置",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "阵营加成",
+   "rows": 32,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "buff",
+   "rows": 3120,
+   "cols": 62,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "变身",
+   "rows": 10,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "战斗测试",
+   "rows": 1250,
+   "cols": 4,
+   "formulas": 78
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet（buff汇总）",
+   "rows": 101,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet勿删",
+   "rows": 46,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet1",
+   "rows": 289,
+   "cols": 59,
+   "formulas": 10
+  },
+  {
+   "file": "09.json",
+   "name": "Sheet2",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "阵法升级",
+   "rows": 607,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

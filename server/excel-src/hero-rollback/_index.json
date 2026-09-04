@@ -1,0 +1,47 @@
+{
+ "workbook": "hero-rollback.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄回退消耗",
+   "rows": 45,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄回退星级奖励",
+   "rows": 52,
+   "cols": 10,
+   "formulas": 102
+  },
+  {
+   "file": "03.json",
+   "name": "英雄高阶回退星级奖励",
+   "rows": 5,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "英雄回退等级奖励",
+   "rows": 2001,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "英雄回退阶数奖励",
+   "rows": 8,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "英雄材料回退数量",
+   "rows": 50,
+   "cols": 22,
+   "formulas": 0
+  }
+ ]
+}

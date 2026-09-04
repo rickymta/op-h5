@@ -1,0 +1,89 @@
+{
+ "workbook": "launch-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "开服活动基础",
+   "rows": 5,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "七日历练展示",
+   "rows": 8,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "七日历练任务",
+   "rows": 99,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "七日历练宝箱",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "七日历练商店",
+   "rows": 22,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "锦囊之谜任务",
+   "rows": 50,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "锦囊之谜宝箱",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "云游仙境任务",
+   "rows": 50,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "云游仙境宝箱",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "功劳簿任务",
+   "rows": 50,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "功劳簿等级",
+   "rows": 8,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

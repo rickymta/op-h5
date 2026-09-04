@@ -1,0 +1,33 @@
+{
+ "workbook": "immortal-artifact-inherit.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "仙器继承基础",
+   "rows": 7,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "仙器继承关系",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "仙器继承消耗",
+   "rows": 61,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 65,
+   "cols": 15,
+   "formulas": 259
+  }
+ ]
+}

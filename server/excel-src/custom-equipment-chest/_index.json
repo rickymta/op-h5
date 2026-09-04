@@ -1,0 +1,12 @@
+{
+ "workbook": "custom-equipment-chest.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "定制装备",
+   "rows": 14,
+   "cols": 23,
+   "formulas": 0
+  }
+ ]
+}

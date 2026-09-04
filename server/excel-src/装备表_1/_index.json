@@ -1,0 +1,82 @@
+{
+ "workbook": "装备表_1.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "装备表",
+   "rows": 94,
+   "cols": 33,
+   "formulas": 93
+  },
+  {
+   "file": "02.json",
+   "name": "装备进阶",
+   "rows": 25,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "装备套装",
+   "rows": 34,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "精炼合成印记概率",
+   "rows": 5,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "附魔套装",
+   "rows": 16,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "附魔卷轴",
+   "rows": 16,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "附魔大类名称",
+   "rows": 6,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "附魔属性分组概率",
+   "rows": 101,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "附魔属性",
+   "rows": 901,
+   "cols": 6,
+   "formulas": 891
+  },
+  {
+   "file": "10.json",
+   "name": "新版附魔属性变更概率",
+   "rows": 5,
+   "cols": 7,
+   "formulas": 9
+  },
+  {
+   "file": "11.json",
+   "name": "Sheet1",
+   "rows": 25,
+   "cols": 14,
+   "formulas": 80
+  }
+ ]
+}

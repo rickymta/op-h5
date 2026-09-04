@@ -1,0 +1,26 @@
+{
+ "workbook": "tenfold-rebate.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "基础配置",
+   "rows": 2,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "赔率填写",
+   "rows": 6,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet3",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "workbook": "hero-summon.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄召唤",
+   "rows": 10,
+   "cols": 27,
+   "formulas": 2
+  },
+  {
+   "file": "02.json",
+   "name": "英雄召唤星组",
+   "rows": 733,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "英雄召唤作弊",
+   "rows": 6,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet(基础召唤概率)",
+   "rows": 95,
+   "cols": 9,
+   "formulas": 411
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet(友情召唤概率)",
+   "rows": 92,
+   "cols": 9,
+   "formulas": 399
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet(高级召唤概率)",
+   "rows": 86,
+   "cols": 18,
+   "formulas": 336
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet(积分召唤概率)",
+   "rows": 46,
+   "cols": 9,
+   "formulas": 174
+  }
+ ]
+}

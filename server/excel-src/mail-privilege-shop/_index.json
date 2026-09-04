@@ -1,0 +1,26 @@
+{
+ "workbook": "mail-privilege-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "邮件特权商城",
+   "rows": 8,
+   "cols": 24,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet2",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet3",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

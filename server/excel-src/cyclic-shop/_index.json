@@ -1,0 +1,68 @@
+{
+ "workbook": "cyclic-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "循环商城基础",
+   "rows": 203,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "循环商城商品",
+   "rows": 81,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "自然日期商城基础",
+   "rows": 129,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "自然日期商城商品",
+   "rows": 124,
+   "cols": 16,
+   "formulas": 10
+  },
+  {
+   "file": "05.json",
+   "name": "自然日兑换商城基础",
+   "rows": 7,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "自然日兑换商城商品",
+   "rows": 156,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "自然日研磨商城基础",
+   "rows": 2,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet1",
+   "rows": 5,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "自然日研磨商城商品",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

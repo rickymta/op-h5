@@ -1,0 +1,54 @@
+{
+ "workbook": "guild-war.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "公会战据点",
+   "rows": 41,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "公会战排行榜奖励",
+   "rows": 100,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "公会战废墟BUFF",
+   "rows": 17,
+   "cols": 8,
+   "formulas": 15
+  },
+  {
+   "file": "04.json",
+   "name": "公会战结算奖励",
+   "rows": 21,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "公会战时间表",
+   "rows": 5,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "公会战挑战难度",
+   "rows": 4,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

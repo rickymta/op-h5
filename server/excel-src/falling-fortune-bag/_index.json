@@ -1,0 +1,26 @@
+{
+ "workbook": "falling-fortune-bag.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "天降福袋基础",
+   "rows": 86,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "天降福袋奖励",
+   "rows": 7,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "解锁额外名额",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

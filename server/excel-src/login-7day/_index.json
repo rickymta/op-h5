@@ -1,0 +1,19 @@
+{
+ "workbook": "login-7day.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "七日登录奖励",
+   "rows": 8,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1（备份）",
+   "rows": 7,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

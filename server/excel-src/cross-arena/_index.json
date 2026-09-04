@@ -1,0 +1,33 @@
+{
+ "workbook": "cross-arena.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "跨服演武场排行榜奖励",
+   "rows": 12,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "跨服演武场挑战奖励",
+   "rows": 43,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "跨服演武场每日宝箱",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "跨服演武场机器人库",
+   "rows": 215,
+   "cols": 5,
+   "formulas": 197
+  }
+ ]
+}

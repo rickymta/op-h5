@@ -1,0 +1,54 @@
+{
+ "workbook": "immortal-artifact.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "仙器基础",
+   "rows": 2486,
+   "cols": 33,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "仙器碎片",
+   "rows": 277,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "仙器栏位",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "仙器技能评分",
+   "rows": 190,
+   "cols": 7,
+   "formulas": 1
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 481,
+   "cols": 9,
+   "formulas": 1443
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet2",
+   "rows": 601,
+   "cols": 12,
+   "formulas": 2402
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet3海外版备份勿删",
+   "rows": 258,
+   "cols": 33,
+   "formulas": 3
+  }
+ ]
+}

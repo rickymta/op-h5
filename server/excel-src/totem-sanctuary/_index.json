@@ -1,0 +1,33 @@
+{
+ "workbook": "totem-sanctuary.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "图腾圣殿类型",
+   "rows": 6,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "图腾圣殿boss方案",
+   "rows": 31,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "图腾圣殿副本",
+   "rows": 61,
+   "cols": 10,
+   "formulas": 48
+  },
+  {
+   "file": "04.json",
+   "name": "图腾圣殿排行榜奖励",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

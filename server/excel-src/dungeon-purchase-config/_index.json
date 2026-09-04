@@ -1,0 +1,19 @@
+{
+ "workbook": "dungeon-purchase-config.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "副本购买配置",
+   "rows": 11,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "副本购买消耗",
+   "rows": 14,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

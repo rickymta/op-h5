@@ -1,0 +1,26 @@
+{
+ "workbook": "launch-battlepass.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "开服战令基础",
+   "rows": 1,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "开服战令积分奖励",
+   "rows": 16,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "开服战令任务类型",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

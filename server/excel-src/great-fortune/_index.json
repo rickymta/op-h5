@@ -1,0 +1,33 @@
+{
+ "workbook": "great-fortune.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "鸿运当头基础",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "鸿运当头礼包",
+   "rows": 22,
+   "cols": 23,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "鸿运当头开放日期",
+   "rows": 8,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "鸿运当头礼包池",
+   "rows": 638,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

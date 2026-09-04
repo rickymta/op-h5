@@ -26,6 +26,10 @@ import zipfile
 from xml.sax.saxutils import escape
 
 INLINE = re.compile(r'<c ([^>]*?)t="inlineStr"([^>]*)><is>(.*?)</is></c>', re.S)
+# Chuoi RONG: openpyxl ghi <c r="I22" t="inlineStr"></c> (khong co <is>). Doi thanh o BLANK co mat
+# (<c r="I22"/>), dung nhu Excel ghi o co dinh dang nhung trong. Voi XSSFRowWrap cua server, o BLANK
+# co mat va o chuoi rong deu tra "" (khac voi o THIEU tra gia tri mac dinh) -> giu duoc hanh vi goc.
+INLINE_EMPTY = re.compile(r'<c ([^>]*?)t="inlineStr"([^>]*?)(?:></c>|/>)', re.S)
 TEXT = re.compile(r'<t[^>]*>(.*?)</t>', re.S)
 UNESC = [('&lt;', '<'), ('&gt;', '>'), ('&quot;', '"'), ('&apos;', "'"), ('&amp;', '&')]
 
@@ -71,6 +75,13 @@ def convert(path):
                 changed += 1
                 return '<c %st="s"%s><v>%d</v></c>' % (m.group(1), m.group(2), sidx(t))
             x = INLINE.sub(rep, x)
+
+            def rep_empty(m):
+                nonlocal changed
+                changed += 1
+                attrs = (m.group(1) + m.group(2)).strip()
+                return '<c %s/>' % attrs if attrs else '<c/>'
+            x = INLINE_EMPTY.sub(rep_empty, x)
             data = x.encode('utf-8')
         out[n] = data
 

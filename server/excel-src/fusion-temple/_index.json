@@ -1,0 +1,54 @@
+{
+ "workbook": "fusion-temple.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "融合神殿难度",
+   "rows": 16,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "融合神殿关卡",
+   "rows": 301,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "融合神殿挑战要求",
+   "rows": 901,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "融合神殿挑战奖励",
+   "rows": 196,
+   "cols": 5,
+   "formulas": 182
+  },
+  {
+   "file": "05.json",
+   "name": "融合神殿自选奖励",
+   "rows": 197,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "融合神殿排行榜",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet1",
+   "rows": 301,
+   "cols": 7,
+   "formulas": 1197
+  }
+ ]
+}

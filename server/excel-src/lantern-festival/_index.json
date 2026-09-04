@@ -1,0 +1,33 @@
+{
+ "workbook": "lantern-festival.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "元宵喜乐基础",
+   "rows": 2,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "元宵题库",
+   "rows": 126,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "元宵排行奖励",
+   "rows": 7,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "元宵礼包",
+   "rows": 5,
+   "cols": 9,
+   "formulas": 4
+  }
+ ]
+}

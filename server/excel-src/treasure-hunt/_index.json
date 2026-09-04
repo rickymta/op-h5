@@ -1,0 +1,47 @@
+{
+ "workbook": "treasure-hunt.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "寻宝商店",
+   "rows": 3,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "寻宝类型",
+   "rows": 5,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "寻宝分组",
+   "rows": 17,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "寻宝奖品",
+   "rows": 73,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 10,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "寻宝幸运值奖励",
+   "rows": 11,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "workbook": "timed-rollback.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "限时回退基础",
+   "rows": 71,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "限时回退方式",
+   "rows": 6,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "限时回退商店",
+   "rows": 5,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 2,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

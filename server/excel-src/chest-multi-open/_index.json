@@ -1,0 +1,12 @@
+{
+ "workbook": "chest-multi-open.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "宝箱连开礼包",
+   "rows": 11,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

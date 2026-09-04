@@ -1,0 +1,47 @@
+{
+ "workbook": "ghost-festival-night.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "中元夜基础",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "中元夜河灯",
+   "rows": 4,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "河灯奖池",
+   "rows": 48,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "中元夜宝箱次数奖励",
+   "rows": 19,
+   "cols": 5,
+   "formulas": 14
+  },
+  {
+   "file": "05.json",
+   "name": "中元夜商店",
+   "rows": 15,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "中元夜任务",
+   "rows": 11,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

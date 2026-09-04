@@ -1,0 +1,47 @@
+{
+ "workbook": "destiny-dungeon.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "命格副本关卡",
+   "rows": 201,
+   "cols": 15,
+   "formulas": 190
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 60,
+   "cols": 17,
+   "formulas": 60
+  },
+  {
+   "file": "03.json",
+   "name": "命格副本章节",
+   "rows": 21,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "命格副本宝箱",
+   "rows": 61,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "命格关卡挑战",
+   "rows": 54,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "命格章节路径",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

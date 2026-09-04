@@ -1,0 +1,180 @@
+{
+ "workbook": "recharge-benefit.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "付费充值",
+   "rows": 9,
+   "cols": 7,
+   "formulas": 16
+  },
+  {
+   "file": "02.json",
+   "name": "特权商城",
+   "rows": 8,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "每日礼包",
+   "rows": 24,
+   "cols": 14,
+   "formulas": 10
+  },
+  {
+   "file": "04.json",
+   "name": "每日礼奖品池",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "周限购商城",
+   "rows": 53,
+   "cols": 18,
+   "formulas": 3
+  },
+  {
+   "file": "06.json",
+   "name": "月限购商城",
+   "rows": 41,
+   "cols": 20,
+   "formulas": 10
+  },
+  {
+   "file": "07.json",
+   "name": "月卡",
+   "rows": 3,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "成长基金",
+   "rows": 21,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "爬塔基金",
+   "rows": 16,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "种族塔基金",
+   "rows": 76,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "快速作战基金",
+   "rows": 16,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "月基金",
+   "rows": 3,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "月基金奖励分组",
+   "rows": 80,
+   "cols": 5,
+   "formulas": 110
+  },
+  {
+   "file": "14.json",
+   "name": "月基金奖励",
+   "rows": 301,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "钜惠礼包",
+   "rows": 208,
+   "cols": 21,
+   "formulas": 0
+  },
+  {
+   "file": "16.json",
+   "name": "Sheet1",
+   "rows": 32,
+   "cols": 7,
+   "formulas": 32
+  },
+  {
+   "file": "17.json",
+   "name": "每日累充",
+   "rows": 18,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "18.json",
+   "name": "每日首充",
+   "rows": 13,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "19.json",
+   "name": "积天豪礼",
+   "rows": 16,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "20.json",
+   "name": "全服限购商品",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "21.json",
+   "name": "全服限购次数奖励",
+   "rows": 10,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "22.json",
+   "name": "超级特权",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "23.json",
+   "name": "周末限购商城",
+   "rows": 11,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "24.json",
+   "name": "仙玉基金",
+   "rows": 21,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "25.json",
+   "name": "元宝基金",
+   "rows": 21,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

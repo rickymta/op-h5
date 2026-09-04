@@ -1,0 +1,12 @@
+{
+ "workbook": "属性信息.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "属性信息",
+   "rows": 15,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

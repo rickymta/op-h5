@@ -1,0 +1,12 @@
+{
+ "workbook": "carnival-7day-fun.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "狂欢七天乐奖励",
+   "rows": 8,
+   "cols": 19,
+   "formulas": 0
+  }
+ ]
+}

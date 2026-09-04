@@ -1,0 +1,1 @@
+{"workbook":"功能开启预告.xlsx","sheet":"Sheet1","index":2,"rows":[[60,7],[24],[1440,10080,11760],[null,null,21840],[null,null,1560]],"formulas":{"A3":"=A1*A2","B3":"=A3*B1","C3":"=120*14*7","C4":"=B3+C3","C5":"=C4/14"},"dims":{"rows":5,"cols":3}}

@@ -1,0 +1,19 @@
+{
+ "workbook": "beast-soul-share.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "兽魂共享基础",
+   "rows": 28,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "兽魂共享解锁花费",
+   "rows": 31,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

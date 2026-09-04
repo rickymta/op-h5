@@ -1,0 +1,33 @@
+{
+ "workbook": "reset.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "重置基础",
+   "rows": 185,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "重置消耗",
+   "rows": 6,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "重置奖池",
+   "rows": 56,
+   "cols": 7,
+   "formulas": 52
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 1135,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

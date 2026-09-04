@@ -1,0 +1,19 @@
+{
+ "workbook": "newbie-benefit.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "新手福利兑换",
+   "rows": 17,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "新手福利任务",
+   "rows": 126,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

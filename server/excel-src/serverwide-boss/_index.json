@@ -1,0 +1,47 @@
+{
+ "workbook": "serverwide-boss.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "全服BOSS基础",
+   "rows": 19,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "全服BOSS关卡",
+   "rows": 8,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "全服BOSS攻击BUFF",
+   "rows": 11,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "全服BOSS伤害奖励",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "全服BOSS血量奖励",
+   "rows": 6,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "全服BOSS排行榜奖励",
+   "rows": 10,
+   "cols": 11,
+   "formulas": 0
+  }
+ ]
+}

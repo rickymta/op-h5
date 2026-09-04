@@ -1,0 +1,19 @@
+{
+ "workbook": "generic-leaderboard-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "通用排行榜配置",
+   "rows": 3,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "通用排行榜奖励",
+   "rows": 13,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

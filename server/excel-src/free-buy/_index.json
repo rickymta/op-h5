@@ -1,0 +1,26 @@
+{
+ "workbook": "free-buy.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "0元购基础",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "0元购商品",
+   "rows": 3,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "0元购任务",
+   "rows": 3,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

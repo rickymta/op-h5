@@ -1,0 +1,47 @@
+{
+ "workbook": "hero-inherit.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄继承时间",
+   "rows": 6,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄继承种族",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "英雄继承材料消耗",
+   "rows": 55,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "英雄继承规则",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "英雄星级返还规则",
+   "rows": 11,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "英雄天赋返还",
+   "rows": 185,
+   "cols": 12,
+   "formulas": 0
+  }
+ ]
+}

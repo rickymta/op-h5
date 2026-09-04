@@ -1,0 +1,33 @@
+{
+ "workbook": "class-immortal-artifact.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "职业仙器基础",
+   "rows": 201,
+   "cols": 17,
+   "formulas": 200
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 241,
+   "cols": 17,
+   "formulas": 240
+  },
+  {
+   "file": "03.json",
+   "name": "职业仙器栏位",
+   "rows": 2,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "职业仙器技能评分",
+   "rows": 139,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

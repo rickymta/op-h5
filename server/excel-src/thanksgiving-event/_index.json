@@ -1,0 +1,33 @@
+{
+ "workbook": "thanksgiving-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "感恩节活动基础",
+   "rows": 3,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "感恩节活动召唤方式",
+   "rows": 4,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "感恩节活动召唤分组",
+   "rows": 52,
+   "cols": 8,
+   "formulas": 28
+  },
+  {
+   "file": "04.json",
+   "name": "作弊规则",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

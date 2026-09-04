@@ -1,0 +1,47 @@
+{
+ "workbook": "divine-artifact.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "神器基础",
+   "rows": 6,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "神器技能",
+   "rows": 193,
+   "cols": 12,
+   "formulas": 482
+  },
+  {
+   "file": "03.json",
+   "name": "神器等级",
+   "rows": 1801,
+   "cols": 16,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "神器精炼",
+   "rows": 487,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "神器圣印",
+   "rows": 201,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet1",
+   "rows": 151,
+   "cols": 12,
+   "formulas": 208
+  }
+ ]
+}

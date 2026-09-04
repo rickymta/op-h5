@@ -1,0 +1,26 @@
+{
+ "workbook": "新手引导.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "引导配置",
+   "rows": 222,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 10,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1策划自己用",
+   "rows": 130,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

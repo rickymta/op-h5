@@ -1,0 +1,26 @@
+{
+ "workbook": "封神祭坛.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "封神祭坛等级",
+   "rows": 28,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "封神祭坛星级加成",
+   "rows": 85,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "献祭位开启条件",
+   "rows": 17,
+   "cols": 19,
+   "formulas": 0
+  }
+ ]
+}

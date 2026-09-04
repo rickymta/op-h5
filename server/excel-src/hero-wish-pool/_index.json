@@ -1,0 +1,40 @@
+{
+ "workbook": "hero-wish-pool.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄祈愿基础",
+   "rows": 18,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄祈愿召唤方式",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "英雄祈愿心仪英雄",
+   "rows": 58,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "英雄祈愿召唤奖励",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 66,
+   "cols": 14,
+   "formulas": 70
+  }
+ ]
+}

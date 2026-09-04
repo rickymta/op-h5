@@ -1,0 +1,12 @@
+{
+ "workbook": "minigame-direct-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "直接领奖",
+   "rows": 7,
+   "cols": 19,
+   "formulas": 0
+  }
+ ]
+}

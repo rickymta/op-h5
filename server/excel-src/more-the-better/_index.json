@@ -1,0 +1,19 @@
+{
+ "workbook": "more-the-better.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "多多益善基础",
+   "rows": 48,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "多多益善任务",
+   "rows": 26,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

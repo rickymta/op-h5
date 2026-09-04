@@ -1,0 +1,54 @@
+{
+ "workbook": "magic-trick.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "魔术戏法活动基础",
+   "rows": 6,
+   "cols": 19,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "魔术戏法BOSS",
+   "rows": 261,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "召唤类型",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "魔术戏法召唤",
+   "rows": 61,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 61,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "魔术戏法礼包",
+   "rows": 15,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "魔术戏法兑换",
+   "rows": 33,
+   "cols": 9,
+   "formulas": 0
+  }
+ ]
+}

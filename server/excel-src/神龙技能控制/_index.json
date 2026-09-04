@@ -1,0 +1,12 @@
+{
+ "workbook": "神龙技能控制.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "神龙技能控制",
+   "rows": 53,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "workbook": "invite.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "每日邀请",
+   "rows": 7,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "邀请新人注册",
+   "rows": 10,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "每日被邀请奖励",
+   "rows": 4,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "邀请30级奖励",
+   "rows": 10,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "邀请60级奖励",
+   "rows": 10,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

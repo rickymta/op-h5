@@ -1,0 +1,12 @@
+{
+ "workbook": "substitute-hero.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "替补英雄基础",
+   "rows": 15,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

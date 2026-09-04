@@ -19,3 +19,4 @@ server/group/tcg-group.jar                           filter=lfs diff=lfs merge=l
 *.sk   -text
 # script chay tren Linux: luon LF
 *.sh   text eol=lf
+server/excel-src/**/*.json text eol=lf

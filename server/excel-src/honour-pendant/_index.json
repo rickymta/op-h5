@@ -1,0 +1,26 @@
+{
+ "workbook": "honour-pendant.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "荣誉挂件基础",
+   "rows": 23,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "荣誉挂件激活道具",
+   "rows": 14,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet3",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

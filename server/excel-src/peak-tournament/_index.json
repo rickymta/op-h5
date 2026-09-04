@@ -1,0 +1,82 @@
+{
+ "workbook": "peak-tournament.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "巅峰会武基础",
+   "rows": 35,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "巅峰会武阶段时间表",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "巅峰会武祈福方式",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "巅峰会武祈福等级",
+   "rows": 12,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "巅峰会武等级分组",
+   "rows": 4,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "巅峰会武排行榜奖励",
+   "rows": 37,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "巅峰会武全服挑战奖励",
+   "rows": 16,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "巅峰会武淘汰赛赛程",
+   "rows": 23,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "荣耀殿堂奖励分组",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "荣耀殿堂奖池",
+   "rows": 91,
+   "cols": 7,
+   "formulas": 60
+  },
+  {
+   "file": "11.json",
+   "name": "荣耀殿堂每日庆功消耗",
+   "rows": 5,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

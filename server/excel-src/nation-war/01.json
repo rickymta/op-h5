@@ -1,0 +1,1 @@
+{"workbook":"nation-war.xlsx","sheet":"国战阵营","index":1,"rows":[["阵营ID","阵营名称","大本营城池","是否中立","旗帜图片ID"],[1,"Lâm An",1000,0,1],[2,"Tương Dương",2000,0,2],[3,"Biện Kinh",3000,0,3],[4,"Đại Lý",4000,0,4],[5,"Trung lập",null,1,5]],"dims":{"rows":6,"cols":5}}

@@ -1,0 +1,19 @@
+{
+ "workbook": "main-character.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "冒险等级",
+   "rows": 211,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "vip等级",
+   "rows": 57,
+   "cols": 22,
+   "formulas": 183
+  }
+ ]
+}

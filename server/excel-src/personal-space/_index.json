@@ -1,0 +1,103 @@
+{
+ "workbook": "personal-space.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "头像",
+   "rows": 94,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet2",
+   "rows": 4,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "头像框",
+   "rows": 39,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "称号",
+   "rows": 51,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "皮肤",
+   "rows": 2,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "冒险形象",
+   "rows": 93,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "皮肤穿戴管理",
+   "rows": 74,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "皮肤技能特效替换",
+   "rows": 1183,
+   "cols": 95,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "皮肤状态特效",
+   "rows": 55,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "条件说明Sheet",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "Sheet称号数据备份",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "Sheet头像备份",
+   "rows": 75,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "Sheet冒险形象备份",
+   "rows": 75,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

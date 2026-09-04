@@ -1,0 +1,33 @@
+{
+ "workbook": "team-championship.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "组队冠军赛阶段",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "组队冠军赛淘汰赛轮次",
+   "rows": 6,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "组队冠军赛排行榜奖励",
+   "rows": 15,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "组队冠军赛赔率",
+   "rows": 33,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

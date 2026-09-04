@@ -1,0 +1,19 @@
+{
+ "workbook": "cross-ingot-ranking.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "跨服元宝排行基础",
+   "rows": 10,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "跨服元宝排行奖励",
+   "rows": 60,
+   "cols": 9,
+   "formulas": 0
+  }
+ ]
+}

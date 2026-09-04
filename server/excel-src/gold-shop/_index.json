@@ -1,0 +1,19 @@
+{
+ "workbook": "gold-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "金币商店基础",
+   "rows": 4,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "金币商店奖励",
+   "rows": 201,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "workbook": "vip-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "vip商城商品",
+   "rows": 2647,
+   "cols": 17,
+   "formulas": 9730
+  },
+  {
+   "file": "02.json",
+   "name": "限购重置周期填写规则",
+   "rows": 19,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1",
+   "rows": 6,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet2",
+   "rows": 1540,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

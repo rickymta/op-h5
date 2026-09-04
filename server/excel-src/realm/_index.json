@@ -1,0 +1,40 @@
+{
+ "workbook": "realm.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "境界基础",
+   "rows": 70,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "境界升级",
+   "rows": 18,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "属性组",
+   "rows": 153,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "消耗组",
+   "rows": 153,
+   "cols": 7,
+   "formulas": 51
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 103,
+   "cols": 7,
+   "formulas": 101
+  }
+ ]
+}

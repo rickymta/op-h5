@@ -1,0 +1,138 @@
+{
+ "workbook": "cyclic-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "挂机掉落活动",
+   "rows": 113,
+   "cols": 18,
+   "formulas": 432
+  },
+  {
+   "file": "02.json",
+   "name": "挂机掉落商店",
+   "rows": 45,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "任务比拼活动",
+   "rows": 724,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "任务比拼详情",
+   "rows": 413,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "任务比拼排行榜",
+   "rows": 103,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "限时活动排序",
+   "rows": 41,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "精英召唤活动",
+   "rows": 966,
+   "cols": 16,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "精英召唤方式",
+   "rows": 3,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "精英召唤奖励",
+   "rows": 8,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "精英召唤商店",
+   "rows": 2,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "精英召唤商品",
+   "rows": 4,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "每日限购活动",
+   "rows": 155,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "每日限购活动商店",
+   "rows": 92,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "战令活动基础",
+   "rows": 41,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "战令积分奖励",
+   "rows": 435,
+   "cols": 11,
+   "formulas": 30
+  },
+  {
+   "file": "16.json",
+   "name": "战令任务",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "17.json",
+   "name": "迷宫战令基础",
+   "rows": 38,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "18.json",
+   "name": "迷宫战令积分奖励",
+   "rows": 32,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "19.json",
+   "name": "Sheet1",
+   "rows": 12,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

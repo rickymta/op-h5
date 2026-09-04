@@ -1,0 +1,19 @@
+{
+ "workbook": "summon-ranking.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "召唤排行基础",
+   "rows": 2,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "召唤排行任务",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

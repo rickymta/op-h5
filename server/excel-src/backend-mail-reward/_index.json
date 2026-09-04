@@ -1,0 +1,19 @@
+{
+ "workbook": "backend-mail-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "累充奖励",
+   "rows": 26,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 8,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

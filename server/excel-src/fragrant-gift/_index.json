@@ -1,0 +1,47 @@
+{
+ "workbook": "fragrant-gift.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "芬芳赠礼活动基础",
+   "rows": 2,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 1,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "芬芳赠礼登陆好礼",
+   "rows": 8,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "芬芳赠礼掉落",
+   "rows": 23,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "芬芳赠礼礼包",
+   "rows": 15,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "芬芳赠礼鲜花排行",
+   "rows": 5,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

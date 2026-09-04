@@ -1,0 +1,12 @@
+{
+ "workbook": "prereg-reward.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "预约奖励详情",
+   "rows": 1,
+   "cols": 25,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "workbook": "world-boss.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "世界BOSS活动",
+   "rows": 28,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "世界BOSS关卡",
+   "rows": 101,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "世界BOSS伤害奖励组",
+   "rows": 261,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "世界BOSS兑换奖励",
+   "rows": 11,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "世界BOSS商店",
+   "rows": 10,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet1",
+   "rows": 576,
+   "cols": 14,
+   "formulas": 0
+  }
+ ]
+}

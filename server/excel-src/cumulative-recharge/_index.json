@@ -1,0 +1,19 @@
+{
+ "workbook": "cumulative-recharge.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "累计充值基础",
+   "rows": 151,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "累计充值奖励",
+   "rows": 10,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

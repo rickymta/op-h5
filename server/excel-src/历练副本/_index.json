@@ -1,0 +1,12 @@
+{
+ "workbook": "历练副本.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "历练副本",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

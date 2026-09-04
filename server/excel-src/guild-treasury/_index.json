@@ -1,0 +1,54 @@
+{
+ "workbook": "guild-treasury.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "公会宝库商品",
+   "rows": 110,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "公会宝库系统赠送奖励",
+   "rows": 36,
+   "cols": 5,
+   "formulas": 66
+  },
+  {
+   "file": "03.json",
+   "name": "公会战获胜掉落奖励",
+   "rows": 22,
+   "cols": 7,
+   "formulas": 36
+  },
+  {
+   "file": "04.json",
+   "name": "公会宝库提示",
+   "rows": 8,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet2",
+   "rows": 98,
+   "cols": 8,
+   "formulas": 679
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet1",
+   "rows": 529,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet3",
+   "rows": 45,
+   "cols": 2,
+   "formulas": 45
+  }
+ ]
+}

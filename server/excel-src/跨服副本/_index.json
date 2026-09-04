@@ -1,0 +1,19 @@
+{
+ "workbook": "跨服副本.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "跨服战场",
+   "rows": 11,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

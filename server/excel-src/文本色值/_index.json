@@ -1,0 +1,19 @@
+{
+ "workbook": "文本色值.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "文本色值",
+   "rows": 107,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

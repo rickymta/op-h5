@@ -1,0 +1,19 @@
+{
+ "workbook": "calendarday-login-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "自然日登录基础",
+   "rows": 9,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "自然日登录奖励",
+   "rows": 44,
+   "cols": 12,
+   "formulas": 0
+  }
+ ]
+}

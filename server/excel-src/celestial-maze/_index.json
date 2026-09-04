@@ -1,0 +1,75 @@
+{
+ "workbook": "celestial-maze.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "天界迷宫层级",
+   "rows": 6,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "天界迷宫地图分组",
+   "rows": 13,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "天界迷宫地图",
+   "rows": 133,
+   "cols": 7,
+   "formulas": 252
+  },
+  {
+   "file": "04.json",
+   "name": "天界迷宫守卫",
+   "rows": 85,
+   "cols": 10,
+   "formulas": 222
+  },
+  {
+   "file": "05.json",
+   "name": "天界迷宫符诏组包",
+   "rows": 871,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "天界迷宫符诏",
+   "rows": 152,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "天界迷宫场景技能",
+   "rows": 16,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "天界迷宫商品",
+   "rows": 37,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "天界迷宫格子类型",
+   "rows": 10,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet1",
+   "rows": 81,
+   "cols": 19,
+   "formulas": 9
+  }
+ ]
+}

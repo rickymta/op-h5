@@ -1,0 +1,47 @@
+{
+ "workbook": "cross-rank-match.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "段位奖励",
+   "rows": 23,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "段位升级",
+   "rows": 23,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "段位赛奖品库",
+   "rows": 182,
+   "cols": 10,
+   "formulas": 186
+  },
+  {
+   "file": "04.json",
+   "name": "段位商店",
+   "rows": 45,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "跨服段位赛机器人库",
+   "rows": 80,
+   "cols": 5,
+   "formulas": 72
+  },
+  {
+   "file": "06.json",
+   "name": "天级榜奖励",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

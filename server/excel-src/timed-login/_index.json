@@ -1,0 +1,19 @@
+{
+ "workbook": "timed-login.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "限时登陆基础",
+   "rows": 1,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "限时登陆奖励",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "workbook": "divine-dragon-battlepass.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "神龙战令基础",
+   "rows": 13,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "神龙战令积分奖励",
+   "rows": 31,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "神龙战令任务",
+   "rows": 16,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

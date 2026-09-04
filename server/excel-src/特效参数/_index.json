@@ -1,0 +1,26 @@
+{
+ "workbook": "特效参数.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "序列帧特效参数",
+   "rows": 20,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Spine特效参数",
+   "rows": 188,
+   "cols": 26,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1",
+   "rows": 1,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

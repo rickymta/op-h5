@@ -1,0 +1,47 @@
+{
+ "workbook": "midspring-month.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "仲春之月活动基础",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "连线礼包奖励",
+   "rows": 69,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "宝箱次数奖励",
+   "rows": 33,
+   "cols": 7,
+   "formulas": 63
+  },
+  {
+   "file": "04.json",
+   "name": "仲春之月登陆好礼",
+   "rows": 8,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "仲春之月礼包",
+   "rows": 24,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "仲春之月任务",
+   "rows": 6,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

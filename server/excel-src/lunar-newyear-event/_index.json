@@ -1,0 +1,96 @@
+{
+ "workbook": "lunar-newyear-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "春节基础",
+   "rows": 5,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "春节登陆好礼",
+   "rows": 8,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "春节任务",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "春节礼包",
+   "rows": 34,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "春节大富翁",
+   "rows": 27,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "大富翁BOSS",
+   "rows": 11,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "大富翁商店",
+   "rows": 36,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "大富翁宝箱",
+   "rows": 19,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "大富翁事件类型",
+   "rows": 21,
+   "cols": 16,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "大富翁祝福",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "大富翁厄运",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "大富翁圈数奖励",
+   "rows": 76,
+   "cols": 6,
+   "formulas": 43
+  },
+  {
+   "file": "13.json",
+   "name": "Sheet1",
+   "rows": 10,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

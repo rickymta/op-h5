@@ -1,0 +1,564 @@
+{
+ "abnormal-hero-recycle.xlsx": [
+  "com.ososx.tcg.game.config.bug.hero.BugHeroRecycleExcel"
+ ],
+ "accumulated-day-gift.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.accpay.CycleAccPayExcel"
+ ],
+ "ad-reward.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.adreward.AdRewardExcel"
+ ],
+ "adventure.xlsx": [
+  "com.ososx.tcg.game.config.farm.adventure.AdventureExcel"
+ ],
+ "alert-threshold.xlsx": [
+  "com.ososx.tcg.game.config.supervise.SuperviseExcel"
+ ],
+ "ancient-war.xlsx": [
+  "com.ososx.tcg.game.guild.aw.excel.GuildAWExcel"
+ ],
+ "arbor-day.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.treeplanting.TreePlantingExcel"
+ ],
+ "arena.xlsx": [
+  "com.ososx.tcg.game.config.pvp.arena.ArenaExcel"
+ ],
+ "backend-mail-reward.xlsx": [
+  "com.ososx.tcg.game.config.gm.rebate.RebateExcel"
+ ],
+ "baoqing-workshop.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.baoqingfang.BaoQingFangExcel"
+ ],
+ "battle-scene-config.xlsx": [
+  "com.ososx.tcg.game.config.scene.FightSceneExcel"
+ ],
+ "beast-soul-prayer-rateup.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.birthchartcall.BirthchartCallUpExcel"
+ ],
+ "beast-soul-share.xlsx": [
+  "com.ososx.tcg.game.config.birthChartShare.BirthChartShareExcel"
+ ],
+ "beast-spirit.xlsx": [
+  "com.ososx.tcg.game.config.beast.BeastSpiritExcel"
+ ],
+ "blessed-grotto.xlsx": [
+  "com.ososx.tcg.game.config.mix.dt.DtExcel"
+ ],
+ "bodhi-tree.xlsx": [
+  "com.ososx.tcg.game.config.tree.TreeExcel"
+ ],
+ "bond.xlsx": [
+  "com.ososx.tcg.game.config.yoke.YokeExcel"
+ ],
+ "bounty-quest.xlsx": [
+  "com.ososx.tcg.game.config.res.rewardtask.RewardTaskExcel"
+ ],
+ "bt-bug-shop.xlsx": [
+  "com.ososx.tcg.game.config.bt.bugmall.BtBugMallExcel"
+ ],
+ "bt-fake-cumulative-recharge.xlsx": [
+  "com.ososx.tcg.game.config.bt.dailycharge.BtDailyChargeExcel"
+ ],
+ "bt-first-recharge.xlsx": [
+  "com.ososx.tcg.game.config.bt.firstpay.BtFirstPayExcel"
+ ],
+ "bt-month-card.xlsx": [
+  "com.ososx.tcg.game.config.bt.monthcard.BtMonthCardExcel"
+ ],
+ "bt-panda-benefit.xlsx": [
+  "com.ososx.tcg.game.activity.cycle.panda.excel.PandaExcel"
+ ],
+ "calendarday-login-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.login.NaturalDayLoginExcel"
+ ],
+ "carnival-7day-fun.xlsx": [
+  "com.ososx.tcg.game.config.res.sevendayloginTwo.SevenDayLoginTwoExcel"
+ ],
+ "celestial-maze.xlsx": [
+  "com.ososx.tcg.game.config.farm.maze.MazeFbExcel"
+ ],
+ "championship.xlsx": [
+  "com.ososx.tcg.game.config.pvp.champion.ChampionExcel"
+ ],
+ "chat-tag.xlsx": [
+  "com.ososx.tcg.game.config.res.label.ChatLabelExcel"
+ ],
+ "chat.xlsx": [
+  "com.ososx.tcg.game.config.res.chat.ChatExcel"
+ ],
+ "checkin.xlsx": [
+  "com.ososx.tcg.game.config.sign.SignExcel"
+ ],
+ "chest-multi-open.xlsx": [
+  "com.ososx.tcg.game.res.openbox.excel.OpenBoxExcel"
+ ],
+ "christmas-tree.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.cristmastree.CristmasTreeExcel"
+ ],
+ "class-immortal-artifact.xlsx": [
+  "com.ososx.tcg.game.config.item.jobfairy.JobFairyExcel"
+ ],
+ "collection-awaken-wheel.xlsx": [
+  "com.ososx.tcg.game.activity.cycle.ciawake.excel.CiAwakeExcel"
+ ],
+ "collection-seal.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.collectSeal.CollectSealExcel"
+ ],
+ "collection.xlsx": [
+  "com.ososx.tcg.game.config.CollectionItem.CollectionItemExcel"
+ ],
+ "combat.xlsx": [
+  "com.ososx.tcg.game.config.fight.FightExcel"
+ ],
+ "common.xlsx": [
+  "com.ososx.tcg.game.config.common.CommonExcel"
+ ],
+ "consecutive-recharge.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.continuepay.ContinuePayExcel"
+ ],
+ "constellation-map.xlsx": [
+  "com.ososx.tcg.game.config.res.star.StarChartExcel"
+ ],
+ "cross-arena.xlsx": [
+  "com.ososx.tcg.game.config.pvp.crosspvp.CrossPvpExcel"
+ ],
+ "cross-boss.xlsx": [
+  "com.ososx.tcg.game.config.farm.crossboss.CrossBossExcel"
+ ],
+ "cross-ingot-ranking.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.rankconsume.RankConsumeExcel"
+ ],
+ "cross-ladder.xlsx": [
+  "com.ososx.tcg.game.config.cross.CrossLadderExcel"
+ ],
+ "cross-rank-match.xlsx": [
+  "com.ososx.tcg.game.config.mix.grade.CrossGradeExcel"
+ ],
+ "cross-recharge-ranking.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.opendaycrossrank.OpendayCrossRankExcel"
+ ],
+ "cumulative-recharge.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.specialpay.SpecialPayExcel"
+ ],
+ "custom-equipment-chest.xlsx": [
+  "com.ososx.tcg.game.config.res.equip.EquipChestExcel"
+ ],
+ "cyclic-7day-fun.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.sevenday.CycleSevenDayLoginExcel"
+ ],
+ "cyclic-event-2.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.two.CycleActivityTwoExcel"
+ ],
+ "cyclic-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.one.CycleActivityExcel"
+ ],
+ "cyclic-shop.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.mall.CycleMallExcel"
+ ],
+ "cyclic-weekly-limited-shop.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.weeklimit.CycleWeekLimitMallExcel"
+ ],
+ "daily-dungeon.xlsx": [
+  "com.ososx.tcg.game.config.farm.dailyFb.DailyFbExcel"
+ ],
+ "destiny-dungeon.xlsx": [
+  "com.ososx.tcg.game.config.farm.birthChartFb.BirthChartFbExcel"
+ ],
+ "destiny-master.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.zonerankconsume.ZoneRankConsumeExcel"
+ ],
+ "destiny-prayer.xlsx": [
+  "com.ososx.tcg.game.config.res.birthchart.call.BirthChartCallExcel"
+ ],
+ "destiny.xlsx": [
+  "com.ososx.tcg.game.config.item.birthChart.BirthChartExcel"
+ ],
+ "divine-artifact.xlsx": [
+  "com.ososx.tcg.game.config.artifact.ArtifactExcel"
+ ],
+ "divine-dragon-battlepass.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.dragontoken.DragonTokenExcel"
+ ],
+ "divine-dragon.xlsx": [
+  "com.ososx.tcg.game.config.item.loong.LoongExcel"
+ ],
+ "divine-equipment.xlsx": [
+  "com.ososx.tcg.game.config.item.godoutfit.GodOutfitExcel"
+ ],
+ "dragonboat-festival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.duanwu.DuanWuExcel"
+ ],
+ "dream-boss.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.dreamboss.DreamBossExcel"
+ ],
+ "dungeon-purchase-config.xlsx": [
+  "com.ososx.tcg.game.config.farm.config.FbBuyConfigExcel"
+ ],
+ "elite-avatar-frame.xlsx": [
+  "com.ososx.tcg.game.config.res.elite.headframe.EliteHeadFrameExcel"
+ ],
+ "endless-trial.xlsx": [
+  "com.ososx.tcg.game.config.farm.endless.EndlessExcel"
+ ],
+ "equipment-table.xlsx": [
+  "com.ososx.tcg.game.config.item.equip.EquipExcel"
+ ],
+ "equipment-week-card.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.equipcard.EquipCardExcel"
+ ],
+ "exclusive-collection-release.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.cangpinskillpack.CangPinSkillPackExcel"
+ ],
+ "exorcism-night.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.exorcism.ExorcismExcel"
+ ],
+ "falling-fortune-bag.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.luckybag.LuckyBagExcel"
+ ],
+ "fragrant-gift.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.flower.FlowerExcel"
+ ],
+ "free-buy.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.freebuy.FreeBuyExcel"
+ ],
+ "friend-invite.xlsx": [
+  "com.ososx.tcg.game.config.activity.friendinvite.FriendInviteExcel"
+ ],
+ "fusion-temple.xlsx": [
+  "com.ososx.tcg.game.config.fusion.FusionExcel"
+ ],
+ "generic-event-choice-pack.xlsx": [
+  "com.ososx.tcg.game.config.promotion.choosepack.ChoosePackExcel"
+ ],
+ "generic-leaderboard-reward.xlsx": [
+  "com.ososx.tcg.game.config.rank.RankRwdExcel"
+ ],
+ "ghost-festival-night.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.ghost.GhostExcel"
+ ],
+ "gold-shop.xlsx": [
+  "com.ososx.tcg.game.config.res.gold.GoldMallExcel"
+ ],
+ "great-fortune.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.luckystrike.LuckyStrikeExcel"
+ ],
+ "guild-boss.xlsx": [
+  "com.ososx.tcg.game.config.farm.guildBoss.GuildBossExcel"
+ ],
+ "guild-treasury.xlsx": [
+  "com.ososx.tcg.game.config.mix.guild.treasure.GuildTreasureExcel"
+ ],
+ "guild-war.xlsx": [
+  "com.ososx.tcg.game.config.mix.guild.war.GuildWarExcel"
+ ],
+ "guild.xlsx": [
+  "com.ososx.tcg.game.config.guild.GuildExcel"
+ ],
+ "hero-bond.xlsx": [
+  "com.ososx.tcg.game.config.res.hero.fetter.FetterExcel"
+ ],
+ "hero-deification-altar.xlsx": [
+  "com.ososx.tcg.game.config.heroShare.HeroShareExcel"
+ ],
+ "hero-expedition.xlsx": [
+  "com.ososx.tcg.game.config.farm.expedition.ExpeditionExcel"
+ ],
+ "hero-inherit.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.heroinherit.HeroInheritExcel"
+ ],
+ "hero-rollback.xlsx": [
+  "com.ososx.tcg.game.config.res.hero.back.HeroBackExcel"
+ ],
+ "hero-sacrifice.xlsx": [
+  "com.ososx.tcg.game.config.res.hero.sacrifice.SacrificeExcel"
+ ],
+ "hero-summon.xlsx": [
+  "com.ososx.tcg.game.config.res.hero.call.HeroCallExcel"
+ ],
+ "hero-week-card.xlsx": [
+  "com.ososx.tcg.game.activity.cycle.weekcard.hc.excel.HCExcel"
+ ],
+ "hero-wish-pool.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.parying.pool.PrayingPoolExcel"
+ ],
+ "hero.xlsx": [
+  "com.ososx.tcg.game.config.hero.HeroExcel"
+ ],
+ "honour-pendant.xlsx": [
+  "com.ososx.tcg.game.config.pendant.PendantExcel"
+ ],
+ "hundred-pull-reward.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.hundreddraw.HundredDrawExcel"
+ ],
+ "immortal-artifact-inherit.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.fairyLvlTrans.FairyLvlTransExcel"
+ ],
+ "immortal-artifact-rateup.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.fairyup.FairyUpExcel"
+ ],
+ "immortal-artifact.xlsx": [
+  "com.ososx.tcg.game.config.item.fairy.FairyExcel"
+ ],
+ "instance-template.xlsx": [
+  "com.ososx.tcg.game.config.ins.InstanceExcel"
+ ],
+ "invite.xlsx": [
+  "com.ososx.tcg.game.config.invite.InviteExcel"
+ ],
+ "jade-shop.xlsx": [
+  "com.ososx.tcg.game.res.jade.excel.JadeExcel"
+ ],
+ "lantern-festival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.yuanxiao.YuanXiaoExcel"
+ ],
+ "launch-battlepass.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.opendaytoken.OpendayTokenExcel"
+ ],
+ "launch-event.xlsx": [
+  "com.ososx.tcg.game.activity.open.excel.OpenActivityExcel"
+ ],
+ "launch-redpacket.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.open.packet.OpenPacketExcel"
+ ],
+ "legion-invasion.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.legionsattack.LegionsAttackExcel"
+ ],
+ "limited-hero-summon.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.limitcall.LimitHeroCallExcel"
+ ],
+ "lingxiao-palace.xlsx": [
+  "com.ososx.tcg.game.config.mix.lingxiao.LingXiaoExcel"
+ ],
+ "linked-hero.xlsx": [
+  "com.ososx.tcg.game.config.farm.line.LineHeroExcel"
+ ],
+ "login-7day-new.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.newsevenlogin.NewSevenLoginExcel"
+ ],
+ "login-7day.xlsx": [
+  "com.ososx.tcg.game.config.res.sevendaylogin.SevenDayLoginExcel"
+ ],
+ "lucky-blindbox.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.doubleeleven.DoubleElevenExcel"
+ ],
+ "lunar-newyear-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.newyear.NewYearExcel"
+ ],
+ "magic-trick.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.childrensday.ChildrensdayExcel"
+ ],
+ "mail-privilege-shop.xlsx": [
+  "com.ososx.tcg.game.config.privilege.MailPrivilegeExcel"
+ ],
+ "main-character.xlsx": [
+  "com.ososx.tcg.game.config.master.MasterExcel"
+ ],
+ "mayday-carnival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.mayday.MayDayExcel"
+ ],
+ "midautumn-festival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.rabbit.RabbitExcel"
+ ],
+ "midspring-month.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.qingming.QingMingExcel"
+ ],
+ "minigame-direct-reward.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.generalgift.GeneralGiftExcel"
+ ],
+ "monday-grand-gift.xlsx": [
+  "com.ososx.tcg.game.config.res.monday.MondayGiftExcel"
+ ],
+ "monthly-first-recharge.xlsx": [
+  "com.ososx.tcg.game.config.month.first.charge.MonthFirstChargeExcel"
+ ],
+ "more-the-better.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.themorethebetter.TheMoreTheBetterExcel"
+ ],
+ "name-pool.xlsx": [
+  "com.ososx.tcg.game.config.name.NameExcel"
+ ],
+ "nation-war.xlsx": [
+  "com.ososx.tcg.game.config.cw.CountryWarExcel"
+ ],
+ "nationalday-battle.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.nationalbattle.NationalBattleExcel"
+ ],
+ "nationalday-carnival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.nationalday.NationalDayExcel"
+ ],
+ "new-hero-release-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.nh.NHExcel"
+ ],
+ "newbie-benefit.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.xinshoufuli.XinShouFuLiExcel"
+ ],
+ "overseas-login-gift.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.oversealogin.OverSeaLoginExcel"
+ ],
+ "overseas-prereg-mail.xlsx": [
+  "com.ososx.tcg.game.config.appointment.AbroadAppointmentExcel"
+ ],
+ "overseas.xlsx": [
+  "com.ososx.tcg.game.config.abroad.AbroadExcel"
+ ],
+ "peak-tournament-preview.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.TopMartial.TopMartialExcel"
+ ],
+ "peak-tournament.xlsx": [
+  "com.ososx.tcg.game.config.peak.pvp.PeakPvpExcel"
+ ],
+ "personal-customisation.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.custom.CustomGoodExcel"
+ ],
+ "personal-space.xlsx": [
+  "com.ososx.tcg.game.config.res.blog.MyBlogExcel"
+ ],
+ "prereg-reward.xlsx": [
+  "com.ososx.tcg.game.config.res.reservation.ReservationExcel"
+ ],
+ "primordial-era.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.savagewild.SavageWildExcel"
+ ],
+ "prophet-sanctuary.xlsx": [
+  "com.ososx.tcg.game.config.res.prophet.ProphetSanctuaryExcel"
+ ],
+ "province-city-region.xlsx": [
+  "com.ososx.tcg.game.config.area.AreaExcel"
+ ],
+ "quest.xlsx": [
+  "com.ososx.tcg.game.config.task.TaskExcel"
+ ],
+ "race-arena.xlsx": [
+  "com.ososx.tcg.game.mix.rp.excel.RPExcel"
+ ],
+ "race-tower.xlsx": [
+  "com.ososx.tcg.game.config.farm.rtower.RTowerExcel"
+ ],
+ "realm.xlsx": [
+  "com.ososx.tcg.game.item.hr.excel.HRExcel"
+ ],
+ "recharge-benefit.xlsx": [
+  "com.ososx.tcg.game.config.pay.PayExcel"
+ ],
+ "recharge-item.xlsx": [
+  "com.ososx.tcg.game.config.pay.PayItemExcel"
+ ],
+ "redpacket-rain.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.redPackets.RedPacketsExcel"
+ ],
+ "rejiang-hero-starup.xlsx": [
+  "com.ososx.tcg.game.config.rejiang.RejiangHeroStarUpExcel"
+ ],
+ "reset.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.displace.DisplaceExcel"
+ ],
+ "resource-recovery.xlsx": [
+  "com.ososx.tcg.game.config.recovery.RecoveryExcel"
+ ],
+ "return-journey.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.backjourney.BackJourneyExcel"
+ ],
+ "rune-week-card.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.runecard.RuneCardExcel"
+ ],
+ "rune.xlsx": [
+  "com.ososx.tcg.game.config.item.rune.RuneExcel"
+ ],
+ "sanctuary.xlsx": [
+  "com.ososx.tcg.game.config.farm.saint.SaintFbExcel"
+ ],
+ "server-merge-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.merge.MergeActivityExcel"
+ ],
+ "serverwide-boss.xlsx": [
+  "com.ososx.tcg.game.config.farm.zoneboss.ZoneBossExcel"
+ ],
+ "shop.xlsx": [
+  "com.ososx.tcg.game.config.res.mall.MallExcel"
+ ],
+ "special-notice-config.xlsx": [
+  "com.ososx.tcg.game.config.notifys.SerNotifysExcel",
+  "com.ososx.tcg.game.config.reportcfg.SpecialAchiveReportExcel"
+ ],
+ "study-notes.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.diligentnote.DiligentNoteExcel"
+ ],
+ "substitute-hero.xlsx": [
+  "com.ososx.tcg.game.config.substitute.SubstituteExcel"
+ ],
+ "summer-battle.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.sumholibattle.SumHoliBattleExcel"
+ ],
+ "summer-carnival.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.sumholicarnival.SumHoliCarnivalExcel"
+ ],
+ "summon-ranking.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.callrank.CallRankExcel"
+ ],
+ "super-wheel.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.turnable.TurnableExcel"
+ ],
+ "system-prompt-localization.xlsx": [
+  "com.ososx.tcg.game.config.i18n.LangSysExcel"
+ ],
+ "system-text.xlsx": [
+  "com.ososx.tcg.game.config.text.TextExcel"
+ ],
+ "team-championship.xlsx": [
+  "com.ososx.tcg.game.config.gc.GroupChampionExcel"
+ ],
+ "tenfold-rebate.xlsx": [
+  "com.ososx.tcg.game.activity.cycle.pf.excel.PFExcel"
+ ],
+ "text-localization.xlsx": [
+  "com.ososx.tcg.game.config.i18n.LangExcel"
+ ],
+ "thanksgiving-event.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.turkey.TurkeyExcel"
+ ],
+ "thirty-six-heavens.xlsx": [
+  "com.ososx.tcg.game.config.farm.tsday.DayExcel"
+ ],
+ "timed-login.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.limitlogin.LimitLoginExcel"
+ ],
+ "timed-reset.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.limitChange.LimitChangeExcel"
+ ],
+ "timed-rollback.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.back.HeroLimitBackExcel"
+ ],
+ "timed-skin-shop.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.limitskin.LimitSkinMallExcel"
+ ],
+ "totem-sanctuary.xlsx": [
+  "com.ososx.tcg.game.config.farm.totemple.TotempleExcel"
+ ],
+ "totem.xlsx": [
+  "com.ososx.tcg.game.config.totem.TotemExcel"
+ ],
+ "tower-of-heaven.xlsx": [
+  "com.ososx.tcg.game.config.farm.tower.TowerExcel"
+ ],
+ "treasure-hunt.xlsx": [
+  "com.ososx.tcg.game.config.res.treasure.TreasureHuntExcel"
+ ],
+ "universe-treasure-box.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.universebox.UniverseBoxExcel"
+ ],
+ "value-first-recharge.xlsx": [
+  "com.ososx.tcg.game.config.firstCharge.FirstChargeExcel"
+ ],
+ "value-pack.xlsx": [
+  "com.ososx.tcg.game.config.activity.cycle.valuepack.ValuePackExcel"
+ ],
+ "vip-shop.xlsx": [
+  "com.ososx.tcg.game.config.res.vipmall.VipMallExcel"
+ ],
+ "wish-gift.xlsx": [
+  "com.ososx.tcg.game.config.promotion.imp.wishgift.WishGiftExcel"
+ ],
+ "world-boss.xlsx": [
+  "com.ososx.tcg.game.config.farm.worldboss.WorldBossExcel"
+ ]
+}

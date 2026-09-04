@@ -1,0 +1,82 @@
+{
+ "workbook": "ancient-war.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "上古之战战场表",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "上古之战怪物",
+   "rows": 10,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "上古之战怪物展示",
+   "rows": 4,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "上古之战怪物血量",
+   "rows": 4,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "上古之战排行榜",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "上古之战抽奖",
+   "rows": 62,
+   "cols": 7,
+   "formulas": 17
+  },
+  {
+   "file": "07.json",
+   "name": "上古之战抽奖次数",
+   "rows": 2,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "上古之战战斗扣血",
+   "rows": 10,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "上古之战战斗奖励",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "上古之战怪物名称",
+   "rows": 5,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "sheet1",
+   "rows": 24,
+   "cols": 11,
+   "formulas": 9
+  }
+ ]
+}

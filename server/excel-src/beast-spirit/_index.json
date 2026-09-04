@@ -1,0 +1,47 @@
+{
+ "workbook": "beast-spirit.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "兽灵基础",
+   "rows": 13,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "兽灵培养",
+   "rows": 4801,
+   "cols": 9,
+   "formulas": 4400
+  },
+  {
+   "file": "03.json",
+   "name": "兽灵情谊",
+   "rows": 1201,
+   "cols": 5,
+   "formulas": 1080
+  },
+  {
+   "file": "04.json",
+   "name": "兽灵技能",
+   "rows": 121,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 601,
+   "cols": 21,
+   "formulas": 28
+  },
+  {
+   "file": "06.json",
+   "name": "Sheet2",
+   "rows": 241,
+   "cols": 20,
+   "formulas": 379
+  }
+ ]
+}

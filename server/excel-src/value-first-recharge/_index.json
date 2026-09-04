@@ -1,0 +1,33 @@
+{
+ "workbook": "value-first-recharge.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "超值首充基础",
+   "rows": 3,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "超值首充奖励",
+   "rows": 8,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "进阶礼包基础",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "进阶礼包奖励",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

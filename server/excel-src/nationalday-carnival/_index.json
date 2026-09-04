@@ -1,0 +1,33 @@
+{
+ "workbook": "nationalday-carnival.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "国庆狂欢基础",
+   "rows": 6,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "国庆大促",
+   "rows": 51,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "国庆狂欢登陆好礼",
+   "rows": 40,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 5,
+   "cols": 3,
+   "formulas": 5
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "workbook": "summer-carnival.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "DY小卖部",
+   "rows": 10,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "暑期狂欢登陆好礼",
+   "rows": 57,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "小卖部商店",
+   "rows": 184,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "暑期大促销",
+   "rows": 82,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

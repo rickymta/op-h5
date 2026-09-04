@@ -1,0 +1,19 @@
+{
+ "workbook": "cross-recharge-ranking.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "跨服充值排行基础",
+   "rows": 17,
+   "cols": 15,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "跨服充值排行奖励",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

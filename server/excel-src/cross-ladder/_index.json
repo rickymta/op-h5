@@ -1,0 +1,19 @@
+{
+ "workbook": "cross-ladder.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "天梯争霸排名奖励",
+   "rows": 18,
+   "cols": 22,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "天梯争霸战斗刷新",
+   "rows": 13,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

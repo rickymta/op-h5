@@ -1,0 +1,26 @@
+{
+ "workbook": "活动预告.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "活动预告",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "预告详情",
+   "rows": 50,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

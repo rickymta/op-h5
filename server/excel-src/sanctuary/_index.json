@@ -1,0 +1,19 @@
+{
+ "workbook": "sanctuary.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "圣域基础",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "圣域关卡",
+   "rows": 22,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

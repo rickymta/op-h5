@@ -1,0 +1,19 @@
+{
+ "workbook": "cross-boss.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "跨服BOSS基础",
+   "rows": 61,
+   "cols": 24,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "跨服BOSS排行奖励",
+   "rows": 421,
+   "cols": 5,
+   "formulas": 413
+  }
+ ]
+}

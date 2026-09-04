@@ -1,0 +1,40 @@
+{
+ "workbook": "universe-treasure-box.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "乾坤宝匣基础",
+   "rows": 762,
+   "cols": 74,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "乾坤宝匣奖励",
+   "rows": 171,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "乾坤宝匣商店",
+   "rows": 8,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "终极大奖",
+   "rows": 93,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "作弊规则",
+   "rows": 3,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

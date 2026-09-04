@@ -1,0 +1,19 @@
+{
+ "workbook": "bodhi-tree.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "菩提树等级",
+   "rows": 6,
+   "cols": 20,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "菩提树果实奖励",
+   "rows": 39,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

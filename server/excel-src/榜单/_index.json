@@ -1,0 +1,12 @@
+{
+ "workbook": "榜单.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "榜单列表",
+   "rows": 9,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

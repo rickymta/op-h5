@@ -1,0 +1,19 @@
+{
+ "workbook": "elite-avatar-frame.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "精英头像框",
+   "rows": 23,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "精英头像框激活道具",
+   "rows": 9,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

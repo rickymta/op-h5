@@ -1,0 +1,40 @@
+{
+ "workbook": "beast-soul-prayer-rateup.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "兽魂祈祷UP基础",
+   "rows": 95,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "兽魂祈祷UP雕像",
+   "rows": 5,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "兽魂祈祷UP雕像变更",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "兽魂UP商店",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "兽魂UP祈祷奖励",
+   "rows": 24,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

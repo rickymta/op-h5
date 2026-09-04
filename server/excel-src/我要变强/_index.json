@@ -1,0 +1,19 @@
+{
+ "workbook": "我要变强.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "推荐阵容",
+   "rows": 8,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 19,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

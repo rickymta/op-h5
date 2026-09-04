@@ -1,0 +1,54 @@
+{
+ "workbook": "thirty-six-heavens.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "三十六重天层数",
+   "rows": 37,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "三十六重天关卡",
+   "rows": 1036,
+   "cols": 11,
+   "formulas": 1926
+  },
+  {
+   "file": "03.json",
+   "name": "三十六重天挑战要求",
+   "rows": 901,
+   "cols": 13,
+   "formulas": 176
+  },
+  {
+   "file": "04.json",
+   "name": "三十六重天星级宝箱",
+   "rows": 109,
+   "cols": 4,
+   "formulas": 210
+  },
+  {
+   "file": "05.json",
+   "name": "三十六重天章节路径",
+   "rows": 177,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "英雄星级加成",
+   "rows": 106,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "三十六重天排行榜",
+   "rows": 7,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

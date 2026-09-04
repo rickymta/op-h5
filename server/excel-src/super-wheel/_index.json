@@ -1,0 +1,47 @@
+{
+ "workbook": "super-wheel.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "转盘基础",
+   "rows": 2,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "转盘轮次奖励",
+   "rows": 16,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "转盘刷新",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "转盘消耗",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "转盘分组",
+   "rows": 9,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "转盘奖品",
+   "rows": 55,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

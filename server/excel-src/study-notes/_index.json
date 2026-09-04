@@ -1,0 +1,26 @@
+{
+ "workbook": "study-notes.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "勤学笔记活动基础",
+   "rows": 15,
+   "cols": 16,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "勤学笔记活动积分奖励",
+   "rows": 181,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "勤学笔记活动任务类型",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

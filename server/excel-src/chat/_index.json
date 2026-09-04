@@ -1,0 +1,19 @@
+{
+ "workbook": "chat.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "聊天频道基础",
+   "rows": 8,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "聊天频道等级",
+   "rows": 153,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

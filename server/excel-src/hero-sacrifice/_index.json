@@ -1,0 +1,33 @@
+{
+ "workbook": "hero-sacrifice.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄献祭等级",
+   "rows": 2001,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄献祭升阶",
+   "rows": 8,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "英雄献祭星级",
+   "rows": 52,
+   "cols": 5,
+   "formulas": 36
+  },
+  {
+   "file": "04.json",
+   "name": "英雄高阶献祭星级",
+   "rows": 5,
+   "cols": 24,
+   "formulas": 0
+  }
+ ]
+}

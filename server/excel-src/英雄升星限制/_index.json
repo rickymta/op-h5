@@ -1,0 +1,26 @@
+{
+ "workbook": "英雄升星限制.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "升星限制",
+   "rows": 3,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet2",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet3",
+   "rows": 21,
+   "cols": 16,
+   "formulas": 0
+  }
+ ]
+}

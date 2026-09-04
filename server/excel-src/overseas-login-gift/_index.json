@@ -1,0 +1,19 @@
+{
+ "workbook": "overseas-login-gift.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "海外登录活动基础",
+   "rows": 3,
+   "cols": 21,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "海外登录奖励分组",
+   "rows": 8,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

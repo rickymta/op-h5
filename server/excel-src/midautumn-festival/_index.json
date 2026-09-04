@@ -1,0 +1,33 @@
+{
+ "workbook": "midautumn-festival.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "欢度中秋基础",
+   "rows": 2,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "欢度中秋积分",
+   "rows": 11,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "欢度中秋奖励",
+   "rows": 27,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "欢度中秋礼包",
+   "rows": 16,
+   "cols": 8,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,75 @@
+{
+ "workbook": "system-text.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "系统公告",
+   "rows": 29,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄对白",
+   "rows": 20,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "邮件",
+   "rows": 203,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "系统提示",
+   "rows": 6,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "公会日志",
+   "rows": 18,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "说明文本",
+   "rows": 228,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "VIP特权说明条目",
+   "rows": 215,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet富文本示例",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "Sheet1",
+   "rows": 11,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet2",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

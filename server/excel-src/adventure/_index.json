@@ -1,0 +1,75 @@
+{
+ "workbook": "adventure.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "冒险推图关卡",
+   "rows": 1001,
+   "cols": 25,
+   "formulas": 828
+  },
+  {
+   "file": "02.json",
+   "name": "援助英雄",
+   "rows": 50,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "冒险推图章节",
+   "rows": 17,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "冒险通关奖励",
+   "rows": 86,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "加载英雄库",
+   "rows": 41,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "挂机怪物库",
+   "rows": 121,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "提示语言库",
+   "rows": 44,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "在线奖励",
+   "rows": 13,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "Sheet1",
+   "rows": 200,
+   "cols": 7,
+   "formulas": 598
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet2",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

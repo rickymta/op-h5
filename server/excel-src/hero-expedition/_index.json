@@ -1,0 +1,26 @@
+{
+ "workbook": "hero-expedition.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "远征难度选择",
+   "rows": 4,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "英雄远征关卡",
+   "rows": 46,
+   "cols": 11,
+   "formulas": 70
+  },
+  {
+   "file": "03.json",
+   "name": "匹配真人战力预值",
+   "rows": 31,
+   "cols": 4,
+   "formulas": 29
+  }
+ ]
+}

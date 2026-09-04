@@ -1,0 +1,40 @@
+{
+ "workbook": "special-notice-config.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "玲珑塔层数统计",
+   "rows": 19,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "拥有星级英雄",
+   "rows": 19,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "合成装备",
+   "rows": 21,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "图鉴上报",
+   "rows": 21,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "套装上报",
+   "rows": 26,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "workbook": "arbor-day.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "植树节活动基础",
+   "rows": 2,
+   "cols": 16,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "树苗基础",
+   "rows": 3,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "树苗奖励",
+   "rows": 35,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "驱虫奖励",
+   "rows": 13,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "植树节礼包",
+   "rows": 30,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "植树节任务",
+   "rows": 7,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

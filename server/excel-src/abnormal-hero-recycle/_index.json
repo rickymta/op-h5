@@ -1,0 +1,19 @@
+{
+ "workbook": "abnormal-hero-recycle.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "异常英雄回收基础",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "异常回收英雄分组",
+   "rows": 3,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

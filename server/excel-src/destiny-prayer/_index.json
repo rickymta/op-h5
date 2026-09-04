@@ -1,0 +1,40 @@
+{
+ "workbook": "destiny-prayer.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "命格祈祷基础",
+   "rows": 5,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "命格雕像变更",
+   "rows": 17,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "命格祈祷奖励",
+   "rows": 627,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "命格祈祷作弊",
+   "rows": 2,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "Sheet1",
+   "rows": 271,
+   "cols": 19,
+   "formulas": 1630
+  }
+ ]
+}

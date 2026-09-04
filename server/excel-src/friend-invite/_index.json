@@ -1,0 +1,12 @@
+{
+ "workbook": "friend-invite.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "好友邀请",
+   "rows": 2,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

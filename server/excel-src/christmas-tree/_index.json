@@ -1,0 +1,33 @@
+{
+ "workbook": "christmas-tree.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "圣诞树基础",
+   "rows": 2,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "圣诞树升级消耗",
+   "rows": 301,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "圣诞树奖励",
+   "rows": 340,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet1",
+   "rows": 20,
+   "cols": 14,
+   "formulas": 0
+  }
+ ]
+}

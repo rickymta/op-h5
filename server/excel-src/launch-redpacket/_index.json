@@ -1,0 +1,33 @@
+{
+ "workbook": "launch-redpacket.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "开服红包基础",
+   "rows": 1,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "开服红包配置",
+   "rows": 3,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "开服红包排行榜",
+   "rows": 9,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "开服红包宝箱奖励",
+   "rows": 4,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

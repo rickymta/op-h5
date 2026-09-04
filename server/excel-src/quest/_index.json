@@ -1,0 +1,89 @@
+{
+ "workbook": "quest.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "任务库",
+   "rows": 1503,
+   "cols": 19,
+   "formulas": 21
+  },
+  {
+   "file": "02.json",
+   "name": "永久历史",
+   "rows": 166,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "主线任务",
+   "rows": 81,
+   "cols": 6,
+   "formulas": 78
+  },
+  {
+   "file": "04.json",
+   "name": "日常任务",
+   "rows": 13,
+   "cols": 4,
+   "formulas": 12
+  },
+  {
+   "file": "05.json",
+   "name": "日常任务宝箱",
+   "rows": 5,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "周常任务",
+   "rows": 14,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "周常任务宝箱",
+   "rows": 5,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "成就",
+   "rows": 169,
+   "cols": 4,
+   "formulas": 168
+  },
+  {
+   "file": "09.json",
+   "name": "历练",
+   "rows": 53,
+   "cols": 4,
+   "formulas": 52
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet缺少的事件类型",
+   "rows": 18,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "Sheet1",
+   "rows": 7,
+   "cols": 18,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "Sheet4",
+   "rows": 28,
+   "cols": 8,
+   "formulas": 18
+  }
+ ]
+}

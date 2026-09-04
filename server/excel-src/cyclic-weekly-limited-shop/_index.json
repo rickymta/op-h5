@@ -1,0 +1,19 @@
+{
+ "workbook": "cyclic-weekly-limited-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "循环周限购基础",
+   "rows": 53,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "循环周限购商店",
+   "rows": 7,
+   "cols": 10,
+   "formulas": 0
+  }
+ ]
+}

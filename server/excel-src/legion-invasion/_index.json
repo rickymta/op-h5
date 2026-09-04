@@ -1,0 +1,40 @@
+{
+ "workbook": "legion-invasion.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "军团入侵基础",
+   "rows": 48,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "军团入侵兑换奖励",
+   "rows": 51,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "军团入侵捐献分组",
+   "rows": 76,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "军团入侵关卡",
+   "rows": 61,
+   "cols": 10,
+   "formulas": 55
+  },
+  {
+   "file": "05.json",
+   "name": "军团入侵类型",
+   "rows": 6,
+   "cols": 7,
+   "formulas": 0
+  }
+ ]
+}

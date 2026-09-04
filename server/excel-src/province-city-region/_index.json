@@ -1,0 +1,19 @@
+{
+ "workbook": "province-city-region.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "省市",
+   "rows": 35,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "地区",
+   "rows": 423,
+   "cols": 16381,
+   "formulas": 0
+  }
+ ]
+}

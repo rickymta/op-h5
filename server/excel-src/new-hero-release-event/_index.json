@@ -1,0 +1,61 @@
+{
+ "workbook": "new-hero-release-event.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "新英雄上新活动日期",
+   "rows": 5,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "新英雄上新英雄试炼",
+   "rows": 16,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "新英雄上新试炼豪礼",
+   "rows": 6,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "新英雄上新英雄战令",
+   "rows": 3,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "新英雄上新战令奖励",
+   "rows": 27,
+   "cols": 7,
+   "formulas": 25
+  },
+  {
+   "file": "06.json",
+   "name": "新英雄上新战令任务",
+   "rows": 15,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "新英雄上新签到奖励",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "试炼BUFF加成",
+   "rows": 6,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

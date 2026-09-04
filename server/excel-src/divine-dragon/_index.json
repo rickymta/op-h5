@@ -1,0 +1,75 @@
+{
+ "workbook": "divine-dragon.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "神龙基础",
+   "rows": 561,
+   "cols": 19,
+   "formulas": 630
+  },
+  {
+   "file": "02.json",
+   "name": "神龙召唤",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "神龙强化",
+   "rows": 377,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "神龙图鉴",
+   "rows": 11,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "御灵等级",
+   "rows": 8,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "龙蛋合成",
+   "rows": 14,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "Sheet1",
+   "rows": 377,
+   "cols": 21,
+   "formulas": 291
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet2",
+   "rows": 41,
+   "cols": 11,
+   "formulas": 195
+  },
+  {
+   "file": "09.json",
+   "name": "Sheet3",
+   "rows": 80,
+   "cols": 23,
+   "formulas": 312
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet4",
+   "rows": 377,
+   "cols": 2,
+   "formulas": 0
+  }
+ ]
+}

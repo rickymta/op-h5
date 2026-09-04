@@ -1,0 +1,19 @@
+{
+ "workbook": "guild-boss.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "公会BOSS关卡",
+   "rows": 188,
+   "cols": 13,
+   "formulas": 156
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 188,
+   "cols": 8,
+   "formulas": 187
+  }
+ ]
+}

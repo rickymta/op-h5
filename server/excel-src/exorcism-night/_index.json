@@ -1,0 +1,47 @@
+{
+ "workbook": "exorcism-night.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "驱魔之夜基础",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "驱魔之夜小鬼",
+   "rows": 18,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "驱魔之夜随机奖励",
+   "rows": 28,
+   "cols": 5,
+   "formulas": 6
+  },
+  {
+   "file": "04.json",
+   "name": "驱魔之夜等级",
+   "rows": 301,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "驱魔之夜任务",
+   "rows": 59,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "驱魔之夜累积任务奖励",
+   "rows": 2,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

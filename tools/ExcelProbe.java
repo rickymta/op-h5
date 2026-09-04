@@ -34,7 +34,7 @@ public class ExcelProbe {
     System.out.println("== " + a[1].substring(a[1].lastIndexOf('.') + 1) + " expects '" + e.getFileName()
         + "'  file=" + f.getName() + " (" + f.length() + " bytes)");
     try { e.load(f); System.out.println("load(File): OK"); }
-    catch (Throwable t) { System.out.println("load(File): FAIL " + t); return; }
+    catch (Throwable t) { System.out.println("load(File): FAIL " + t); System.out.flush(); System.exit(2); }
     for (ESheet s : e.getSheets())
       System.out.println("  sheet '" + s.getSheetName() + "': " + (s.list == null ? "null" : s.list.size() + " row"));
     try { e.decode(); System.out.println("decode(): OK"); }
@@ -53,5 +53,7 @@ public class ExcelProbe {
         }
       System.out.println("  row[0] '" + s.getSheetName() + "': " + sb);
     }
+    // Mot so loader (ArenaExcel...) de lai thread nen non-daemon -> JVM khong tu thoat: ep thoat.
+    System.out.flush(); System.exit(0);
   }
 }

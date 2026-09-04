@@ -1,0 +1,33 @@
+{
+ "workbook": "exclusive-collection-release.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "藏品上新基础",
+   "rows": 37,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "藏品上新商品",
+   "rows": 55,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1",
+   "rows": 11,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "Sheet2",
+   "rows": 1,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

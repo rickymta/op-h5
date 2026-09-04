@@ -1,0 +1,12 @@
+{
+ "workbook": "redpacket-rain.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "红包雨基础",
+   "rows": 45,
+   "cols": 11,
+   "formulas": 0
+  }
+ ]
+}

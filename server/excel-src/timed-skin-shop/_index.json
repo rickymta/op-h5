@@ -1,0 +1,19 @@
+{
+ "workbook": "timed-skin-shop.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "限时皮肤商店基础",
+   "rows": 4,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "限时皮肤商品",
+   "rows": 8,
+   "cols": 13,
+   "formulas": 0
+  }
+ ]
+}

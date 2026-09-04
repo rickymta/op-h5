@@ -1,0 +1,12 @@
+{
+ "workbook": "daily-dungeon.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "日常副本",
+   "rows": 46,
+   "cols": 13,
+   "formulas": 0
+  }
+ ]
+}

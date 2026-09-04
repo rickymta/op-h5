@@ -1,0 +1,68 @@
+{
+ "workbook": "race-arena.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "种族竞技基础配置",
+   "rows": 169,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "种族竞技赛程",
+   "rows": 9,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "种族竞技预赛赛程",
+   "rows": 10,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "种族竞技决赛赛程",
+   "rows": 7,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "竞猜奖励",
+   "rows": 3,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "决赛排名奖励",
+   "rows": 37,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "六界圣殿奖励分组",
+   "rows": 15,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "六界圣殿庆功消耗",
+   "rows": 5,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "六界圣殿奖池",
+   "rows": 16,
+   "cols": 7,
+   "formulas": 15
+  }
+ ]
+}

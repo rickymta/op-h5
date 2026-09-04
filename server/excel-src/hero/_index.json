@@ -1,0 +1,131 @@
+{
+ "workbook": "hero.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "英雄基础",
+   "rows": 2724,
+   "cols": 45,
+   "formulas": 1762
+  },
+  {
+   "file": "02.json",
+   "name": "英雄升级",
+   "rows": 401,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "英雄进阶",
+   "rows": 784,
+   "cols": 16383,
+   "formulas": 2879
+  },
+  {
+   "file": "04.json",
+   "name": "英雄高阶升星",
+   "rows": 301,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "英雄技能",
+   "rows": 4997,
+   "cols": 99,
+   "formulas": 4988
+  },
+  {
+   "file": "06.json",
+   "name": "英雄模型参数",
+   "rows": 7,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "英雄天赋",
+   "rows": 185,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "Sheet1符文",
+   "rows": 138,
+   "cols": 79,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "Sheet1",
+   "rows": 6,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "Sheet英雄天赋",
+   "rows": 140,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "11.json",
+   "name": "Sheet特殊目标选择方式",
+   "rows": 22,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "Sheet英雄基础",
+   "rows": 6,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "13.json",
+   "name": "Sheet英雄技能",
+   "rows": 11,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "14.json",
+   "name": "Sheet等级上限计算",
+   "rows": 13,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "15.json",
+   "name": "Sheet初始属性",
+   "rows": 6,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "16.json",
+   "name": "Sheet属性等级成长",
+   "rows": 12,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "17.json",
+   "name": "Sheet上阵位置优先级",
+   "rows": 5,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "18.json",
+   "name": "Sheet位移结算",
+   "rows": 27,
+   "cols": 6,
+   "formulas": 2
+  }
+ ]
+}

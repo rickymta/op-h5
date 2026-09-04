@@ -1,0 +1,40 @@
+{
+ "workbook": "accumulated-day-gift.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "积天豪礼基础",
+   "rows": 49,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "积天豪礼奖励",
+   "rows": 23,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "Sheet1",
+   "rows": 15,
+   "cols": 10,
+   "formulas": 15
+  },
+  {
+   "file": "04.json",
+   "name": "BT免费连充基础",
+   "rows": 49,
+   "cols": 11,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "BT免费连充奖励",
+   "rows": 16,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

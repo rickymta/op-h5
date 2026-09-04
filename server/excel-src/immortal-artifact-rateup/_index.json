@@ -1,0 +1,33 @@
+{
+ "workbook": "immortal-artifact-rateup.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "仙器UP基础",
+   "rows": 102,
+   "cols": 33,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "仙器UP召唤方式",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "仙器UP召唤次数奖励",
+   "rows": 19,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "仙器UP召唤分组",
+   "rows": 809,
+   "cols": 23,
+   "formulas": 609
+  }
+ ]
+}

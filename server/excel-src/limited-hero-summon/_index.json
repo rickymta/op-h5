@@ -1,0 +1,61 @@
+{
+ "workbook": "limited-hero-summon.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "限定英雄召唤基础",
+   "rows": 29,
+   "cols": 22,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "限定英雄召唤方式",
+   "rows": 3,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "限定英雄召唤奖励",
+   "rows": 136,
+   "cols": 4,
+   "formulas": 145
+  },
+  {
+   "file": "04.json",
+   "name": "限定英雄培养商店",
+   "rows": 95,
+   "cols": 12,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "限定英雄商店",
+   "rows": 28,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "限定英雄商品",
+   "rows": 136,
+   "cols": 7,
+   "formulas": 260
+  },
+  {
+   "file": "07.json",
+   "name": "限定英雄升星活动",
+   "rows": 28,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "限定英雄升星任务",
+   "rows": 175,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

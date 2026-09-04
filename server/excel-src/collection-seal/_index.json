@@ -1,0 +1,26 @@
+{
+ "workbook": "collection-seal.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "藏品封印活动",
+   "rows": 11,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "免费藏品封印",
+   "rows": 3,
+   "cols": 9,
+   "formulas": 0
+  }
+ ]
+}

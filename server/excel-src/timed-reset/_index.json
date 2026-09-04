@@ -1,0 +1,33 @@
+{
+ "workbook": "timed-reset.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "限时重置基础",
+   "rows": 19,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "限时重置消耗",
+   "rows": 3,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "限时重置商店",
+   "rows": 7,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "置换英雄池",
+   "rows": 65,
+   "cols": 6,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "workbook": "wish-gift.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "心愿之礼每日礼包",
+   "rows": 4,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "workbook": "lucky-blindbox.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "幸运盲盒基础",
+   "rows": 14,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "作弊规则",
+   "rows": 2,
+   "cols": 3,
+   "formulas": 0
+  }
+ ]
+}

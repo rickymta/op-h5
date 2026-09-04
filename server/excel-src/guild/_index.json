@@ -1,0 +1,96 @@
+{
+ "workbook": "guild.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "公会等级",
+   "rows": 31,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "公会捐献",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "公会捐献活跃度奖励",
+   "rows": 4,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "公会活跃等级",
+   "rows": 52,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "公会活跃任务",
+   "rows": 9,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "公会红包",
+   "rows": 4,
+   "cols": 17,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "公会技能等级",
+   "rows": 161,
+   "cols": 13,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "公会技能图标",
+   "rows": 45,
+   "cols": 5,
+   "formulas": 15
+  },
+  {
+   "file": "09.json",
+   "name": "公会公告",
+   "rows": 12,
+   "cols": 2,
+   "formulas": 0
+  },
+  {
+   "file": "10.json",
+   "name": "公会PVP属性",
+   "rows": 801,
+   "cols": 8,
+   "formulas": 1372
+  },
+  {
+   "file": "11.json",
+   "name": "公会PVP技能解锁",
+   "rows": 17,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "12.json",
+   "name": "公会PVP技能升级",
+   "rows": 321,
+   "cols": 8,
+   "formulas": 760
+  },
+  {
+   "file": "13.json",
+   "name": "Sheet1",
+   "rows": 0,
+   "cols": 1,
+   "formulas": 0
+  }
+ ]
+}

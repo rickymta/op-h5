@@ -1,0 +1,61 @@
+{
+ "workbook": "return-journey.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "回归基础",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "回归签到",
+   "rows": 8,
+   "cols": 4,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "回归商城",
+   "rows": 11,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "回归活跃",
+   "rows": 5,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "一元豪礼",
+   "rows": 2,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "回归战令基础",
+   "rows": 2,
+   "cols": 10,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "回归战令奖励",
+   "rows": 32,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "回归战令任务",
+   "rows": 17,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

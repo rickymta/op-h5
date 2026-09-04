@@ -1,0 +1,19 @@
+{
+ "workbook": "consecutive-recharge.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "连续充值基础",
+   "rows": 19,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "连续充值奖励",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

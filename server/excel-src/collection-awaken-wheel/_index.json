@@ -1,0 +1,40 @@
+{
+ "workbook": "collection-awaken-wheel.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "藏品觉醒配置",
+   "rows": 12,
+   "cols": 14,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "藏品兑换商店限制",
+   "rows": 4,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "藏品概率配置",
+   "rows": 15,
+   "cols": 7,
+   "formulas": 15
+  },
+  {
+   "file": "04.json",
+   "name": "藏品兑换商城",
+   "rows": 36,
+   "cols": 6,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "超级大奖奖池",
+   "rows": 4,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

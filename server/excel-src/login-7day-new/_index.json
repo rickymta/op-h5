@@ -1,0 +1,19 @@
+{
+ "workbook": "login-7day-new.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "新七日登陆基础",
+   "rows": 4,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "新七日登陆奖励",
+   "rows": 22,
+   "cols": 4,
+   "formulas": 0
+  }
+ ]
+}

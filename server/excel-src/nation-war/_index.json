@@ -1,0 +1,68 @@
+{
+ "workbook": "nation-war.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "国战阵营",
+   "rows": 6,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "国战城池",
+   "rows": 35,
+   "cols": 19,
+   "formulas": 0
+  },
+  {
+   "file": "03.json",
+   "name": "国战随机奖励",
+   "rows": 29,
+   "cols": 8,
+   "formulas": 58
+  },
+  {
+   "file": "04.json",
+   "name": "国战随机商店",
+   "rows": 7,
+   "cols": 5,
+   "formulas": 0
+  },
+  {
+   "file": "05.json",
+   "name": "国战排行榜奖励",
+   "rows": 26,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "06.json",
+   "name": "国战特殊道具",
+   "rows": 3,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "07.json",
+   "name": "国战阵营属性",
+   "rows": 19,
+   "cols": 8,
+   "formulas": 0
+  },
+  {
+   "file": "08.json",
+   "name": "国战名望任务",
+   "rows": 28,
+   "cols": 9,
+   "formulas": 0
+  },
+  {
+   "file": "09.json",
+   "name": "国战名望奖励",
+   "rows": 11,
+   "cols": 5,
+   "formulas": 0
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "workbook": "prophet-sanctuary.xlsx",
+ "sheets": [
+  {
+   "file": "01.json",
+   "name": "先知圣殿召唤类型",
+   "rows": 5,
+   "cols": 7,
+   "formulas": 0
+  },
+  {
+   "file": "02.json",
+   "name": "先知圣殿召唤分组",
+   "rows": 150,
+   "cols": 15,
+   "formulas": 531
+  },
+  {
+   "file": "03.json",
+   "name": "英雄转换",
+   "rows": 3,
+   "cols": 3,
+   "formulas": 0
+  },
+  {
+   "file": "04.json",
+   "name": "英雄转换分组",
+   "rows": 41,
+   "cols": 11,
+   "formulas": 147
+  }
+ ]
+}
