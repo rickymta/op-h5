@@ -38,3 +38,9 @@ website/game/.public-host
 *.swp
 Thumbs.db
 .DS_Store
+
+# ---- platform/ (Go)
+platform/bin/
+*.pem
+*.key
+id-signing*

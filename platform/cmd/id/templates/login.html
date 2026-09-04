@@ -1,0 +1,69 @@
+{{define "login.html"}}<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đăng nhập</title>
+<style>
+  :root{
+    --bg:#EEF1F4; --surface:#fff; --text:#0D1620; --muted:#4A5A68;
+    --line:#C9D3DA; --brass:#8A6317; --signal:#9E2F24; --signal-bg:#F4DEDA;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0D1620;--surface:#152130;--text:#DFE7EC;--muted:#A3B3C0;
+          --line:#2A3B4D;--brass:#D9A945;--signal:#E0685A;--signal-bg:#3A1E1A;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:var(--bg);color:var(--text);padding:24px;
+       font:16px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  .card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);
+        border-radius:4px;padding:32px 28px}
+  h1{margin:0 0 4px;font-size:22px;letter-spacing:-.01em}
+  .sub{margin:0 0 24px;color:var(--muted);font-size:14px}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  input{width:100%;padding:10px 12px;font-size:15px;color:var(--text);
+        background:var(--bg);border:1px solid var(--line);border-radius:3px}
+  input:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:transparent}
+  .field{margin-bottom:16px}
+  button{width:100%;padding:11px;font-size:15px;font-weight:600;cursor:pointer;
+         color:var(--bg);background:var(--brass);border:0;border-radius:3px;margin-top:8px}
+  button:hover{filter:brightness(1.08)}
+  .err{background:var(--signal-bg);color:var(--signal);border-left:3px solid var(--signal);
+       padding:10px 12px;font-size:14px;margin:0 0 18px}
+  .foot{margin:20px 0 0;font-size:13px;color:var(--muted);text-align:center}
+  .foot a{color:var(--brass)}
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Đăng nhập</h1>
+    <p class="sub">Một tài khoản dùng chung cho mọi game.</p>
+
+    {{if .Error}}<p class="err">{{.Error}}</p>{{end}}
+
+    <form method="POST" action="{{.Action}}" autocomplete="on">
+      <input type="hidden" name="client_id" value="{{.Params.ClientID}}">
+      <input type="hidden" name="redirect_uri" value="{{.Params.RedirectURI}}">
+      <input type="hidden" name="scope" value="{{.Params.Scope}}">
+      <input type="hidden" name="state" value="{{.Params.State}}">
+      <input type="hidden" name="nonce" value="{{.Params.Nonce}}">
+      <input type="hidden" name="code_challenge" value="{{.Params.Challenge}}">
+      <input type="hidden" name="code_challenge_method" value="{{.Params.Method}}">
+
+      <div class="field">
+        <label for="u">Tài khoản</label>
+        <input id="u" name="username" autocomplete="username" autocapitalize="none"
+               spellcheck="false" required autofocus>
+      </div>
+      <div class="field">
+        <label for="p">Mật khẩu</label>
+        <input id="p" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit">Đăng nhập</button>
+    </form>
+
+    <p class="foot">Chưa có tài khoản? <a href="/dang-ky">Đăng ký</a></p>
+  </main>
+</body>
+</html>{{end}}
