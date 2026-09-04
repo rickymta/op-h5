@@ -4,6 +4,7 @@
 	
 	if(isset($DataInput->signature) and $DataInput->signature == $signature){
 	    include './config.php';
+	    require_once __DIR__ . '/id_wallet.php';
 	    
 		$phone = $DataInput->phone; 				//số điện thoại Momo nhận tiền
 		$tranId = $DataInput->tranId; 				//Mã giao dịch
@@ -21,7 +22,11 @@
     		    $xuadd = $amount + round(($amount*0)/100); // đang km 20%
     		    $kmnap = 1.5; //0 là bt, 1 là km 100%, 2 là km 200%
     		    $xuaddthat = $kmnap*$amount + $xuadd;
-    		    $pdo->prepare("UPDATE user SET xu = xu + ? WHERE username = ?")->execute(array($xuaddthat, $username));
+    		    // tranId la ma giao dich cua MoMo -> khoa chong trung. Bo loc bang file
+    		    // temp/<tranId>.log ben duoi van giu, nhung khoa nay moi la lop chac chan:
+    		    // file co the bi xoa, con idempotency_key thi nam trong so cai.
+    		    id_wallet_credit($pdo, $username, $xuaddthat, 'momo-' . $tranId,
+    		                     'Nạp MoMo ' . $noidung, $tranId);
                 $pdo->prepare("INSERT INTO `card_log` (`username`, `task_id`, `phuongthuc`, `status`, `menhgia`) VALUES (?,?,?,?,?)")->execute(array($username, $task_id, 'momo', 'Thành công', $amount));
                 file_put_contents("temp/".$tranId.".log",$tranId.' - '.$noidung);
                 echo $username."-".$xuadd;

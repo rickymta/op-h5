@@ -89,3 +89,39 @@ function id_wallet_topup($username, $amount, $idemKey, $memo = '', $reference = 
         'balance' => isset($data['balance']) ? (int)$data['balance'] : 0,
     );
 }
+
+/**
+ * Cong tien cho nguoi choi, chon dung MOT kho tien.
+ *
+ * Day la cong tac chuyen doi giua he cu va he moi:
+ *   - ID_WALLET_ENABLED=1  -> tien vao so cai cua he thong ID
+ *   - nguoc lai            -> giu nguyen duong cu, cong vao web.user.xu
+ *
+ * KHONG BAO GIO cong ca hai. Cong ca hai nghia la nguoi choi co tien o hai noi va
+ * tieu duoc hai lan.
+ *
+ * Neu bat he moi ma goi that bai (he thong ID chet, mang loi), ham nay KHONG am tham
+ * quay ve duong cu: no ghi log va tra ve false. Quay ve duong cu luc do se tao ra
+ * tien o dung noi ma khong ai doi soat.
+ *
+ * @return bool true neu da cong duoc tien
+ */
+function id_wallet_credit($pdo, $username, $amount, $idemKey, $memo = '', $reference = '') {
+    if ((int)$amount <= 0 || $username === '') {
+        return false;
+    }
+    if (getenv('ID_WALLET_ENABLED') !== '1') {
+        // Duong cu: mot lenh cong don gian, khong co chong trung.
+        $pdo->prepare("UPDATE `user` SET `xu` = `xu` + ? WHERE `username` = ?")
+            ->execute(array($amount, $username));
+        return true;
+    }
+    $r = id_wallet_topup($username, $amount, $idemKey, $memo, $reference);
+    if (!$r['ok']) {
+        // Ghi log de doi soat tay. KHONG cong vao web.user.xu thay the.
+        error_log(sprintf('id_wallet_credit that bai: user=%s amount=%d key=%s loi=%s',
+            $username, $amount, $idemKey, $r['error']));
+        return false;
+    }
+    return true;
+}

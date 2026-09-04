@@ -25,6 +25,7 @@ Bản gốc trước khi che nằm ở `_backup-secrets-original/` (không push)
 | `__GMHANGLONG_CODE__` | Ma uy quyen GM cua gmhanglong (config/config.php $gm_code) |
 | `__GM_LOGIN_TOKEN__` | JWT Login-Token hardcode trong gm/user/function/common.php (da het han; lay token moi qua staff/login) |
 | `__MOMO_PHONE__` | So dien thoai nhan MoMo trong link QR (user/indexapk.php) |
+| `__BANK_CALLBACK_CHECKSUM__` | Checksum tĩnh của callback ngân hàng (api/bankCallback.php) — trước đây nằm trong comment và **không được kiểm tra** |
 
 ## File bị che
 
@@ -49,6 +50,7 @@ Bản gốc trước khi che nằm ở `_backup-secrets-original/` (không push)
 - `website/game/adminphp@2024/check.php`
 - `website/game/api/card.php`
 - `website/game/api/momoCallback.php`
+- `website/game/api/bankCallback.php`
 - `website/game/gm/config.php`
 - `website/game/gmhanglong/config/config.php`
 - `website/game/gm/user/function/common.php`
@@ -78,4 +80,5 @@ __GM_CODE__=
 __GMHANGLONG_CODE__=
 __GM_LOGIN_TOKEN__=
 __MOMO_PHONE__=
+__BANK_CALLBACK_CHECKSUM__=
 ```

@@ -1,5 +1,6 @@
 <?php
 include './config.php';
+require_once __DIR__ . '/id_wallet.php';
 $status = $post['status'];
 $amount = $post['receive_amount'];
 $task_id = $post['content'];
@@ -8,12 +9,14 @@ $xuadd = $amount + $kmnap*$amount; // đang km 20%
 $username = $pdo->query("SELECT * FROM card_log WHERE task_id = '$task_id'")->fetch()['username'];
 switch($status){
 	case 'thanhcong':
-		$pdo->prepare("UPDATE `user` SET `xu` = `xu` + ? WHERE `username` = ?")->execute(array($xuadd, $username));
+		// task_id la ma giao dich duy nhat sinh o card.php -> khoa chong trung.
+		// Truoc day khong co khoa nay: nha cung cap ban lai callback la cong tien lan nua.
+		id_wallet_credit($pdo, $username, $xuadd, 'the-' . $task_id, 'Nạp thẻ cào', $task_id);
 		$pdo->prepare("UPDATE `card_log` SET `status` = ? WHERE `task_id` = ?")->execute(array('Thành công', $task_id));
 	break;
 	
 	case 'saimenhgia':
-		$pdo->prepare("UPDATE `user` SET `xu` = `xu` + ? WHERE `username` = ?")->execute(array($xuadd, $username));
+		id_wallet_credit($pdo, $username, $xuadd, 'the-' . $task_id, 'Nạp thẻ cào (sai mệnh giá)', $task_id);
 		$pdo->prepare("UPDATE `card_log` SET `status` = ? WHERE `task_id` = ?")->execute(array('Sai mệnh giá', $task_id));
 	break;
 	

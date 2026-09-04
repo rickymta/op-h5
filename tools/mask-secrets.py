@@ -39,6 +39,7 @@ PLACEHOLDERS = [
     ('__GMHANGLONG_CODE__',       'Ma uy quyen GM cua gmhanglong (config/config.php $gm_code)'),
     ('__GM_LOGIN_TOKEN__',        'JWT Login-Token hardcode trong gm/user/function/common.php (da het han; lay token moi qua staff/login)'),
     ('__MOMO_PHONE__',            'So dien thoai nhan MoMo trong link QR (user/indexapk.php)'),
+    ('__BANK_CALLBACK_CHECKSUM__','Checksum tinh cua callback ngan hang (api/bankCallback.php) — truoc day nam trong comment va KHONG duoc kiem tra'),
 ]
 
 # Quy tac che: (file, [(regex, thay the)]) -- regex dung nhom de giu phan khong phai secret.
@@ -68,6 +69,9 @@ RULES = [
     ('website/game/adminphp@2024/check.php', [(r'rev\.php\?key=[0-9a-f]{32}', 'rev.php?key=__REV_QUERY_KEY__')]),
     ('website/game/api/card.php', [(r"('APIkey'\s*=>\s*)'[0-9A-Fa-f]{32}'", r"\1'__THESIEUTOC_API_KEY__'")]),
     ('website/game/api/momoCallback.php', [(r'(\$signature\s*=\s*)"[0-9a-f]{64}"', r'\1"__MOMO_CALLBACK_SIGNATURE__"')]),
+    ('website/game/api/bankCallback.php', [
+        (r'(checksum=)[0-9a-f]{32}', r'\1__BANK_CALLBACK_CHECKSUM__'),
+        (r"(\$expected\s*=\s*)'[0-9a-f]{32}'", r"\1'__BANK_CALLBACK_CHECKSUM__'")]),
     ('website/game/gm/config.php', [(r"(\$gmcode\s*=\s*)'[^']*'", r"\1'__GM_CODE__'")]),
     ('website/game/gmhanglong/config/config.php', [
         (r"(\$gm_code\s*=\s*)\"[^\"]*\"", r'\1"__GMHANGLONG_CODE__"'),
