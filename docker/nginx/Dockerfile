@@ -8,6 +8,7 @@ FROM nginx:1.25-alpine
 RUN apk add --no-cache bash
 COPY website/game/ /www/wwwroot/game/
 COPY docker/nginx/game.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx/adapter_proxy.conf /etc/nginx/adapter_proxy.conf
 COPY docker/web-entrypoint.sh /usr/local/bin/web-entrypoint
 RUN chmod +x /usr/local/bin/web-entrypoint \
  && rm -rf /www/wwwroot/game/res /www/wwwroot/game/sound /www/wwwroot/game/spine /www/wwwroot/game/home.zip

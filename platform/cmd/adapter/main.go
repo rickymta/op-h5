@@ -10,7 +10,9 @@ package main
 
 import (
 	"context"
+	"embed"
 	"errors"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -43,6 +45,9 @@ func (l loginSource) Online(ctx context.Context) (map[string]int, error) {
 	return out, nil
 }
 
+//go:embed all:templates
+var templatesFS embed.FS
+
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -74,6 +79,12 @@ func main() {
 	}
 	tracker := capacity.NewTracker(loginSource{loginClient}, db, cfg.GameCode, cfg.TicketTTL, log)
 
+	tpl, err := template.ParseFS(templatesFS, "templates/*.html")
+	if err != nil {
+		log.Error("doc template", "err", err)
+		os.Exit(1)
+	}
+
 	consoleClient := console.New(cfg.ConsoleBaseURL, cfg.ConsoleUser, cfg.ConsolePassword, cfg.TcgSecret)
 	worker := &grants.Worker{
 		DB: db, Console: consoleClient, GameCode: cfg.GameCode, Log: log,
@@ -99,6 +110,7 @@ func main() {
 		worker:  worker,
 		db:      db,
 		log:     log,
+		tpl:     tpl,
 		// Host cong khai dien vao URL WebSocket tra cho client: login server chi biet
 		// dia chi noi bo (127.0.0.1).
 		publicHost: envOr("ADAPTER_PUBLIC_HOST", ""),
@@ -106,13 +118,16 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", srv.home)
+	mux.HandleFunc("GET /may-chu", srv.serversPage)
+	mux.HandleFunc("GET /quy-doi", srv.convertPage)
 	mux.HandleFunc("GET /choi-game", srv.playGame)
 	mux.HandleFunc("GET /auth/callback", srv.authCallback)
 	mux.HandleFunc("GET /auth/logout", srv.logout)
-	mux.HandleFunc("GET /api/servers", srv.listServers)
-	mux.HandleFunc("POST /api/session", srv.createSession)
-	mux.HandleFunc("GET /api/packages", srv.listPackages)
-	mux.HandleFunc("POST /api/convert", srv.convert)
+	mux.HandleFunc("GET /api/game/servers", srv.listServers)
+	mux.HandleFunc("POST /api/game/session", srv.createSession)
+	mux.HandleFunc("GET /api/game/packages", srv.listPackages)
+	mux.HandleFunc("POST /api/game/convert", srv.convert)
 	mux.HandleFunc("GET /healthz", srv.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

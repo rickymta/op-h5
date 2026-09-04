@@ -1,0 +1,40 @@
+{{define "servers.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Máy chủ · Đại Hải Trình</title></head><body>
+{{template "nav" .}}
+<main>
+  <section>
+    <p class="eyebrow">Danh sách máy chủ</p>
+    <h1 style="font-size:30px">Chọn nơi ra khơi</h1>
+    <p class="lead">Người chơi cũ luôn về đúng máy chủ có nhân vật. Người mới nên chọn máy chủ đang “Mượt”.</p>
+
+    <div class="panel">
+      {{if .Servers}}
+        {{range .Servers}}
+        <div class="srv">
+          <div>
+            <span class="nm">{{.Name}}</span><span class="code">{{.Code}}</span>
+            {{if .Recommend}}<span class="pill smooth" style="margin-left:8px">gợi ý</span>{{end}}
+          </div>
+          <div class="load">{{.OnlineFmt}} người</div>
+          <div><span class="pill {{.Band}}">{{.Label}}</span></div>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="muted" style="margin:0">Chưa đọc được danh sách máy chủ.</p>
+      {{end}}
+    </div>
+
+    <div style="margin-top:22px"><a class="btn" href="/choi-game">Chơi ngay</a></div>
+
+    <div class="panel" style="margin-top:30px">
+      <h2 style="font-size:17px">Ba dải trạng thái nghĩa là gì</h2>
+      <div style="margin-top:12px;display:grid;gap:10px;font-size:14.5px">
+        <div><span class="pill smooth">Mượt</span> <span class="muted">— còn nhiều chỗ, nhận cả người chơi mới.</span></div>
+        <div><span class="pill busy">Đông</span> <span class="muted">— vẫn vào được, nhưng người mới nên chọn máy khác.</span></div>
+        <div><span class="pill full">Đầy</span> <span class="muted">— tạm không nhận thêm phiên mới. Người đang chơi không bị ảnh hưởng.</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+{{template "foot" .}}
+</body></html>{{end}}

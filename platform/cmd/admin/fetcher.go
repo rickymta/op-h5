@@ -39,7 +39,7 @@ func (f *fleetFetcher) fetch(ctx context.Context, adapterURL string) (liveFleet,
 	if adapterURL == "" {
 		return out, fmt.Errorf("chua cau hinh adapter_url")
 	}
-	u := strings.TrimRight(adapterURL, "/") + "/api/servers"
+	u := strings.TrimRight(adapterURL, "/") + "/api/game/servers"
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return out, err

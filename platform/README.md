@@ -13,15 +13,26 @@ nguồn thật và có test.
 | Thành phần | Cổng | Trạng thái |
 |---|---|---|
 | `cmd/id` — OIDC provider, danh tính, ví, trang chủ + tài khoản | 8080 | ✅ kiểm chứng end-to-end |
-| `cmd/adapter` — token ID → tài khoản game + cổng giới hạn tải | 8090 | ✅ kiểm chứng end-to-end |
+| `cmd/adapter` — trang game, token ID → tài khoản game, cổng giới hạn tải, phát vật phẩm | 8090 | ✅ kiểm chứng end-to-end |
 | `cmd/admin` — theo dõi đội server, điều khiển ngưỡng | 8100 | ✅ kiểm chứng end-to-end |
 | `cmd/fakelogin` — login server giả, chỉ để phát triển | 9000 | ✅ |
 | Nhiều game trên cùng nền tảng | | ✅ kiểm chứng bằng game thứ hai |
 
-**Chưa làm:** giao diện riêng của từng game (`haitac.domain.com` vẫn dùng trang PHP cũ,
-Adapter chỉ phục vụ `/choi-game`); khôi phục mật khẩu qua email; cổng nạp tiền thật
-(các đầu nối thẻ cào/bank/MoMo vẫn ở tầng PHP cũ); tiến trình phát vật phẩm cho
-`game_grants` đang ở trạng thái `pending`.
+### Trang của game (`haitac.domain.com`)
+
+Adapter phục vụ `/`, `/may-chu`, `/quy-doi`, `/choi-game`; nginx proxy sáu đường đó sang
+`:8090` và giữ nguyên phần còn lại cho tầng PHP cũ (xem `docker/nginx/game.conf`). Dùng
+`=` và `^~` để chúng thắng trước regex `\.php$`, nên `/api/getSession.php` vẫn về PHP.
+
+Số liệu trên trang là **sống**: dải trạng thái máy chủ đến từ chính bộ đếm tải mà cổng
+giới hạn đang dùng. Phục vụ bằng file tĩnh thì trang sẽ hiện một con số còn cổng lại
+quyết định theo một con số khác.
+
+Nhận diện lấy từ chính game: `#EE4623` đã là màu chủ đạo của trang cũ, nền dùng
+`assets/images/bg_pc.jpg`, logo dùng `assets/images/logo.png`.
+
+**Chưa làm:** tích hợp login server và console THẬT (cần dump DB từ server cũ); trang
+riêng cho các game sau này (mỗi game một bộ template, hoặc tham số hoá bộ hiện có).
 
 ## Vì sao logic giới hạn tải nằm ở đây, không nằm trong game
 

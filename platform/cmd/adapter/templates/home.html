@@ -1,0 +1,79 @@
+{{define "home.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đại Hải Trình</title>
+<style>
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .art{position:absolute;inset:0;background:url(/assets/images/bg_pc.jpg) center 22% / cover no-repeat;
+             opacity:.34;filter:saturate(1.05)}
+  /* Phủ dốc để chữ luôn đọc được dù ảnh nền sáng tối chỗ nào */
+  .hero .veil{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(7,18,28,.55) 0%,rgba(7,18,28,.82) 62%,var(--abyss) 100%)}
+  .hero .inner{position:relative;max-width:1000px;margin:0 auto;padding:64px 24px 56px}
+  .hero h1{max-width:15ch}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
+  .cta .note{font-size:13.5px;color:var(--mist)}
+  .stats{display:flex;flex-wrap:wrap;gap:28px;margin-top:34px;padding-top:22px;
+         border-top:1px solid var(--line)}
+  .stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+  .stat .v{font-family:var(--mono);font-size:24px;font-variant-numeric:tabular-nums;
+           letter-spacing:-.02em;margin-top:2px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+</style>
+</head><body>
+{{template "nav" .}}
+
+<div class="hero">
+  <div class="art" role="presentation"></div>
+  <div class="veil" role="presentation"></div>
+  <div class="inner">
+    <p class="eyebrow">Nhập cuộc hải trình</p>
+    <h1>Ra khơi cùng băng hải tặc của riêng bạn</h1>
+    <p class="lead">Chơi thẳng trên trình duyệt, không cần tải. Một tài khoản dùng chung cho mọi game trên hệ thống.</p>
+    <div class="cta">
+      <a class="btn lg" href="/choi-game">Chơi ngay</a>
+      {{if not .User}}<span class="note">Chưa có tài khoản? Bấm Chơi ngay để đăng ký trong một bước.</span>{{end}}
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">Máy chủ đang mở</div><div class="v">{{.OpenCount}}</div></div>
+      <div class="stat"><div class="k">Đang chơi</div><div class="v">{{.OnlineFmt}}</div></div>
+      {{if .Recommended}}<div class="stat"><div class="k">Gợi ý cho người mới</div><div class="v">{{.Recommended}}</div></div>{{end}}
+    </div>
+  </div>
+</div>
+
+<main>
+  <section>
+    <h2>Máy chủ</h2>
+    <p class="sub">Cập nhật liên tục. “Đông” vẫn vào được; “Đầy” thì chọn máy chủ khác.</p>
+    <div class="panel">
+      {{if .Servers}}
+        {{range .Servers}}
+        <div class="srv">
+          <div><span class="nm">{{.Name}}</span><span class="code">{{.Code}}</span></div>
+          <div class="load">{{.OnlineFmt}} người</div>
+          <div><span class="pill {{.Band}}">{{.Label}}</span></div>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="muted" style="margin:0">Chưa đọc được danh sách máy chủ. Thử tải lại sau ít phút.</p>
+      {{end}}
+    </div>
+  </section>
+
+  <section>
+    <div class="grid2">
+      <div class="panel">
+        <h2>Quy đổi Xu</h2>
+        <p class="sub" style="margin-bottom:16px">Nạp một lần vào ví chung, đổi sang vật phẩm ở game nào tuỳ bạn.</p>
+        <a class="btn ghost" href="/quy-doi">Xem bảng giá</a>
+      </div>
+      <div class="panel">
+        <h2>Tài khoản</h2>
+        <p class="sub" style="margin-bottom:16px">Số dư, lịch sử giao dịch và đổi mật khẩu nằm ở trang tài khoản chung.</p>
+        <a class="btn ghost" href="{{.IDBase}}/tai-khoan">Mở trang tài khoản</a>
+      </div>
+    </div>
+  </section>
+</main>
+{{template "foot" .}}
+</body></html>{{end}}

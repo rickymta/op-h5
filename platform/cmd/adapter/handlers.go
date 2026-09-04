@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +32,7 @@ type adapterServer struct {
 	worker     *grants.Worker
 	db         *sql.DB
 	log        *slog.Logger
+	tpl        *template.Template
 	publicHost string
 	useTLS     bool
 }
