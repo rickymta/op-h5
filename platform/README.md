@@ -65,6 +65,56 @@ VALUES ('haitac', 'Đại Hải Trình', NULL, 'https://haitac.example.com/auth/
 `secret_hash = NULL` là client công khai — chỉ dựa vào PKCE. Client bí mật thì đặt
 chuỗi băm Argon2id.
 
+## Thêm một game mới
+
+Toàn bộ là **cấu hình, không sửa code**. Đã kiểm chứng bằng cách cắm game thứ hai
+(`tamquoc`) vào hệ thống đang chạy:
+
+```sql
+-- 1. Đăng ký làm OIDC client
+INSERT INTO oauth_clients (client_id, name, secret_hash, redirect_uris, scopes, require_pkce)
+VALUES ('tamquoc', 'Tam Quốc', NULL, 'https://tamquoc.example.com/auth/callback',
+        'openid profile wallet', 1);
+
+-- 2. Khai báo cho trang quản trị biết hỏi Adapter nào
+INSERT INTO games (code, name, adapter_url, site_url, sort_order)
+VALUES ('tamquoc', 'Tam Quốc', 'http://127.0.0.1:8190', 'https://tamquoc.example.com', 2);
+
+-- 3. Đội server và ngưỡng riêng của game đó
+INSERT INTO game_devices (game_code, device_code, name, max_online)
+VALUES ('tamquoc', 'host-02', 'Máy 02', 2000);
+INSERT INTO game_servers (game_code, srv_code, name, device_code, ws_port,
+                          soft_limit, overflow_pct, recommend, status)
+VALUES ('tamquoc','t1','Kinh Châu','host-02',8101,500,15,1,'running'),
+       ('tamquoc','t2','Từ Châu','host-02',8102,800,10,1,'running');
+```
+
+Rồi chạy thêm **một container Adapter nữa, cùng image**, chỉ khác biến môi trường:
+
+```bash
+docker run -d --network host \
+  -e ADAPTER_ADDR=":8190" -e ADAPTER_GAME_CODE=tamquoc -e ADAPTER_GAME_ID=20001 \
+  -e ADAPTER_CLIENT_ID=tamquoc \
+  -e ADAPTER_REDIRECT_URI="https://tamquoc.example.com/auth/callback" \
+  -e ADAPTER_LOGIN_BASE_URL="http://127.0.0.1:9100" \
+  -e TCG_SECRET="<secret cua game do>" \
+  -e ADAPTER_SECRET_ENC_KEY="<khoa rieng cua game do>" \
+  -e ADAPTER_PUBLIC_HOST="tamquoc.example.com" \
+  op-h5-adapter
+```
+
+**Mỗi game một `ADAPTER_SECRET_ENC_KEY` riêng.** Dùng chung một khoá nghĩa là lộ khoá
+của game này thì mở được tài khoản game kia.
+
+Một người dùng ID có tài khoản **riêng** ở từng game — cùng `user_id` nhưng khoá khác
+nhau, nên nhân vật và tiến độ hoàn toàn tách biệt:
+
+```
+user_id  game_code  game_username  khoa_rieng
+1        haitac     id000000001    2E46B364…
+1        tamquoc    id000000001    7E2E7663…
+```
+
 ## Biến môi trường
 
 | Biến | Bắt buộc | Mặc định |
