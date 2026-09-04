@@ -52,10 +52,10 @@ if [ "$MODE" = "build" ]; then
   else git clone --branch "$BRANCH" "https://github.com/$REPO.git" "$BASE/src"; fi
   ls -la "$BASE/src/server/statistic/"*.jar | awk '{print "  JAR:", $5, "bytes", $9}'   # phai ~104 MB, khong phai 130 byte (LFS pointer)
   DOCKER_DIR="$BASE/src/docker"
-  echo "== 5/6 Build image tren server (khong compile, chi COPY; ~3-5 phut)"
+  echo "== 5/6 Build image tren server (server/php/nginx chi COPY ~3-5 phut; id/adapter/admin compile Go ~2-4 phut)"
   [ -f "$DOCKER_DIR/.env" ] || cp "$DOCKER_DIR/.env.example" "$DOCKER_DIR/.env"
-  ( cd "$DOCKER_DIR" && $COMPOSE build console php nginx )
-  docker images | grep -E 'op-h5-(server|php|nginx)' | awk '{print "  image:", $1":"$2, $NF}'
+  ( cd "$DOCKER_DIR" && $COMPOSE -f docker-compose.platform.yml build console php nginx id adapter admin )
+  docker images | grep -E 'op-h5-(server|php|nginx|id|adapter|admin)' | awk '{print "  image:", $1":"$2, $NF}'
 else
   echo "== 4/6 Lay thu muc docker/ tu tarball (khong can git)"
   mkdir -p "$BASE/docker"; TMP=$(mktemp -d)
@@ -68,7 +68,7 @@ fi
 chmod +x "$DOCKER_DIR"/*.sh "$DOCKER_DIR"/initdb/mongo/*.sh 2>/dev/null || true
 
 echo "== 6/6 Port tren host phai ranh (host network)"
-for p in 80 3306 27017 5672 9999 9000 12345 7788 10010 10086 30001 20001 8001 18001 9001; do
+for p in 80 3306 27017 5672 9999 9000 12345 7788 10010 10086 30001 20001 8001 18001 9001 8080 8090 8100; do
   ss -ltn 2>/dev/null | awk '{print $4}' | grep -qE "[:.]$p\$" && echo "  !! port $p dang bi chiem" || true
 done
 
@@ -76,6 +76,11 @@ cat <<EOF
 
 XONG phan tu dong. Con lai (thu cong):
   1) nano $DOCKER_DIR/.env                  # PUBLIC_HOST + secrets (gia tri that o may ban: _backup-secrets-original/)
+     Nen tang: ID_ISSUER=http://<PUBLIC_HOST>:8080  ADAPTER_REDIRECT_URI=http://<PUBLIC_HOST>/auth/callback
+       printf 'ID_SIGNING_KEY_PEM="%s"
+' "$(openssl genrsa 2048 2>/dev/null)" >> $DOCKER_DIR/.env
+       ADAPTER_SECRET_ENC_KEY, ID_INTERNAL_SECRET: head -c 32 /dev/urandom | base64 ; ADMIN_BOOTSTRAP_USER/PASSWORD
+     Firewall mo them 8080 (he thong ID). 8090/8100 chi loopback.
   2) Tai nguyen client vao $BASE/assets/{res,sound,spine}  — nhanh nhat la rsync tu server cu:
        rsync -avz --progress root@<server-cu>:/www/wwwroot/game/res   $BASE/assets/
        rsync -avz --progress root@<server-cu>:/www/wwwroot/game/sound $BASE/assets/

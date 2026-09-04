@@ -4,7 +4,7 @@
 # Tren server:
 #   cd /opt/tcg/docker && cp .env.example .env && nano .env     # dien secrets + PUBLIC_HOST
 #   docker compose -f docker-compose.image.yml pull
-#   docker compose -f docker-compose.image.yml up -d
+#   docker compose -f docker-compose.image.yml up -d          # gom ca id/adapter/admin/platform-seed
 #
 # Bat buoc co san tren host (khong nam trong image):
 #   /opt/tcg/res/            <- website/game/res (1.5 GB) + sound/ + spine/, upload 1 lan bang WinSCP
@@ -244,6 +244,143 @@ services:
     mem_limit: 96m
     cpu_shares: 256
     logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
+
+  # ---- Nen tang (platform/: Go) — ban IMAGE, khong build. Cung noi dung voi
+  # docker-compose.platform.yml (file do them `build:`); sua mot noi thi sua noi kia.
+  # id :8080 (cong khai, OIDC), adapter 127.0.0.1:8090 (nginx proxy), admin 127.0.0.1:8100 (SSH tunnel),
+  # platform-seed: tao DB `platform` + seed oauth_clients/games/game_servers/game_devices/game_packages.
+  # Tao DB `platform`, doi migration cua `id` chay xong, roi ghi (upsert, chay lai duoc):
+  # oauth_clients (client cua game), games, game_devices + game_servers (tu tcg.srv_game),
+  # game_packages (docker/platform-seed/game_packages.<game>.sql). Tai khoan quan tri dau
+  # tien do `admin` tu tao tu ADMIN_BOOTSTRAP_USER/PASSWORD.
+  platform-seed:
+    image: mysql:8.0
+    network_mode: host
+    restart: "no"
+    entrypoint: ["bash", "/seed/platform-seed.sh"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
+      ADAPTER_GAME_NAME: ${ADAPTER_GAME_NAME:-Đại Hải Trình}
+      ADAPTER_CLIENT_ID: ${ADAPTER_CLIENT_ID:-haitac}
+      ADAPTER_REDIRECT_URI: ${ADAPTER_REDIRECT_URI:?dat trong .env — vd http://<PUBLIC_HOST>/auth/callback}
+      ADAPTER_PORT: ${ADAPTER_PORT:-8090}
+      ADAPTER_SITE_URL: ${ADAPTER_SITE_URL:-}
+      GAME_SERVERS: ${GAME_SERVERS:-s1:8001:d1}
+    volumes:
+      - ./platform-seed.sh:/seed/platform-seed.sh:ro
+      - ./platform-seed:/seed/data:ro
+    depends_on:
+      mysql: { condition: service_healthy }
+    logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
+
+  id:
+    image: ${IMAGE_ID:-ghcr.io/rickymta/op-h5-id:latest}
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      ID_ADDR: ":${ID_PORT:-8080}"
+      ID_ISSUER: ${ID_ISSUER:?dat trong .env — URL cong khai cua he thong ID, vd http://<PUBLIC_HOST>:8080}
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ID_SIGNING_KEY_PEM: ${ID_SIGNING_KEY_PEM:?sinh bang `openssl genrsa 2048`, dat trong .env}
+      ID_COOKIE_SECURE: ${ID_COOKIE_SECURE:-true}
+      ID_INTERNAL_SECRET: ${ID_INTERNAL_SECRET:-}
+      ID_SMTP_HOST: ${ID_SMTP_HOST:-}
+      ID_SMTP_PORT: ${ID_SMTP_PORT:-587}
+      ID_SMTP_USER: ${ID_SMTP_USER:-}
+      ID_SMTP_PASSWORD: ${ID_SMTP_PASSWORD:-}
+      ID_SMTP_FROM: ${ID_SMTP_FROM:-}
+      ID_SMTP_FROM_NAME: ${ID_SMTP_FROM_NAME:-Cổng game}
+    depends_on:
+      mysql: { condition: service_healthy }
+    mem_limit: 128m
+    cpu_shares: 256
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ID_PORT:-8080}/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  adapter:
+    image: ${IMAGE_ADAPTER:-ghcr.io/rickymta/op-h5-adapter:latest}
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      # Chi nghe loopback: nginx proxy /, /may-chu, /quy-doi, /choi-game, /auth/, /api/game/ vao day.
+      ADAPTER_ADDR: "127.0.0.1:${ADAPTER_PORT:-8090}"
+      ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
+      ADAPTER_GAME_ID: ${ADAPTER_GAME_ID:-10091}
+      ADAPTER_PLATFORM_CODE: ${ADAPTER_PLATFORM_CODE:-id}
+      ADAPTER_CHANNEL_CODE: ${ADAPTER_CHANNEL_CODE:-web}
+      ADAPTER_CURRENCY_CODE: ${ADAPTER_CURRENCY_CODE:-VND}
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ADAPTER_ISSUER: ${ID_ISSUER:?dat trong .env}
+      ADAPTER_CLIENT_ID: ${ADAPTER_CLIENT_ID:-haitac}
+      ADAPTER_CLIENT_SECRET: ${ADAPTER_CLIENT_SECRET:-}
+      ADAPTER_REDIRECT_URI: ${ADAPTER_REDIRECT_URI:?dat trong .env — platform-seed ghi cung gia tri vao oauth_clients}
+      ADAPTER_LOGIN_BASE_URL: "http://127.0.0.1:9000"
+      TCG_SECRET: ${TCG_SECRET:?dat trong .env — phai bang secret trong env.yml}
+      ADAPTER_SECRET_ENC_KEY: ${ADAPTER_SECRET_ENC_KEY:?sinh bang `head -c 32 /dev/urandom | base64`}
+      # Console :9999 — adapter dang nhap /staff/login de phat vat pham (/gm/pay/*).
+      # Cung tai khoan admin ma gmhanglong dung (tcg.staff), nen mat khau la CONSOLE_ADMIN_PASSWORD.
+      ADAPTER_CONSOLE_BASE_URL: "http://127.0.0.1:9999"
+      ADAPTER_CONSOLE_USER: ${ADAPTER_CONSOLE_USER:-admin}
+      ADAPTER_CONSOLE_PASSWORD: ${CONSOLE_ADMIN_PASSWORD:?dat trong .env — mat khau tai khoan admin cua console (tcg.staff)}
+      ADAPTER_CONSOLE_PAY_MODE: ${ADAPTER_CONSOLE_PAY_MODE:-manual}
+      ADAPTER_GRANT_INTERVAL: ${ADAPTER_GRANT_INTERVAL:-15s}
+      ADAPTER_PUBLIC_HOST: ${PUBLIC_HOST:?dat trong .env}
+      ADAPTER_TLS: ${ADAPTER_TLS:-false}
+      ADAPTER_POLL_INTERVAL: ${ADAPTER_POLL_INTERVAL:-10s}
+      ADAPTER_TICKET_TTL: ${ADAPTER_TICKET_TTL:-60s}
+    depends_on:
+      id: { condition: service_healthy }
+      platform-seed: { condition: service_completed_successfully }
+      login: { condition: service_healthy }
+    mem_limit: 128m
+    cpu_shares: 256
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ADAPTER_PORT:-8090}/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  # Trang quan tri nen tang (doi server, nguong tai, nap tay, nhat ky). Chi loopback:
+  # vao bang SSH tunnel  ssh -L 8100:127.0.0.1:8100 root@<server>  roi mo http://127.0.0.1:8100
+  admin:
+    image: ${IMAGE_ADMIN:-ghcr.io/rickymta/op-h5-admin:latest}
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      ADMIN_ADDR: ${ADMIN_ADDR:-127.0.0.1:8100}
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-false}
+      ADMIN_BOOTSTRAP_USER: ${ADMIN_BOOTSTRAP_USER:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+    depends_on:
+      id: { condition: service_healthy }
+    mem_limit: 96m
+    cpu_shares: 128
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://${ADMIN_ADDR:-127.0.0.1:8100}/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
 
 volumes:
   mysql-data:

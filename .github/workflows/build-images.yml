@@ -1,6 +1,7 @@
 name: build-images
 
-# Build 3 image (server / php / nginx) va day len GHCR. Server chi can `docker compose pull`.
+# Build 6 image (server / php / nginx + id / adapter / admin cua platform/) va day len GHCR.
+# Server chi can `docker compose pull`.
 #
 # LFS: 8 fat JAR (611 MB) la LFS object. Free plan chi co 1 GB bandwidth/thang, nen LFS
 # duoc cache trong Actions cache (10 GB/repo) — chi lan build dau tien ton bandwidth.
@@ -16,6 +17,7 @@ on:
       - 'server/**'
       - 'website/game/**'
       - 'docker/**'
+      - 'platform/**'
       - '.dockerignore'
       - '.github/workflows/build-images.yml'
 
@@ -107,11 +109,51 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
 
+      # ---- nen tang (Go): context la platform/, mot Dockerfile, chon binary bang ARG CMD ----
+      - name: Build & push id
+        uses: docker/build-push-action@v6
+        with:
+          context: platform
+          file: platform/Dockerfile
+          build-args: CMD=id
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-id:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-id:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=platform
+          cache-to: type=gha,mode=max,scope=platform
+
+      - name: Build & push adapter
+        uses: docker/build-push-action@v6
+        with:
+          context: platform
+          file: platform/Dockerfile
+          build-args: CMD=adapter
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-adapter:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-adapter:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=platform
+          cache-to: type=gha,mode=max,scope=platform
+
+      - name: Build & push admin
+        uses: docker/build-push-action@v6
+        with:
+          context: platform
+          file: platform/Dockerfile
+          build-args: CMD=admin
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-admin:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner_lc }}/op-h5-admin:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=platform
+          cache-to: type=gha,mode=max,scope=platform
+
       - name: Tom tat
         run: |
           echo "### Image da day len GHCR" >> "$GITHUB_STEP_SUMMARY"
-          for i in server php nginx; do
+          for i in server php nginx id adapter admin; do
             echo "- \`${REGISTRY}/${{ steps.meta.outputs.owner_lc }}/op-h5-$i:${{ steps.meta.outputs.sha }}\` (+ latest)" >> "$GITHUB_STEP_SUMMARY"
           done
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Lan dau: vao Packages -> op-h5-server/php/nginx -> Package settings -> Change visibility -> Public, de server pull khong can login." >> "$GITHUB_STEP_SUMMARY"
+          echo "Lan dau: vao Packages -> op-h5-server/php/nginx/id/adapter/admin -> Package settings -> Change visibility -> Public, de server pull khong can login." >> "$GITHUB_STEP_SUMMARY"

@@ -68,7 +68,7 @@ docker run -d --name pf-id --network host \
   op-h5-id
 ```
 
-Migration tự chạy lúc khởi động (`internal/store/migrations/*.sql`, chạy một lần mỗi file).
+Migration tự chạy lúc khởi động (`internal/store/migrations/*.sql`, chạy một lần mỗi file). **Database `platform` thì không tự tạo** — trong Docker, service `platform-seed` (`docker/platform-seed.sh`) tạo DB rồi seed `oauth_clients`, `games`, `game_devices`, `game_servers`, `game_packages` từ `.env` + `tcg.srv_game` + `docker/platform-seed/game_packages.<game>.sql`; chạy tay thì `CREATE DATABASE platform` trước.
 
 ### Đăng ký một game làm OIDC client
 

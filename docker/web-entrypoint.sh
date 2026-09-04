@@ -42,6 +42,23 @@ fill __GM_CODE__                "${GM_CODE:-}"
 fill __GMHANGLONG_CODE__        "${GMHANGLONG_CODE:-}"
 fill __GM_LOGIN_TOKEN__         "${GM_LOGIN_TOKEN:-}"
 fill __MOMO_PHONE__             "${MOMO_PHONE:-}"
+fill __BANK_CALLBACK_CHECKSUM__ "${BANK_CALLBACK_CHECKSUM:-}"
+
+# 3) bien moi truong cho PHP. php-fpm xoa env cua tien trinh (clear_env) nen getenv() trong PHP
+#    khong thay .env; chi dua dung 3 bien cua vi ID vao pool, khong dua ca .env (secret khac
+#    khong co viec gi trong PHP). Chi lam khi day la image php-fpm.
+FPM_D=/usr/local/etc/php-fpm.d
+if [ -d "$FPM_D" ]; then
+  {
+    echo "; sinh boi web-entrypoint luc start — dung sua tay"
+    echo "[www]"
+    for v in ID_BASE_URL ID_INTERNAL_SECRET ID_WALLET_ENABLED; do
+      [ -n "${!v:-}" ] && printf 'env[%s] = "%s"
+' "$v" "${!v}"
+    done
+  } > "$FPM_D/zz-env.conf"
+  echo "[web-entrypoint] php-fpm env: $(grep -c '^env\[' "$FPM_D/zz-env.conf") bien (ID_WALLET_ENABLED=${ID_WALLET_ENABLED:-0})"
+fi
 
 left=$(grep -rhoE '__[A-Z_]+__' "$W" --include='*.php' 2>/dev/null | sort -u | tr '\n' ' ')
 [ -z "$left" ] || echo "[web-entrypoint] placeholder chua dien (bo qua neu la nginx): $left" >&2
