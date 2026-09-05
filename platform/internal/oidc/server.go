@@ -175,7 +175,33 @@ type loginView struct {
 	Action string
 }
 
+// formActionCSP noi long `form-action` vua du cho dung client dang dang nhap.
+//
+// CSP mac dinh (httpx.SecurityHeaders) dat `form-action 'self'`. Chrome ap rang buoc nay
+// cho CA CHUOI CHUYEN HUONG sau khi POST, khong chi cho dia chi `action`. Ma dang nhap
+// thanh cong thi `/oauth/authorize/login` chuyen huong sang redirect_uri cua game — mot
+// origin KHAC — nen Chrome chan, va bao loi kem URL cua `action` nen rat de chan doan nham:
+//
+//	Sending form data to 'https://id.<domain>/oauth/authorize/login' violates the
+//	following Content Security Policy directive: "form-action 'self'".
+//
+// Firefox khong ap cho chuyen huong nen loi chi hien tren Chrome.
+//
+// Chi them ORIGIN cua redirect_uri da duoc kiem (`p.RedirectURI` da qua AllowsRedirect),
+// khong dung 'self' https: — noi long het thi mat luon tac dung chong chuyen huong form
+// sang trang la.
+func (s *Server) formActionCSP(w http.ResponseWriter, redirectURI string) {
+	extra := ""
+	if u, err := url.Parse(redirectURI); err == nil && u.Scheme != "" && u.Host != "" {
+		extra = " " + u.Scheme + "://" + u.Host
+	}
+	w.Header().Set("Content-Security-Policy",
+		"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "+
+			"connect-src 'self'; form-action 'self'"+extra+"; base-uri 'none'; frame-ancestors 'none'")
+}
+
 func (s *Server) renderLogin(w http.ResponseWriter, r *http.Request, p authzParams, errMsg string) {
+	s.formActionCSP(w, p.RedirectURI)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	status := http.StatusOK
 	if errMsg != "" {
