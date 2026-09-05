@@ -4,6 +4,81 @@ Làm **theo đúng thứ tự**, mỗi bước có điểm kiểm tra. Ký hiệ
 
 Đầu vào đã có: repo `github.com/rickymta/op-h5` (JAR qua LFS), release `assets-v1` (res/sound/spine 1.33 GB), giá trị secrets thật trong `_backup-secrets-original/` trên PC, server cũ còn chạy với DB thật.
 
+## Trỏ domain thật (ví dụ `antfarms.xyz`)
+
+Mặc định hệ thống chạy theo IP. Để dùng domain, ba việc phải làm **theo đúng thứ tự** —
+làm ngược là nginx không khởi động được.
+
+### 1. DNS
+
+| Bản ghi | Trỏ về | Phục vụ |
+|---|---|---|
+| `A  antfarms.xyz` | IP server | Cổng thông tin |
+| `A  www.antfarms.xyz` | IP server | Chuyển hướng về tên không www |
+| `A  id.antfarms.xyz` | IP server | Đăng ký, tài khoản, quên mật khẩu, OIDC |
+| `A  haitac.antfarms.xyz` | IP server | Site game + client |
+
+Thêm game mới thì thêm một bản ghi A và copy khối `server` của haitac.
+
+**Trang quản trị cố ý không có domain.** Nó không có lớp chống dò mật khẩu như hệ thống
+ID, và mở ra Internet là mở cả đường nạp tay. Vào bằng SSH tunnel:
+`ssh -L 8100:127.0.0.1:8100 root@<server>` rồi mở `http://127.0.0.1:8100`.
+
+### 2. Chứng chỉ — làm TRƯỚC khi bật khối 443
+
+nginx **không khởi động được** nếu file chứng chỉ chưa tồn tại.
+
+```bash
+mkdir -p /var/www/acme
+certbot certonly --webroot -w /var/www/acme \
+  -d antfarms.xyz -d www.antfarms.xyz -d id.antfarms.xyz -d haitac.antfarms.xyz
+```
+
+### 3. Điền domain và bật cấu hình
+
+```bash
+cd /opt/tcg/src/docker/nginx
+sed -i 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' domains.conf tls.conf
+# rồi mount domains.conf + tls.conf + game_site.conf vào container nginx
+```
+
+Kèm theo, trong `docker/.env`:
+
+```
+PUBLIC_HOST=haitac.antfarms.xyz
+ID_ISSUER=https://id.antfarms.xyz
+ADAPTER_REDIRECT_URI=https://haitac.antfarms.xyz/auth/callback
+ADAPTER_TLS=true
+```
+
+Và trong MySQL — nếu bỏ qua, login server vẫn công bố `ws://` và client sẽ bị chặn:
+
+```sql
+UPDATE tcg.srv_login    SET np_scheme='https', np_ssl=1, np_host_WAN='haitac.antfarms.xyz';
+UPDATE tcg.srv_game     SET ws_scheme='wss';
+UPDATE tcg.cloud_device SET host_WAN='haitac.antfarms.xyz';
+```
+
+### Vì sao phải bọc TLS cho cả 12345 / 7788 / 9000 / 8001
+
+Client gọi thẳng bốn dịch vụ này **theo cổng**, và scheme bám theo trang:
+
+```js
+ydwxConfig.metaDataServer = location.protocol + "//" + location.hostname + ":12345/";
+```
+
+Trang chạy HTTPS thì client gọi `https://haitac.antfarms.xyz:12345/` và
+`wss://…:8001`. Trình duyệt chặn nội dung hỗn hợp, **không có đường lui**. Vì thế
+`domains.conf` có bốn khối `server` chỉ để bọc TLS rồi chuyển tiếp sang dịch vụ chạy
+loopback. Bỏ qua bốn khối đó thì trang web lên bình thường nhưng client không vào được
+game — và triệu chứng (client đứng im) không chỉ vào nguyên nhân.
+
+**Chưa kiểm chứng:** không có domain thật và chứng chỉ trên máy dev nên mới chỉ chạy
+`nginx -t` với chứng chỉ tự ký — đủ 8 khối server hợp lệ. Bốn khối cổng phụ là suy ra từ
+cách client dùng `location.protocol`, chưa chạy thật lần nào.
+
+---
+
 ## Di trú người chơi cũ — BẮT BUỘC trước khi mở cổng ID
 
 Bỏ bước này thì mọi người chơi cũ đăng nhập đúng mật khẩu nhưng lạc vào **nhân vật
