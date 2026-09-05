@@ -65,7 +65,11 @@ down
 
 echo "==> 2/9 Sinh bi mat cho lan chay nay"
 MYSQL_PW=$(gen); TCG_SECRET=$(gen); INT_SECRET=$(gen)
-ENC_KEY=$(openssl rand -base64 32)
+# Khoa ma hoa game_secret: TAI DUNG giua cac lan chay. Sinh moi thi moi dong
+# game_identities da luu thanh rac, va Adapter bao "K_PASSWORD_ERROR" rat kho doan.
+[ -f "$STATE/enc.key" ] || openssl rand -base64 32 > "$STATE/enc.key"
+chmod 600 "$STATE/enc.key"
+ENC_KEY=$(cat "$STATE/enc.key")
 ADMIN_PW=$(gen 16)
 CONSOLE_PW=$(gen 16)
 # Ma uy quyen cua tang PHP cu (gm/, gmhanglong/, adminphp@2024/). Phai sinh o day:
@@ -82,6 +86,7 @@ ADMIN_BOOTSTRAP_USER=quantri
 ADMIN_BOOTSTRAP_PASSWORD=$ADMIN_PW
 CONSOLE_PASSWORD=$CONSOLE_PW
 ID_INTERNAL_SECRET=$INT_SECRET
+ADAPTER_SECRET_ENC_KEY=$ENC_KEY
 GM_CODE=$GM_CODE
 GMHANGLONG_CODE=$GMHANGLONG_CODE
 REV_QUERY_KEY=$REV_KEY
