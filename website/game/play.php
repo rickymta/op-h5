@@ -61,6 +61,50 @@ if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
 		}
 	}
 }
+
+// CHOT CHAN: khong co phien thi khong duoc vao game.
+//
+// Truoc day thieu phien thi trang van nap du 9,4 MB client roi de client hien FORM DANG
+// NHAP CU cua no. Khi do nguoi choi dang nhap thang vao login server qua /account/, bo
+// qua toan bo he thong ID: khong co vi Xu, khong qua cong chan tai, khong co tai khoan
+// ID nao duoc tao. Tuc la mo `https://<domain>/play.php` la ai cung vao duoc.
+//
+// Phan biet HAI truong hop, neu khong se thanh vong lap chuyen huong:
+//
+//   - Khong co cookie  -> chac chan chua dang nhap -> day sang /choi-game (chay OIDC).
+//   - Co cookie nhung Adapter tu choi (may chu day, login server hong, phien het han)
+//     -> KHONG chuyen huong, vi /choi-game co the day nguoc lai day. Hien mot trang loi
+//        goi y, co duong di tiep.
+if ($opAuto === null) {
+	if (!isset($_COOKIE['haitac_sess'])) {
+		header('Location: /choi-game', true, 302);
+		exit;
+	}
+	http_response_code(503);
+	header('Content-Type: text/html; charset=utf-8');
+	$ly_do = $opAutoErr !== '' ? $opAutoErr : 'Phiên chơi đã hết hạn hoặc chưa sẵn sàng.';
+	?><!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chưa vào được — Đại Hải Trình</title>
+<style>
+ body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:#0C1D2B;color:#E4EDF3;font:16px/1.6 ui-sans-serif,system-ui,sans-serif;padding:20px}
+ .the{max-width:420px;background:#122636;border:1px solid #22394D;border-radius:8px;padding:26px;text-align:center}
+ h1{font-size:19px;margin:0 0 10px}
+ p{color:#9CB0C0;margin:0 0 20px}
+ a{display:inline-block;margin:4px;padding:11px 18px;border-radius:5px;text-decoration:none;font-weight:600}
+ .chinh{background:#EE4623;color:#fff} .phu{border:1px solid #22394D;color:#9CB0C0}
+</style></head><body>
+ <div class="the">
+  <h1>Chưa vào được game</h1>
+  <p><?php echo htmlspecialchars($ly_do, ENT_QUOTES, 'UTF-8'); ?></p>
+  <a class="chinh" href="/choi-game">Thử lại</a>
+  <a class="phu" href="/">Về trang chính</a>
+ </div>
+</body></html><?php
+	exit;
+}
 ?>
 <html>
 <head>
@@ -78,6 +122,12 @@ if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
 </head>
 
 <body id="body">
+<!-- Duong ve trang chinh. Canvas game chiem toan man hinh nen khong co loi ra nao khac:
+     nguoi choi muon xem may chu, nap Xu hay doi tai khoan deu phai bam Back cua trinh
+     duyet (tren app/webview thi khong co ca cai do).
+     Dat o goc TRAI-TREN: goc phai-tren da co nut Dong cua khung nap tien (#close).
+     `env(safe-area-inset-*)` de khong bi tai tho tren iPhone che mat. -->
+<a id="opHome" href="/" title="Về trang chính">&#8592; Trang chính</a>
 <div class="frame" style="margin: auto;" id="iframe"></div>
 <button onclick="closes()" id="close" style="display:none;position: absolute; z-index: 99999999; left: auto; right: 6px; top: 6px; width: 44px; height: 46px; border: 0px; cursor: pointer; background: url(/assets/images/back.png) no-repeat; font-size: 0;">Đóng</button>
 <script>
@@ -115,6 +165,24 @@ function openNapTien(){
             width: 100%;
             height: 100%;
         }
+        /* Mo mo luc binh thuong de khong che game; ro han khi cham/tro vao. */
+        #opHome {
+            position: fixed;
+            z-index: 99999998;
+            left: calc(8px + env(safe-area-inset-left, 0px));
+            top: calc(8px + env(safe-area-inset-top, 0px));
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(6, 18, 28, .55);
+            color: #DCE7EF;
+            font: 600 13px/1 ui-sans-serif, system-ui, sans-serif;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, .16);
+            opacity: .45;
+            transition: opacity .15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #opHome:hover, #opHome:active, #opHome:focus { opacity: 1; }
         @font-face {
             font-family: Arial;
             src: url(/assets/fonts/msyh.ttf);
@@ -177,6 +245,7 @@ function openNapTien(){
         // Cung ly do nhu opBundleV: file nay cung bi cache (7d) va no la noi quyet dinh
         // URL cua bundle chinh, nen ban cu se tiep tuc nap bundle cu.
         echo @filemtime(__DIR__ . '/a3b31-4c087-1dc2f.js') ?: '0'; ?>"></script>
+    <script type="text/javascript" src="op-https.js?v=<?php echo @filemtime(__DIR__ . '/op-https.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-autologin.js?v=<?php
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
         // giu ban cu trong cache va thay doi khong co tac dung nao.

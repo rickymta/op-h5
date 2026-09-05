@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -198,13 +199,44 @@ func truncate(s string, n int) string {
 	return s
 }
 
+// logout ket thuc phien choi game VA phien o he thong ID.
+//
+// Truoc day chi huy dung phien cua Adapter (`WHERE id = ?`). Hai he dung CHUNG bang
+// `sessions` nhung o hai domain khac nhau, nen huy mot ben khong dung toi ben kia:
+// dang xuat o day xong, `id.<domain>` van coi nguoi dung dang dang nhap. Huy theo
+// user_id thi ca hai cung ket thuc.
+//
+// Sau do van chuyen qua `/oauth/logout` cua he thong ID de XOA NOT COOKIE ben do —
+// phien da bi thu hoi roi nen cookie con lai la vo hai, nhung de lai thi trinh duyet
+// van gui kem moi request va giao dien ID co the hien nham trang thai.
 func (s *adapterServer) logout(w http.ResponseWriter, r *http.Request) {
 	if c, err := r.Cookie(sessionCookie); err == nil {
-		_, _ = s.db.ExecContext(r.Context(),
-			`UPDATE sessions SET revoked_at = NOW() WHERE id = ?`, c.Value)
+		if _, err := s.db.ExecContext(r.Context(),
+			`UPDATE sessions SET revoked_at = NOW()
+			  WHERE user_id = (SELECT user_id FROM (
+			          SELECT user_id FROM sessions WHERE id = ?
+			        ) AS t)
+			    AND revoked_at IS NULL`, c.Value); err != nil {
+			s.log.Error("thu hoi phien khi dang xuat", "err", err)
+		}
 	}
 	s.clearCookie(w, sessionCookie)
-	http.Redirect(w, r, "/", http.StatusFound)
+
+	if s.cfg.Issuer == "" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	q := url.Values{}
+	q.Set("client_id", s.cfg.ClientID)
+	q.Set("post_logout_redirect_uri", s.siteURL()+"/")
+	http.Redirect(w, r, strings.TrimRight(s.cfg.Issuer, "/")+"/oauth/logout?"+q.Encode(),
+		http.StatusFound)
+}
+
+// siteURL la goc cua trang game, suy ra tu RedirectURI bang cach bo duoi "/auth/callback"
+// — dung quy uoc ma `platform-seed.sh` dang dung cho `games.site_url`.
+func (s *adapterServer) siteURL() string {
+	return strings.TrimSuffix(strings.TrimRight(s.cfg.RedirectURI, "/"), "/auth/callback")
 }
 
 type serverView struct {

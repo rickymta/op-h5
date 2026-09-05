@@ -175,7 +175,33 @@ type loginView struct {
 	Action string
 }
 
+// formActionCSP noi long `form-action` vua du cho dung client dang dang nhap.
+//
+// CSP mac dinh (httpx.SecurityHeaders) dat `form-action 'self'`. Chrome ap rang buoc nay
+// cho CA CHUOI CHUYEN HUONG sau khi POST, khong chi cho dia chi `action`. Ma dang nhap
+// thanh cong thi `/oauth/authorize/login` chuyen huong sang redirect_uri cua game — mot
+// origin KHAC — nen Chrome chan, va bao loi kem URL cua `action` nen rat de chan doan nham:
+//
+//	Sending form data to 'https://id.<domain>/oauth/authorize/login' violates the
+//	following Content Security Policy directive: "form-action 'self'".
+//
+// Firefox khong ap cho chuyen huong nen loi chi hien tren Chrome.
+//
+// Chi them ORIGIN cua redirect_uri da duoc kiem (`p.RedirectURI` da qua AllowsRedirect),
+// khong dung 'self' https: — noi long het thi mat luon tac dung chong chuyen huong form
+// sang trang la.
+func (s *Server) formActionCSP(w http.ResponseWriter, redirectURI string) {
+	extra := ""
+	if u, err := url.Parse(redirectURI); err == nil && u.Scheme != "" && u.Host != "" {
+		extra = " " + u.Scheme + "://" + u.Host
+	}
+	w.Header().Set("Content-Security-Policy",
+		"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "+
+			"connect-src 'self'; form-action 'self'"+extra+"; base-uri 'none'; frame-ancestors 'none'")
+}
+
 func (s *Server) renderLogin(w http.ResponseWriter, r *http.Request, p authzParams, errMsg string) {
+	s.formActionCSP(w, p.RedirectURI)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	status := http.StatusOK
 	if errMsg != "" {
@@ -446,18 +472,59 @@ func (s *Server) verifyAnyAudience(tok string) (int64, string, error) {
 	return s.Signer.verifyNoAudience(tok, s.Issuer, "access")
 }
 
-// Logout huy phien tai id.domain.com.
+// Logout huy phien va dua nguoi dung ve mot trang, khong tra JSON.
+//
+// Huy MOI phien cua nguoi dung chu khong chi phien tren domain nay. Ly do: Adapter
+// (haitac.<domain>) giu phien rieng cua no trong CHINH bang `sessions` nay va chi kiem
+// `revoked_at IS NULL`. Neu chi huy phien cua he thong ID thi:
+//
+//   - Bam "Thoat" xong, vao lai game van vao thang duoc bang cookie cu (da gap that).
+//   - Nang hon: nguoi khac dang nhap tren cung may van tiep tuc CHOI BANG TAI KHOAN TRUOC
+//     do — vi `/choi-game` chi nhin cookie cua chinh no, khong bao gio hoi lai he thong ID.
+//     Da gap that: hai tai khoan ID nhung chi mot danh tinh game, va phien duoc phuc vu la
+//     cua nguoi dang nhap TRUOC.
+//
+// Tra ve JSON nhu truoc day cung la mot loi: `shell.html` tro thang vao day nen nguoi dung
+// bam "Thoat" thi nhan duoc `{"status":"logged_out"}` giua man hinh.
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	if sid := identity.CookieValue(r, s.CookieSecur); sid != "" {
-		_ = s.Sessions.Revoke(r.Context(), sid)
+		if sess, err := s.Sessions.Get(r.Context(), sid); err == nil {
+			_ = s.Sessions.RevokeAllForUser(r.Context(), sess.UserID)
+		} else {
+			// Phien da het han/thu hoi: van huy dung no cho chac.
+			_ = s.Sessions.Revoke(r.Context(), sid)
+		}
 	}
 	identity.ClearCookie(w, s.CookieSecur)
-	redirect := r.URL.Query().Get("post_logout_redirect_uri")
-	if redirect == "" {
-		httpx.JSON(w, http.StatusOK, map[string]string{"status": "logged_out"})
-		return
+	http.Redirect(w, r, s.postLogoutTarget(r), http.StatusFound)
+}
+
+// postLogoutTarget chon dia chi tra nguoi dung ve sau khi dang xuat.
+//
+// Thu tu: khong co tham so -> trang chu cua chinh he thong ID; duong dan tuong doi cung
+// site -> cho qua; dia chi tuyet doi -> CHI cho qua khi khop tuyet doi voi mot dia chi da
+// dang ky cua client (`oauth_clients.post_logout_uris`). Moi truong hop khac deu ve "/"
+// kem mot dong canh bao — khong bao gio chuyen tiep den noi chua dang ky.
+func (s *Server) postLogoutTarget(r *http.Request) string {
+	raw := r.URL.Query().Get("post_logout_redirect_uri")
+	if raw == "" {
+		return "/"
 	}
-	http.Redirect(w, r, redirect, http.StatusFound)
+	// Duong dan tuong doi cung site. Chan "//host" va "/\host" vi trinh duyet hieu chung
+	// la dia chi tuyet doi (protocol-relative) — do la loi open redirect kinh dien.
+	if strings.HasPrefix(raw, "/") && !strings.HasPrefix(raw, "//") && !strings.HasPrefix(raw, "/\\") {
+		return raw
+	}
+	if cid := r.URL.Query().Get("client_id"); cid != "" && s.Store != nil {
+		if c, err := s.Store.Client(r.Context(), cid); err == nil && c.AllowsPostLogout(raw) {
+			return raw
+		}
+	}
+	if s.Log != nil {
+		s.Log.Warn("post_logout_redirect_uri khong nam trong danh sach dang ky; ve trang chu",
+			"uri", raw, "client_id", r.URL.Query().Get("client_id"))
+	}
+	return "/"
 }
 
 // Health cho healthcheck cua Docker.

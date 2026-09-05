@@ -47,6 +47,22 @@ func (c *Client) AllowsRedirect(uri string) bool {
 
 type Store struct{ DB *sql.DB }
 
+// AllowsPostLogout cho biet mot dia chi co duoc phep nhan nguoi dung sau khi dang xuat.
+//
+// Phai khop TUYET DOI voi mot dia chi da dang ky. Truoc day `Logout` lay thang tham so
+// `post_logout_redirect_uri` tu URL roi `http.Redirect` — tuc la open redirect ngay tren
+// domain dang nhap: ke tan cong gui link `id.<domain>/oauth/logout?post_logout_redirect_uri=
+// https://trang-gia` la day duoc nguoi dung sang trang gia mao voi xuat phat diem la domain
+// that. Cot `post_logout_uris` von da co trong schema tu dau nhung chua ai dung.
+func (c *Client) AllowsPostLogout(uri string) bool {
+	for _, u := range c.PostLogoutURIs {
+		if u != "" && u == uri {
+			return true
+		}
+	}
+	return false
+}
+
 func splitLines(s string) []string {
 	out := []string{}
 	for _, l := range strings.Split(s, "\n") {

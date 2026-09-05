@@ -24,14 +24,25 @@ for f in $CFG; do
     -e "s|http://123\.253\.26\.34:88/cli/app/icon/|http://$(esc "$PUBLIC_HOST")/cli/app/icon/|g" \
     "$f"
 done
-# PUBLIC_SCHEME=https: dua loginNP/statNP trong global.conf.json ve cong cong khai.
+# PUBLIC_SCHEME=https: dua loginNP trong global.conf.json ve cong cong khai.
 #
-# VI SAO: client lay dia chi login/statistic tu day (KHONG phai tu tcg.srv_login — bang do
-# phuc vu viec khac). Voi mot server chi mo 80/443, de nguyen port 9000/7788 la client goi
-# vao cho khong ai nghe; va khi trang chay HTTPS thi trinh duyet con chan noi dung hon hop.
+# VI SAO chi loginNP: meta khong tu giu danh sach login server (meta.conf.json chi co
+# {"client":{"version":...}}) — no lay tu loginNP roi CONG BO cho client qua
+# /facade/client/start. Da doi chieu tren server that: sau khi doi, serverList tra ve
+# {"scheme":"https","host":"haitac.<domain>","port":443}. Voi server chi mo 80/443, de
+# nguyen 9000 la client goi vao cho khong ai nghe; va trang HTTPS con bi chan noi dung
+# hon hop. Sau khi doi, nginx nhan /account/ va /srv/ tren 443 roi chuyen vao loopback.
 #
-# Sau khi doi, nginx nhan cac duong /account/, /srv/, /stat/ tren 443 roi chuyen tiep vao
-# dich vu chay loopback. Xem docker/nginx/game_site.conf va docs/deploy-runbook.md.
+# VI SAO KHONG dong statNP — da tung lam va da HONG:
+#   global.conf.json la cau hinh NOI BO giua cac service Java, khong phai cau hinh client.
+#   Client lay dia chi thong ke tu a3b31-4c087-1dc2f.js (location.origin + "/stat/"),
+#   KHONG doc statNP. Doi statNP thanh https:443 lam tien trinh game goi ra dia chi cong
+#   khai va dinh 404:
+#     RoleKeyNumHandler - 同步...失败:POST请求结果异常:404,
+#     uri=https://haitac.<domain>:443//res/role/key/num/update/batch
+#   (hai dau gach: base ghep voi path deu co "/"; qua nginx thi "//res/" rut gon thanh
+#   "/res/" va roi vao khoi tai nguyen tinh -> 404). Hau qua: du lieu quan trong theo
+#   nhan vat khong bao gio dong bo sang statistic. Giu statNP o dia chi noi bo.
 #
 # Dung perl chu khong phai python/jq: image nay chi co perl/awk/sed. Va sua CO PHAM VI —
 # chi trong khoi cua dung khoa loginNP/statNP — chu khong thay moi "port":9000 trong file,
@@ -41,7 +52,7 @@ if [ "${PUBLIC_SCHEME:-http}" = "https" ]; then
   if [ -f "$GC" ]; then
     PORT="${PUBLIC_PORT:-443}" perl -0pi -e '
       my $port = $ENV{PORT};
-      for my $key (qw(loginNP statNP)) {
+      for my $key (qw(loginNP)) {
         # Khop tu "<key>":{ den dau } cung cap. Cac khoi nay khong long nhau ngoai "host",
         # nen mot lop long la du.
         s{("\Q$key\E"\s*:\s*\{)((?:[^{}]|\{[^{}]*\})*)(\})}{
@@ -52,7 +63,7 @@ if [ "${PUBLIC_SCHEME:-http}" = "https" ]; then
           $mo . $than . $dong;
         }gex;
       }
-    ' "$GC" && echo "[tcg-entrypoint] loginNP/statNP -> https:${PUBLIC_PORT:-443}"
+    ' "$GC" && echo "[tcg-entrypoint] loginNP -> https:${PUBLIC_PORT:-443} (statNP giu noi bo)"
   fi
 fi
 
