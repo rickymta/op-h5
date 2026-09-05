@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Tham so Argon2id. Chon theo khuyen nghi OWASP cho may nho: 64 MiB, 3 vong, 4 luong.
@@ -80,6 +81,22 @@ func decodeHash(encoded string) (p params, salt, sum []byte, err error) {
 // VerifyPassword so sanh khong phu thuoc thoi gian. Chuoi bam hong tra ve false
 // kem loi, khong bao gio tra ve true.
 func VerifyPassword(password, encoded string) (bool, error) {
+	// Ban ghi di tru tu `web.user` mang bam bcrypt ($2a/$2b/$2y) do PHP tao.
+	// Chap nhan o day de nguoi choi cu dang nhap duoc bang dung mat khau cu; ngay sau
+	// do NeedsRehash() tra ve true (decodeHash khong doc duoc bcrypt) nen ban ghi tu
+	// duoc nang len Argon2id o lan dang nhap dau tien.
+	//
+	// KHONG chap nhan mat khau dang tho o day: cong cu di tru da bam san truoc khi ghi,
+	// va mo mot nhanh so sanh ban ro trong ham nay la moi cho ro ri ve sau.
+	if strings.HasPrefix(encoded, "$2a$") || strings.HasPrefix(encoded, "$2b$") ||
+		strings.HasPrefix(encoded, "$2y$") {
+		err := bcrypt.CompareHashAndPassword([]byte(encoded), []byte(password))
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, nil
+		}
+		return err == nil, err
+	}
+
 	p, salt, want, err := decodeHash(encoded)
 	if err != nil {
 		return false, err

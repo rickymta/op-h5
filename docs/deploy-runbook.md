@@ -4,6 +4,37 @@ Làm **theo đúng thứ tự**, mỗi bước có điểm kiểm tra. Ký hiệ
 
 Đầu vào đã có: repo `github.com/rickymta/op-h5` (JAR qua LFS), release `assets-v1` (res/sound/spine 1.33 GB), giá trị secrets thật trong `_backup-secrets-original/` trên PC, server cũ còn chạy với DB thật.
 
+## Di trú người chơi cũ — BẮT BUỘC trước khi mở cổng ID
+
+Bỏ bước này thì mọi người chơi cũ đăng nhập đúng mật khẩu nhưng lạc vào **nhân vật
+rỗng**: `Mapper.Ensure()` đúc username `id%09d` mới cho bất kỳ ai chưa có ánh xạ. Loại
+sự cố này không sửa được bằng cách thử lại, và càng để lâu càng khó gỡ.
+
+```bash
+# 1. Xem sẽ làm gì (mặc định là dry-run, không ghi gì)
+go run ./cmd/migrate-legacy   --platform-dsn 'root:PW@tcp(127.0.0.1:3306)/platform?parseTime=true'   --web-dsn      'root:PW@tcp(127.0.0.1:3306)/web'   --tcg-dsn      'root:PW@tcp(127.0.0.1:3306)/tcg'   --enc-key      "$ADAPTER_SECRET_ENC_KEY" --game haitac
+
+# 2. Thực hiện. Chạy lại được — lần hai không tạo trùng, không cộng Xu hai lần.
+#    Thêm --apply.
+```
+
+Bốn việc nó làm: `web.user` → `platform.users` (kèm ví); ghi `user_legacy_links`;
+`tcg.account` → `game_identities`; `web.user.xu` → số dư mở đầu trong sổ cái.
+
+**Không đổi mật khẩu game.** `tcg.account.password` lưu dạng thô, nên công cụ đọc thẳng
+rồi mã hoá vào `game_identities.game_secret`. Người chơi giữ nguyên đường đăng nhập trực
+tiếp cũ, và Adapter đăng nhập hộ được — không ai phải đặt lại mật khẩu.
+
+**Mật khẩu cổng**: bản bcrypt của PHP được chép nguyên và tự nâng lên Argon2id ở lần đăng
+nhập đầu; bản còn dạng thô được băm ngay tại chỗ. Không bao giờ ghi mật khẩu thô sang hệ
+thống mới.
+
+`--enc-key` phải là **đúng** `ADAPTER_SECRET_ENC_KEY` mà Adapter đang dùng, nếu không
+Adapter giải mã ra chuỗi sai và login server trả `K_PASSWORD_ERROR`.
+
+Đã kiểm chứng đủ đường: người chơi cũ đăng nhập bằng mật khẩu cũ → vào thẳng máy chủ có
+nhân vật của họ (S1), đúng tên và cấp nhân vật, không qua màn hình đăng nhập nào.
+
 ---
 
 ## Tóm tắt lệnh — bản rút gọn để copy (Ubuntu, Docker đã cài, ufw đã mở 22/80/443)

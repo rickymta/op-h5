@@ -125,9 +125,12 @@ func (a *AccountSession) masters() []json.RawMessage {
 
 // srvCodeKeys la cac ten truong co the chua ma may chu trong mot dong masterList.
 //
-// KHONG kiem chung duoc voi login server that (chua chay duoc JAR do), nen day la mot
-// danh sach doan co kiem soat: thu lan luot, khong khop thi tra ve rong. Ten cua CHINH
-// truong `masterList` thi chac chan — do bang Proxy tren client that.
+// `srvCode` DA KIEM CHUNG tren client that: boc moi dong masterList trong mot Proxy roi
+// doc lai xem client cham vao nhung khoa nao — no doc dung bon khoa
+// srvCode / masterIdHex / masterName / masterLevel. Khong con la phong doan.
+//
+// Cac ten con lai giu lam duong lui cho ban client khac, xep sau. Khong khop khoa nao
+// thi tra ve rong, va ben goi de client tu chon may chu.
 var srvCodeKeys = []string{"srvCode", "code", "serverCode", "srv", "server"}
 
 // ServerCodes liet ke cac may chu ma tai khoan da co nhan vat.

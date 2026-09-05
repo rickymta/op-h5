@@ -85,3 +85,31 @@ func TestEmptyPassword(t *testing.T) {
 		t.Error("mat khau khac ma van khop voi hash cua chuoi rong")
 	}
 }
+
+// Ban ghi di tru tu `web.user` mang bam bcrypt cua PHP: phai dang nhap duoc, va phai
+// duoc danh dau can bam lai de lan dang nhap dau tien nang len Argon2id.
+func TestVerifyAcceptsLegacyBcrypt(t *testing.T) {
+	// bcrypt cost 10 cua mat khau "Mk-thu-nghiem-2026", sinh boi PHP password_hash().
+	const hash = "$2y$10$S9wbQFhWWt9dkkIcQuBYvuZh7HQmmRo0EXeb69AvDVH.CTWPi9Ycm"
+	const pass = "Mk-thu-nghiem-2026"
+
+	ok, err := VerifyPassword(pass, hash)
+	if err != nil || !ok {
+		t.Fatalf("bam bcrypt phai xac thuc duoc: ok=%v err=%v", ok, err)
+	}
+	if bad, _ := VerifyPassword("sai-be-bet", hash); bad {
+		t.Fatal("mat khau sai khong duoc cho qua")
+	}
+	if !NeedsRehash(hash) {
+		t.Fatal("bam bcrypt phai duoc danh dau can bam lai sang Argon2id")
+	}
+}
+
+// Chuoi rac khong duoc lam ham panic, va khong bao gio duoc tra ve true.
+func TestVerifyRejectsGarbage(t *testing.T) {
+	for _, h := range []string{"", "matkhauthO", "$2y$khong-phai-bcrypt", "$argon2id$hong"} {
+		if ok, _ := VerifyPassword("bat-ky", h); ok {
+			t.Fatalf("chuoi %q khong duoc cho qua", h)
+		}
+	}
+}

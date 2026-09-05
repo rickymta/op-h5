@@ -47,13 +47,16 @@ type account struct {
 	Masters []master `json:",omitempty"`
 }
 
-// master la mot dong trong masterList. Chi giu cac truong Adapter thuc su doc;
-// login server that tra ve nhieu hon.
+// master la mot dong trong masterList.
+//
+// Bon ten truong nay DO TREN CLIENT THAT: boc moi dong trong mot Proxy roi xem client
+// cham vao khoa nao. Dat sai ten thi client van chay nhung hien "undefined(undefinedCap)"
+// o cho ten nhan vat — hong am tham, dung kieu ma ban gia lap sinh ra de tranh.
 type master struct {
-	SrvCode  string `json:"srvCode"`
-	RoleID   string `json:"roleId,omitempty"`
-	RoleName string `json:"roleName,omitempty"`
-	Level    int    `json:"level,omitempty"`
+	SrvCode     string `json:"srvCode"`
+	MasterIDHex string `json:"masterIdHex"`
+	MasterName  string `json:"masterName"`
+	MasterLevel int    `json:"masterLevel"`
 }
 
 type srv struct {
@@ -265,7 +268,7 @@ func main() {
 
 	// Cong cu thu: gan nhan vat cho mot tai khoan, de dien lai canh "nguoi choi cu"
 	// (Adapter phai xet dai nguoi CU cho dung may chu do thay vi dai nguoi MOI).
-	//   curl -X POST ':9000/_test/master/add?username=id000000001&srvCode=s1&roleName=Ten'
+	//   curl -X POST ':9000/_test/master/add?username=id000000001&srvCode=s1&masterName=Ten&level=30'
 	mux.HandleFunc("/_test/master/add", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		st.mu.Lock()
@@ -275,9 +278,13 @@ func main() {
 			fail(w, 3, "khong co tai khoan nay")
 			return
 		}
+		lv := 1
+		if n, err := strconv.Atoi(q.Get("level")); err == nil && n > 0 {
+			lv = n
+		}
 		acc.Masters = append(acc.Masters, master{
-			SrvCode: q.Get("srvCode"), RoleID: q.Get("roleId"),
-			RoleName: q.Get("roleName"), Level: 1,
+			SrvCode: q.Get("srvCode"), MasterIDHex: q.Get("masterIdHex"),
+			MasterName: q.Get("masterName"), MasterLevel: lv,
 		})
 		st.saveLocked()
 		ok(w, acc.Masters)
