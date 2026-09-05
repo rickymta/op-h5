@@ -1,3 +1,55 @@
+<?php
+// Hoi Adapter mot phien game da san sang, roi nhung ket qua vao trang.
+//
+// Vi sao goi o day chu khong de client tu goi: cookie phien (haitac_sess) la HttpOnly,
+// va lam o phia server thi cong chan tai (Adapter tu choi khi may chu day) chay TRUOC
+// khi client kip tai 9.4 MB tai nguyen.
+//
+// Khong co ADAPTER_BASE_URL, khong co cookie, hay Adapter tu choi -> $opAuto = null va
+// trang chay y het nhu cu (client hien man hinh dang nhap cua no). Day la duong lui bat
+// buoc: tang PHP nay con phuc vu ca luong dang nhap cu.
+$opAuto = null;
+$opAutoErr = '';
+$adapterBase = getenv('ADAPTER_BASE_URL');
+if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
+	$ch = curl_init(rtrim($adapterBase, '/') . '/api/game/session');
+	curl_setopt_array($ch, array(
+		CURLOPT_POST           => true,
+		CURLOPT_POSTFIELDS     => '{"client_type":0}',
+		CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+		// Chi chuyen dung cookie phien, khong bung nguyen $_COOKIE sang dich vu khac.
+		CURLOPT_COOKIE         => 'haitac_sess=' . $_COOKIE['haitac_sess'],
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_TIMEOUT        => 5,
+	));
+	$body = curl_exec($ch);
+	$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	curl_close($ch);
+	$j = $body ? json_decode($body, true) : null;
+	if ($code === 200 && is_array($j) && !empty($j['login_data'])) {
+		$opAuto = array(
+			'username'  => isset($j['game_username']) ? $j['game_username'] : '',
+			'srvCode'   => isset($j['srv_code']) ? $j['srv_code'] : '',
+			'wsUrl'     => isset($j['ws_url']) ? $j['ws_url'] : '',
+			'band'      => isset($j['band']) ? $j['band'] : '',
+			'warn'      => !empty($j['warn']),
+			'loginData' => $j['login_data'],
+		);
+	} else {
+		// Bi tu choi vi qua tai thi noi ro ly do, dung de nguoi choi doan.
+		// 503 (qua tai) tra ve `message`; cac loi khac di qua httpx.Error nen la
+		// `error_description`. Doc ca hai, neu khong thi ly do that bi nuot.
+		$opAutoErr = '';
+		if (is_array($j)) {
+			if (isset($j['message'])) {
+				$opAutoErr = $j['message'];
+			} elseif (isset($j['error_description'])) {
+				$opAutoErr = $j['error_description'];
+			}
+		}
+	}
+}
+?>
 <html>
 <head>
     <title>Đại Hải Trình Mobile</title>
@@ -88,6 +140,15 @@ function openNapTien(){
             document.body.appendChild(script);
         }
     </script>
+    <script type="text/javascript">
+        // Phien do Adapter cap (rong neu chua dang nhap qua he thong ID).
+        window.__opAuto = <?php echo $opAuto ? json_encode($opAuto, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
+        window.__opAutoErr = <?php echo json_encode($opAutoErr, JSON_UNESCAPED_UNICODE); ?>;
+    </script>
     <script type="text/javascript" src="a3b31-4c087-1dc2f.js"></script>
+    <script type="text/javascript" src="op-autologin.js?v=<?php
+        // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
+        // giu ban cu trong cache va thay doi khong co tac dung nao.
+        echo @filemtime(__DIR__ . '/op-autologin.js') ?: '1'; ?>"></script>
 </body>
 </html>

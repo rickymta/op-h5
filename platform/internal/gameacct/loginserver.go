@@ -87,6 +87,13 @@ type AccountSession struct {
 	GameID     string        `json:"gameId"`
 	ClientType int           `json:"clientType"`
 	Token      string        `json:"token"`
+
+	// Raw la nguyen van truong `data` cua login server, khong dien giai lai.
+	// Client LayaAir doc thang cac truong trong do (onAccLoginComplete), va ten
+	// chung nam trong bytecode da obfuscate — chep nguyen ban an toan hon la doan
+	// lai roi dung lai tu AccountSession, vi mot truong bi bo sot se lam client
+	// vao game voi trang thai thieu ma khong bao loi.
+	Raw json.RawMessage `json:"-"`
 }
 
 // LoginClient goi login server qua HTTP.
@@ -155,6 +162,9 @@ func (c *LoginClient) do(req *http.Request, out any) error {
 	if out != nil && len(res.Data) > 0 && string(res.Data) != "null" {
 		if err := json.Unmarshal(res.Data, out); err != nil {
 			return fmt.Errorf("giai ma data: %w", err)
+		}
+		if raw, okRaw := out.(*AccountSession); okRaw {
+			raw.Raw = append(json.RawMessage(nil), res.Data...)
 		}
 	}
 	return nil

@@ -281,6 +281,26 @@ a3b31-4c087-1dc2f.js            → ydwxConfig (basePath, metaDataServer :12345,
 
 Client gọi thẳng: `:9000` (login), `:12345/announce/one`, `:7788/client/error/log` và `/login/flow/add`, `:9999/status`, `/api/getSession.php`.
 
+### Bỏ qua màn hình đăng nhập của client (từ 2026-09-05)
+
+Người chơi đã đăng nhập ở hệ thống ID không phải đăng nhập lần thứ hai ở client:
+
+- `play.php` gọi `POST $ADAPTER_BASE_URL/api/game/session` **phía server**, chuyển kèm cookie
+  `haitac_sess`, rồi nhúng kết quả vào `window.__opAuto`. Làm ở server vì cookie là HttpOnly,
+  và vì cổng chặn tải phải chạy *trước* khi client kịp tải 9,4 MB tài nguyên.
+- `op-autologin.js` tìm màn hình đăng nhập bằng **hành vi** (đối tượng nào có cả
+  `onAccLoginComplete` lẫn `accountLogin` — hai tên này không bị obfuscate), điền ô `dAcc`,
+  rồi gọi thẳng `onAccLoginComplete({errorcode:0, data: <nguyên văn data của login server>})`.
+  Không gửi khoá game xuống trình duyệt: Adapter đã đăng nhập hộ ở phía server.
+- Sau đó gọi `selectServer()` với đúng máy chủ cổng chặn tải đã cấp — **chỉ khi `_masterList`
+  rỗng**. Ai đã có nhân vật thì để client tự chọn máy chủ của nhân vật đó.
+- Hỏng ở bất kỳ bước nào (không có cookie, Adapter từ chối vì quá tải, không tìm thấy màn
+  hình) đều lùi về luồng cũ: client hiện form đăng nhập của nó. Lý do từ chối nằm ở
+  `window.__opAutoErr`.
+- Client đọc **đúng ba** trường trong `data`: `token`, `account`, `masterList` (đo bằng Proxy
+  trên client thật). Thiếu `masterList` thì client đăng nhập xong nhưng **đứng ở màn hình
+  trắng, không báo lỗi** — vì nó không biết nên hiện danh sách server hay vào nhân vật cũ.
+
 ---
 
 ## 10. Đọc log

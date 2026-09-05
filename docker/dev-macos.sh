@@ -225,7 +225,7 @@ echo "==> 9/9 php-fpm + nginx"
 docker run -d --name op-php --network "$NET" \
   -e PUBLIC_HOST=127.0.0.1 -e MYSQL_ROOT_PASSWORD="$MYSQL_PW" \
   -e ID_BASE_URL="http://127.0.0.1:8081" -e ID_INTERNAL_SECRET="$INT_SECRET" \
-  -e ID_WALLET_ENABLED=1 \
+  -e ID_WALLET_ENABLED=1 -e ADAPTER_BASE_URL="http://127.0.0.1:8090" \
   -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" \
   -e GM_CODE="$GM_CODE" -e GMHANGLONG_CODE="$GMHANGLONG_CODE" -e REV_QUERY_KEY="$REV_KEY" \
   -v "$REPO/website/game:/www/wwwroot/game" docker-php >/dev/null

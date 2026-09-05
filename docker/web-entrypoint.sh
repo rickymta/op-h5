@@ -69,7 +69,7 @@ if [ -d "$FPM_D" ]; then
   {
     echo "; sinh boi web-entrypoint luc start — dung sua tay"
     echo "[www]"
-    for v in ID_BASE_URL ID_INTERNAL_SECRET ID_WALLET_ENABLED; do
+    for v in ID_BASE_URL ID_INTERNAL_SECRET ID_WALLET_ENABLED ADAPTER_BASE_URL; do
       [ -n "${!v:-}" ] && printf 'env[%s] = "%s"
 ' "$v" "${!v}"
     done

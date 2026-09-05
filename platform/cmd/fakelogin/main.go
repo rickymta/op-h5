@@ -138,6 +138,12 @@ func main() {
 			"gameId":     r.FormValue("gameId"),
 			"clientType": 0,
 			"token":      "tok-" + acc.UID,
+			// masterList = nhan vat cua tai khoan (tcg.account_master), moi server mot dong.
+			// BAT BUOC co, ke ca khi rong: client doc dung ba truong token/account/masterList
+			// tu phan hoi nay (do bang Proxy tren client that). Thieu no thi client dang nhap
+			// xong nhung dung o man hinh trang — khong bao loi, vi no chi khong biet nen hien
+			// danh sach server hay vao thang nhan vat cu.
+			"masterList": []any{},
 		})
 	})
 
@@ -187,7 +193,7 @@ func main() {
 	}
 
 	log.Printf("fake login server tren %s, %d server", *addr, len(st.servers))
-	if err := http.ListenAndServe(*addr, mux); err != nil {
+	if err := http.ListenAndServe(*addr, allowCORS(mux)); err != nil {
 		log.Print(err)
 		os.Exit(1)
 	}
@@ -262,4 +268,25 @@ func serveFakeConsole(addr, user, pass string, failFirst int) {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Print(err)
 	}
+}
+
+// allowCORS mo CORS cho moi origin.
+//
+// Client H5 chay o http://<host>:80 nhung goi thang login server o :9000, tuc la
+// cross-origin. Login server that co header nay (khong thi ban production da khong
+// chay duoc); ban gia lap nay phai co theo, neu khong trinh duyet chan
+// /srv/game/list va client dung o "Nhan danh sach may chu that bai".
+//
+// `*` chi chap nhan duoc vi day la cong cu dev cuc bo — xem ghi chu dau file.
+func allowCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

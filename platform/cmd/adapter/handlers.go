@@ -289,13 +289,17 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpx.JSON(w, http.StatusOK, map[string]any{
-		"token":        sess.Token,
-		"account_uid":  sess.Account.UID,
-		"srv_code":     d.SrvCode,
-		"ws_url":       np.WebSocketURL(s.publicHost, s.useTLS),
-		"band":         d.Band.String(),
-		"warn":         d.Warn,
-		"alternatives": d.Alternatives,
+		"token":         sess.Token,
+		"account_uid":   sess.Account.UID,
+		"game_username": sess.Account.Username,
+		"srv_code":      d.SrvCode,
+		"ws_url":        np.WebSocketURL(s.publicHost, s.useTLS),
+		"band":          d.Band.String(),
+		"warn":          d.Warn,
+		"alternatives":  d.Alternatives,
+		// Nguyen van `data` cua login server: play.php chuyen thang cho client, de
+		// client tu doc cac truong no can (xem website/game/op-autologin.js).
+		"login_data": json.RawMessage(sess.Raw),
 	})
 }
 
