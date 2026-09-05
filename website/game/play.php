@@ -82,6 +82,13 @@ if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
 <button onclick="closes()" id="close" style="display:none;position: absolute; z-index: 99999999; left: auto; right: 6px; top: 6px; width: 44px; height: 46px; border: 0px; cursor: pointer; background: url(/assets/images/back.png) no-repeat; font-size: 0;">Đóng</button>
 <script>
 var appVersion = "28.3";
+// Ma bam theo NOI DUNG bundle, de doi PUBLIC_HOST la URL doi theo.
+//
+// nginx phuc vu /libs/ voi "immutable, 30d" con `?v=` lai la appVersion co dinh. Khi
+// web-entrypoint sed host moi vao bundle, URL khong doi nen trinh duyet giu ban cu —
+// nguoi choi tiep tuc goi host CU toi 30 ngay. Da dinh that: sau khi doi host, client
+// van goi 192.168.1.69:7788 tu bundle trong cache.
+var opBundleV = "<?php echo @filemtime(__DIR__ . '/libs/e228b-0b904-ac44c.js') ?: '0'; ?>";
 
 function closes(){
 	$('.none').css('display','none');
@@ -166,7 +173,10 @@ function openNapTien(){
         window.__opAutoErr = <?php echo json_encode($opAutoErr,
             JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
-    <script type="text/javascript" src="a3b31-4c087-1dc2f.js"></script>
+    <script type="text/javascript" src="a3b31-4c087-1dc2f.js?v=<?php
+        // Cung ly do nhu opBundleV: file nay cung bi cache (7d) va no la noi quyet dinh
+        // URL cua bundle chinh, nen ban cu se tiep tuc nap bundle cu.
+        echo @filemtime(__DIR__ . '/a3b31-4c087-1dc2f.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-autologin.js?v=<?php
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
         // giu ban cu trong cache va thay doi khong co tac dung nao.

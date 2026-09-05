@@ -74,7 +74,7 @@ func main() {
 	mapper := &gameacct.Mapper{
 		DB: db, Vault: vault, Login: loginClient,
 		Game: cfg.GameCode, GameID: envOr("ADAPTER_GAME_ID", "10091"),
-		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "id"),
+		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "develop"),
 		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "web"),
 	}
 	tracker := capacity.NewTracker(loginSource{loginClient}, db, cfg.GameCode, cfg.TicketTTL, log)
@@ -88,7 +88,7 @@ func main() {
 	consoleClient := console.New(cfg.ConsoleBaseURL, cfg.ConsoleUser, cfg.ConsolePassword, cfg.TcgSecret)
 	worker := &grants.Worker{
 		DB: db, Console: consoleClient, GameCode: cfg.GameCode, Log: log,
-		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "id"),
+		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "develop"),
 		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "web"),
 		CurrencyCode: envOr("ADAPTER_CURRENCY_CODE", "VND"),
 		Mode:         cfg.ConsolePayMode,

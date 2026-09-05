@@ -112,14 +112,26 @@ wait_port() { # $1 ten  $2 port  $3 timeout giay
 }
 
 echo "==> 4/8 MySQL (seed sach + zz-init.sh), MongoDB, RabbitMQ, Mailpit"
-docker run -d --name op-mysql --network "$NET" \
+# initdb duoc CHEP vao container chu khong bind mount.
+#
+# Vi sao: entrypoint cua image mysql chay file *.sh neu no co bit thuc thi, con khong
+# thi source. Bind mount cua Docker Desktop tren macOS trinh dien MOI file la 0777 —
+# ke ca khi tren dia la 0644 — nen entrypoint chon nhanh "chay"; nhung chinh mount do
+# lai la noexec, thanh ra "/bin/bash: bad interpreter: Permission denied" va container
+# chet voi ma 126 truoc khi nap duoc seed.
+#
+# `docker cp` giu nguyen mode cua host (0644) nen entrypoint source dung nhu zz-init.sh
+# duoc thiet ke — no can ham docker_process_sql cua image, ham nay chi ton tai khi source.
+# Tren Linux (docker-compose.yml) bind mount giu dung mode nen khong dinh; chi doi o day.
+docker create --name op-mysql --network "$NET" \
   -e MYSQL_ROOT_PASSWORD="$MYSQL_PW" -e TZ=Asia/Ho_Chi_Minh \
   -e MONGO_USER=abc123 -e MONGO_PASSWORD="$MYSQL_PW" \
   -e RABBITMQ_USER=admin -e RABBITMQ_PASSWORD="$MYSQL_PW" \
   -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" -e PUBLIC_HOST=127.0.0.1 -e GAME_SERVERS=s1:8001:d1 \
   -v "$REPO/docker/mysql/tcg.cnf:/etc/mysql/conf.d/tcg.cnf:ro" \
-  -v "$REPO/docker/initdb/mysql:/docker-entrypoint-initdb.d:ro" \
   mysql:8.0 --defaults-extra-file=/etc/mysql/conf.d/tcg.cnf >/dev/null
+docker cp "$REPO/docker/initdb/mysql/." op-mysql:/docker-entrypoint-initdb.d/ >/dev/null
+docker start op-mysql >/dev/null
 docker run -d --name op-mongo --network "$NET" \
   -e MONGO_INITDB_ROOT_USERNAME=abc123 -e MONGO_INITDB_ROOT_PASSWORD="$MYSQL_PW" \
   -v "$REPO/docker/initdb/mongo:/docker-entrypoint-initdb.d:ro" \
@@ -161,10 +173,16 @@ java_svc world     world     tcg-world-server-0.0.1-SNAPSHOT.jar 640m;  wait_por
 java_svc meta      meta      tcg-meta-0.0.1-SNAPSHOT.jar         320m
 java_svc statistic statistic tcg-stat-server-0.0.1-SNAPSHOT.jar  512m;  wait_port statistic 7788 180
 java_svc pay       pay       tcg-pay-server-0.0.1-SNAPSHOT.jar   384m;  wait_port pay 10010 180
-java_svc group     group     tcg-group.jar 640m --v=0 --gc=group-offical --p=30001;  wait_port group 30001 180
+# group can nhieu heap hon cac service khac: SrvGroupDeviceEntity.jvmArgs trong DB ghi
+# -Xmx1128m, va o 640m no chet ngay luc khoi dong ("OutOfMemoryError: Java heap space",
+# dung nhu CLAUDE.md muc 11.2 mo ta). Cap 1152m cho khop cau hinh goc.
+java_svc group     group     tcg-group.jar 1152m --v=0 --gc=group-offical --p=30001;  wait_port group 30001 180
 java_svc game      game      tcg-game.jar  1024m --v=0 --sc=s1;                     wait_port game 8001 300
 java_svc login     login     tcg-login-server-0.0.1-SNAPSHOT.jar 320m;              wait_port login 9000 180
-java_svc cross     cross     tcg-cross.jar 640m --v=0 --cc=cross-yzx1 --p=20001;    wait_port cross 20001 180
+# cross giong group: SrvCrossEntity.jvmArgs trong DB ghi -Xmx1128m, o 640m no chet ngay
+# luc khoi dong ("OutOfMemoryError: Java heap space"). Do thuc te: ca cum dung ~2,3 GiB
+# tren 7,75 GiB nen tran cao hon khong gay ap luc — day chi la muc dat truoc.
+java_svc cross     cross     tcg-cross.jar 1152m --v=0 --cc=cross-yzx1 --p=20001;    wait_port cross 20001 180
 
 echo "==> 6/8 He thong ID, Adapter, trang quan tri"
 # ID nghe DUNG cong ma trinh duyet dung (8081): issuer phai la mot dia chi giai duoc ca
@@ -198,6 +216,8 @@ docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_SECRET_ENC_KEY="$ENC_KEY" \
   -e ADAPTER_CONSOLE_BASE_URL="http://127.0.0.1:9999" \
   -e ADAPTER_CONSOLE_USER=admin -e ADAPTER_CONSOLE_PASSWORD="$CONSOLE_PW" \
+  # develop = ma platform duy nhat con bat dang nhap username+mat khau tren login server.
+  -e ADAPTER_PLATFORM_CODE=develop \
   -e ADAPTER_PUBLIC_HOST="127.0.0.1" -e ADAPTER_POLL_INTERVAL=3s -e ADAPTER_GRANT_INTERVAL=5s \
   op-h5-adapter >/dev/null
 

@@ -87,13 +87,26 @@ type Mapper struct {
 // khac nhau, va nguoi choi doi ten o he thong ID khong duoc lam mat nhan vat trong game.
 func usernameFor(userID int64) string { return fmt.Sprintf("id%09d", userID) }
 
-// newSecret sinh khoa ngau nhien 32 byte dang base64url (43 ky tu).
+// secretMaxLen la do dai toi da cua khoa game.
+//
+// Rang buoc den tu `tcg.account.password` la varchar(32). Vuot qua thi login server tra
+// "Data truncation: Data too long for column 'password'" luc dang ky — va neu cot do
+// khong bao loi ma cat bot, khoa luu o Adapter se khong con khop voi khoa trong game.
+const secretMaxLen = 32
+
+// newSecret sinh khoa ngau nhien 24 byte dang base64url — dung 32 ky tu, vua khit cot.
+//
+// 24 byte = 192 bit, du an toan cho mot khoa may sinh khong ai phai nho.
 func newSecret() (string, error) {
-	b := make([]byte, 32)
+	b := make([]byte, 24)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return base64.RawURLEncoding.EncodeToString(b), nil
+	s := base64.RawURLEncoding.EncodeToString(b)
+	if len(s) > secretMaxLen {
+		return "", fmt.Errorf("khoa game dai %d ky tu, cot chi chua %d", len(s), secretMaxLen)
+	}
+	return s, nil
 }
 
 // Lookup tra cuu anh xa da co, KHONG tao moi.

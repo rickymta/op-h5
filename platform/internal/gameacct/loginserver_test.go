@@ -58,3 +58,36 @@ func TestServerCodesReadsKnownKeys(t *testing.T) {
 		}
 	}
 }
+
+// WebSocketURL phai giu duong dan ma login server tra ve.
+//
+// Login server THAT tra ve path="game" (khong co dau /), tuc la client phai noi toi
+// ws://host:8001/game. Bo qua truong do thi bat tay WebSocket that bai — va ban gia lap
+// truoc day khong tra path nen loi nay bi giau cho den lan chay voi JAR that.
+func TestWebSocketURLKeepsPath(t *testing.T) {
+	port := 8001
+	yes := true
+	np := NetProcess{Scheme: "ws", Host: Host{LAN: "127.0.0.1"}, Port: &port, Path: "game"}
+
+	if got := np.WebSocketURL("", false); got != "ws://127.0.0.1:8001/game" {
+		t.Fatalf("duoc %q", got)
+	}
+	if got := np.WebSocketURL("haitac.example.com", false); got != "ws://haitac.example.com:8001/game" {
+		t.Fatalf("ghi de host: duoc %q", got)
+	}
+	np.SSL = &yes
+	if got := np.WebSocketURL("haitac.example.com", false); got != "wss://haitac.example.com:8001/game" {
+		t.Fatalf("ssl: duoc %q", got)
+	}
+
+	// Khong co path thi khong duoc de lai dau / thua.
+	np2 := NetProcess{Scheme: "ws", Host: Host{LAN: "127.0.0.1"}, Port: &port}
+	if got := np2.WebSocketURL("", false); got != "ws://127.0.0.1:8001" {
+		t.Fatalf("khong path: duoc %q", got)
+	}
+	// Path co dau / o hai dau cung phai ra dung mot dau /.
+	np3 := NetProcess{Scheme: "ws", Host: Host{LAN: "h"}, Port: &port, Path: "/game/"}
+	if got := np3.WebSocketURL("", false); got != "ws://h:8001/game" {
+		t.Fatalf("path co dau /: duoc %q", got)
+	}
+}

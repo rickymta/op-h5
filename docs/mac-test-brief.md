@@ -150,18 +150,58 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 
 | # | Điểm kiểm tra | Kết quả | Bằng chứng |
 |---|---|---|---|
-| 5.1 | zz-init.sh nạp seed, không còn placeholder, 101 bảng | | |
-| 5.2 | 9 JVM `running`, `GameLoading` đúng host/port | | |
-| 5.3 | game không thiếu Excel; group không OOM; `game_s1` tự tạo | | |
-| 5.4 | console 200, `/srv/game/list` có s1, web 200, OIDC JSON | | |
-| 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | | |
-| 5.6 | platform-seed 6 dòng đếm | | |
-| — | RAM thật (`docker stats --no-stream`, tổng) | | |
-| — | Thời gian từ lúc chạy tới khi login lên | | |
+| 5.1 | zz-init.sh nạp seed, không còn placeholder, 101 bảng | ✅ *(sau 3 bản vá)* | `xong (seed)` + `s1 ws=8001 device=d1 open=2026-09-05`; 6/6 nhóm placeholder = 0; tcg 59 + stat 20 + web 21 + cdks 1 = **101** |
+| 5.2 | 9 JVM `running`, `GameLoading` đúng host/port | ✅ | cả 9 `running`; `wsPort=8001`, mongo/mysql `host=127.0.0.1`, cross `url=http://127.0.0.1:20001/`, group `:30001/` |
+| 5.3 | game không thiếu Excel; group không OOM; `game_s1` tự tạo | ⚠️ | group OOM = 0 ✅; `game_s1` có đủ 4 bảng `stat_*` ✅; game còn **9** dòng thiếu excel — 5 file `bt-*` (không cần, `gameVer=mainland`, CLAUDE.md 11.4) + 4 `加载错误`; world **1** NPE (đã biết, CLAUDE.md 11.3) |
+| 5.4 | console 200, `/srv/game/list` có s1, web 200, OIDC JSON | ✅ | console `200`; `/srv/game/list` → `[{"code":"s1",...}]`; `/` và `/play.php` `200`; OIDC discovery trả JSON |
+| 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ❌ *(chặn ở tài nguyên thiếu)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Nguyên nhân: **`website/game/template/` không có trong snapshot** |
+| 5.6 | platform-seed 6 dòng đếm | ✅ | `oauth_clients 1, games 1, game_devices 1, game_servers 1, game_packages 1962`; `admin_users 1` do service `admin` tự tạo (không phải platform-seed) |
+| — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
+| — | Thời gian tới khi login lên | ✅ | ~2 phút: console → world (5s) → statistic (10s) → pay (5s) → group (25s) → game (30s) → login (5s) → cross |
 
-Lỗi gặp và cách xử lý (nguyên văn, đã che mật khẩu):
+**RAM Docker Desktop trên máy này là 7,8 GB**, dưới mức 8 GB tài liệu yêu cầu. Không gây sự cố (thực dùng 2,3 GiB) nhưng nên nâng lên 10 GB như khuyến nghị.
 
-- …
+### Lỗi gặp và cách xử lý
+
+**1. `zz-init.sh` không chạy được trên macOS — MySQL chết mã 126.**
+`/bin/bash: bad interpreter: Permission denied`. File trên đĩa là `0644`, nhưng bind mount của Docker Desktop trình diện mọi file là `0777` trong container nên entrypoint chọn nhánh *chạy* thay vì *source* — rồi chính mount đó lại `noexec`. Sửa ở `dev-macos.sh`: `docker create` + `docker cp` + `docker start`. Linux giữ đúng mode nên không dính.
+
+**2. `set -u` lọt vào hàm của image.**
+`docker_process_sql` đọc `"$1"` khi được gọi không tham số (dòng 249 `docker-entrypoint.sh`, mysql:8.0) và đọc `$MYSQL_DATABASE` có thể chưa đặt. Hàm của image không an toàn với `-u`. Sửa ở `zz-init.sh`: tắt `-u` đúng lúc gọi, bật lại ngay.
+
+**3a. `ROW_FORMAT=COMPACT` từ mysqldump 5.6 vượt giới hạn dòng của MySQL 8.**
+`ERROR 1118 (42000) at line 69: Row size too large (> 8126)` khi tạo `web.card_log` (10 cột `varchar(255)` utf8mb4). Sửa ở `zz-init.sh`: `sed ROW_FORMAT=COMPACT -> DYNAMIC` lúc nạp seed.
+**Cần làm tiếp trên PC:** `tools/dump-to-seed.py` nên phát `DYNAMIC` ngay từ đầu để seed đúng tại nguồn. Và **dump thật trên server sẽ đâm vào đúng bức tường này** — image mysql nạp dump trực tiếp (sắp xếp trước `zz-init.sh`) nên bản vá này không chen vào được.
+
+**3b. `set -e` trong `zz-init.sh` vô hiệu — lỗi bị nuốt.**
+Nặng hơn 3a. `_tcg_init` được gọi dạng `_tcg_init || { ... }`; trong danh sách `||` thì `set -e` bị tắt cho cả compound command và mọi lệnh con. Kết quả: `web.sql` chết ở bảng thứ 3 nhưng script vẫn in **`xong (seed)`** và hệ thống lên với **2/21 bảng `web`**. Sửa: kiểm tra mã thoát tường minh sau mỗi lần nạp.
+
+**4. `group` và `cross` OOM ở 640m.**
+`Terminating due to java.lang.OutOfMemoryError: Java heap space`. Cả hai đều có `jvmArgs=-Xms128m -Xmx1128m` trong DB (`SrvGroupDeviceEntity` / `SrvCrossEntity`) — đúng CLAUDE.md 11.2. Nâng cả hai lên 1152m.
+
+**5. `LoginClient` gửi form-urlencoded, login server thật chỉ nhận JSON.**
+`Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported`. Khuôn cũ suy ra từ `cmd/fakelogin` (nhận cả hai) nên sai chỉ lộ khi chạy JAR thật. Sửa: thêm `postJSON`, dùng cho `/account/register` và `/account/login`.
+
+**6. `platformCode` phải là `develop`.**
+Với các mã khác (`id`, `yezixi`, `official`, `web`) login server trả `errorcode=0` nhưng `uid`/`token` đều `null` kèm ghi chú `该登录方式目前不生效` — **thành công giả**. Chỉ `develop` bật nhánh username+mật khẩu (`使用了用户名和密码的方式`). Khớp với dòng gốc `srv_game_access.platform_code='develop'`. Đã đổi mặc định ở `main.go`, `.env.example`, compose, `dev-macos.sh`.
+
+**7. Khoá game Adapter sinh dài hơn cột.**
+`Data truncation: Data too long for column 'password'` — `tcg.account.password` là `varchar(32)` còn khoá là 43 ký tự (base64url của 32 byte). Sửa: sinh 24 byte = đúng 32 ký tự, kèm test khoá ràng buộc.
+
+**8. `NetProcess.WebSocketURL` bỏ mất đường dẫn.**
+Login server thật trả `path: "game"` → URL đúng là `ws://host:8001/game`. Bản giả lập không có trường này nên lỗi bị giấu. Đã thêm `Path` + test.
+
+**9. Khoá game bị lộ xuống trình duyệt.**
+Login server thật trả **khoá dạng thô** trong `data.account.password`, mà `play.php` nhúng `login_data` thẳng vào trang. Đã thêm `redactLoginData`.
+**Phải nói rõ:** việc này *không* làm cho khoá "không bao giờ xuống trình duyệt" — chính JWT trong `data.token` mang khoá đó ở claim `a4` (đã giải mã đối chiếu), mà client bắt buộc phải có token. Với login server này, khoá game của một người chơi **sẽ** đến trình duyệt của chính họ; không sửa được ở phía ta. Cái lớp Adapter vẫn giữ được: mật khẩu hệ thống ID không bao giờ đến cụm game, và mỗi người chỉ thấy khoá của mình. Đã sửa lại các chỗ tài liệu khẳng định sai.
+
+**10. Cache bundle giữ host cũ tới 30 ngày.**
+nginx phục vụ `/libs/` với `immutable, 30d` còn `?v=` là `appVersion` cố định (28.3). Đổi `PUBLIC_HOST` thì `web-entrypoint` sed host mới vào bundle nhưng URL không đổi → trình duyệt giữ bản cũ. Đã dính thật: client tiếp tục gọi `192.168.1.69:7788` từ cache. Sửa: `play.php` phát `opBundleV` theo `filemtime`, `a3b31` gắn `&b=`, và `a3b31` cũng được gắn `?v=filemtime`.
+
+**11. ❌ CHƯA GIẢI QUYẾT — `website/game/template/` không có trong snapshot.**
+Client cần `template/perLoadTpls.json` và `template/dongtaitishi.txt`; thư mục không có trong git, không bị gitignore, không có trong tarball `assets-v1`. Đây là lý do client đứng ở "Đang tải cấu hình giao diện… 0%" và **không bao giờ mở WebSocket** — giải thích luôn vì sao mọi phiên trước đều không vào được game.
+Thử đặt `perLoadTpls.json = []` và chép `dongtaitishi.txt` từ `server/excel/release/`: hết 404 nhưng client **vẫn** kẹt, và hàng đợi nạp của Laya treo ở 4 mục dù HTTP đều 200. Nên nội dung thật của `perLoadTpls.json` là cần thiết, và có thể còn thiếu tài nguyên khác.
+**Việc cần làm:** lấy `template/` từ server cũ (`/www/wwwroot/game/template`) rồi đưa vào tarball `assets-v1` cùng `res/ sound/ spine/`. Hai file thử nghiệm đã xoá, không commit — để không che mất vấn đề.
 
 ## 8. Trước khi commit — bắt buộc
 

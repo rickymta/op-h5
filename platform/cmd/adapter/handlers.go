@@ -317,9 +317,8 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 		"band":          d.Band.String(),
 		"warn":          d.Warn,
 		"alternatives":  d.Alternatives,
-		// Nguyen van `data` cua login server: play.php chuyen thang cho client, de
-		// client tu doc cac truong no can (xem website/game/op-autologin.js).
-		"login_data": json.RawMessage(sess.Raw),
+		// `data` cua login server, da luoc `account.password` (xem redactLoginData).
+		"login_data": redactLoginData(sess.Raw, s.log),
 	})
 }
 
@@ -604,4 +603,53 @@ func (s *adapterServer) renderFull(w http.ResponseWriter, r *http.Request, d cap
 		"User": s.username(r), "Message": reasonMessage(d.Reason),
 		"Servers": servers, "IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
 	})
+}
+
+// redactLoginData bo `account.password` truoc khi tra phan hoi cua login server ra ngoai.
+//
+// Login server THAT tra ve khoa game DANG THO trong `data.account.password`. Truong do
+// khong co trong ban gia lap nen den lan chay voi JAR that moi lo ra — va play.php nhung
+// thang login_data vao trang, tuc la khoa se nam trong ma nguon HTML.
+//
+// PHAI NOI RO: viec nay KHONG lam cho khoa game "khong bao gio xuong trinh duyet". Chinh
+// JWT trong `data.token` cung mang khoa do (claim `a4`, da giai ma va doi chieu), ma client
+// bat buoc phai co token de noi WebSocket. Voi login server nay, khoa game cua mot nguoi
+// choi nhat dinh se den duoc trinh duyet cua chinh ho — khong sua duoc o phia ta.
+//
+// Cai lop Adapter VAN giu duoc: mat khau he thong ID khong bao gio den cum game, va moi
+// nguoi chi thay khoa cua chinh minh. Bo truong nay la de khoa khong nam o hai cho.
+//
+// Hong thi tra ve nguyen ban: tha de thua mot truong con hon lam client mat du lieu no can.
+func redactLoginData(raw json.RawMessage, log *slog.Logger) json.RawMessage {
+	if len(raw) == 0 {
+		return raw
+	}
+	var m map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return raw
+	}
+	accRaw, ok := m["account"]
+	if !ok {
+		return raw
+	}
+	var acc map[string]json.RawMessage
+	if err := json.Unmarshal(accRaw, &acc); err != nil {
+		return raw
+	}
+	if _, had := acc["password"]; !had {
+		return raw
+	}
+	delete(acc, "password")
+	newAcc, err := json.Marshal(acc)
+	if err != nil {
+		log.Warn("khong luoc duoc account.password", "err", err)
+		return raw
+	}
+	m["account"] = newAcc
+	out, err := json.Marshal(m)
+	if err != nil {
+		log.Warn("khong dung lai duoc login_data", "err", err)
+		return raw
+	}
+	return out
 }

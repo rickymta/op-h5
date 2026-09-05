@@ -19,5 +19,7 @@ loadLib("libs/6c019-63500-58428.js");
 loadLib("libs/9e1f8-d19bc-ca79a.js");
 loadLib("libs/0e8e7-bdd92-8bd5a.js");
 loadLib("libs/fe8a3-bb91d-7fb1b.js");
-loadLib("libs/e228b-0b904-ac44c.js?v="+appVersion); 
+// opBundleV (do play.php dat, theo filemtime) di kem appVersion: doi host thi bundle
+// duoc sed lai, URL phai doi theo, neu khong cache "immutable 30d" giu ban cu.
+loadLib("libs/e228b-0b904-ac44c.js?v="+appVersion+(typeof opBundleV!=="undefined"?"&b="+opBundleV:""));
 loadLib("libs/795bf-bff72-0d910.js?v="+appVersion); 

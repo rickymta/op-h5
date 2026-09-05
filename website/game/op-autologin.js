@@ -5,10 +5,15 @@
 //
 // Client (LayaAir, da obfuscate, khong co ma nguon) dang nhap bang cach POST
 // username+password len login server roi dua ket qua cho `onAccLoginComplete`.
-// Neu muon tu dong hoa bang cach dien san hai o text thi phai gui khoa game cua
-// nguoi choi xuong trinh duyet — dung dieu ma Adapter sinh ra de tranh. Nen o day
-// bo qua han buoc POST: Adapter da dang nhap ho o phia server roi, ta chi trao lai
+// O day bo qua han buoc POST: Adapter da dang nhap ho o phia server roi, ta chi trao lai
 // dung cai phan hoi ma client dang cho.
+//
+// DUNG hieu nham day la "khoa game khong bao gio xuong trinh duyet". Do bang JAR that:
+// JWT trong `data.token` mang chinh khoa game o claim `a4`, ma client bat buoc phai co
+// token de noi WebSocket — nen khoa cua mot nguoi choi VAN den trinh duyet cua chinh ho,
+// khong sua duoc o phia ta. Adapter co bo `account.password` truoc khi tra ra (de khoa
+// khong nam o hai cho), va cai lop nay VAN giu duoc: mat khau he thong ID khong bao gio
+// den cum game, va moi nguoi chi thay khoa cua chinh minh.
 //
 // `login_data` la NGUYEN VAN truong `data` cua login server, khong dien giai lai.
 // Ten cac truong ben trong nam trong bytecode da obfuscate; chep nguyen ban thi

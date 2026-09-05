@@ -25,7 +25,19 @@ _tcg_init() (
 
   # --- chay SQL: qua ham cua image (khi duoc source) hoac mysql client (khi bi exec) ---
   if declare -F docker_process_sql >/dev/null 2>&1; then
-    run_sql() { docker_process_sql "$@"; }
+    # docker_process_sql cua image KHONG an toan voi `set -u`: no doc "$1" ngay ca khi
+    # duoc goi khong tham so (dong 249 cua docker-entrypoint.sh, mysql:8.0) va doc
+    # $MYSQL_DATABASE co the chua dat. Tat -u trong luc goi roi bat lai ngay, de -u van
+    # con hieu luc cho phan code cua chinh file nay.
+    #
+    # `|| rc=$?` la bat buoc: khong co no thi `set -e` thoat truoc khi kip bat lai -u.
+    run_sql() {
+      local rc=0
+      set +u
+      docker_process_sql "$@" || rc=$?
+      set -u
+      return "$rc"
+    }
   else
     run_sql() { mysql --protocol=socket -uroot -hlocalhost --socket="${SOCKET:-/var/run/mysqld/mysqld.sock}" \
                       -p"${MYSQL_ROOT_PASSWORD:?}" --comments "$@"; }
@@ -50,7 +62,20 @@ _tcg_init() (
     [ -d "$SEED" ] && ls "$SEED"/*.sql >/dev/null 2>&1 || { echo "$TAG LOI: khong co dump *.sql va cung khong co $SEED/*.sql" >&2; return 1; }
     for f in "$SEED"/*.sql; do
       echo "$TAG seed: $(basename "$f")"
-      run_sql < "$f"
+      # ROW_FORMAT=COMPACT -> DYNAMIC: dump sinh boi mysqldump 5.6 giu nguyen row format cu.
+      # MySQL 8 tu choi bang co nhieu cot varchar(255) utf8mb4 o dinh dang COMPACT
+      # ("Row size too large (> 8126)"); DYNAMIC (mac dinh cua MySQL 8) luu phan dai ra
+      # ngoai trang nen vua. Khong doi ngu nghia du lieu.
+      #
+      # Sua o day chu khong sua file trong seed/ vi chung do tools/dump-to-seed.py sinh.
+      # Tool do nen phat DYNAMIC ngay tu dau — phai sinh lai seed tren PC co dump.
+      #
+      # PHAI kiem tra ma thoat tuong minh, KHONG dua vao `set -e`: _tcg_init duoc goi
+      # dang `_tcg_init || {...}`, ma trong mot danh sach `||` thi `set -e` bi tat cho
+      # ca compound command va moi lenh con. Truoc khi co dong nay, web.sql chet o bang
+      # thu 3 nhung script van in "xong (seed)" va he thong len voi 2/21 bang.
+      sed 's/ROW_FORMAT=COMPACT/ROW_FORMAT=DYNAMIC/g' "$f" | run_sql \
+        || { echo "$TAG LOI: nap $(basename "$f") that bai — xem dong ERROR o tren" >&2; return 1; }
     done
     MODE=seed
   else

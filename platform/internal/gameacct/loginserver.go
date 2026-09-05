@@ -3,6 +3,7 @@
 package gameacct
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -36,6 +37,10 @@ type NetProcess struct {
 	Host   Host   `json:"host"`
 	Port   *int   `json:"port"`
 	SSL    *bool  `json:"ssl"`
+	// Path la duong dan cua endpoint WebSocket. Login server THAT tra ve "game"
+	// (khong co dau /), va bo qua no thi client noi vao ws://host:8001 thay vi
+	// ws://host:8001/game. Ban gia lap truoc day khong co truong nay nen loi bi giau.
+	Path string `json:"path"`
 }
 
 // WebSocketURL dung URL WebSocket ma client se ket noi toi.
@@ -53,10 +58,14 @@ func (n NetProcess) WebSocketURL(publicHost string, tls bool) string {
 			host = n.Host.LAN
 		}
 	}
+	base := host
 	if n.Port != nil {
-		return fmt.Sprintf("%s://%s:%d", scheme, host, *n.Port)
+		base = fmt.Sprintf("%s:%d", host, *n.Port)
 	}
-	return fmt.Sprintf("%s://%s", scheme, host)
+	if p := strings.Trim(n.Path, "/"); p != "" {
+		return fmt.Sprintf("%s://%s/%s", scheme, base, p)
+	}
+	return fmt.Sprintf("%s://%s", scheme, base)
 }
 
 // SrvGameVO la mot dong trong danh sach server ma login server cong bo.
@@ -186,6 +195,35 @@ func NewLoginClient(baseURL, secret string) *LoginClient {
 }
 
 // postForm gui form va giai ma khuon EcResult.
+// postJSON gui than JSON.
+//
+// Login server THAT (Spring) khai bao @RequestBody nen chi nhan application/json; gui
+// form-urlencoded se bi tra ve loi "Content type 'application/x-www-form-urlencoded;
+// charset=UTF-8' not supported". Ban gia lap truoc day nhan ca hai, nen sai nay chi lo
+// ra khi chay voi JAR that.
+//
+// Bo qua truong rong: login server tu choi mot so truong rong (vi du platformCode) va
+// gui "" khac han voi khong gui.
+func (c *LoginClient) postJSON(ctx context.Context, path string, body map[string]any, out any) error {
+	clean := make(map[string]any, len(body))
+	for k, v := range body {
+		if sv, ok := v.(string); ok && sv == "" {
+			continue
+		}
+		clean[k] = v
+	}
+	blob, err := json.Marshal(clean)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+path, bytes.NewReader(blob))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return c.do(req, out)
+}
+
 func (c *LoginClient) postForm(ctx context.Context, path string, form url.Values, out any) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+path,
 		strings.NewReader(form.Encode()))
@@ -268,13 +306,13 @@ type RegisterInput struct {
 // Mat khau o day KHONG phai mat khau cua nguoi choi: no la khoa ngau nhien do Adapter
 // sinh va giu. Nguoi choi khong bao gio biet no, va no khong bao gio roi khoi Adapter.
 func (c *LoginClient) Register(ctx context.Context, in RegisterInput) error {
-	return c.postForm(ctx, "/account/register", url.Values{
-		"username":     {in.Username},
-		"password":     {in.Password},
-		"nickname":     {in.Nickname},
-		"platformCode": {in.PlatformCode},
-		"channelCode":  {in.ChannelCode},
-		"secret":       {c.Secret},
+	return c.postJSON(ctx, "/account/register", map[string]any{
+		"username":     in.Username,
+		"password":     in.Password,
+		"nickname":     in.Nickname,
+		"platformCode": in.PlatformCode,
+		"channelCode":  in.ChannelCode,
+		"secret":       c.Secret,
 	}, nil)
 }
 
@@ -292,15 +330,16 @@ type LoginInput struct {
 // Login doi khoa cua Adapter lay AccountSession.token cho client.
 func (c *LoginClient) Login(ctx context.Context, in LoginInput) (*AccountSession, error) {
 	var sess AccountSession
-	err := c.postForm(ctx, "/account/login", url.Values{
-		"username":     {in.Username},
-		"password":     {in.Password},
-		"openId":       {in.OpenID},
-		"gameId":       {in.GameID},
-		"clientType":   {fmt.Sprint(in.ClientType)},
-		"platformCode": {in.PlatformCode},
-		"channelCode":  {in.ChannelCode},
-		"timestamp":    {fmt.Sprint(time.Now().UnixMilli())},
+	err := c.postJSON(ctx, "/account/login", map[string]any{
+		"username":     in.Username,
+		"password":     in.Password,
+		"openId":       in.OpenID,
+		"gameId":       in.GameID,
+		"clientType":   in.ClientType,
+		"platformCode": in.PlatformCode,
+		"channelCode":  in.ChannelCode,
+		"secret":       c.Secret,
+		"timestamp":    time.Now().UnixMilli(),
 	}, &sess)
 	if err != nil {
 		return nil, err
