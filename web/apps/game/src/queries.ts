@@ -3,12 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
+  ApiError,
   api,
   type Me,
   type Meta,
   type NewsItem,
   type PackagesResponse,
+  type PageDoc,
+  type PkgDetail,
   type ServersResponse,
+  type StoreStats,
 } from "./api";
 
 export const useMeta = () =>
@@ -25,11 +29,102 @@ export const useServers = () =>
     refetchInterval: 30_000,
   });
 
-export const usePackages = () =>
+/**
+ * Danh sách nhóm gói (để đổ vào ô chọn và lấy "Gói nổi bật").
+ *
+ * Đây là lượt gọi **duy nhất** kéo cả bảng giá về; mọi lượt lọc/lật trang sau đó đi qua
+ * `usePkgList` với khối `list` nhỏ. Trước đợt 3 thì mỗi lần đổi tab cũng phải giữ nguyên
+ * 1.900 gói trong bộ nhớ và vẽ hết ra.
+ */
+export const useCategories = () =>
   useQuery({
-    queryKey: ["packages"],
+    queryKey: ["cats"],
     queryFn: () => api.get<PackagesResponse>("/api/game/packages"),
+    staleTime: 5 * 60_000,
+  });
+
+/** Bộ lọc của bảng gói. Giá trị rỗng nghĩa là "mọi nhóm" / "sắp xếp mặc định". */
+export interface StoreQuery {
+  q: string;
+  cat: string;
+  sort: string;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Một trang của bảng gói.
+ *
+ * Tham số `category` (khuôn cũ, số ít) được gửi kèm **có chủ ý**: nó quyết định khối
+ * `categories` mà server đính vào phản hồi. Không gửi thì mỗi lần lật trang server lại
+ * đính cả 1.900 gói (489 KB) mà trang không dùng tới — nhóm gói đã có từ `useCategories`.
+ * Khối `categories` của phản hồi này vì thế bị bỏ qua.
+ */
+export const usePkgList = (sq: StoreQuery) =>
+  useQuery({
+    queryKey: ["pkgs", sq],
+    queryFn: () => {
+      const p = new URLSearchParams({
+        q: sq.q,
+        cat: sq.cat,
+        sort: sq.sort,
+        page: String(sq.page),
+        page_size: String(sq.pageSize),
+        category: sq.cat || "diamond",
+      });
+      return api.get<PackagesResponse>(`/api/game/packages?${p}`);
+    },
     staleTime: 60_000,
+    placeholderData: (prev) => prev, // lật trang không nhấp nháy về khung rỗng
+  });
+
+/**
+ * Tên và mô tả của **một** nhóm gói, cho trang chi tiết.
+ *
+ * Không dùng `useCategories` ở đó: người mở thẳng liên kết `/cua-hang/<id>` sẽ phải tải cả
+ * bảng giá chỉ để biết chữ "Nguyên Bảo". Gửi `category` + `page_size=1` thì server chỉ đính
+ * đúng một tab và một gói — vài trăm byte.
+ */
+export const useCategoryInfo = (key: string) =>
+  useQuery({
+    queryKey: ["cat", key],
+    queryFn: () => {
+      const k = encodeURIComponent(key);
+      return api.get<PackagesResponse>(`/api/game/packages?category=${k}&cat=${k}&page_size=1`);
+    },
+    enabled: key !== "",
+    staleTime: 5 * 60_000,
+    select: (d: PackagesResponse) => d.categories?.[0] ?? null,
+  });
+
+export const usePackage = (id: string) =>
+  useQuery({
+    queryKey: ["pkg", id],
+    queryFn: () => api.get<PkgDetail>(`/api/game/packages/${encodeURIComponent(id)}`),
+    enabled: id !== "",
+    staleTime: 60_000,
+  });
+
+export const useStoreStats = () =>
+  useQuery({
+    queryKey: ["store-stats"],
+    queryFn: () => api.get<StoreStats>("/api/game/store/stats"),
+    staleTime: 5 * 60_000,
+  });
+
+/**
+ * Trang nội dung sửa được ở trang quản trị. Chưa có bản ghi (404) thì trả `null` chứ không
+ * phải lỗi — trang tự dùng bản mặc định viết sẵn trong mã.
+ */
+export const usePage = (slug: string) =>
+  useQuery({
+    queryKey: ["page", slug],
+    queryFn: () =>
+      api.get<PageDoc>(`/api/game/pages/${slug}`).catch((e) => {
+        if (e instanceof ApiError && e.status === 404) return null;
+        throw e;
+      }),
+    staleTime: 5 * 60_000,
   });
 
 export const useNews = (limit: number) =>

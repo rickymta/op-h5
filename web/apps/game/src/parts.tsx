@@ -131,6 +131,35 @@ export function Paragraphs({ text }: { text: string }) {
   );
 }
 
+/**
+ * Thân trang nội dung: `## ` là tiêu đề phụ, `- ` là gạch đầu dòng, còn lại là đoạn văn.
+ *
+ * Dựng bằng JSX nên mọi ký tự đều được React thoát — không `dangerouslySetInnerHTML`, dù nội
+ * dung này do người vận hành gõ ở trang quản trị. Cắt khối theo dòng trống trước, rồi mới nhìn
+ * ký tự mở đầu; nhờ vậy một danh sách nhiều dòng liền nhau ra đúng một `<ul>`.
+ */
+export function RichText({ body }: { body: string }) {
+  const blocks = body.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  return (
+    <div className="gm-doc">
+      {blocks.map((b, i) => {
+        if (b.startsWith("## ")) return <h2 key={i}>{b.slice(3).trim()}</h2>;
+        const lines = b.split("\n").map((l) => l.trim());
+        if (lines.every((l) => l.startsWith("- "))) {
+          return (
+            <ul key={i}>
+              {lines.map((l, j) => (
+                <li key={j}>{l.slice(2).trim()}</li>
+              ))}
+            </ul>
+          );
+        }
+        return <p key={i}>{b}</p>;
+      })}
+    </div>
+  );
+}
+
 export function QueryError({ error, prefix }: { error: unknown; prefix?: string }) {
   return (
     <Msg tone="err">

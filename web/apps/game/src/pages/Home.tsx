@@ -1,14 +1,18 @@
 import { Card, Empty, Hero, LinkButton, NewsList, Section } from "@op/ui/publisher";
-import { useImg, useMe, useMeta, useNews, usePackages, useServers, useTitle } from "../queries";
+import { useImg, useMe, useMeta, useNews, usePage, usePkgList, useServers, useTitle } from "../queries";
 import { BandLegend, Loading, PkgCard, QueryError, RecommendHint, ServerList } from "../parts";
+import { HOME_ABOUT, HOME_FEATURES } from "../content";
 
 /** Trang chủ của game (docs/plan-go-react.md 15.4): hero → máy chủ → cửa hàng rút gọn → tin → tài khoản. */
 export function Home() {
   const meta = useMeta();
   const me = useMe();
   const servers = useServers();
-  const pkgs = usePackages();
+  // Chỉ ba gói mẫu: xin đúng nhóm "diamond" và ba dòng thay vì kéo cả bảng giá 1.900 gói về
+  // trang chủ như trước (QA đợt 3, V4).
+  const pkgs = usePkgList({ q: "", cat: "diamond", sort: "popular", page: 1, pageSize: 3 });
   const news = useNews(4);
+  const about = usePage("gioi-thieu");
 
   const m = meta.data;
   useTitle(m?.name);
@@ -17,9 +21,19 @@ export function Home() {
   const idBase = (m?.id_base ?? "").replace(/\/+$/, "");
   const guest = me.data ? !me.data.logged_in : false;
 
-  const firstCat = pkgs.data?.categories[0];
-  const teaser = firstCat?.packages.slice(0, 3) ?? [];
-  const balance = me.data?.logged_in ? (me.data.balance ?? 0) : undefined;
+  const firstCat = pkgs.data?.categories?.[0];
+  const teaser = (pkgs.data?.list?.packages ?? []).slice(0, 3);
+  const balance = me.data?.logged_in ? me.data.balance : undefined;
+
+  // "Về game": ưu tiên bản người vận hành soạn ở trang quản trị; lấy các đoạn văn xuôi đầu
+  // tiên của bài giới thiệu (bỏ tiêu đề phụ `## ` và gạch đầu dòng `- `).
+  const doc = about.data?.body ?? "";
+  const fromDb = doc
+    .split(/\n\s*\n/)
+    .map((s) => s.trim())
+    .filter((s) => s && !s.startsWith("## ") && !s.startsWith("- "))
+    .slice(0, 3);
+  const aboutParas = fromDb.length ? fromDb : HOME_ABOUT;
 
   return (
     <>
@@ -45,6 +59,33 @@ export function Home() {
       </Hero>
 
       <main className="pb-main">
+        <Section
+          eyebrow="Về game"
+          title={m?.name ? `Về ${m.name}` : "Về game"}
+          action={
+            <a className="gm-link" href="/gioi-thieu">
+              Giới thiệu đầy đủ →
+            </a>
+          }
+        >
+          <div className="gm-doc gm-doc--tight">
+            {aboutParas.map((s, i) => (
+              <p key={i}>{s}</p>
+            ))}
+          </div>
+        </Section>
+
+        <Section eyebrow="Đặc điểm" title="Chơi kiểu gì">
+          <div className="gm-feats">
+            {HOME_FEATURES.map((f) => (
+              <div className="gm-feat" key={f.title}>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         <Section
           eyebrow="Máy chủ"
           title="Chọn nơi ra khơi"
@@ -82,7 +123,12 @@ export function Home() {
               {firstCat?.hint ? <p className="gm-cat-hint">{firstCat.hint}</p> : null}
               <div className="gm-pkgs">
                 {teaser.map((p) => (
-                  <PkgCard key={p.id} p={p} href="/cua-hang" poor={balance !== undefined && p.price_xu > balance} />
+                  <PkgCard
+                    key={p.id}
+                    p={p}
+                    href={`/cua-hang/${encodeURIComponent(p.id)}`}
+                    poor={balance !== undefined && p.price_xu > balance}
+                  />
                 ))}
               </div>
             </>

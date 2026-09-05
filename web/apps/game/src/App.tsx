@@ -7,8 +7,10 @@ import { useImg, useMe, useMeta } from "./queries";
 import { Home } from "./pages/Home";
 import { Servers } from "./pages/Servers";
 import { Store } from "./pages/Store";
+import { Package } from "./pages/Package";
 import { News } from "./pages/News";
 import { NewsDetail } from "./pages/NewsDetail";
+import { About, Faq, Guide } from "./pages/Content";
 import { NotFound } from "./pages/NotFound";
 
 /** Tối màu hex đi ~18% cho trạng thái hover của nút chính (cùng công thức với Hero của @op/ui). */
@@ -26,8 +28,12 @@ function applyAccent(accent: string | undefined) {
   st.setProperty("--accent-dim", darken(accent));
 }
 
-/** Đường do SPA phục vụ (hợp đồng 4.4). Mọi đường khác — /choi-game, /auth/*, id_base — là liên kết thường. */
-const SPA_PATH = /^\/(may-chu|cua-hang|tin-tuc(\/[^/]+)?)?$/;
+/**
+ * Đường do SPA phục vụ (hợp đồng 4.4, mở rộng ở đợt 3). Mọi đường khác — /choi-game, /auth/*,
+ * id_base — là liên kết thường. Danh sách này phải khớp `mux.Handle` trong `cmd/adapter/main.go`
+ * **và** các `location` trong `docker/nginx/game_site.conf`: thiếu một bên là 404 khi tải thẳng.
+ */
+const SPA_PATH = /^\/(may-chu|cua-hang(\/[^/]+)?|tin-tuc(\/[^/]+)?|gioi-thieu|huong-dan|faq)?$/;
 
 export function App() {
   const meta = useMeta();
@@ -57,20 +63,28 @@ export function App() {
     window.scrollTo(0, 0);
   }
 
-  const active = (p: string) => (p === "/tin-tuc" ? loc.startsWith(p) : loc === p);
+  const active = (p: string) => (p === "/may-chu" ? loc === p : loc === p || loc.startsWith(p + "/"));
   const links = [
     { href: "/may-chu", label: "Máy chủ", active: active("/may-chu") },
     { href: "/cua-hang", label: "Cửa hàng", active: active("/cua-hang") },
     { href: "/tin-tuc", label: "Tin tức", active: active("/tin-tuc") },
+    { href: "/huong-dan", label: "Hướng dẫn", active: active("/huong-dan") },
   ];
 
   let right = null;
   if (me.data?.logged_in) {
+    // Số dư đọc lỗi thì `/api/game/me` bỏ hẳn trường `balance`. Hiện "—" chứ không hiện "0 Xu":
+    // người vừa nạp tiền mà thấy 0 sẽ tưởng mất tiền (QA đợt 3, V2).
+    const bal = me.data.balance;
     right = (
       <>
-        <a className="pb-topbar__who gm-who" href="/cua-hang" title="Số dư ví · vào cửa hàng">
+        <a
+          className="pb-topbar__who gm-who"
+          href="/cua-hang"
+          title={bal === undefined ? "Chưa đọc được số dư · vào cửa hàng" : "Số dư ví · vào cửa hàng"}
+        >
           <span className="gm-who__name">{me.data.username}</span>
-          {formatInt(me.data.balance ?? 0)} Xu
+          {bal === undefined ? "—" : formatInt(bal)} Xu
         </a>
         <a className="pb-topbar__link gm-out" href="/auth/logout">
           Thoát
@@ -85,7 +99,12 @@ export function App() {
     );
   }
 
-  const footLinks = [{ href: idBase || "/", label: "Trang chính" }, { href: `${idBase}/tai-khoan`, label: "Tài khoản" }];
+  const footLinks = [
+    { href: "/gioi-thieu", label: "Giới thiệu" },
+    { href: "/faq", label: "Hỏi đáp" },
+    { href: idBase || "/", label: "Trang chính" },
+    { href: `${idBase}/tai-khoan`, label: "Tài khoản" },
+  ];
   if (m?.links.fanpage_url) footLinks.push({ href: m.links.fanpage_url, label: "Fanpage" });
   if (m?.links.group_url) footLinks.push({ href: m.links.group_url, label: "Nhóm" });
   if (m?.links.support_url) footLinks.push({ href: m.links.support_url, label: "Hỗ trợ" });
@@ -102,8 +121,12 @@ export function App() {
         <Route path="/" component={Home} />
         <Route path="/may-chu" component={Servers} />
         <Route path="/cua-hang" component={Store} />
+        <Route path="/cua-hang/:id">{(p) => <Package id={p.id ?? ""} />}</Route>
         <Route path="/tin-tuc" component={News} />
         <Route path="/tin-tuc/:id" component={NewsDetail} />
+        <Route path="/gioi-thieu" component={About} />
+        <Route path="/huong-dan" component={Guide} />
+        <Route path="/faq" component={Faq} />
         <Route component={NotFound} />
       </Switch>
       <Footer

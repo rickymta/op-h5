@@ -1,0 +1,27 @@
+{
+  "id": "it-gold",
+  "name": "Rương vàng lớn",
+  "category": "item",
+  "grant_mode": "mail",
+  "description": "Nhận vàng bằng 24 giờ treo máy.",
+  "badge": "",
+  "cond": "",
+  "item_name": "Rương vàng lớn",
+  "item_count": 1,
+  "price_xu": 30000,
+  "price_fmt": "30.000",
+  "vip_points": 0,
+  "reward_items": [
+    {
+      "label": "Kim tệ",
+      "count": 5000000
+    }
+  ],
+  "grant_note": "Vật phẩm được gửi qua thư trong game; mở hòm thư của nhân vật bạn chọn để nhận.",
+  "server_days": {
+    "min": 0,
+    "max": 0
+  },
+  "daily_limit": 0,
+  "vip_required": 0
+}
