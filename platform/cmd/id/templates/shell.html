@@ -69,7 +69,7 @@
     {{if .User}}
       <a href="/tai-khoan">Tài khoản</a>
       <span class="muted" style="font-size:13px">{{.User.Username}}</span>
-      <a href="/oauth/logout">Thoát</a>
+      <a href="/oauth/logout?post_logout_redirect_uri=/">Thoát</a>
     {{else}}
       <a href="/dang-ky">Đăng ký</a>
     {{end}}

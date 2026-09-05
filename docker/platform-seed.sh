@@ -67,9 +67,13 @@ if [ "$PRINT" = 0 ]; then
 fi
 
 # 3a) OIDC client cua game — cong khai (PKCE), secret_hash giu NULL; doi redirect khi PUBLIC_HOST doi
-sql "INSERT INTO oauth_clients (client_id, name, secret_hash, redirect_uris, scopes, require_pkce, status)
-     VALUES ('$(q "$CLIENT")', '$(q "$GAME_NAME")', NULL, '$(q "$ADAPTER_REDIRECT_URI")', 'openid profile wallet', 1, 'active')
-     ON DUPLICATE KEY UPDATE name=VALUES(name), redirect_uris=VALUES(redirect_uris);" "$DB"
+# post_logout_uris: noi duoc phep tra nguoi dung ve sau khi dang xuat. `Logout` cua he
+# thong ID CHI chuyen tiep den dia chi khop tuyet doi voi cot nay (chong open redirect tren
+# domain dang nhap), nen thieu dong nay thi nguoi choi dang xuat xong bi dua ve "/" cua
+# id.<domain> thay vi ve trang game.
+sql "INSERT INTO oauth_clients (client_id, name, secret_hash, redirect_uris, post_logout_uris, scopes, require_pkce, status)
+     VALUES ('$(q "$CLIENT")', '$(q "$GAME_NAME")', NULL, '$(q "$ADAPTER_REDIRECT_URI")', '$(q "$SITE_URL/")', 'openid profile wallet', 1, 'active')
+     ON DUPLICATE KEY UPDATE name=VALUES(name), redirect_uris=VALUES(redirect_uris), post_logout_uris=VALUES(post_logout_uris);" "$DB"
 
 # 3b) games — trang quan tri hoi adapter nao
 sql "INSERT INTO games (code, name, adapter_url, site_url, status, sort_order)
