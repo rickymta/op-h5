@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../gmhanglong/config/auth.php';
+$GM = gm_require();
+
 include '../config.php';
 include './function/common.php';
 
@@ -19,7 +22,9 @@ $signkey    = $qu['key'];
 //$url        = $qu['url'];
 $s          = $qu['code'];
 
-if($checknum  != $gmcode){
+// Ma GM tinh da duoc thay bang tai khoan (gm_require o tren). Van giu kiem tra nay
+// nhu mot lop nua cho ai da cau hinh $gmcode; de trong thi bo qua.
+if($gmcode !== '' && strpos($gmcode, '__') !== 0 && $checknum != $gmcode){
     exit('GM码不对');
 }
 

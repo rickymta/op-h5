@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/auth.php';
+$GM = gm_require(true);
+
 error_reporting(0);
 $qu = $_POST['qu'];
 $sqm = $_POST['sqm'];

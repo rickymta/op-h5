@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/auth.php';
+$GM = gm_require();
+
 error_reporting(0);
 $sqm = $_POST['sqm'];
 $num = $_POST['num'];
@@ -7,7 +10,8 @@ include "../config/config.php";
 $zame = 'PAY_';
 $type == 0 && (die("<script>alert('Vui lòng chọn loại');window.history.back(-1); </script>")); 
 $type == 2 && ($zame = 'CDK_'); 
-$sqm != $gm_code && (die("<script>alert('Lỗi mã ủy quyền');window.history.back(-1); </script>")); 
+// Ma uy quyen tinh da duoc thay bang tai khoan GM (gm_require o tren). Giu bien \$sqm
+// vi form cu van gui len, nhung KHONG con dung no de xac thuc.
 $num > 100 && (die("<script>alert('Có thể tạo tối đa 100 mục cùng một lúc');window.history.back(-1); </script>")); 
 $num == '' && ($num = 1);
 $mysql = mysqli_connect($PZ['DB_HOST'],$PZ['DB_USER'],$PZ['DB_PWD'],$PZ['DB_NAME'],$PZ['DB_PORT']) or die("<script>alert('Kết nối cơ sở dữ liệu không thành công');window.history.back(-1); </script>");

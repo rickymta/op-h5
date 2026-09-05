@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/../config/auth.php';
+gm_bootstrap();
+$GM = gm_require();
+?>
 
 <!DOCTYPE html>
 <html lang="zh">

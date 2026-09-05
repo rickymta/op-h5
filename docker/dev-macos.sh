@@ -242,6 +242,7 @@ docker run -d --name op-nginx --network "$NET" \
   -v "$REPO/website/game:/www/wwwroot/game:ro" \
   -v "$REPO/docker/nginx/game.conf:/etc/nginx/conf.d/default.conf:ro" \
   -v "$REPO/docker/nginx/game_site.conf:/etc/nginx/game_site.conf:ro" \
+  -v "$REPO/docker/nginx/gm_access.dev.conf:/etc/nginx/gm_access.conf:ro" \
   -v "$REPO/docker/nginx/adapter_proxy.conf:/etc/nginx/adapter_proxy.conf:ro" \
   nginx:1.25-alpine >/dev/null
 

@@ -69,7 +69,11 @@ if [ -d "$FPM_D" ]; then
   {
     echo "; sinh boi web-entrypoint luc start — dung sua tay"
     echo "[www]"
-    for v in ID_BASE_URL ID_INTERNAL_SECRET ID_WALLET_ENABLED ADAPTER_BASE_URL; do
+    # GM tool doc ID_DB_* de noi vao bang gm_users, va GM_BOOTSTRAP_* de tao tai khoan
+    # dau tien. php-fpm xoa env cua tien trinh (clear_env) nen phai dua qua pool.
+    for v in ID_BASE_URL ID_INTERNAL_SECRET ID_WALLET_ENABLED ADAPTER_BASE_URL \
+             ID_DB_HOST ID_DB_NAME ID_DB_USER ID_DB_PASSWORD \
+             GM_BOOTSTRAP_USER GM_BOOTSTRAP_PASSWORD; do
       [ -n "${!v:-}" ] && printf 'env[%s] = "%s"
 ' "$v" "${!v}"
     done
