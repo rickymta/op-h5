@@ -131,6 +131,9 @@ func main() {
 	mux.HandleFunc("POST /api/game/session", srv.createSession)
 	mux.HandleFunc("GET /api/game/packages", srv.listPackages)
 	mux.HandleFunc("POST /api/game/convert", srv.convert)
+	// Duong cua LOGIN SERVER ma nginx tro vao Adapter, de che dia chi cong khai
+	// (server chi mo 80/443). Xem ghi chu o connectTarget.
+	mux.HandleFunc("GET /srv/game/connect/target", srv.connectTarget)
 	mux.HandleFunc("GET /healthz", srv.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

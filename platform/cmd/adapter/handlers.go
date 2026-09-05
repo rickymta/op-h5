@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -652,4 +653,67 @@ func redactLoginData(raw json.RawMessage, log *slog.Logger) json.RawMessage {
 		return raw
 	}
 	return out
+}
+
+// connectTarget tra lai dia chi WebSocket cua tien trinh game, DA VIET LAI cho phu hop
+// voi mot server chi mo 80/443.
+//
+// VAN DE: client hoi thang login server `/srv/game/connect/target` va nhan ve
+// ws://<host>:8001/game. Cong 8001 khong mo ra Internet duoc, ma cung khong the doi
+// `tcg.srv_game.ws_port` thanh 443: cot do vua la cong login CONG BO vua la cong tien
+// trinh game BIND vao — dat 443 thi game se tranh cong voi nginx.
+//
+// CACH GO: nginx tro duong nay vao Adapter thay vi login server. Adapter van hoi login
+// server nhu cu (giu nguyen path va cac truong khac), roi chi thay host/port/scheme
+// bang dia chi cong khai. nginx nhan wss tren 443 o duong /game roi chuyen tiep vao
+// 127.0.0.1:8001. Tien trinh game khong phai doi gi.
+func (s *adapterServer) connectTarget(w http.ResponseWriter, r *http.Request) {
+	srvCode := r.URL.Query().Get("srvCode")
+	if srvCode == "" {
+		httpx.JSON(w, http.StatusOK, map[string]any{
+			"errorcode": 1, "errormsg": "thiếu srvCode", "data": nil,
+		})
+		return
+	}
+	np, err := s.login.ConnectTarget(r.Context(), srvCode)
+	if err != nil {
+		s.log.Error("hoi dia chi tien trinh game", "err", err, "srv", srvCode)
+		// Giu khuon EcResult: client doc `errorcode`, tra HTTP 502 se lam no bao mot loi khac.
+		httpx.JSON(w, http.StatusOK, map[string]any{
+			"errorcode": 1, "errormsg": "không lấy được địa chỉ máy chủ", "data": nil,
+		})
+		return
+	}
+
+	scheme, port, ssl := "ws", 80, false
+	if s.useTLS {
+		scheme, port, ssl = "wss", 443, true
+	}
+	// ADAPTER_PUBLIC_PORT cho moi truong khong dung cong chuan (vi du may dev phuc vu o
+	// 8080). Khong doan tu dau khac duoc: Adapter khong nhin thay cong ma trinh duyet da
+	// goi vao, va publicHost thi con dung o cho khac nen khong nhet cong vao do duoc.
+	if v := os.Getenv("ADAPTER_PUBLIC_PORT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 && n < 65536 {
+			port = n
+		} else {
+			s.log.Warn("ADAPTER_PUBLIC_PORT khong hop le, bo qua", "gia_tri", v)
+		}
+	}
+	host := s.publicHost
+	if host == "" {
+		host = np.Host.WAN
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"errorcode": 0,
+		"errormsg":  "success",
+		"data": map[string]any{
+			"scheme": scheme,
+			// Ca ba deu la host cong khai: client chon truong nao cung ra dung dia chi.
+			"host":    map[string]any{"LAN": host, "WAN": host, "domain": host},
+			"port":    port,
+			"path":    np.Path,
+			"ssl":     ssl,
+			"enabled": true,
+		},
+	})
 }

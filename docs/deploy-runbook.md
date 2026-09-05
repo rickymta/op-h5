@@ -4,78 +4,96 @@ Làm **theo đúng thứ tự**, mỗi bước có điểm kiểm tra. Ký hiệ
 
 Đầu vào đã có: repo `github.com/rickymta/op-h5` (JAR qua LFS), release `assets-v1` (res/sound/spine 1.33 GB), giá trị secrets thật trong `_backup-secrets-original/` trên PC, server cũ còn chạy với DB thật.
 
-## Trỏ domain thật (ví dụ `antfarms.xyz`)
+## Trỏ domain thật — `antfarms.xyz`
 
-Mặc định hệ thống chạy theo IP. Để dùng domain, ba việc phải làm **theo đúng thứ tự** —
-làm ngược là nginx không khởi động được.
+| Tên | Trỏ về |
+|---|---|
+| `antfarms.xyz` | Trang chính |
+| `www.antfarms.xyz` | Chuyển hướng về tên không www |
+| `id.antfarms.xyz` | Quản lý tài khoản, nạp tiền, OIDC |
+| `haitac.antfarms.xyz` | Game hải tặc |
+| `haitac.antfarms.xyz/adminportal` | Công cụ GM |
 
-### 1. DNS
+Bốn bản ghi `A` trỏ về IP server. Thêm game mới thì thêm một bản ghi và copy khối
+`server` của haitac.
 
-| Bản ghi | Trỏ về | Phục vụ |
+### Chỉ mở 80 và 443 — client không còn gọi theo cổng
+
+Bản gốc client gọi thẳng bốn dịch vụ **theo cổng**: meta `:12345`, statistic `:7788`,
+login `:9000`, WebSocket `:8001`. Với server chỉ mở 80/443 thì bốn đường đó không tới
+nơi, và khi trang chạy HTTPS trình duyệt còn chặn nội dung hỗn hợp — **không có đường
+lui**. Nay cả bốn đi qua 443 bằng tiền tố đường dẫn:
+
+| Đường | Tới | Ai quyết định |
 |---|---|---|
-| `A  antfarms.xyz` | IP server | Cổng thông tin |
-| `A  www.antfarms.xyz` | IP server | Chuyển hướng về tên không www |
-| `A  id.antfarms.xyz` | IP server | Đăng ký, tài khoản, quên mật khẩu, OIDC |
-| `A  haitac.antfarms.xyz` | IP server | Site game + client |
+| `/meta/` | `127.0.0.1:12345` | `a3b31-4c087-1dc2f.js` dùng `location.origin + "/meta/"` |
+| `/stat/` | `127.0.0.1:7788` | như trên, `"/stat/"` |
+| `/account/`, `/srv/` | `127.0.0.1:9000` | client nối vào base lấy từ `loginNP` |
+| `/game` | `127.0.0.1:8001` | WebSocket; `path` do login server trả về |
 
-Thêm game mới thì thêm một bản ghi A và copy khối `server` của haitac.
+**Ba việc bắt buộc làm kèm.** Thiếu bất kỳ việc nào thì client vẫn gọi cổng cũ và
+triệu chứng (client đứng im) không chỉ vào nguyên nhân:
 
-**Trang quản trị cố ý không có domain.** Nó không có lớp chống dò mật khẩu như hệ thống
-ID, và mở ra Internet là mở cả đường nạp tay. Vào bằng SSH tunnel:
-`ssh -L 8100:127.0.0.1:8100 root@<server>` rồi mở `http://127.0.0.1:8100`.
+1. **`PUBLIC_SCHEME=https`** trong `docker/.env` (và `PUBLIC_PORT` nếu khác 443).
+   `server-entrypoint.sh` sẽ sửa `loginNP`/`statNP` trong
+   `console/store/global.conf.json`. Client lấy địa chỉ login từ **đây**, không phải từ
+   `tcg.srv_login` — bảng đó phục vụ việc khác.
+2. **`ADAPTER_TLS=true`**. Adapter phục vụ `/srv/game/connect/target` và viết lại địa chỉ
+   WebSocket thành `wss://haitac.antfarms.xyz:443/game`. Không thể đổi
+   `tcg.srv_game.ws_port` thành 443 vì **cột đó vừa là cổng login công bố vừa là cổng
+   tiến trình game bind vào** — đặt 443 thì game tranh cổng với nginx.
+3. **MySQL**: `UPDATE tcg.cloud_device SET host_WAN='haitac.antfarms.xyz';`
 
-### 2. Chứng chỉ — làm TRƯỚC khi bật khối 443
-
-nginx **không khởi động được** nếu file chứng chỉ chưa tồn tại.
-
-```bash
-mkdir -p /var/www/acme
-certbot certonly --webroot -w /var/www/acme \
-  -d antfarms.xyz -d www.antfarms.xyz -d id.antfarms.xyz -d haitac.antfarms.xyz
-```
-
-### 3. Điền domain và bật cấu hình
-
-```bash
-cd /opt/tcg/src/docker/nginx
-sed -i 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' domains.conf tls.conf
-# rồi mount domains.conf + tls.conf + game_site.conf vào container nginx
-```
-
-Kèm theo, trong `docker/.env`:
+Kèm theo trong `.env`:
 
 ```
 PUBLIC_HOST=haitac.antfarms.xyz
+PUBLIC_SCHEME=https
 ID_ISSUER=https://id.antfarms.xyz
 ADAPTER_REDIRECT_URI=https://haitac.antfarms.xyz/auth/callback
 ADAPTER_TLS=true
 ```
 
-Và trong MySQL — nếu bỏ qua, login server vẫn công bố `ws://` và client sẽ bị chặn:
+### Thứ tự
 
-```sql
-UPDATE tcg.srv_login    SET np_scheme='https', np_ssl=1, np_host_WAN='haitac.antfarms.xyz';
-UPDATE tcg.srv_game     SET ws_scheme='wss';
-UPDATE tcg.cloud_device SET host_WAN='haitac.antfarms.xyz';
+```bash
+# 1. Chứng chỉ TRƯỚC — thiếu file là nginx không khởi động được
+mkdir -p /var/www/acme
+certbot certonly --webroot -w /var/www/acme \
+  -d antfarms.xyz -d www.antfarms.xyz -d id.antfarms.xyz -d haitac.antfarms.xyz
+
+# 2. Điền domain vào hai file mẫu trong image rồi mount đè
+docker run --rm ghcr.io/rickymta/op-h5-nginx:latest cat /etc/nginx/domains.conf.mau \
+  | sed 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' > /opt/tcg/nginx/domains.conf
+docker run --rm ghcr.io/rickymta/op-h5-nginx:latest cat /etc/nginx/tls.conf.mau \
+  | sed 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' > /opt/tcg/nginx/tls.conf
+
+# 3. Thêm vào service nginx trong compose:
+#   volumes:
+#     - /opt/tcg/nginx/domains.conf:/etc/nginx/conf.d/domains.conf:ro
+#     - /opt/tcg/nginx/tls.conf:/etc/nginx/tls.conf:ro
+#     - /etc/letsencrypt:/etc/letsencrypt:ro
+#     - /var/www/acme:/var/www/acme:ro
 ```
 
-### Vì sao phải bọc TLS cho cả 12345 / 7788 / 9000 / 8001
+### Công cụ GM
 
-Client gọi thẳng bốn dịch vụ này **theo cổng**, và scheme bám theo trang:
+Ở `haitac.antfarms.xyz/adminportal`. **Mặc định chỉ loopback** (`gm_access.conf`) — vào
+bằng SSH tunnel: `ssh -L 8080:127.0.0.1:80 root@<server>`. Muốn mở cho một địa chỉ cố
+định thì thêm `allow <IP>;` vào `gm_access.conf` rồi mount đè.
 
-```js
-ydwxConfig.metaDataServer = location.protocol + "//" + location.hostname + ":12345/";
-```
+Tài khoản GM nằm ở bảng `platform.gm_users` (mật khẩu bcrypt), tài khoản đầu tiên tạo từ
+`GM_BOOTSTRAP_USER`/`GM_BOOTSTRAP_PASSWORD`. Mọi thao tác ghi vào `platform.gm_audit`.
 
-Trang chạy HTTPS thì client gọi `https://haitac.antfarms.xyz:12345/` và
-`wss://…:8001`. Trình duyệt chặn nội dung hỗn hợp, **không có đường lui**. Vì thế
-`domains.conf` có bốn khối `server` chỉ để bọc TLS rồi chuyển tiếp sang dịch vụ chạy
-loopback. Bỏ qua bốn khối đó thì trang web lên bình thường nhưng client không vào được
-game — và triệu chứng (client đứng im) không chỉ vào nguyên nhân.
+**Trang quản trị nền tảng (`:8100`) cố ý không có domain** — nó không có lớp chống dò mật
+khẩu như hệ thống ID và mở ra Internet là mở cả đường nạp tay. Vào bằng
+`ssh -L 8100:127.0.0.1:8100 root@<server>`.
 
-**Chưa kiểm chứng:** không có domain thật và chứng chỉ trên máy dev nên mới chỉ chạy
-`nginx -t` với chứng chỉ tự ký — đủ 8 khối server hợp lệ. Bốn khối cổng phụ là suy ra từ
-cách client dùng `location.protocol`, chưa chạy thật lần nào.
+### Chưa kiểm chứng
+
+Không có domain và chứng chỉ thật trên máy dev nên phần TLS mới chỉ chạy `nginx -t` với
+chứng chỉ tự ký. Phần **đường dẫn** thì đã chạy thật qua HTTP ở cổng 8080: client gọi
+đúng `/meta/`, `/stat/`, `/srv/…` và Adapter trả về địa chỉ WebSocket đã viết lại.
 
 ---
 

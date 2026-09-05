@@ -7,8 +7,16 @@ ydwxConfig.platform = "yezixi";
 ydwxConfig.basePath = location.protocol + "//" + location.host + "/";
 ydwxConfig.debug = false;
 ydwxConfig.loginType = 1;
-ydwxConfig.metaDataServer = location.protocol + "//" + location.hostname + ":12345/";
-ydwxConfig.statisticServer = location.protocol + "//" + location.hostname + ":7788/";
+// Goi CUNG GOC thay vi theo cong.
+//
+// Ban goc dung location.hostname + ":12345/" va ":7788/". Server that chi mo 80 va
+// 443, nen hai duong do khong toi noi; va khi trang chay HTTPS thi trinh duyet con
+// chan noi dung hon hop, khong co duong lui.
+//
+// nginx chuyen /meta/ -> 127.0.0.1:12345 va /stat/ -> 127.0.0.1:7788. Dung
+// location.origin nen scheme va cong tu khop, khong phai doan.
+ydwxConfig.metaDataServer = location.origin + "/meta/";
+ydwxConfig.statisticServer = location.origin + "/stat/";
 ydwxConfig.clientVersion = appVersion;
 //loadLib("8e40e-89c8c-95a05.js"); 
 loadLib("libs/0c1cc-498bc-931f1.js");

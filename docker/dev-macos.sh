@@ -218,6 +218,9 @@ docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_CONSOLE_USER=admin -e ADAPTER_CONSOLE_PASSWORD="$CONSOLE_PW" \
   # develop = ma platform duy nhat con bat dang nhap username+mat khau tren login server.
   -e ADAPTER_PLATFORM_CODE=develop -e ADAPTER_CHANNEL_CODE=0 \
+  # May dev phuc vu o 8080 chu khong phai 80: Adapter phai cong bo dung cong do trong
+  # /srv/game/connect/target, neu khong client noi WebSocket vao ws://host:80/game.
+  -e ADAPTER_PUBLIC_PORT=8080 \
   -e ADAPTER_PUBLIC_HOST="127.0.0.1" -e ADAPTER_POLL_INTERVAL=3s -e ADAPTER_GRANT_INTERVAL=5s \
   op-h5-adapter >/dev/null
 
