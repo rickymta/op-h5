@@ -8,6 +8,12 @@
 // Khong co ADAPTER_BASE_URL, khong co cookie, hay Adapter tu choi -> $opAuto = null va
 // trang chay y het nhu cu (client hien man hinh dang nhap cua no). Day la duong lui bat
 // buoc: tang PHP nay con phuc vu ca luong dang nhap cu.
+// Trang nay gio mang du lieu phien RIENG cua tung nguoi choi (token game, uid, may chu).
+// Truoc day no la HTML tinh nen khong ai dat header cache; de nguyen thi trinh duyet —
+// hay bat ky proxy nao dung truoc — co the tra phien cua nguoi nay cho nguoi khac.
+header('Cache-Control: no-store, private');
+header('Pragma: no-cache');
+
 $opAuto = null;
 $opAutoErr = '';
 $adapterBase = getenv('ADAPTER_BASE_URL');
@@ -18,7 +24,9 @@ if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
 		CURLOPT_POSTFIELDS     => '{"client_type":0}',
 		CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
 		// Chi chuyen dung cookie phien, khong bung nguyen $_COOKIE sang dich vu khac.
-		CURLOPT_COOKIE         => 'haitac_sess=' . $_COOKIE['haitac_sess'],
+		// Loc `;` va khoang trang: gia tri cookie do trinh duyet gui len, noi thang vao
+		// header thi mot dau `;` cho phep gan them cookie tuy y vao request noi bo.
+		CURLOPT_COOKIE         => 'haitac_sess=' . preg_replace('/[^A-Za-z0-9._~+\/=-]/', '', $_COOKIE['haitac_sess']),
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_TIMEOUT        => 5,
 	));
@@ -142,8 +150,17 @@ function openNapTien(){
     </script>
     <script type="text/javascript">
         // Phien do Adapter cap (rong neu chua dang nhap qua he thong ID).
-        window.__opAuto = <?php echo $opAuto ? json_encode($opAuto, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
-        window.__opAutoErr = <?php echo json_encode($opAutoErr, JSON_UNESCAPED_UNICODE); ?>;
+        // JSON_HEX_TAG|AMP|APOS|QUOT bien `<`, `>`, `&`, `'`, `"` thanh \uXXXX. Du lieu
+        // duoi day nhung thang vao khoi script, ma mot chuoi chua the dong script hay
+        // mo comment HTML se cat khoi script som va nuot cac the phia sau.
+        //
+        // KHONG viet nguyen van cac chuoi do o day — ke ca trong comment. Trinh phan tich
+        // HTML khong biet day la comment JavaScript: no van cat. Da dinh dung loi nay.
+        window.__opAuto = <?php echo $opAuto
+            ? json_encode($opAuto, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
+            : 'null'; ?>;
+        window.__opAutoErr = <?php echo json_encode($opAutoErr,
+            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
     <script type="text/javascript" src="a3b31-4c087-1dc2f.js"></script>
     <script type="text/javascript" src="op-autologin.js?v=<?php

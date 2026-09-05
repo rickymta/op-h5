@@ -96,6 +96,29 @@ type AccountSession struct {
 	Raw json.RawMessage `json:"-"`
 }
 
+// HasCharacters cho biet tai khoan da co nhan vat trong game chua.
+//
+// Doc tu `masterList` trong ban goc chu khong tu AccountSession: day la mot trong ba
+// truong ma client that doc (do bang Proxy tren client, xem website/game/op-autologin.js),
+// nen ten khoa la chac chan. Chi dem so phan tu — khong dong vao truong ben trong, vi
+// khuon cua tung phan tu thi chua kiem chung duoc voi login server that.
+//
+// Phan biet nay quan trong voi cong chan tai: "con cho cho nguoi MOI" (chi dai Muot) chat
+// hon "con cho cho nguoi CU" (Muot va Dong). Coi nguoi cu la nguoi moi se chan ho khoi
+// chinh may chu co nhan vat cua ho.
+func (a *AccountSession) HasCharacters() bool {
+	if a == nil || len(a.Raw) == 0 {
+		return false
+	}
+	var probe struct {
+		MasterList []json.RawMessage `json:"masterList"`
+	}
+	if err := json.Unmarshal(a.Raw, &probe); err != nil {
+		return false
+	}
+	return len(probe.MasterList) > 0
+}
+
 // LoginClient goi login server qua HTTP.
 type LoginClient struct {
 	BaseURL string

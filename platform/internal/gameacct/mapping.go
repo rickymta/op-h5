@@ -96,6 +96,26 @@ func newSecret() (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
+// Lookup tra cuu anh xa da co, KHONG tao moi.
+//
+// Khac Ensure o cho khong co tac dung phu: dung cho cac quyet dinh chi doc (vi du cong
+// chan tai o /choi-game) — goi Ensure o do se tao tai khoan game cho nguoi chua tung
+// choi, ngay ca khi ta sap tu choi khong cho ho vao.
+func (m *Mapper) Lookup(ctx context.Context, userID int64) (*Identity, bool, error) {
+	var id Identity
+	err := m.DB.QueryRowContext(ctx, `
+		SELECT user_id, game_code, game_username, account_uid
+		  FROM game_identities WHERE user_id = ? AND game_code = ?`, userID, m.Game).
+		Scan(&id.UserID, &id.GameCode, &id.GameUsername, &id.AccountUID)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return nil, false, nil
+	case err != nil:
+		return nil, false, err
+	}
+	return &id, true, nil
+}
+
 // Ensure dam bao nguoi dung co tai khoan trong game, tao neu chua co, roi tra ve
 // anh xa kem khoa da giai ma.
 func (m *Mapper) Ensure(ctx context.Context, userID int64) (*Identity, string, error) {

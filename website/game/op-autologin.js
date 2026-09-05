@@ -91,8 +91,16 @@
 		if (!list || !list.length) {
 			return setTimeout(function () { pickServer(screen, tries + 1); }, 250);
 		}
+		// Chi ep khi CHAC CHAN tai khoan chua co nhan vat. Doc khong ra (ban client khac
+		// dat ten khac) thi cung khong ep: ep nham nguoi da co nhan vat sang may chu khac
+		// lam ho tuong minh mat nhan vat, con khong ep thi cung lam chi ca — huong sai
+		// re hon nhieu.
 		var masters = screen._masterList;
-		if (masters && masters.length) {
+		if (!Array.isArray(masters)) {
+			console.warn('[op-autologin] khong doc duoc danh sach nhan vat; de client tu chon may chu');
+			return;
+		}
+		if (masters.length) {
 			console.info('[op-autologin] tai khoan da co nhan vat; de client tu chon may chu');
 			return;
 		}
@@ -144,9 +152,9 @@
 			}
 			pickServer(screen, 0);
 		} catch (err) {
-			// Da bam `done` nen khong thu lai: goi lan hai co the lam client vao trang
-			// thai nua voi. De nguyen man hinh dang nhap cho nguoi choi tu lam.
-			done = false;
+			// KHONG thu lai: onAccLoginComplete co the da chay duoc mot phan truoc khi nem,
+			// goi lan hai se de client o trang thai nua voi. Giu `done` va de nguyen man
+			// hinh dang nhap cho nguoi choi tu lam.
 			console.error('[op-autologin] trao phien that bai; giu luong cu', err);
 		}
 	}

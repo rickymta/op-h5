@@ -84,8 +84,8 @@ func (s *adapterServer) currentUser(r *http.Request) (int64, bool) {
 
 // playGame la cua vao: chua dang nhap thi chuyen sang he thong ID.
 func (s *adapterServer) playGame(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.currentUser(r); ok {
-		if d, blocked := s.tooFullForNewSession(); blocked {
+	if uid, ok := s.currentUser(r); ok {
+		if d, blocked := s.tooFullForNewSession(r.Context(), uid); blocked {
 			s.renderFull(w, r, d)
 			return
 		}
@@ -259,11 +259,12 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 	var in sessionRequest
 	_ = json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in)
 
-	var d capacity.Decision
-	if in.SrvCode == "" {
-		d = s.tracker.AdmitNew()
-	} else {
-		d = s.tracker.AdmitReturning(in.SrvCode)
+	ctx := r.Context()
+	d, sess, err := s.admit(ctx, uid, in)
+	if err != nil {
+		s.log.Error("cap phien game", "err", err, "user", uid)
+		httpx.Error(w, http.StatusBadGateway, "game_unavailable", "Máy chủ game đang bận, thử lại sau.")
+		return
 	}
 	if !d.Allowed {
 		httpx.JSON(w, http.StatusServiceUnavailable, map[string]any{
@@ -279,18 +280,17 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 		s.log.Warn("server vuot nguong mem", "srv", d.SrvCode, "band", d.Band.String())
 	}
 
-	ctx := r.Context()
-	sess, err := s.mapper.Session(ctx, uid, in.ClientType)
-	if err != nil {
-		s.log.Error("cap phien game", "err", err, "user", uid)
-		httpx.Error(w, http.StatusBadGateway, "game_unavailable", "Máy chủ game đang bận, thử lại sau.")
-		return
-	}
-	np, err := s.login.ConnectTarget(ctx, d.SrvCode)
-	if err != nil {
-		s.log.Error("hoi dia chi tien trinh game", "err", err, "srv", d.SrvCode)
-		httpx.Error(w, http.StatusBadGateway, "game_unavailable", "Máy chủ game đang bận, thử lại sau.")
-		return
+	// Khong co srv_code (nguoi cu tu chon may chu cua nhan vat) thi khong hoi dia chi
+	// tien trinh game — ta chua biet ho se vao may nao.
+	var wsURL string
+	if d.SrvCode != "" {
+		np, npErr := s.login.ConnectTarget(ctx, d.SrvCode)
+		if npErr != nil {
+			s.log.Error("hoi dia chi tien trinh game", "err", npErr, "srv", d.SrvCode)
+			httpx.Error(w, http.StatusBadGateway, "game_unavailable", "Máy chủ game đang bận, thử lại sau.")
+			return
+		}
+		wsURL = np.WebSocketURL(s.publicHost, s.useTLS)
 	}
 
 	httpx.JSON(w, http.StatusOK, map[string]any{
@@ -298,7 +298,7 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 		"account_uid":   sess.Account.UID,
 		"game_username": sess.Account.Username,
 		"srv_code":      d.SrvCode,
-		"ws_url":        np.WebSocketURL(s.publicHost, s.useTLS),
+		"ws_url":        wsURL,
 		"band":          d.Band.String(),
 		"warn":          d.Warn,
 		"alternatives":  d.Alternatives,
@@ -306,6 +306,55 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 		// client tu doc cac truong no can (xem website/game/op-autologin.js).
 		"login_data": json.RawMessage(sess.Raw),
 	})
+}
+
+// admit quyet dinh cho vao hay khong, va duc phien khi duoc cho vao.
+//
+// Ba nhanh, khac nhau o CHO nao duc phien so voi cho nao xet dai:
+//
+//  1. Client noi ro may chu: dai nguoi CU cho dung may chu do.
+//  2. Chua tung co tai khoan game: chac chan la nguoi MOI, xet dai TRUOC khi duc phien.
+//     Duc truoc roi moi tu choi se de lai mot tai khoan game cho nguoi khong vao duoc,
+//     va lan sau chinh tai khoan do lam ho trong nhu nguoi cu — cong bien thanh loai
+//     dung mot lan.
+//  3. Da tung dang nhap game: phai duc phien truoc, vi chi phan hoi cua login server
+//     moi cho biet ho da co nhan vat chua, ma dieu do quyet dinh ap dai nao.
+//
+// Phai tach dai nguoi MOI khoi dai nguoi CU: "con cho cho nguoi moi" chi tinh dai Muot,
+// con nguoi cu vao duoc ca khi may chu dang Dong. Gop lam mot se chan nguoi cu khoi
+// chinh may chu co nhan vat cua ho.
+//
+// Nhanh 1 va 2 giu ve truoc khi duc phien, nen neu login server hong thi mot ve bi phi.
+// Ve tu het han sau TicketTTL; danh doi nay re hon nhieu so voi de lai tai khoan game
+// mo coi o nhanh 2.
+func (s *adapterServer) admit(ctx context.Context, uid int64, in sessionRequest) (capacity.Decision, *gameacct.AccountSession, error) {
+	mint := func(d capacity.Decision) (capacity.Decision, *gameacct.AccountSession, error) {
+		if !d.Allowed {
+			return d, nil, nil
+		}
+		sess, err := s.mapper.Session(ctx, uid, in.ClientType)
+		return d, sess, err
+	}
+
+	if in.SrvCode != "" {
+		return mint(s.tracker.AdmitReturning(in.SrvCode))
+	}
+	// Loi tra cuu thi di tiep bang nhanh 3 (duc phien roi doc masterList): chinh xac hon,
+	// chi ton them mot lan goi login server.
+	if _, found, err := s.mapper.Lookup(ctx, uid); err == nil && !found {
+		return mint(s.tracker.AdmitNew())
+	}
+
+	sess, err := s.mapper.Session(ctx, uid, in.ClientType)
+	if err != nil {
+		return capacity.Decision{}, nil, err
+	}
+	if sess.HasCharacters() {
+		// Khong giu ve va khong tra srv_code: client se tu chon may chu cua nhan vat,
+		// ta chua biet la may nao nen giu ve o day se ghi sai so.
+		return capacity.Decision{Allowed: true, Reason: capacity.ReasonOK}, sess, nil
+	}
+	return s.tracker.AdmitNew(), sess, nil
 }
 
 func reasonMessage(r capacity.Reason) string {
@@ -468,13 +517,35 @@ func (s *adapterServer) convert(w http.ResponseWriter, r *http.Request) {
 // Khi chua doc duoc so lieu (danh sach server rong — login server chet, hoac vua khoi
 // dong) thi CHO QUA. Chan o trang thai khong biet gi se lam ca game sap chi vi mot truc
 // trac giam sat; con neu that su khong vao duoc thi `/api/game/session` van chan o sau.
-func (s *adapterServer) tooFullForNewSession() (capacity.Decision, bool) {
+func (s *adapterServer) tooFullForNewSession(ctx context.Context, uid int64) (capacity.Decision, bool) {
 	f := s.tracker.Fleet()
 	if f == nil || len(f.Servers) == 0 {
 		return capacity.Decision{}, false
 	}
 	d := f.AdmitNew()
-	return d, !d.Allowed
+	if d.Allowed {
+		return d, false
+	}
+
+	// Het cho cho nguoi MOI khong co nghia la het cho cho tat ca: dai "Dong" tu choi
+	// nguoi moi nhung van nhan nguoi cu ve dung may chu co nhan vat cua ho. Chan ho o
+	// day la chan khoi chinh nhan vat cua ho.
+	//
+	// Chua co anh xa tai khoan game = chua tung dang nhap game = chac chan la nguoi moi.
+	// Da co thi de qua; /api/game/session doc masterList tu login server roi quyet dinh
+	// chinh xac, va neu ho that su la nguoi moi thi bi tu choi o do.
+	//
+	// Loi khi tra cuu cung CHO QUA: mot truc trac DB khong duoc bien thanh "khong ai
+	// vao duoc game".
+	id, found, err := s.mapper.Lookup(ctx, uid)
+	if err != nil {
+		s.log.Warn("tra cuu anh xa tai khoan game that bai", "err", err, "user", uid)
+		return capacity.Decision{}, false
+	}
+	if found && id.AccountUID.Valid {
+		return capacity.Decision{}, false
+	}
+	return d, true
 }
 
 // renderFull hien trang "dang qua tai" thay vi day nguoi choi vao client, noi ho chi
