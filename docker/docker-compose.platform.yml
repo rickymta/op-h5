@@ -168,6 +168,11 @@ services:
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       # 1 = giao dien React (nhung san trong image), trang Go cu lui ve /cu/
       ADMIN_SPA: ${ADMIN_SPA:-0}
+      # 1 = trang quan tri mo ra Internet qua nginx (https://admin.<domain> va
+      # https://haitac.<domain>/admin-portal). Dich vu VAN bind 127.0.0.1:8100; co nay bat
+      # cac lop bao ve bat buoc khi mo cua: dem so lan dang nhap sai theo tai khoan va theo
+      # IP, rut han cookie, va tu choi khoi dong neu owner con dung mat khau mac dinh.
+      ADMIN_PUBLIC: ${ADMIN_PUBLIC:-0}
       # Cong cu GM goi console (phat vat pham, gui thu, kho do) va statistic (tra nhan vat
       # theo TEN — console khong lam duoc). Thieu thi trang quan tri van chay, chi thao tac
       # GM bao "chua cau hinh console".

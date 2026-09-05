@@ -2,7 +2,9 @@
 -- 1933 goi cho game 'haitac': bo: khong co trong excel=38, card=8, daily=10, diamond=8, event=1870, fund=7, item=9, limited=15, privilege=6.
 -- Gia tu website/game/api/id.txt; nhom/noi dung/dieu kien tu recharge-item + recharge-benefit; ten Viet tu
 -- recharge-benefit / NAMES / gm/pay.txt. Goi 'item' (grant_mode=mail) tu bang web.webshop cu.
--- Chay lai: ghi de gia/nhom/noi dung/dieu kien; KHONG ghi de `name` va `status` (sua tay tren trang quan tri).
+-- Chay lai: ghi de gia/nhom/noi dung/dieu kien; KHONG ghi de `status`.
+-- `name`: chi ghi de khi ten dang luu CON CHU HAN (vet cua ban seed dau tien, truoc khi co ten Viet);
+-- ten da Viet hoa hoac quan tri sua tay tren trang admin thi giu nguyen.
 SET NAMES utf8mb4;
 INSERT INTO game_packages (game_code, package_id, name, category, grant_mode, price_xu, item_tid, item_count, item_name, reward, description, badge, func_id, shop_item_id, vip_points, server_day_min, server_day_max, daily_limit, vip_required, status, sort_order) VALUES
 ('haitac','18001','10.000 Nguyên Bảo','diamond','pay',10000,18001,1,'10.000 Nguyên Bảo','0:1:10000','Nhận 10.000 Nguyên Bảo. Lần đầu mua mốc này được thêm 10.000 (tổng 20.000). Cộng điểm VIP.','x2 lần đầu',710,1,10000,NULL,NULL,NULL,NULL,'active',0),
@@ -1938,4 +1940,4 @@ INSERT INTO game_packages (game_code, package_id, name, category, grant_mode, pr
 ('haitac','web-94','Food 10+ (thăng tinh anh hùng)','item','mail',150000,0,1,'Food 10+ (thăng tinh anh hùng)','3:1000022:1','Gửi qua thư trong game: 10 Tinh thông dụng anh linh ×1.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',1930),
 ('haitac','web-93','100M EXP Anh Hùng','item','mail',300000,0,1,'100M EXP Anh Hùng','0:4:100000000','Gửi qua thư trong game: EXP anh hùng ×100.000.000.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',1931),
 ('haitac','web-92','500 vạn KNB','item','mail',1500000,0,1,'500 vạn KNB','0:1:5000000','Gửi qua thư trong game: Nguyên Bảo ×5.000.000.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',1932)
-ON DUPLICATE KEY UPDATE price_xu=VALUES(price_xu), item_tid=VALUES(item_tid), item_count=VALUES(item_count), item_name=VALUES(item_name), category=VALUES(category), grant_mode=VALUES(grant_mode), reward=VALUES(reward), description=VALUES(description), badge=VALUES(badge), func_id=VALUES(func_id), shop_item_id=VALUES(shop_item_id), vip_points=VALUES(vip_points), server_day_min=VALUES(server_day_min), server_day_max=VALUES(server_day_max), daily_limit=VALUES(daily_limit), vip_required=VALUES(vip_required), sort_order=VALUES(sort_order);
+ON DUPLICATE KEY UPDATE name=IF(`name` REGEXP '[一-龥]', VALUES(name), `name`), price_xu=VALUES(price_xu), item_tid=VALUES(item_tid), item_count=VALUES(item_count), item_name=VALUES(item_name), category=VALUES(category), grant_mode=VALUES(grant_mode), reward=VALUES(reward), description=VALUES(description), badge=VALUES(badge), func_id=VALUES(func_id), shop_item_id=VALUES(shop_item_id), vip_points=VALUES(vip_points), server_day_min=VALUES(server_day_min), server_day_max=VALUES(server_day_max), daily_limit=VALUES(daily_limit), vip_required=VALUES(vip_required), sort_order=VALUES(sort_order);
