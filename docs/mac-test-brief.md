@@ -198,23 +198,36 @@ Login server thật trả **khoá dạng thô** trong `data.account.password`, m
 **10. Cache bundle giữ host cũ tới 30 ngày.**
 nginx phục vụ `/libs/` với `immutable, 30d` còn `?v=` là `appVersion` cố định (28.3). Đổi `PUBLIC_HOST` thì `web-entrypoint` sed host mới vào bundle nhưng URL không đổi → trình duyệt giữ bản cũ. Đã dính thật: client tiếp tục gọi `192.168.1.69:7788` từ cache. Sửa: `play.php` phát `opBundleV` theo `filemtime`, `a3b31` gắn `&b=`, và `a3b31` cũng được gắn `?v=filemtime`.
 
-**11. `website/game/template/` không có trong snapshot — đã tái tạo, có tác dụng.**
-Client cần `template/perLoadTpls.json` và `template/dongtaitishi.txt`; thư mục không có
-trong git, không bị gitignore, không có trong release `assets-v1`. Đây là lý do client
-đứng ở "Đang tải cấu hình giao diện… 0%" — giải thích luôn vì sao mọi phiên trước đều
-không vào được game.
+**11. ~~Thiếu `website/game/template/`~~ — CHẨN ĐOÁN SAI, thư mục này không cần.**
 
-Tái tạo: `perLoadTpls.json` = `[]` (danh sách nạp trước, rỗng = không nạp trước gì) và
-`dongtaitishi.txt` chép từ `server/excel/release/`. **Đã kiểm chứng là đủ** — client đi
-hết màn hình tải và tới được bước tạo nhân vật.
+Tôi thấy `/template/perLoadTpls.json` trả 404 lúc client đứng ở "Đang tải cấu hình giao
+diện… 0%" và kết luận thư mục bị thiếu khỏi snapshot. Sai.
 
-*Đính chính:* ban đầu tôi kết luận bản tái tạo "không có tác dụng" rồi xoá đi. Sai. Lúc
-đó tab trình duyệt của tôi kẹt vì lý do khác (tài nguyên cũ trong cache sau nhiều lần
-dựng lại), còn client sạch thì qua được — bằng chứng là các lần thử tạo nhân vật lúc
-19:42 trong `game/.logs/game-s1/error.log`. Nay đã khôi phục và commit.
+Client **không** tải theo đường dẫn đó. Toàn bộ tài nguyên đi qua bảng ánh xạ
+`libs/2af72-f100c-2af72.json` (JSON nén deflate) dạng *tên logic → file băm trong `res/`*:
 
-Vẫn nên lấy bản thật từ `/www/wwwroot/game/template` trên server cũ: `[]` chỉ tắt bước
-nạp trước, không phải nội dung gốc.
+```
+"template/perLoadTpls.json" -> "res/3b337-4248f-7ce3e"   (8038 byte, co san)
+"template/dongtaitishi.txt" -> "res/2d19b-aaed7-3bd8b"   (593 byte,  co san)
+"template/templates.bin"    -> "res/97cec-62c2f-5f56f"   (1,94 MB,   co san)
+```
+
+Kiểm chứng: bỏ hẳn thư mục rồi chạy lại — client vẫn vào tới màn hình chọn máy chủ, và
+`performance.getEntriesByType('resource')` **không có lời gọi nào** tới `/template/`.
+Thư mục đã xoá, không commit.
+
+Hai điều rút ra:
+- Bản tái tạo `perLoadTpls.json = []` của tôi là **sai nội dung** (bản thật 8038 byte
+  chứa cấu hình), và `dongtaitishi.txt` tôi chép từ `server/excel/release/` cũng **khác**
+  bản thật. Nếu commit thì chúng sẽ che mất bản đúng.
+- Cái thật sự gỡ được luồng là các bản vá khác (JSON cho login server, `channelCode`,
+  cache-bust bundle) chứ không phải thư mục này. Trùng thời điểm nên tôi quy nhầm nhân quả.
+
+`common/`, `atlas/`, `grid/`, `herocut/` cũng vậy — tên logic trong manifest, không phải
+thư mục trên đĩa.
+
+**CÒN THIẾU THẬT:** 21 file băm trong `res/` và 1 file `sound/` mà manifest có trỏ tới
+nhưng không tồn tại. Danh sách và cách xử lý: [windows-assets-handoff.md](windows-assets-handoff.md).
 
 **12. `channelCode` phải là SỐ — tạo nhân vật thất bại.**
 Đăng nhập vào được nhưng tạo nhân vật hỏng, và client không nói gì rõ ràng; lỗi chỉ nằm
