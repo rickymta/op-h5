@@ -185,8 +185,8 @@ services:
     <<: *java
     working_dir: /h5/server/group
     # start goc dung -Xmx512m va OOM ("GC overhead limit exceeded"); DB ghi 1128m.
-    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_GROUP:-640m}", "-jar", "tcg-group.jar", "--v=0", "--gc=group-offical", "--p=30001"]
-    mem_limit: 950m
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_GROUP:-1152m}", "-jar", "tcg-group.jar", "--v=0", "--gc=group-offical", "--p=30001"]
+    mem_limit: 1400m
     cpu_shares: 512
     depends_on: { pay: { condition: service_healthy } }
     healthcheck:
@@ -224,8 +224,8 @@ services:
   cross:
     <<: *java
     working_dir: /h5/server/cross
-    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CROSS:-640m}", "-jar", "tcg-cross.jar", "--v=0", "--cc=cross-yzx1", "--p=20001"]
-    mem_limit: 950m
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CROSS:-1152m}", "-jar", "tcg-cross.jar", "--v=0", "--cc=cross-yzx1", "--p=20001"]
+    mem_limit: 1400m
     cpu_shares: 512
     depends_on: { login: { condition: service_healthy } }
     healthcheck:
@@ -241,7 +241,17 @@ services:
     network_mode: host          # php-fpm nghe 127.0.0.1:9001 (9000 da bi login server dung)
     restart: unless-stopped
     env_file: .env              # web-entrypoint can PUBLIC_HOST + cac secret PHP
-    environment: { TZ: Asia/Ho_Chi_Minh }
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      # GM tool (gmhanglong/config/auth.php) doc bang platform.gm_users qua 4 bien ID_DB_*
+      # (KHONG co fallback sang MYSQL_ROOT_PASSWORD) va tao tai khoan GM dau tien tu
+      # GM_BOOTSTRAP_* khi bang con rong. web-entrypoint dua chung vao pool php-fpm.
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ID_DB_USER: root
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      GM_BOOTSTRAP_USER: ${GM_BOOTSTRAP_USER:-}
+      GM_BOOTSTRAP_PASSWORD: ${GM_BOOTSTRAP_PASSWORD:-}
     volumes:
       - ${WEBSITE_DIR:-../website}/game:/www/wwwroot/game
       - ./php/www.conf:/usr/local/etc/php-fpm.d/zz-tcg.conf:ro
@@ -257,6 +267,8 @@ services:
       - ${WEBSITE_DIR:-../website}/game:/www/wwwroot/game:ro
       - ./nginx/game.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/adapter_proxy.conf:/etc/nginx/adapter_proxy.conf:ro
+      # certbot --webroot ghi challenge vao day; game.conf (che do IP) phuc vu /.well-known/acme-challenge/
+      - ${ACME_DIR:-/var/www/acme}:/var/www/acme:ro
     depends_on: [php]
     mem_limit: 96m
     cpu_shares: 256

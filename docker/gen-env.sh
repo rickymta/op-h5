@@ -37,6 +37,8 @@ setv() { # $1 key, $2 value: thay ca dong "KEY=..." (bo comment cuoi dong), them
 ADMIN_USER=quantri
 ADMIN_PW=$(hex 8)
 CONSOLE_PW=$(hex 12)
+GM_USER=gm
+GM_PW=$(hex 8)
 
 setv PUBLIC_HOST            "$HOST"
 setv TCG_SECRET             "$(hex 16)"
@@ -56,6 +58,8 @@ setv ADAPTER_SECRET_ENC_KEY "$(b64)"
 setv ADMIN_COOKIE_SECURE    false
 setv ADMIN_BOOTSTRAP_USER   "$ADMIN_USER"
 setv ADMIN_BOOTSTRAP_PASSWORD "$ADMIN_PW"
+setv GM_BOOTSTRAP_USER      "$GM_USER"
+setv GM_BOOTSTRAP_PASSWORD  "$GM_PW"
 
 # Khoa ky JWT cua he thong ID: nhieu dong, de cuoi file trong ngoac kep (Compose doc duoc).
 sed -i.bak '/^ID_SIGNING_KEY_PEM=/d' .env && rm -f .env.bak
@@ -65,7 +69,8 @@ chmod 600 .env
 cat <<EOF
 Da sinh $(pwd)/.env cho PUBLIC_HOST=$HOST
   Trang quan tri (ssh -L 8100:127.0.0.1:8100 -> http://127.0.0.1:8100): $ADMIN_USER / $ADMIN_PW
-  Console :9999 va GM tool: admin / $CONSOLE_PW
+  Console :9999 (Adapter phat vat pham): admin / $CONSOLE_PW
+  GM tool /adminportal (chi loopback: ssh -L 8080:127.0.0.1:80 -> http://127.0.0.1:8080/adminportal): $GM_USER / $GM_PW
   Cac gia tri khac: grep -E '^(TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD|GM_CODE|GMHANGLONG_CODE|REV_QUERY_KEY)=' .env
 Con trong (dien khi can): THESIEUTOC_API_KEY, MOMO_CALLBACK_SIGNATURE, MOMO_PHONE, BANK_CALLBACK_CHECKSUM, GM_LOGIN_TOKEN, ID_SMTP_*.
 EOF

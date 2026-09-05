@@ -59,7 +59,7 @@ CREATE TABLE `briefing_daily` (
   KEY `briefing_daily_srv_code_IDX` (`srv_code`) USING BTREE,
   KEY `briefing_daily_game_id_IDX` (`game_id`) USING BTREE,
   KEY `briefing_daily_date_IDX` (`date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='每日简报';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='每日简报';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -78,7 +78,7 @@ CREATE TABLE `first_login_imei` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `idx_imei` (`imei`) USING BTREE,
   KEY `idx_login_time_srv_code` (`srv_code`,`login_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -97,7 +97,7 @@ CREATE TABLE `first_login_ip` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `idx_ip` (`ip`) USING BTREE,
   KEY `idx_login_time_srv_code` (`srv_code`,`login_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -129,7 +129,7 @@ CREATE TABLE `hero_lineup` (
   KEY `hero_lineup_srv_code_IDX` (`srv_code`) USING BTREE,
   KEY `hero_lineup_role_level_IDX` (`role_level`) USING BTREE,
   KEY `hero_lineup_role_id_IDX` (`role_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='英雄阵容使用情况统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='英雄阵容使用情况统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -152,7 +152,7 @@ CREATE TABLE `hero_record` (
   `hero_pid` int(11) DEFAULT NULL,
   `update_time` timestamp NULL DEFAULT NULL,
   KEY `hero_record_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -177,7 +177,7 @@ CREATE TABLE `hero_record_v2` (
   `group_id` int(11) DEFAULT NULL COMMENT '所属服务器组',
   `game_id` varchar(32) DEFAULT NULL COMMENT '所属GameID',
   PRIMARY KEY (`uid`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='英雄统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='英雄统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -198,7 +198,7 @@ CREATE TABLE `login_account` (
   PRIMARY KEY (`account_uid`,`reg_date`) USING BTREE,
   KEY `login_account_game_id_IDX` (`game_id`) USING BTREE,
   KEY `login_account_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于账号的登录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于账号的登录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -219,7 +219,7 @@ CREATE TABLE `login_device` (
   PRIMARY KEY (`device_code`,`reg_date`) USING BTREE,
   KEY `login_device_game_id_IDX` (`game_id`) USING BTREE,
   KEY `login_device_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于设备的登录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于设备的登录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -245,7 +245,7 @@ CREATE TABLE `login_flow` (
   `game_id` varchar(32) DEFAULT NULL COMMENT 'GameID',
   `create_time` timestamp NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`open_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='登录流程打点';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='登录流程打点';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -266,7 +266,7 @@ CREATE TABLE `login_ip` (
   PRIMARY KEY (`ip`,`reg_date`) USING BTREE,
   KEY `login_ip_game_id_IDX` (`game_id`) USING BTREE,
   KEY `login_ip_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于IP的登录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于IP的登录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -287,7 +287,7 @@ CREATE TABLE `login_role` (
   PRIMARY KEY (`role_id`,`reg_date`) USING BTREE,
   KEY `login_role_game_id_IDX` (`game_id`) USING BTREE,
   KEY `login_role_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于角色的登录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于角色的登录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -302,7 +302,7 @@ CREATE TABLE `online` (
   `srv_code` varchar(32) DEFAULT NULL COMMENT '游戏服编码',
   `online_num` int(11) DEFAULT NULL COMMENT '在线人数',
   `time` timestamp NULL DEFAULT NULL COMMENT '记录时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='在线统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='在线统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -320,7 +320,7 @@ CREATE TABLE `participate` (
   `num` int(11) DEFAULT NULL COMMENT '参与人数',
   `begin_time` timestamp NULL DEFAULT NULL COMMENT '记录开始时间',
   `end_time` timestamp NULL DEFAULT NULL COMMENT '记录结束时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='游戏功能参与统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='游戏功能参与统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -371,7 +371,7 @@ CREATE TABLE `pay_record` (
   KEY `idx_pay_time` (`pay_time`) USING BTREE,
   KEY `idx_srv_code` (`srv_code`) USING BTREE,
   KEY `pay_record_create_time_IDX` (`create_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='充值记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='充值记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -437,7 +437,7 @@ CREATE TABLE `role_key_res_num` (
   PRIMARY KEY (`role_id`) USING BTREE,
   KEY `role_key_res_num_role_name_IDX` (`role_name`) USING BTREE,
   KEY `role_key_res_num_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于角色的关键数量统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于角色的关键数量统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -501,7 +501,7 @@ CREATE TABLE `role_record` (
   KEY `role_record_role_name_IDX` (`role_name`) USING BTREE,
   KEY `role_record_account_uid_IDX` (`account_uid`) USING BTREE,
   KEY `role_record_open_id_IDX` (`open_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='角色档案';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='角色档案';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -549,7 +549,7 @@ CREATE TABLE `srv_game` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_code` (`code`) USING BTREE,
   KEY `idx_group_id` (`group_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏服务器信息';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏服务器信息';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -586,7 +586,7 @@ CREATE TABLE `summary_daily` (
   KEY `summary_daily_srv_code_IDX` (`srv_code`) USING BTREE,
   KEY `summary_daily_game_id_IDX` (`game_id`) USING BTREE,
   KEY `summary_daily_date_IDX` (`date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='每日汇总';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='每日汇总';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -602,7 +602,7 @@ CREATE TABLE `tpl_hero_base` (
   `pid` int(11) DEFAULT NULL COMMENT '原型ID',
   `name` varchar(32) DEFAULT NULL COMMENT '名字',
   `star` int(11) DEFAULT NULL COMMENT '星级'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -619,7 +619,7 @@ CREATE TABLE `work` (
   `status` tinyint(4) DEFAULT NULL COMMENT '工作状态',
   `create_time` timestamp NULL DEFAULT NULL COMMENT '创建时间',
   `finish_time` timestamp NULL DEFAULT NULL COMMENT '完成时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='统计工作表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='统计工作表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 

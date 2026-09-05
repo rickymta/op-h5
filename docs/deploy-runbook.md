@@ -44,7 +44,7 @@ triệu chứng (client đứng im) không chỉ vào nguyên nhân:
    tiến trình game bind vào** — đặt 443 thì game tranh cổng với nginx.
 3. **MySQL**: `UPDATE tcg.cloud_device SET host_WAN='haitac.antfarms.xyz';`
 
-Kèm theo trong `.env`:
+Kèm theo trong `.env` (`enable-domain.sh` tự đặt):
 
 ```
 PUBLIC_HOST=haitac.antfarms.xyz
@@ -54,27 +54,21 @@ ADAPTER_REDIRECT_URI=https://haitac.antfarms.xyz/auth/callback
 ADAPTER_TLS=true
 ```
 
-### Thứ tự
+### Thứ tự — một lệnh
+
+Sau khi `server-bootstrap.sh` đã đưa stack lên theo IP và 4 bản ghi `A` đã trỏ về server:
 
 ```bash
-# 1. Chứng chỉ TRƯỚC — thiếu file là nginx không khởi động được
-mkdir -p /var/www/acme
-certbot certonly --webroot -w /var/www/acme \
-  -d antfarms.xyz -d www.antfarms.xyz -d id.antfarms.xyz -d haitac.antfarms.xyz
-
-# 2. Điền domain vào hai file mẫu trong image rồi mount đè
-docker run --rm ghcr.io/rickymta/op-h5-nginx:latest cat /etc/nginx/domains.conf.mau \
-  | sed 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' > /opt/tcg/nginx/domains.conf
-docker run --rm ghcr.io/rickymta/op-h5-nginx:latest cat /etc/nginx/tls.conf.mau \
-  | sed 's/__PUBLIC_DOMAIN__/antfarms.xyz/g' > /opt/tcg/nginx/tls.conf
-
-# 3. Thêm vào service nginx trong compose:
-#   volumes:
-#     - /opt/tcg/nginx/domains.conf:/etc/nginx/conf.d/domains.conf:ro
-#     - /opt/tcg/nginx/tls.conf:/etc/nginx/tls.conf:ro
-#     - /etc/letsencrypt:/etc/letsencrypt:ro
-#     - /var/www/acme:/var/www/acme:ro
+cd /opt/tcg/docker && ./enable-domain.sh antfarms.xyz [email]
 ```
+
+Script làm đúng thứ tự bắt buộc: kiểm DNS → xin chứng chỉ SAN cho 4 tên bằng `certbot --webroot`
+qua nginx **đang chạy** (khối chế độ IP trong `game.conf` phục vụ `/.well-known/acme-challenge/`
+từ `ACME_DIR`, mặc định `/var/www/acme`, nên không phải tắt gì) → sinh `/opt/tcg/nginx/{domains,tls}.conf`
+→ ghi `docker-compose.domain.yml` (mount 2 file + `/etc/letsencrypt` vào nginx) → sửa `.env` sang
+https (bảng trên) → `up -d` → `UPDATE tcg.cloud_device.host_WAN` → hook `certbot renew` reload nginx.
+Chạy lại vô hại. `server-bootstrap.sh` tự dùng kèm overlay khi thấy file. Làm tay thì theo đúng
+thứ tự đó; xin chứng chỉ **trước** khi mount `domains.conf` — thiếu file chứng chỉ là nginx không khởi động.
 
 ### Công cụ GM
 
@@ -134,7 +128,7 @@ nhân vật của họ (S1), đúng tên và cấp nhân vật, không qua màn 
 
 Trạng thái 2026-09-05: repo + release `assets-v1` + image GHCR đã sẵn; MySQL khởi tạo từ **seed sạch trong git** (`docker/initdb/mysql/seed/`), **không cần dump, không cần secrets cũ**. Chưa `up` thật lần nào. Ký hiệu `[MỚI]` Ubuntu, `[CŨ]` pgaming. Lệnh Linux chạy bằng root.
 
-**1 `[MỚI]` Port:**
+**1 `[MỚI]` Port** (chế độ IP; khi bật domain ở bước 3b thì chỉ cần 80/443, đóng được các cổng này):
 ```bash
 ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw allow 8080/tcp && ufw status numbered   # 8080 = he thong ID
 ```
@@ -155,6 +149,11 @@ curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/glob
 curl -s http://127.0.0.1:8080/.well-known/openid-configuration | head -c 120; echo
 ```
 Từ máy khác: `http://PUBLIC_HOST/` → đăng ký ở `:8080` → `/choi-game`. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
+
+**3b `[MỚI]` Domain + HTTPS** (sau khi trỏ 4 bản ghi `A` về server; chi tiết mục "Trỏ domain thật"):
+```bash
+cd /opt/tcg/docker && ./enable-domain.sh antfarms.xyz [email]     # certbot webroot -> conf -> overlay -> .env https -> up -d -> DB
+```
 
 **4 `[CŨ]`→`[MỚI]` Tuỳ chọn — giữ tài khoản/nhân vật cũ:**
 ```bash

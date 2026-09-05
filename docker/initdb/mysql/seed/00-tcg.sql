@@ -53,7 +53,7 @@ CREATE TABLE `account` (
   PRIMARY KEY (`uid`) USING BTREE,
   UNIQUE KEY `account_UN` (`username`) USING BTREE,
   KEY `account_open_id_IDX` (`open_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -74,7 +74,7 @@ CREATE TABLE `account_master` (
   PRIMARY KEY (`account_uid`,`master_id_hex`) USING BTREE,
   KEY `account_master_account_uid_IDX` (`account_uid`) USING BTREE,
   KEY `account_master_master_id_hex_IDX` (`master_id_hex`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='账号下拥有的主角简单数据';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='账号下拥有的主角简单数据';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -95,7 +95,7 @@ CREATE TABLE `account_master_migrate` (
   `to_srv_code` varchar(16) CHARACTER SET utf8 NOT NULL COMMENT '迁移到哪个游戏服',
   `merge_id` int(11) DEFAULT NULL COMMENT '隶属于哪次合并操作ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='账号角色迁移记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='账号角色迁移记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -117,7 +117,7 @@ CREATE TABLE `app` (
   `note` varchar(100) DEFAULT NULL,
   `associated_code` varchar(32) DEFAULT NULL COMMENT '关联编码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏应用配置';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏应用配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +143,7 @@ CREATE TABLE `beta_record` (
   `m1_done` tinyint(1) DEFAULT NULL COMMENT '元宝返还完成',
   `m1_time` timestamp NULL DEFAULT NULL COMMENT '元宝领取时间',
   PRIMARY KEY (`open_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='封测记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='封测记录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -166,7 +166,7 @@ CREATE TABLE `cloud_device` (
   `ssh_port` int(11) DEFAULT NULL COMMENT 'ssh端口',
   `note` varchar(64) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='云服务器设备';
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='云服务器设备';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -201,7 +201,7 @@ CREATE TABLE `cloud_mongo` (
   `conf_url_public` varchar(300) DEFAULT NULL COMMENT '连接url公网',
   `server_code` varchar(32) DEFAULT NULL COMMENT '关联物理服务器编码',
   `conf_host_public` varchar(64) DEFAULT NULL COMMENT '公网host'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -231,7 +231,7 @@ CREATE TABLE `cloud_mq` (
   `server_code` varchar(32) DEFAULT NULL COMMENT '关联物理服务器编码',
   `conf_port` int(11) DEFAULT NULL COMMENT '端口',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='云mq服务配置';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='云mq服务配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -263,7 +263,7 @@ CREATE TABLE `cloud_mysql` (
   `server_code` varchar(32) DEFAULT NULL COMMENT '关联物理服务器编码',
   `conf_host_public` varchar(64) DEFAULT NULL COMMENT '公网host',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='云mysql服务配置';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='云mysql服务配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -297,7 +297,7 @@ CREATE TABLE `demo` (
   `val_datetime` datetime(3) DEFAULT NULL,
   `val_timestamp` timestamp(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='演示';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='演示';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -312,7 +312,7 @@ CREATE TABLE `dynamic_conf` (
   `key` varchar(100) NOT NULL COMMENT '唯一key',
   `value` varchar(4196) DEFAULT NULL COMMENT 'json 值',
   PRIMARY KEY (`key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='动态配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='动态配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -362,7 +362,7 @@ CREATE TABLE `game_rt` (
   `batch_cmd_msg` text COMMENT '批量命令结果消息',
   `batch_cmd_time` timestamp NULL DEFAULT NULL COMMENT '批量命令时间',
   PRIMARY KEY (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏实时数据';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏实时数据';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -388,7 +388,7 @@ CREATE TABLE `gm_announce` (
   `content3` varchar(3000) DEFAULT NULL COMMENT '内容3',
   `title3` varchar(100) DEFAULT NULL COMMENT '标题3',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='全服公告';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='全服公告';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -412,7 +412,7 @@ CREATE TABLE `gm_chat_forbid` (
   `el_errorcode` int(11) DEFAULT NULL COMMENT '操作结果码',
   `el_errormsg` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -437,7 +437,7 @@ CREATE TABLE `gm_freeze` (
   `el_errorcode` int(11) DEFAULT NULL,
   `el_errormsg` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`master_id_hex`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='GM冻结角色';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='GM冻结角色';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -461,7 +461,7 @@ CREATE TABLE `gm_lamp` (
   `end_time` timestamp NULL DEFAULT NULL COMMENT '结束时间',
   `interval` bigint(20) DEFAULT NULL COMMENT '间隔时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='GM跑马灯';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='GM跑马灯';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -491,7 +491,7 @@ CREATE TABLE `gm_mail_approval` (
   `mail_type` tinyint(4) DEFAULT NULL COMMENT '邮件类型',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_mtype_stime` (`mail_type`,`schedule_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=435 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=435 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -512,7 +512,7 @@ CREATE TABLE `gm_mail_tar` (
   `platform_code` varchar(64) DEFAULT NULL COMMENT '平台编号',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_mail_id` (`mail_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=366 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=366 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -536,7 +536,7 @@ CREATE TABLE `gm_notice` (
   `el_errorcode` int(11) DEFAULT NULL COMMENT '操作结果码',
   `el_errormsg` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='GM通知表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='GM通知表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -566,7 +566,7 @@ CREATE TABLE `gm_rebate_approval` (
   KEY `index_status` (`status`) USING BTREE,
   KEY `index_submit_time` (`submit_time`) USING BTREE,
   KEY `idx_type_date_status` (`type`,`query_date`,`status`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -587,7 +587,7 @@ CREATE TABLE `gm_rebate_tar` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_rebate_id` (`rebate_id`) USING BTREE,
   KEY `idx_master_id_hex` (`master_id_hex`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -606,7 +606,7 @@ CREATE TABLE `merge_map` (
   `update_time` timestamp NULL DEFAULT NULL COMMENT '映射更新时间',
   `note` varchar(100) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`srv_code_origin`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='合服映射';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='合服映射';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -642,7 +642,7 @@ CREATE TABLE `pay_approval` (
   `currency_code` varchar(10) DEFAULT NULL COMMENT '支付币种代码',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_sub_uname` (`submit_username`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -670,7 +670,7 @@ CREATE TABLE `pay_indirect` (
   `other_info` varchar(100) DEFAULT NULL COMMENT '其他信息',
   `error_info` varchar(300) DEFAULT NULL COMMENT '错误信息',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='间接支付';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='间接支付';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -720,7 +720,7 @@ CREATE TABLE `pay_record` (
   KEY `record_platform_order_id_IDX` (`platform_order_id`) USING BTREE,
   KEY `pay_record_pay_time_IDX` (`pay_time`) USING BTREE,
   KEY `pay_record_create_time_IDX` (`create_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='充值记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='充值记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -768,7 +768,7 @@ CREATE TABLE `pay_record_beta` (
   KEY `record_platform_order_id_IDX` (`platform_order_id`) USING BTREE,
   KEY `idx_pay_time` (`pay_time`) USING BTREE,
   KEY `idx_srv_code` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT COMMENT='封测充值记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='封测充值记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -791,7 +791,7 @@ CREATE TABLE `pay_refund` (
   `master_id_hex` varchar(64) DEFAULT NULL COMMENT '主角唯一ID',
   `master_name` varchar(32) DEFAULT NULL COMMENT '主角名称',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='删档充值返还';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='删档充值返还';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -808,7 +808,7 @@ CREATE TABLE `platform_yzx_param` (
   `game_key` varchar(100) DEFAULT NULL COMMENT 'GameKey',
   `secret_key` varchar(100) DEFAULT NULL COMMENT 'SecretKey',
   `note` varchar(100) DEFAULT NULL COMMENT '备注'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='平台配置之叶子戏';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='平台配置之叶子戏';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -828,7 +828,7 @@ CREATE TABLE `player_imei_record` (
   `first_platform_code` varchar(32) DEFAULT NULL COMMENT '首次登陆平台',
   `first_channel_code` varchar(64) DEFAULT NULL COMMENT '首次登陆渠道',
   PRIMARY KEY (`IMEI`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='关于设备码的统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='关于设备码的统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -848,7 +848,7 @@ CREATE TABLE `player_ip_record` (
   `first_platform_code` varchar(32) DEFAULT NULL COMMENT '首次登陆平台',
   `first_channel_code` varchar(64) DEFAULT NULL COMMENT '首次登陆渠道',
   PRIMARY KEY (`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -912,7 +912,7 @@ CREATE TABLE `role_key_res_num` (
   PRIMARY KEY (`role_id`) USING BTREE,
   KEY `role_key_res_num_role_name_IDX` (`role_name`) USING BTREE,
   KEY `role_key_res_num_srv_code_IDX` (`srv_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='基于角色的关键数量统计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='基于角色的关键数量统计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -940,7 +940,7 @@ CREATE TABLE `srv_cross` (
   `program_path` varchar(100) DEFAULT NULL COMMENT '程序路径',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `srv_cross_UN` (`code`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='跨服配置';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='跨服配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -970,7 +970,7 @@ CREATE TABLE `srv_cross_plan` (
   `cross_err` varchar(1000) DEFAULT NULL COMMENT '跨服执行错误信息',
   `enabled` tinyint(1) DEFAULT '1' COMMENT '是否已执行过改变',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1018,7 +1018,7 @@ CREATE TABLE `srv_game` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `srv_game_code_IDX` (`code`) USING BTREE,
   KEY `srv_game_group_id_IDX` (`group_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工与应用关联';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工与应用关联';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1051,7 +1051,7 @@ CREATE TABLE `srv_game_access` (
   `ext_limit` tinyint(1) DEFAULT NULL COMMENT '是否扩展限定',
   `ext` varchar(100) DEFAULT NULL COMMENT '扩展',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏服进入规则';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏服进入规则';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1082,7 +1082,7 @@ CREATE TABLE `srv_game_ext` (
   `longtu_game_id` varchar(64) DEFAULT NULL COMMENT '龙图gameid',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `srv_game_ext_UN` (`code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏扩展配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏扩展配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1100,7 +1100,7 @@ CREATE TABLE `srv_game_status` (
   `cross_code_switch` varchar(16) DEFAULT NULL COMMENT '切换跨服编码',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `srv_game_status_game_code_uindex` (`game_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏服状态表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏服状态表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1117,7 +1117,7 @@ CREATE TABLE `srv_group` (
   `note` varchar(100) DEFAULT NULL COMMENT '备注',
   `code` varchar(32) DEFAULT NULL COMMENT '服务器组编码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏服务器组';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏服务器组';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1154,7 +1154,7 @@ CREATE TABLE `srv_group_device` (
   `program_path` varchar(100) DEFAULT NULL COMMENT '程序路径',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `idx_code_uni` (`code`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='游戏服组配置';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='游戏服组配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1185,7 +1185,7 @@ CREATE TABLE `srv_login` (
   `np_enabled` tinyint(1) DEFAULT NULL COMMENT '是否启用',
   `note` varchar(100) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='登录服务器配置信息';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='登录服务器配置信息';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1217,7 +1217,7 @@ CREATE TABLE `srv_merge` (
   `migrate_am_times` int(11) DEFAULT NULL COMMENT '账号主角区服迁移的执行次数',
   `migrate_am_last` timestamp NULL DEFAULT NULL COMMENT '账号主角区服迁移的最近一次执行时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='合服配置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='合服配置表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1234,7 +1234,7 @@ CREATE TABLE `srv_paid_delete` (
   `enabled` tinyint(1) DEFAULT NULL COMMENT '是否启用',
   `note` varchar(100) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='删档收费服配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='删档收费服配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1254,7 +1254,7 @@ CREATE TABLE `srv_status_plan` (
   `enabled` tinyint(1) DEFAULT NULL COMMENT '是否启用',
   `cancel_recommend_srv_code` varchar(64) DEFAULT NULL COMMENT '要取消推荐的游戏服编码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='区服状态改变计划';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='区服状态改变计划';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1276,7 +1276,7 @@ CREATE TABLE `staff` (
   `dept` varchar(100) DEFAULT NULL COMMENT '隶属部门',
   `company` varchar(100) DEFAULT NULL COMMENT '隶属公司',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工表';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1301,7 +1301,7 @@ CREATE TABLE `staff_app` (
   `staff_id` int(11) DEFAULT NULL,
   `app_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1326,7 +1326,7 @@ CREATE TABLE `staff_channel` (
   `staff_id` int(11) DEFAULT NULL,
   `channel_code` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1351,7 +1351,7 @@ CREATE TABLE `staff_platform` (
   `staff_id` int(11) DEFAULT NULL,
   `platform_code` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1376,7 +1376,7 @@ CREATE TABLE `staff_role` (
   `name` varchar(32) DEFAULT NULL COMMENT '角色名',
   `note` varchar(100) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工角色表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1401,7 +1401,7 @@ CREATE TABLE `staff_role_game_id` (
   `role_id` int(11) NOT NULL COMMENT '员工角色ID',
   `game_id` varchar(32) DEFAULT NULL COMMENT 'GameID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工角色所限制的gameId';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工角色所限制的gameId';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1468,7 +1468,7 @@ CREATE TABLE `staff_role_permission` (
   `p41` tinyint(1) DEFAULT '0',
   `p42` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`role_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工角色权限配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工角色权限配置';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1493,7 +1493,7 @@ CREATE TABLE `staff_role_srv` (
   `role_id` int(11) DEFAULT NULL COMMENT '角色ID',
   `srv_game_code` varchar(32) DEFAULT NULL COMMENT '游戏服编码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工角色关联游戏服';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工角色关联游戏服';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1509,7 +1509,7 @@ CREATE TABLE `staff_role_srv_group` (
   `role_id` int(11) DEFAULT NULL COMMENT '员工角色ID',
   `srv_group_id` int(11) DEFAULT NULL COMMENT '服务器组ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='员工角色与服务器组';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='员工角色与服务器组';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1546,7 +1546,7 @@ CREATE TABLE `stat_sum` (
   `pay_count` int(11) DEFAULT NULL,
   `pay_count_master` int(11) DEFAULT NULL,
   PRIMARY KEY (`srv_code`,`date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='每日合计';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='每日合计';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1581,7 +1581,7 @@ CREATE TABLE `supervise_report` (
   `assess_value_delta` double DEFAULT NULL COMMENT '角色估值变化量',
   `pay_sum_delta` double DEFAULT NULL COMMENT '充值变化量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='监控汇报';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='监控汇报';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1606,7 +1606,7 @@ CREATE TABLE `sys_task` (
   `tag2` varchar(100) DEFAULT NULL COMMENT '标签2',
   `tag3` varchar(100) DEFAULT NULL COMMENT '标签3',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1628,7 +1628,7 @@ CREATE TABLE `vip_service` (
   `pic_id` int(11) DEFAULT NULL COMMENT '头像图片id',
   `upsert_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1645,7 +1645,7 @@ CREATE TABLE `vip_service_tar` (
   `srv_code` varchar(100) DEFAULT NULL COMMENT '游戏服编码',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_code_id` (`srv_code`,`service_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -1665,7 +1665,7 @@ CREATE TABLE `world_invite_record` (
   `open_id` varchar(100) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='邀请记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='邀请记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 

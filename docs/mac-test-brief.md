@@ -171,7 +171,7 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 
 **3a. `ROW_FORMAT=COMPACT` từ mysqldump 5.6 vượt giới hạn dòng của MySQL 8.**
 `ERROR 1118 (42000) at line 69: Row size too large (> 8126)` khi tạo `web.card_log` (10 cột `varchar(255)` utf8mb4). Sửa ở `zz-init.sh`: `sed ROW_FORMAT=COMPACT -> DYNAMIC` lúc nạp seed.
-**Cần làm tiếp trên PC:** `tools/dump-to-seed.py` nên phát `DYNAMIC` ngay từ đầu để seed đúng tại nguồn. Và **dump thật trên server sẽ đâm vào đúng bức tường này** — image mysql nạp dump trực tiếp (sắp xếp trước `zz-init.sh`) nên bản vá này không chen vào được.
+**Đã làm trên PC (2026-09-05 tối):** `tools/dump-to-seed.py` phát `DYNAMIC` tại nguồn (seed sinh lại, 100 bảng), `prepare-dumps.sh` sed dump thật ngay trên server cũ — vì image mysql nạp dump trực tiếp (sắp xếp trước `zz-init.sh`) nên bản vá trong `zz-init.sh` không chen vào được với dump.
 
 **3b. `set -e` trong `zz-init.sh` vô hiệu — lỗi bị nuốt.**
 Nặng hơn 3a. `_tcg_init` được gọi dạng `_tcg_init || { ... }`; trong danh sách `||` thì `set -e` bị tắt cho cả compound command và mọi lệnh con. Kết quả: `web.sql` chết ở bảng thứ 3 nhưng script vẫn in **`xong (seed)`** và hệ thống lên với **2/21 bảng `web`**. Sửa: kiểm tra mã thoát tường minh sau mỗi lần nạp.

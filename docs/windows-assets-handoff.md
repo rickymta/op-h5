@@ -26,6 +26,20 @@ Cả ba file băm **đã có** trong `res/`. Đã kiểm chứng bằng cách b�
 `Shouling/` — chúng là **tên logic trong manifest**, không phải thư mục trên đĩa. Đừng đi
 tìm chúng.
 
+## KẾT QUẢ KIỂM TRA TRÊN MÁY WINDOWS (2026-09-05, tối)
+
+Chạy đúng đoạn kiểm tra bên dưới trong `website/game`: **32 mục thiếu, giống hệt máy Mac**. Cả bản
+`website/game` lẫn bản copy nguyên vẹn `www/wwwroot/game` của server cũ đều có đúng 10.584 file
+`res/` và **không có** 22 file được liệt kê (dãy `4b84d-a0519-bp*` trên đĩa chỉ có 18 file, đúng các
+số lẻ + bp001/002/032). Server cũ (`192.168.1.69`) lúc kiểm không kết nối được, nhưng bản copy là
+đầy đủ nên gần như chắc bản gốc cũng thiếu: manifest trỏ tới file chưa từng tồn tại trong bản triển
+khai, các mục đó vốn 404 từ trước. **Không có gì để chuyển, không phát hành lại `assets-v1`.**
+Chỉ còn một việc: khi vào lại được mạng server cũ, xác nhận bằng
+`ls /www/wwwroot/game/res/09f91-b9ea0-9918f` (mong đợi: không có).
+
+`tools/dump-to-seed.py` đã phát `ROW_FORMAT=DYNAMIC`, seed đã sinh lại; `prepare-dumps.sh` sed dump
+thật ngay trên server cũ (xem cuối tài liệu).
+
 ## Việc cần làm: 21 file trong `res/` và 1 file trong `sound/`
 
 Đây là các mục **manifest có trỏ tới nhưng không tồn tại trên đĩa**. Chúng sẽ 404 lúc

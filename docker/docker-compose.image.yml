@@ -177,8 +177,8 @@ services:
   group:
     <<: *java
     working_dir: /h5/server/group
-    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_GROUP:-640m}", "-jar", "tcg-group.jar", "--v=0", "--gc=group-offical", "--p=30001"]
-    mem_limit: 950m
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_GROUP:-1152m}", "-jar", "tcg-group.jar", "--v=0", "--gc=group-offical", "--p=30001"]
+    mem_limit: 1400m
     cpu_shares: 512
     depends_on: { pay: { condition: service_healthy } }
     healthcheck:
@@ -213,8 +213,8 @@ services:
   cross:
     <<: *java
     working_dir: /h5/server/cross
-    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CROSS:-640m}", "-jar", "tcg-cross.jar", "--v=0", "--cc=cross-yzx1", "--p=20001"]
-    mem_limit: 950m
+    command: ["java", "-Xms128m", "-Xmx${JAVA_XMX_CROSS:-1152m}", "-jar", "tcg-cross.jar", "--v=0", "--cc=cross-yzx1", "--p=20001"]
+    mem_limit: 1400m
     cpu_shares: 512
     depends_on: { login: { condition: service_healthy } }
     healthcheck:
@@ -229,7 +229,17 @@ services:
     network_mode: host
     restart: unless-stopped
     env_file: .env
-    environment: { TZ: Asia/Ho_Chi_Minh }
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      # GM tool (gmhanglong/config/auth.php) doc bang platform.gm_users qua 4 bien ID_DB_*
+      # (KHONG co fallback sang MYSQL_ROOT_PASSWORD) va tao tai khoan GM dau tien tu
+      # GM_BOOTSTRAP_* khi bang con rong. web-entrypoint dua chung vao pool php-fpm.
+      ID_DB_HOST: "127.0.0.1"
+      ID_DB_NAME: ${ID_DB_NAME:-platform}
+      ID_DB_USER: root
+      ID_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      GM_BOOTSTRAP_USER: ${GM_BOOTSTRAP_USER:-}
+      GM_BOOTSTRAP_PASSWORD: ${GM_BOOTSTRAP_PASSWORD:-}
     volumes:
       - ${ASSETS_DIR:-/opt/tcg/assets}/res:/www/wwwroot/game/res:ro
       - ${ASSETS_DIR:-/opt/tcg/assets}/sound:/www/wwwroot/game/sound:ro
@@ -251,6 +261,8 @@ services:
       - ${ASSETS_DIR:-/opt/tcg/assets}/res:/www/wwwroot/game/res:ro
       - ${ASSETS_DIR:-/opt/tcg/assets}/sound:/www/wwwroot/game/sound:ro
       - ${ASSETS_DIR:-/opt/tcg/assets}/spine:/www/wwwroot/game/spine:ro
+      # certbot --webroot ghi challenge vao day; game.conf (che do IP) phuc vu /.well-known/acme-challenge/
+      - ${ACME_DIR:-/var/www/acme}:/var/www/acme:ro
     depends_on: [php]
     mem_limit: 96m
     cpu_shares: 256
@@ -328,7 +340,7 @@ services:
       ADAPTER_ADDR: "127.0.0.1:${ADAPTER_PORT:-8090}"
       ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
       ADAPTER_GAME_ID: ${ADAPTER_GAME_ID:-10091}
-      ADAPTER_PLATFORM_CODE: ${ADAPTER_PLATFORM_CODE:-id}
+      ADAPTER_PLATFORM_CODE: ${ADAPTER_PLATFORM_CODE:-develop}
       ADAPTER_CHANNEL_CODE: ${ADAPTER_CHANNEL_CODE:-0}
       ADAPTER_CURRENCY_CODE: ${ADAPTER_CURRENCY_CODE:-VND}
       ID_DB_HOST: "127.0.0.1"

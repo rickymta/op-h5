@@ -68,6 +68,7 @@ chmod 600 "$STATE/enc.key"
 ENC_KEY=$(cat "$STATE/enc.key")
 ADMIN_PW=$(gen 16)
 CONSOLE_PW=$(gen 16)     # zz-init.sh ghi vao tcg.staff (admin) — Adapter va GM tool dung
+GM_PW=$(gen 8)           # tai khoan GM dau tien (platform.gm_users) cho /adminportal, /gmhanglong
 # Ma uy quyen cua tang PHP cu (gm/, gmhanglong/, adminphp@2024/). Phai sinh o day:
 # thieu bien nao thi web-entrypoint de nguyen placeholder, va vi PHP dat error_reporting(0)
 # nen trang tuong ung chi tra 200 RONG chu khong bao loi.
@@ -86,6 +87,8 @@ ADAPTER_SECRET_ENC_KEY=$ENC_KEY
 GM_CODE=$GM_CODE
 GMHANGLONG_CODE=$GMHANGLONG_CODE
 REV_QUERY_KEY=$REV_KEY
+GM_BOOTSTRAP_USER=gm
+GM_BOOTSTRAP_PASSWORD=$GM_PW
 EOF
 chmod 600 "$STATE/creds.txt"
 
@@ -240,6 +243,8 @@ docker run -d --name op-php --network "$NET" \
   -e ID_WALLET_ENABLED=1 -e ADAPTER_BASE_URL="http://127.0.0.1:8090" \
   -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" \
   -e GM_CODE="$GM_CODE" -e GMHANGLONG_CODE="$GMHANGLONG_CODE" -e REV_QUERY_KEY="$REV_KEY" \
+  -e ID_DB_HOST=127.0.0.1 -e ID_DB_NAME=platform -e ID_DB_USER=root -e ID_DB_PASSWORD="$MYSQL_PW" \
+  -e GM_BOOTSTRAP_USER=gm -e GM_BOOTSTRAP_PASSWORD="$GM_PW" \
   -v "$REPO/website/game:/www/wwwroot/game" docker-php >/dev/null
 docker run -d --name op-nginx --network "$NET" \
   -v "$REPO/website/game:/www/wwwroot/game:ro" \
@@ -266,7 +271,8 @@ printf "  %-32s %s\n" "http://127.0.0.1:8100"          "Trang quan tri"
 printf "  %-32s %s\n" "http://127.0.0.1:8025"          "Hop thu (email dat lai mat khau)"
 echo
 echo "  Quan tri: quantri / $ADMIN_PW"
-echo "  Console :9999 (GM tool): admin / $CONSOLE_PW"
+echo "  Console :9999: admin / $CONSOLE_PW"
+echo "  GM tool http://127.0.0.1:8080/adminportal: gm / $GM_PW"
 echo "  Bi mat khac: $STATE/creds.txt"
 echo
 echo "  Log game:  docker exec op-game tail -f .logs/game-s1/info.log"

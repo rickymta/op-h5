@@ -222,7 +222,10 @@ def transform(db, sql, stats, forbidden, allowed):
             continue
         out.append(line)
         i += 1
-    return '\n'.join(out), cols
+    # mysqldump 5.6 giu ROW_FORMAT=COMPACT; MySQL 8 tu choi bang nhieu cot varchar(255) utf8mb4
+    # o dinh dang do ("Row size too large (> 8126)", vd web.card_log). DYNAMIC (mac dinh cua
+    # MySQL 8) luu phan dai ra ngoai trang, khong doi ngu nghia du lieu. Phat hien tren macOS 2026-09-05.
+    return '\n'.join(out).replace('ROW_FORMAT=COMPACT', 'ROW_FORMAT=DYNAMIC'), cols
 
 
 def backup_secrets():

@@ -22,6 +22,11 @@ while read -r db; do
 done < "$OUT/mysql-dbs.txt"
 # Thu tu import cua image mysql la theo ten file (a-z): dat tcg truoc cho chac
 [ -f "$OUT/mysql/tcg.sql" ] && mv "$OUT/mysql/tcg.sql" "$OUT/mysql/00-tcg.sql"
+# MySQL 8 tu choi ROW_FORMAT=COMPACT cua mysqldump 5.6 o bang nhieu cot varchar utf8mb4
+# ("Row size too large (> 8126)", vd web.card_log). Image mysql nap dump TRUC TIEP (truoc
+# zz-init.sh) nen phai sua ngay trong file dump; DYNAMIC khong doi ngu nghia du lieu.
+sed -i 's/ROW_FORMAT=COMPACT/ROW_FORMAT=DYNAMIC/g' "$OUT"/mysql/*.sql
+echo "  ROW_FORMAT=COMPACT -> DYNAMIC: $(grep -l 'ROW_FORMAT=DYNAMIC' "$OUT"/mysql/*.sql | wc -l) file"
 
 echo "== mongodump (toan bo, co auth) =="
 mongodump --host 127.0.0.1 --port 27017 -u "$MONGO_USER" -p "$MONGO_PW" --authenticationDatabase admin --out "$OUT/mongo/dump"

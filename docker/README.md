@@ -13,7 +13,8 @@ Hệ quả: **tắt MySQL/MongoDB/RabbitMQ/Java/nginx đang chạy trên máy đ
 | Thành phần | mem_limit | Heap/cache | Ghi chú |
 |---|---|---|---|
 | game | 1400m | -Xmx1024m | ưu tiên CPU cao nhất |
-| world, group, cross | 950m ×3 | -Xmx640m | parse ~200 Excel lúc khởi động → peak |
+| world | 950m | -Xmx640m | parse ~200 Excel lúc khởi động → peak |
+| group, cross | 1400m ×2 | -Xmx1152m | DB ghi `-Xmx1128m`; 640m OOM ngay lúc khởi động (đo trên macOS 2026-09-05; cả cụm thực dùng 2,3 GiB) |
 | console, statistic | 800m ×2 | -Xmx512m | |
 | pay | 640m | -Xmx384m | |
 | meta, login | 560m ×2 | -Xmx320m | |
@@ -91,7 +92,7 @@ docker compose up -d                              # console -> world -> meta -> 
 watch -n5 'docker compose ps'                     # đợi tất cả (healthy)
 ```
 
-Toàn bộ chuỗi mất **5–8 phút** trên 4 CPU (game một mình ~50 s parse Excel).
+Toàn bộ chuỗi mất **5–8 phút** trên 4 CPU (game một mình ~50 s parse Excel). Bật domain + HTTPS sau đó: `./enable-domain.sh <domain>` (xem runbook mục "Trỏ domain thật").
 
 ## 5. Kiểm tra
 
@@ -241,6 +242,6 @@ Các tài nguyên client còn lại (`libs/`, `bmFont/`, `icon/`, `iconshop/`, `
 2. **Heap là ước lượng.** Không có số đo steady-state từ server cũ. Bộ số mặc định để *khởi động được* trên 8 GB; chỉnh theo `docker stats`.
 3. ~~Chưa từng `up` thật.~~ **Đã `up` thật trên macOS 2026-09-05** — 19 container lên hết, 9 JVM chạy, seed sạch nạp đủ 101 bảng, đăng ký → `/choi-game` → client tự đăng nhập bằng tài khoản game thật. Còn chặn ở bước vào thế giới: thiếu `website/game/template/` (xem mục 6 dưới). Chi tiết và các lỗi đã vá: [docs/mac-test-brief.md](../docs/mac-test-brief.md) mục 7.
 4. **`tcg.srv_cross.url` / `srv_group_device.url`** được `zz-init.sh` đặt về `http://127.0.0.1:<port>/` lúc khởi tạo (cả seed lẫn dump) — game gọi cross/group qua loopback. Nếu sau này tách cross/group sang máy khác, đổi 2 cột `url` đó qua console `/srv/cross/update`, `/srv/group/conf/update`.
-5. ~~`zz-init.sh` chưa chạy trong container MySQL thật~~ — **đã chạy**, và hỏng 3 chỗ nay đã vá: bind mount macOS làm entrypoint *chạy* thay vì *source* file; `set -u` lọt vào `docker_process_sql` của image; và `set -e` bị vô hiệu do `_tcg_init || {...}` nên lỗi nạp seed bị nuốt (web chỉ vào 2/21 bảng mà vẫn in `xong (seed)`). **Còn phải làm trên PC:** `tools/dump-to-seed.py` nên phát `ROW_FORMAT=DYNAMIC` — mysqldump 5.6 để `COMPACT`, MySQL 8 từ chối với `Row size too large (> 8126)`; hiện `zz-init.sh` đổi lúc nạp, nhưng **dump thật sẽ đâm vào đúng lỗi này** vì image nạp dump trực tiếp.
+5. ~~`zz-init.sh` chưa chạy trong container MySQL thật~~ — **đã chạy**, và hỏng 3 chỗ nay đã vá: bind mount macOS làm entrypoint *chạy* thay vì *source* file; `set -u` lọt vào `docker_process_sql` của image; và `set -e` bị vô hiệu do `_tcg_init || {...}` nên lỗi nạp seed bị nuốt (web chỉ vào 2/21 bảng mà vẫn in `xong (seed)`). Từ 2026-09-05 (tối) `tools/dump-to-seed.py` phát `ROW_FORMAT=DYNAMIC` ngay tại nguồn và `prepare-dumps.sh` sed dump thật ngay trên server cũ — mysqldump 5.6 để `COMPACT`, MySQL 8 từ chối với `Row size too large (> 8126)`; dump đã lấy trước đó phải `sed -i 's/ROW_FORMAT=COMPACT/ROW_FORMAT=DYNAMIC/g'` trước khi đặt vào `initdb/mysql/`.
 6. **Tai nguyen client**: mọi thứ đi qua bảng ánh xạ `libs/2af72-f100c-2af72.json` (tên logic → file băm trong `res/`), nên `template/`, `common/`, `atlas/` không phải thư mục trên đĩa. Thiếu thật là 21 file băm trong `res/` + 1 file `sound/` — [docs/windows-assets-handoff.md](../docs/windows-assets-handoff.md).
 5. Thời điểm thay JAR mới từ nhà phát hành: chạy lại `python tools/patch-excel-names.py --apply`, nếu không bytecode quay về tìm tên Excel tiếng Trung.

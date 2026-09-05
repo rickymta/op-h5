@@ -91,6 +91,8 @@ if [ "${NO_UP:-0}" = 1 ]; then
 else
   echo "== 7/7 Khoi dong toan bo (console -> world -> meta -> statistic -> pay -> group -> game -> login -> cross -> web; 5-8 phut)"
   cd "$DOCKER_DIR"
+  # enable-domain.sh sinh overlay nay (mount domains.conf/tls.conf/letsencrypt vao nginx); co thi dung kem.
+  [ -f docker-compose.domain.yml ] && COMPOSE="$COMPOSE -f docker-compose.domain.yml"
   [ "$MODE" = pull ] && $COMPOSE pull
   $COMPOSE up -d
   for i in $(seq 1 60); do
@@ -104,13 +106,21 @@ else
 fi
 
 H=$(grep '^PUBLIC_HOST=' "$DOCKER_DIR/.env" | cut -d= -f2- | sed 's/ *#.*//')
+MYIP_HINT=$(curl -fsS -m 5 https://api.ipify.org 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}' || echo '<IP-server>')
 cat <<EOF
 
 XONG. Nguoi choi vao:  http://$H/          (dang ky o http://$H:8080, vao game tai /choi-game)
-  Trang quan tri:   ssh -L 8100:127.0.0.1:8100 root@<server>  ->  http://127.0.0.1:8100   (tai khoan: xem ADMIN_BOOTSTRAP_* trong $DOCKER_DIR/.env)
-  Console/GM tool:  admin / CONSOLE_ADMIN_PASSWORD trong .env
-  Firewall mo: 80, 8080 (he thong ID), 9000, 8001, 12345, 7788. 8090/8100 chi loopback.
+  Trang quan tri:   ssh -L 8100:127.0.0.1:8100 root@<server>  ->  http://127.0.0.1:8100   (tai khoan: ADMIN_BOOTSTRAP_* trong $DOCKER_DIR/.env)
+  GM tool:          ssh -L 8080:127.0.0.1:80   root@<server>  ->  http://127.0.0.1:8080/adminportal   (GM_BOOTSTRAP_* trong .env)
+  Console:          admin / CONSOLE_ADMIN_PASSWORD trong .env (Adapter dung de phat vat pham)
+  Firewall che do IP: mo 80, 8080 (he thong ID), 9000, 8001, 12345, 7788. 8090/8100 chi loopback.
   Kiem tra:  cd $DOCKER_DIR && $COMPOSE ps && $COMPOSE logs game | grep -E '找不到excel|加载错误|OutOfMemory'
+
+Bat domain + HTTPS (chi con 80/443 mo ra ngoai; client di qua 443 bang tien to duong dan):
+  tro 4 ban ghi A (<domain>, www., id., haitac.) ve $MYIP_HINT roi:
+    cd $DOCKER_DIR && ./enable-domain.sh <domain> [email]
+  (xin chung chi Let's Encrypt qua nginx dang chay, sinh domains.conf/tls.conf + docker-compose.domain.yml,
+   sua .env sang https, up lai, cap nhat DB; xem docs/deploy-runbook.md muc "Tro domain that")
 
 Tuy chon:
   * Giu tai khoan/nhan vat cu: dump tren server cu (docker/prepare-dumps.sh), rsync vao
