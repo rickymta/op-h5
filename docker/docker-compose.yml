@@ -272,6 +272,8 @@ services:
       - ${WEBSITE_DIR:-../website}/game:/www/wwwroot/game:ro
       - ./nginx/game.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/adapter_proxy.conf:/etc/nginx/adapter_proxy.conf:ro
+      # Anh thuong hieu tung game (ASSETS_DIR/brand/<game>/...): nginx phuc vu /brand/ (game_site.conf).
+      - ${ASSETS_DIR:-/opt/tcg/assets}/brand:/www/wwwroot/game/brand:ro
       # certbot --webroot ghi challenge vao day; game.conf (che do IP) phuc vu /.well-known/acme-challenge/
       - ${ACME_DIR:-/var/www/acme}:/var/www/acme:ro
     depends_on: [php]

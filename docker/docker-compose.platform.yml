@@ -65,6 +65,14 @@ services:
       ID_SMTP_PASSWORD: ${ID_SMTP_PASSWORD:-}
       ID_SMTP_FROM: ${ID_SMTP_FROM:-}
       ID_SMTP_FROM_NAME: ${ID_SMTP_FROM_NAME:-Cổng game}
+      # 1 = giao dien React (web/apps/portal, nhung san trong image): trang chinh + tai khoan; trang Go cu o /cu/
+      ID_SPA: ${ID_SPA:-0}
+      # Thuong hieu cua cong — GET /api/site (trang chinh, chan trang moi trang game)
+      ID_BRAND_NAME: ${ID_BRAND_NAME:-Cổng game}
+      ID_SUPPORT_URL: ${ID_SUPPORT_URL:-}
+      ID_FANPAGE_URL: ${ID_FANPAGE_URL:-}
+      ID_TOPUP_URL: ${ID_TOPUP_URL:-}
+      ID_LEGAL_NOTE: ${ID_LEGAL_NOTE:-}
     depends_on:
       mysql: { condition: service_healthy }
     mem_limit: 128m
@@ -87,7 +95,8 @@ services:
     restart: unless-stopped
     environment:
       TZ: Asia/Ho_Chi_Minh
-      # Chi nghe loopback: nginx proxy /, /may-chu, /quy-doi, /choi-game, /auth/, /api/game/ vao day.
+      # Chi nghe loopback: nginx proxy /, /may-chu, /cua-hang, /tin-tuc, /quy-doi, /choi-game, /auth/,
+      # /api/game/, /app/, /cu/ vao day.
       ADAPTER_ADDR: "127.0.0.1:${ADAPTER_PORT:-8090}"
       ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
       ADAPTER_GAME_ID: ${ADAPTER_GAME_ID:-10091}
@@ -115,6 +124,14 @@ services:
       ADAPTER_TLS: ${ADAPTER_TLS:-false}
       ADAPTER_POLL_INTERVAL: ${ADAPTER_POLL_INTERVAL:-10s}
       ADAPTER_TICKET_TTL: ${ADAPTER_TICKET_TTL:-60s}
+      # Trang game: ten/tagline/anh doc tu bang games (/api/game/meta); ADAPTER_GAME_NAME chi la du phong.
+      # Tieu de thu cua hang mac dinh "Cửa hàng <tên game>".
+      ADAPTER_GAME_NAME: ${ADAPTER_GAME_NAME:-}
+      ADAPTER_MAIL_TITLE: ${ADAPTER_MAIL_TITLE:-}
+      ADAPTER_MAIL_CONTENT: ${ADAPTER_MAIL_CONTENT:-}
+      # 1 = giao dien React (web/apps/game): /, /may-chu, /cua-hang, /tin-tuc, /app/*; trang Go cu o /cu/
+      ADAPTER_SPA: ${ADAPTER_SPA:-0}
+      ID_BRAND_NAME: ${ID_BRAND_NAME:-Cổng game}
     depends_on:
       id: { condition: service_healthy }
       platform-seed: { condition: service_completed_successfully }

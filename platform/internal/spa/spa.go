@@ -3,9 +3,11 @@
 // Vi sao khong dung thang http.FileServer:
 //   - SPA dinh tuyen o phia trinh duyet, nen moi duong khong phai file that phai tra
 //     index.html chu khong phai 404 — nguoi choi bam F5 o /don-mua se thay trang trang.
-//   - Vite dat bam noi dung vao ten file trong assets/ nen chung bat bien; con index.html
-//     thi KHONG duoc cache, neu khong nguoi dung giu ban cu tro toi asset da bi xoa sau
-//     lan trien khai sau (da dinh that mot lan voi bundle client, xem docs/mac-test-brief).
+//   - Vite dat bam noi dung vao ten file trong assets/ (hoac app/ — apps/game dung
+//     assetsDir "app" vi tren host game nginx da danh /assets/ va regex \.(js|css)$ cho
+//     client LayaAir) nen chung bat bien; con index.html thi KHONG duoc cache, neu khong
+//     nguoi dung giu ban cu tro toi asset da bi xoa sau lan trien khai sau (da dinh that
+//     mot lan voi bundle client, xem docs/mac-test-brief).
 //   - Duong /api/ khong bao gio duoc roi vao day: no phai 404 JSON chu khong tra HTML,
 //     neu khong client se bao mot loi khong lien quan.
 package spa
@@ -39,7 +41,7 @@ func Handler(fsys fs.FS, root string) http.Handler {
 			if f, err := sub.Open(p); err == nil {
 				_ = f.Close()
 				// Ten file cua Vite co bam noi dung -> doi noi dung la doi ten.
-				if strings.HasPrefix(p, "assets/") {
+				if immutableDir(p) {
 					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 				}
 				files.ServeHTTP(w, r)
@@ -48,6 +50,12 @@ func Handler(fsys fs.FS, root string) http.Handler {
 		}
 		serveIndex(w, index)
 	})
+}
+
+// immutableDir: file nam trong thu muc tai san co bam cua Vite (assets/ mac dinh, app/ cua
+// apps/game) — cache duoc vinh vien.
+func immutableDir(p string) bool {
+	return strings.HasPrefix(p, "assets/") || strings.HasPrefix(p, "app/")
 }
 
 func serveIndex(w http.ResponseWriter, index []byte) {

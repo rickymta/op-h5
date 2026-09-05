@@ -1,0 +1,13 @@
+{
+  "id": 2,
+  "game_code": "haitac",
+  "game_name": "Đại Hải Trình",
+  "kind": "event",
+  "title": "Sự kiện Tuần lễ Tân Thế Giới: x2 Nguyên Bảo mốc đầu",
+  "summary": "Từ 05/09 đến 12/09, mọi mốc Nguyên Bảo mua lần đầu được nhân đôi và cộng điểm VIP tương ứng.",
+  "body": "Thời gian: 00:00 ngày 05/09 đến 23:59 ngày 12/09/2026, áp dụng cho mọi máy chủ.\n\nNội dung: mỗi mốc Nguyên Bảo mua lần đầu trong thời gian sự kiện được nhân đôi. Điểm VIP cộng theo giá gốc.\n\nCách nhận: mua ở Cửa hàng bằng Xu trong ví, chọn đúng máy chủ có nhân vật. Nguyên Bảo về thẳng túi trong game, thường trong một phút.",
+  "image_url": "/assets/images/banner-min.png",
+  "link_url": "",
+  "pinned": false,
+  "published_at": "2026-09-05T09:30:00+07:00"
+}

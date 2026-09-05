@@ -8,7 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
-    "./base.css": "./src/base.css"
+    "./base.css": "./src/base.css",
+    "./publisher": "./src/publisher/index.ts",
+    "./publisher.css": "./src/publisher/publisher.css"
   },
   "peerDependencies": { "react": "^19.0.0" }
 }

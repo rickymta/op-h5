@@ -38,6 +38,10 @@ type adapterServer struct {
 	tpl        *template.Template
 	publicHost string
 	useTLS     bool
+	// gameName: ten hien thi du phong khi bang games chua co dong cua game nay; brand: thuong
+	// hieu nen tang o chan trang (meta.go).
+	gameName string
+	brand    string
 	// sessionLimit chan bam lien tuc vao /api/game/session, khoa theo nguoi dung.
 	sessionLimit *httpx.Limiter
 }

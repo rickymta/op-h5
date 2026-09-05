@@ -1,0 +1,13 @@
+{
+  "id": 4,
+  "game_code": null,
+  "game_name": "",
+  "kind": "news",
+  "title": "Một tài khoản, một ví: Xu dùng được cho mọi game trên hệ thống",
+  "summary": "Nạp một lần vào ví chung, đổi sang vật phẩm ở game nào tuỳ bạn. Lịch sử giao dịch xem ở trang tài khoản.",
+  "body": "Từ nay mọi game trên hệ thống dùng chung một tài khoản và một ví Xu.\n\nNạp Xu ở trang tài khoản, rồi vào cửa hàng của game bất kỳ để đổi sang Nguyên Bảo, thẻ tuần, quỹ hay vật phẩm. Game từ chối (hết lượt, chưa tới ngày mở) thì Xu được hoàn ngay.\n\nChỉ nạp qua đường chính thức; không đưa mật khẩu hay OTP cho bất kỳ ai.",
+  "image_url": "",
+  "link_url": "http://127.0.0.1:8080/tai-khoan/vi",
+  "pinned": false,
+  "published_at": "2026-08-01T08:00:00+07:00"
+}

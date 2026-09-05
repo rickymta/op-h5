@@ -12,27 +12,54 @@ nguồn thật và có test.
 
 | Thành phần | Cổng | Trạng thái |
 |---|---|---|
-| `cmd/id` — OIDC provider, danh tính, ví, trang chủ + tài khoản | 8080 | ✅ kiểm chứng end-to-end |
+| `cmd/id` — OIDC provider, danh tính, ví, trang chính của cổng + tài khoản | 8080 | ✅ kiểm chứng end-to-end |
 | `cmd/adapter` — trang game, token ID → tài khoản game, cổng giới hạn tải, phát vật phẩm | 8090 | ✅ kiểm chứng end-to-end |
-| `cmd/admin` — theo dõi đội server, điều khiển ngưỡng | 8100 | ✅ kiểm chứng end-to-end |
+| `cmd/admin` — theo dõi đội server, điều khiển ngưỡng, game, nhân viên, tin tức | 8100 | ✅ kiểm chứng end-to-end |
 | `cmd/fakelogin` — login server giả, chỉ để phát triển | 9000 | ✅ |
 | Nhiều game trên cùng nền tảng | | ✅ kiểm chứng bằng game thứ hai |
 
+### Trang chính của cổng (`domain.com`, dịch vụ `id`)
+
+`id` phục vụ trang chính và trang tài khoản. API công khai (không cần đăng nhập): `GET /api/site`
+(thương hiệu từ `ID_BRAND_NAME`/`ID_SUPPORT_URL`/`ID_FANPAGE_URL`/`ID_TOPUP_URL`/`ID_LEGAL_NOTE`
++ thông báo ghim), `GET /api/games` (game `active`, game `featured` lên đầu; `online`/`servers_open`
+hỏi `GET <adapter_url>/api/game/servers` với timeout 3 s, **cache 30 s mỗi Adapter**, chống dồn;
+Adapter chết thì `live:false`; URL ảnh tương đối được ghép với `site_url`), `GET /api/news`,
+`GET /api/news/{id}`. API có phiên: `POST /api/login`, `/api/logout`, `GET /api/me` (mở rộng),
+`POST /api/me/email`, `GET /api/me/games`, `GET /api/me/sessions` + `POST …/revoke-others`,
+`GET /api/wallet/history?kind=&page=&page_size=`.
+
+`ID_SPA=1`: bundle React `web/apps/portal` (nhúng bằng `go:embed` từ `cmd/id/dist`) phục vụ mọi
+đường không phải `/api/*`, `/oauth/*`, `/.well-known/*`, `/internal/*`, `/healthz`; trang Go cũ
+lui về `/cu/`. Trang đăng nhập OIDC `/oauth/authorize` giữ template Go. CSP của `id`
+(`internal/httpx.SecurityHeaders`) đã thêm `'self'` cho script/style, `img-src 'self' data: https:`
+(ảnh game nằm ở host của game), `font-src 'self'`.
+
 ### Trang của game (`haitac.domain.com`)
 
-Adapter phục vụ `/`, `/may-chu`, `/quy-doi`, `/choi-game`; nginx proxy sáu đường đó sang
-`:8090` và giữ nguyên phần còn lại cho tầng PHP cũ (xem `docker/nginx/game.conf`). Dùng
-`=` và `^~` để chúng thắng trước regex `\.php$`, nên `/api/getSession.php` vẫn về PHP.
+Adapter phục vụ `/`, `/may-chu`, `/cua-hang`, `/tin-tuc`, `/tin-tuc/{id}`, `/choi-game`; nginx
+proxy các đường đó (cùng `/auth/`, `/api/game/`, `/app/`, `/cu/`) sang `:8090` và giữ nguyên phần
+còn lại cho tầng PHP cũ (xem `docker/nginx/game_site.conf`). Dùng `=` và `^~` để chúng thắng trước
+regex `\.php$` và `\.(js|css)$`, nên `/api/getSession.php` vẫn về PHP.
 
 Số liệu trên trang là **sống**: dải trạng thái máy chủ đến từ chính bộ đếm tải mà cổng
 giới hạn đang dùng. Phục vụ bằng file tĩnh thì trang sẽ hiện một con số còn cổng lại
 quyết định theo một con số khác.
 
-Nhận diện lấy từ chính game: `#EE4623` đã là màu chủ đạo của trang cũ, nền dùng
-`assets/images/bg_pc.jpg`, logo dùng `assets/images/logo.png`.
+Nhận diện **không còn gắn cứng**: tên, tagline, thể loại, ảnh bìa / key visual / logo, màu nhấn,
+nhãn Mới/Hot/Sắp ra và ba liên kết đọc từ dòng `games` của chính game (migration 0010, sửa ở trang
+quản trị → Game) qua `GET /api/game/meta` — kèm `recommended` (máy chủ gợi ý cho người mới, cùng
+`AdmitNew` mà cổng dùng), `servers_open`, `online`, `brand`, `id_base`. Tiêu đề thư cửa hàng
+mặc định `"Cửa hàng " + tên game`. Ảnh thương hiệu đặt ở `ASSETS_DIR/brand/<game>/…`, nginx phục vụ
+`/brand/`; URL trong bảng có thể tương đối so với `site_url`. Tin của game + tin chung:
+`GET /api/game/news?limit=`, `GET /api/game/news/{id}`; trạng thái đăng nhập: `GET /api/game/me`.
 
-**Chưa làm:** tích hợp login server và console THẬT (cần dump DB từ server cũ); trang
-riêng cho các game sau này (mỗi game một bộ template, hoặc tham số hoá bộ hiện có).
+`ADAPTER_SPA=1`: bundle React `web/apps/game` (assetsDir `app/`, vì `/assets/` trên host game đã
+thuộc client LayaAir) phục vụ `/`, `/may-chu`, `/cua-hang`, `/tin-tuc*`; trang Go cũ lui về `/cu/`;
+`/choi-game`, `/auth/*`, `/api/*`, `/srv/*`, `/quy-doi` và trang `full.html` giữ nguyên. **Một bundle
+chạy cho mọi game** — game mới chỉ cần dòng `games` + ảnh trong `brand/`, không build lại image.
+
+**Chưa làm:** tích hợp login server và console THẬT (cần dump DB từ server cũ).
 
 ## Vì sao logic giới hạn tải nằm ở đây, không nằm trong game
 
@@ -119,6 +146,11 @@ docker run -d --network host \
   op-h5-adapter
 ```
 
+Tên/tagline/ảnh của game đó điền ở trang quản trị (Game) sau khi có dòng `games`; ảnh chép vào
+`ASSETS_DIR/brand/tamquoc/` rồi ghi URL `/brand/tamquoc/…`. Adapter còn nhận `ADAPTER_SPA`
+(`1` = giao diện React), `ADAPTER_GAME_NAME` (tên dự phòng khi chưa có dòng `games`) và
+`ID_BRAND_NAME` (thương hiệu ở chân trang).
+
 **Mỗi game một `ADAPTER_SECRET_ENC_KEY` riêng.** Dùng chung một khoá nghĩa là lộ khoá
 của game này thì mở được tài khoản game kia.
 
@@ -182,6 +214,9 @@ mọi lần nạp đều vào nhật ký.
 | `ID_SMTP_HOST` / `ID_SMTP_PORT` | | — thiếu thì **tắt** khôi phục mật khẩu |
 | `ID_SMTP_USER` / `ID_SMTP_PASSWORD` | | để trống nếu SMTP nội bộ không cần xác thực |
 | `ID_SMTP_FROM` / `ID_SMTP_FROM_NAME` | | địa chỉ gửi; `FROM` bắt buộc để bật tính năng |
+| `ID_SPA` | | `0` — `1` = giao diện React `web/apps/portal` phục vụ từ gốc, trang Go cũ ở `/cu/` |
+| `ID_BRAND_NAME` | | `Cổng game` — thương hiệu, trả qua `GET /api/site` (cả adapter cũng đọc biến này) |
+| `ID_SUPPORT_URL` / `ID_FANPAGE_URL` / `ID_TOPUP_URL` / `ID_LEGAL_NOTE` | | rỗng — link hỗ trợ, fanpage, trang nạp Xu (rỗng = chưa có cổng nạp), dòng pháp lý ở chân trang |
 
 **Không có "chế độ ghi log" thay cho gửi email thật.** Một đường đặt lại mật khẩu in ra
 log là một đường chiếm tài khoản cho bất kỳ ai đọc được log. Chưa cấu hình SMTP thì tính

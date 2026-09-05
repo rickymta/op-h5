@@ -29,6 +29,9 @@ type apiServer struct {
 	mail           *mail.Sender
 	// publicURL dung de dung lien ket trong email.
 	publicURL string
+	// site la thuong hieu cua cong (GET /api/site); live la cache so lieu song tu Adapter (catalog.go).
+	site siteInfo
+	live *liveStats
 }
 
 // decodeJSON doc than request JSON voi gioi han kich thuoc.
@@ -92,24 +95,6 @@ func (a *apiServer) register(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusCreated, map[string]any{"id": id, "username": in.Username})
 }
 
-func (a *apiServer) me(w http.ResponseWriter, r *http.Request) {
-	uid, ok := a.currentUser(r)
-	if !ok {
-		httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Chưa đăng nhập.")
-		return
-	}
-	u, err := a.users.ByID(r.Context(), uid)
-	if err != nil {
-		httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Phiên không hợp lệ.")
-		return
-	}
-	out := map[string]any{"id": u.ID, "username": u.Username, "created_at": u.CreatedAt}
-	if u.Email.Valid {
-		out["email"] = u.Email.String
-	}
-	httpx.JSON(w, http.StatusOK, out)
-}
-
 func (a *apiServer) balance(w http.ResponseWriter, r *http.Request) {
 	uid, ok := a.currentUser(r)
 	if !ok {
@@ -123,29 +108,6 @@ func (a *apiServer) balance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{"currency": "XU", "balance": bal})
-}
-
-func (a *apiServer) history(w http.ResponseWriter, r *http.Request) {
-	uid, ok := a.currentUser(r)
-	if !ok {
-		httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Chưa đăng nhập.")
-		return
-	}
-	items, err := a.wallet.History(r.Context(), uid, 50)
-	if err != nil {
-		a.log.Error("doc lich su", "err", err)
-		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được lịch sử.")
-		return
-	}
-	out := make([]map[string]any, 0, len(items))
-	for _, e := range items {
-		row := map[string]any{"txn": e.TxnID, "kind": e.Kind, "amount": e.Amount, "at": e.At}
-		if e.Memo.Valid {
-			row["memo"] = e.Memo.String
-		}
-		out = append(out, row)
-	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"items": out})
 }
 
 // ---------------------------------------------------------------- nap tien noi bo

@@ -1,0 +1,19 @@
+{
+  "items": [
+    { "txn": 9012, "kind": "convert", "amount": -20000, "memo": "Đại Hải Trình · Gói Thuyền Trưởng · S3", "at": "2026-09-06T08:45:00+07:00" },
+    { "txn": 9011, "kind": "refund", "amount": 20000, "memo": "Hoàn: game từ chối đơn #5581 (nhân vật chưa tạo)", "at": "2026-09-06T08:40:00+07:00" },
+    { "txn": 9010, "kind": "convert", "amount": -20000, "memo": "Đại Hải Trình · Gói Thuyền Trưởng · S3", "at": "2026-09-06T08:39:00+07:00" },
+    { "txn": 9004, "kind": "topup", "amount": 100000, "memo": "Thẻ Viettel 100.000đ", "at": "2026-09-05T21:10:00+07:00" },
+    { "txn": 8990, "kind": "convert", "amount": -5000, "memo": "Đại Hải Trình · Gói Tân Thủ · S3", "at": "2026-09-04T19:02:00+07:00" },
+    { "txn": 8971, "kind": "adjust", "amount": 300, "memo": "Đền bù sự cố đăng nhập 03/09", "at": "2026-09-03T15:30:00+07:00" },
+    { "txn": 8950, "kind": "topup", "amount": 50000, "memo": "Chuyển khoản MB · NAP HAITACFAN", "at": "2026-09-01T09:12:00+07:00" },
+    { "txn": 8901, "kind": "convert", "amount": -12000, "memo": "Đại Hải Trình · Thẻ Tháng · S3", "at": "2026-08-28T22:48:00+07:00" },
+    { "txn": 8870, "kind": "adjust", "amount": -1000, "memo": "Thu hồi Xu phát nhầm (hỗ trợ #2231)", "at": "2026-08-25T11:00:00+07:00" },
+    { "txn": 8844, "kind": "refund", "amount": 5000, "memo": "Hoàn: game từ chối đơn #5402", "at": "2026-08-20T17:20:00+07:00" },
+    { "txn": 8843, "kind": "convert", "amount": -5000, "memo": "Đại Hải Trình · Gói Tân Thủ · S2", "at": "2026-08-20T17:18:00+07:00" },
+    { "txn": 8800, "kind": "topup", "amount": 200000, "memo": "MoMo · đơn MM20260815", "at": "2026-08-15T12:00:00+07:00" }
+  ],
+  "page": 1,
+  "page_size": 20,
+  "has_more": true
+}

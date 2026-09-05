@@ -1,0 +1,21 @@
+{
+  "games": [
+    {
+      "code": "haitac", "name": "Đại Hải Trình", "adapter_url": "http://127.0.0.1:8090", "site_url": "https://haitac.example.com",
+      "status": "active", "sort_order": 10, "servers": 3, "packages": 24, "has_client": true,
+      "tagline": "Ra khơi cùng băng hải tặc của riêng bạn", "genre": "Đấu tướng · Idle",
+      "description": "Thu thập thuyền viên, nâng cấp tàu và chinh phục Đại Hải Trình.\n\nChơi ngay trên trình duyệt, không cần cài đặt.",
+      "cover_url": "/assets/images/banner-min.png", "banner_url": "/assets/images/bg_pc.jpg", "logo_url": "/assets/images/logo.png",
+      "accent": "#EE4623", "badge": "hot", "featured": true,
+      "fanpage_url": "https://facebook.com/haitac", "group_url": "https://facebook.com/groups/haitac", "support_url": "https://m.me/haitac"
+    },
+    {
+      "code": "tienhiep", "name": "Tiên Hiệp Ký", "adapter_url": "http://127.0.0.1:8091", "site_url": "https://tienhiep.example.com",
+      "status": "hidden", "sort_order": 20, "servers": 0, "packages": 0, "has_client": false,
+      "tagline": "", "genre": "Nhập vai", "description": "",
+      "cover_url": "", "banner_url": "", "logo_url": "",
+      "accent": "", "badge": "soon", "featured": false,
+      "fanpage_url": "", "group_url": "", "support_url": ""
+    }
+  ]
+}

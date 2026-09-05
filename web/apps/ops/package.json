@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_MOCK=1 vite",
     "build": "node ../../scripts/clean-dist.mjs ../../../platform/cmd/admin/dist && vite build",
     "preview": "vite preview"
   },

@@ -1,0 +1,6 @@
+{
+  "roles": [
+    { "srv_code": "s2", "master_id_hex": "64f1c2a0b7e94d3a1c5e8f01", "name": "Hắc Râu", "level": 58 },
+    { "srv_code": "s1", "master_id_hex": "64e0a9d3c1b24f6e8a7d2c33", "name": "Tiểu Hải", "level": 12 }
+  ]
+}

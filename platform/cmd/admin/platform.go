@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rickymta/op-h5/platform/internal/catalog"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
 )
@@ -60,14 +61,29 @@ type gameRow struct {
 	SiteURL    string `json:"site_url"`
 	Status     string `json:"status"`
 	SortOrder  int    `json:"sort_order"`
-	Servers    int    `json:"servers"`
-	Packages   int    `json:"packages"`
-	HasClient  bool   `json:"has_client"`
+	// Bo mat (migration 0010) — trang chinh va trang game doc tu day.
+	Tagline     string `json:"tagline"`
+	Genre       string `json:"genre"`
+	Description string `json:"description"`
+	CoverURL    string `json:"cover_url"`
+	BannerURL   string `json:"banner_url"`
+	LogoURL     string `json:"logo_url"`
+	Accent      string `json:"accent"`
+	Badge       string `json:"badge"`
+	Featured    bool   `json:"featured"`
+	FanpageURL  string `json:"fanpage_url"`
+	GroupURL    string `json:"group_url"`
+	SupportURL  string `json:"support_url"`
+	Servers     int    `json:"servers"`
+	Packages    int    `json:"packages"`
+	HasClient   bool   `json:"has_client"`
 }
 
 func (s *server) apiGameList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	rows, err := s.db.QueryContext(r.Context(), `
 		SELECT g.code, g.name, g.adapter_url, COALESCE(g.site_url,''), g.status, g.sort_order,
+		       g.tagline, g.genre, COALESCE(g.description,''), g.cover_url, g.banner_url, g.logo_url,
+		       g.accent, g.badge, g.featured, g.fanpage_url, g.group_url, g.support_url,
 		       (SELECT COUNT(*) FROM game_servers  s WHERE s.game_code = g.code),
 		       (SELECT COUNT(*) FROM game_packages p WHERE p.game_code = g.code AND p.status='active'),
 		       EXISTS(SELECT 1 FROM oauth_clients c WHERE c.client_id = g.code)
@@ -82,11 +98,15 @@ func (s *server) apiGameList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	for rows.Next() {
 		var g gameRow
 		if err := rows.Scan(&g.Code, &g.Name, &g.AdapterURL, &g.SiteURL, &g.Status, &g.SortOrder,
+			&g.Tagline, &g.Genre, &g.Description, &g.CoverURL, &g.BannerURL, &g.LogoURL,
+			&g.Accent, &g.Badge, &g.Featured, &g.FanpageURL, &g.GroupURL, &g.SupportURL,
 			&g.Servers, &g.Packages, &g.HasClient); err == nil {
 			out = append(out, g)
+		} else {
+			s.log.Error("doc dong game", "err", err)
 		}
 	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"games": out})
+	httpx.JSON(w, http.StatusOK, map[string]any{"games": out, "badges": catalog.Badges})
 }
 
 type gameInput struct {
@@ -248,8 +268,21 @@ func (s *server) apiGameUpdate(w http.ResponseWriter, r *http.Request, a *admin)
 		SiteURL    *string `json:"site_url"`
 		Status     *string `json:"status"`
 		SortOrder  *int    `json:"sort_order"`
+		// Bo mat (migration 0010). Moi truong deu tuy chon: chi ghi truong nao gui len.
+		Tagline     *string `json:"tagline"`
+		Genre       *string `json:"genre"`
+		Description *string `json:"description"`
+		CoverURL    *string `json:"cover_url"`
+		BannerURL   *string `json:"banner_url"`
+		LogoURL     *string `json:"logo_url"`
+		Accent      *string `json:"accent"`
+		Badge       *string `json:"badge"`
+		Featured    *bool   `json:"featured"`
+		FanpageURL  *string `json:"fanpage_url"`
+		GroupURL    *string `json:"group_url"`
+		SupportURL  *string `json:"support_url"`
 	}
-	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32<<10)).Decode(&in); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Dữ liệu không đọc được.")
 		return
 	}
@@ -288,24 +321,115 @@ func (s *server) apiGameUpdate(w http.ResponseWriter, r *http.Request, a *admin)
 	if in.SortOrder != nil {
 		set("sort_order", *in.SortOrder)
 	}
+	// --- bo mat ---
+	for _, f := range []struct {
+		v     *string
+		col   string
+		label string
+		max   int
+	}{{in.Tagline, "tagline", "Tagline", 120}, {in.Genre, "genre", "Thể loại", 48}} {
+		if f.v == nil {
+			continue
+		}
+		t := strings.TrimSpace(*f.v)
+		if len([]rune(t)) > f.max {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request", fmt.Sprintf("%s tối đa %d ký tự.", f.label, f.max))
+			return
+		}
+		set(f.col, t)
+	}
+	if in.Description != nil {
+		d := strings.TrimSpace(*in.Description)
+		if len([]rune(d)) > 4000 {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request", "Mô tả tối đa 4.000 ký tự.")
+			return
+		}
+		set("description", nullStr(d))
+	}
+	// URL anh va lien ket: rong, hoac tuong doi tu goc (so voi site_url), hoac http(s)://.
+	for _, f := range []struct {
+		v     *string
+		col   string
+		label string
+	}{
+		{in.CoverURL, "cover_url", "Ảnh bìa"}, {in.BannerURL, "banner_url", "Key visual"}, {in.LogoURL, "logo_url", "Logo"},
+		{in.FanpageURL, "fanpage_url", "Fanpage"}, {in.GroupURL, "group_url", "Nhóm"}, {in.SupportURL, "support_url", "Hỗ trợ"},
+	} {
+		if f.v == nil {
+			continue
+		}
+		u := strings.TrimSpace(*f.v)
+		if !catalog.ValidAssetURL(u) {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request",
+				f.label+" phải để trống, bắt đầu bằng / hoặc http(s)://, tối đa 255 ký tự.")
+			return
+		}
+		set(f.col, u)
+	}
+	if in.Accent != nil {
+		c := strings.TrimSpace(*in.Accent)
+		if !catalog.ValidAccent(c) {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request", "Màu nhấn phải dạng #RRGGBB hoặc để trống.")
+			return
+		}
+		set("accent", c)
+	}
+	if in.Badge != nil {
+		if !catalog.ValidBadge(*in.Badge) {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request", "Nhãn phải là new, hot, soon hoặc để trống.")
+			return
+		}
+		set("badge", *in.Badge)
+	}
+	if in.Featured != nil {
+		set("featured", *in.Featured)
+	}
 	if len(sets) == 0 {
 		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Không có gì để sửa.")
 		return
 	}
 	ctx := r.Context()
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không mở được giao dịch.")
+		return
+	}
+	defer func() { _ = tx.Rollback() }()
+	// Chi MOT game noi bat (hero cua trang chinh): bat o game nay thi tat o moi game khac, trong
+	// cung giao dich — khong co luc nao hai game cung noi bat hay khong game nao ca giua chung.
+	if in.Featured != nil && *in.Featured {
+		if _, err := tx.ExecContext(ctx, `UPDATE games SET featured = 0 WHERE code <> ? AND featured = 1`, code); err != nil {
+			s.log.Error("tat noi bat game khac", "err", err, "code", code)
+			httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
+			return
+		}
+	}
 	args = append(args, code)
-	if _, err := s.db.ExecContext(ctx, `UPDATE games SET `+strings.Join(sets, ", ")+` WHERE code = ?`, args...); err != nil {
+	res, err := tx.ExecContext(ctx, `UPDATE games SET `+strings.Join(sets, ", ")+` WHERE code = ?`, args...)
+	if err != nil {
 		s.log.Error("sua game", "err", err, "code", code)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
 		return
 	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		// 0 dong cung co the la "khong doi gi" — kiem tra ton tai de tra dung loi.
+		var one int
+		if tx.QueryRowContext(ctx, `SELECT 1 FROM games WHERE code = ?`, code).Scan(&one) != nil {
+			httpx.Error(w, http.StatusNotFound, "not_found", "Không có game này.")
+			return
+		}
+	}
 	// site_url doi thi redirect cua client OIDC phai doi theo, neu khong dang nhap se hong.
 	if in.SiteURL != nil {
 		redirect := strings.TrimRight(strings.TrimSpace(*in.SiteURL), "/") + "/auth/callback"
-		if _, err := s.db.ExecContext(ctx,
+		if _, err := tx.ExecContext(ctx,
 			`UPDATE oauth_clients SET redirect_uris = ? WHERE client_id = ?`, redirect, code); err != nil {
 			s.log.Error("sua redirect oauth", "err", err, "code", code)
 		}
+	}
+	if err := tx.Commit(); err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không lưu được.")
+		return
 	}
 	blob, _ := json.Marshal(in)
 	s.audit(ctx, a.ID, "game_update", code, string(blob))
