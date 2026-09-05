@@ -40,9 +40,20 @@ services:
     environment:
       TZ: Asia/Ho_Chi_Minh
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?dat trong .env}
+      # initdb/mysql/zz-init.sh (chi chay lan dau) nap seed/ khi khong co dump, roi ghi mat khau
+      # Mongo/MQ/console + PUBLIC_HOST vao tcg.cloud_*/staff/cloud_device va them may chu theo GAME_SERVERS.
+      MONGO_USER: ${MONGO_USER:-abc123}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:?dat trong .env}
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?dat trong .env}
+      CONSOLE_ADMIN_PASSWORD: ${CONSOLE_ADMIN_PASSWORD:?dat trong .env — mat khau tai khoan admin cua console (tcg.staff)}
+      PUBLIC_HOST: ${PUBLIC_HOST:?dat trong .env}
+      GAME_SERVERS: ${GAME_SERVERS:-s1:8001:d1}
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/tcg.cnf:/etc/mysql/conf.d/tcg.cnf:ro
+      # Chi chay LAN DAU (volume trong): *.sql = dump that (gitignored, tuy chon); seed/*.sql = bo seed
+      # sach trong git; zz-init.sh chon seed khi khong co dump va dien .env vao ca hai truong hop.
       - ./initdb/mysql:/docker-entrypoint-initdb.d:ro
     mem_limit: 768m
     mem_reservation: 384m

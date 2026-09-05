@@ -39,107 +39,63 @@ nhân vật của họ (S1), đúng tên và cấp nhân vật, không qua màn 
 
 ## Tóm tắt lệnh — bản rút gọn để copy (Ubuntu, Docker đã cài, ufw đã mở 22/80/443)
 
-Trạng thái 2026-09-04: repo + release `assets-v1` + image GHCR (public, CI xanh 3/3) đã sẵn. Chưa chạy bước nào trên server mới. Ký hiệu `[PC]` máy Windows, `[CŨ]` pgaming, `[MỚI]` Ubuntu. Lệnh Linux chạy bằng root.
+Trạng thái 2026-09-05: repo + release `assets-v1` + image GHCR đã sẵn; MySQL khởi tạo từ **seed sạch trong git** (`docker/initdb/mysql/seed/`), **không cần dump, không cần secrets cũ**. Chưa `up` thật lần nào. Ký hiệu `[MỚI]` Ubuntu, `[CŨ]` pgaming. Lệnh Linux chạy bằng root.
 
-**1 `[PC]` Lấy secrets** (13 giá trị, bảng ở Bước 0 bên dưới):
-```bash
-cd E:/DATA/Games/HacTacHuyenThoaiH5/game && python tools/mask-secrets.py --restore
-# ... chép giá trị ra một chỗ ...
-python tools/mask-secrets.py --mask && python tools/mask-secrets.py --check
-```
-Chọn `PUBLIC_HOST` = IP public server mới; dùng `http://` (client hardcode `http://…:9000`, chưa dùng 443).
-
-**2 `[CŨ]` Dump DB** (chưa tắt server cũ):
-```bash
-curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/prepare-dumps.sh -o /tmp/prepare-dumps.sh
-export MYSQL_PW='<root mysql>' MONGO_PW='<mongo abc123>' && bash /tmp/prepare-dumps.sh
-sed -i 's/192\.168\.1\.69/<PUBLIC_HOST>/g' /tmp/tcg-dumps/mysql/00-tcg.sql && ls /tmp/tcg-dumps/mysql /tmp/tcg-dumps/mongo/dump
-```
-Phải có `00-tcg.sql stat.sql web.sql cdks.sql game_s1.sql` + thư mục Mongo `tcg cross-yzx1 game-s1` (+ `admin`). Server cũ **không có** `statistic` và `group-offical` — hai DB đó được service tự tạo khi chạy, không phải lỗi dump. (Dump 2026-09-05 đã nằm sẵn ở `docker/initdb/` trên PC; server cũ chạy MongoDB 5.0.6 không có `mongodump`, phải tải MongoDB Database Tools rồi bật `mongod` tạm — xem mục Bước 1.)
-
-**3 `[MỚI]` Port + compose + rsync:**
+**1 `[MỚI]` Port:**
 ```bash
 ufw allow 9000/tcp && ufw allow 8001/tcp && ufw allow 12345/tcp && ufw allow 7788/tcp && ufw allow 8080/tcp && ufw status numbered   # 8080 = he thong ID
-docker compose version || apt-get install -y docker-compose-plugin
-apt-get install -y rsync curl
 ```
 
-**4 `[MỚI]` Bootstrap** (swap 4 GB, tải 1.33 GB assets từ release, lấy `docker/` về `/opt/tcg/docker`):
+**2 `[MỚI]` Bootstrap = tất cả** (swap 4 GB, tải 1.33 GB assets, lấy `docker/`, sinh `.env` với bí mật ngẫu nhiên, pull image, `up -d`, đợi web + login lên; 10–20 phút):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | MODE=pull bash
-ls /opt/tcg/assets/res | wc -l && ls /opt/tcg/docker          # 10584
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | MODE=pull PUBLIC_HOST=<IP-hoặc-domain> bash
 ```
+Cuối script in tài khoản quản trị và console; toàn bộ bí mật ở `/opt/tcg/docker/.env` (chmod 600). `MODE=build` = clone + build tại chỗ (611 MB LFS). `NO_UP=1` để dừng trước khi `up`. Chạy lại script vô hại: `.env` đã có thì giữ nguyên.
 
-**5 `[MỚI]` Kéo dump:**
+**3 `[MỚI]` Kiểm tra:**
 ```bash
+cd /opt/tcg/docker && C="docker compose -f docker-compose.image.yml"
+$C ps                                                   # tất cả healthy; platform-seed "Exited (0)"
+$C logs mysql | grep tcg-init                           # "xong (seed)" + dòng "s1  ws=8001"
+$C logs game | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory'; echo "(rong = tot)"
+curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get; curl -sI http://127.0.0.1/play-game | head -1
+curl -s http://127.0.0.1:8080/.well-known/openid-configuration | head -c 120; echo
+```
+Từ máy khác: `http://PUBLIC_HOST/` → đăng ký ở `:8080` → `/choi-game`. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
+
+**4 `[CŨ]`→`[MỚI]` Tuỳ chọn — giữ tài khoản/nhân vật cũ:**
+```bash
+# [CŨ]
+curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/prepare-dumps.sh -o /tmp/prepare-dumps.sh
+export MYSQL_PW='<root mysql>' MONGO_PW='<mongo abc123>' && bash /tmp/prepare-dumps.sh
+# [MỚI]
 rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mysql/      /opt/tcg/docker/initdb/mysql/
 rsync -avz --progress root@<IP-CŨ>:/tmp/tcg-dumps/mongo/dump/ /opt/tcg/docker/initdb/mongo/dump/
+cd /opt/tcg/docker && $C down -v && $C up -d            # khởi tạo lại từ dump; zz-init.sh tự điền mật khẩu .env + PUBLIC_HOST vào dump
 ```
+Không cần sửa IP hay mật khẩu trong dump. `game_s1.sql` và `admin/` của Mongo bỏ được. (Dump 2026-09-04 đang nằm ở `docker/initdb/` trên PC, gitignored.)
 
-**6 `[MỚI]` `.env`:**
-```bash
-cd /opt/tcg/docker && nano .env      # PUBLIC_HOST + 14 secret PHP/Java + nen tang (xem Buoc 4)
-H=$(grep ^PUBLIC_HOST= .env | cut -d= -f2-); sed -i "s|^ID_ISSUER=.*|ID_ISSUER=http://$H:8080|; s|^ADAPTER_REDIRECT_URI=.*|ADAPTER_REDIRECT_URI=http://$H/auth/callback|" .env
-sed -i "s|^ADAPTER_SECRET_ENC_KEY=.*|ADAPTER_SECRET_ENC_KEY=$(head -c 32 /dev/urandom | base64)|; s|^ID_INTERNAL_SECRET=.*|ID_INTERNAL_SECRET=$(head -c 32 /dev/urandom | base64)|" .env
-printf 'ID_SIGNING_KEY_PEM="%s"\n' "$(openssl genrsa 2048 2>/dev/null)" >> .env
-grep -E '^(PUBLIC_HOST|TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD|CONSOLE_ADMIN_PASSWORD|ID_ISSUER|ADAPTER_REDIRECT_URI|ADAPTER_SECRET_ENC_KEY|ADMIN_BOOTSTRAP_USER|ADMIN_BOOTSTRAP_PASSWORD)=$' .env && echo "CON TRONG" || echo OK
-```
-Ba mật khẩu MySQL/Mongo/MQ **phải đúng như server cũ** (dump tạo bằng chúng). `CONSOLE_ADMIN_PASSWORD` giờ còn được adapter dùng để phát vật phẩm qua console. `ADMIN_BOOTSTRAP_USER/PASSWORD` = tài khoản owner đầu tiên của trang quản trị. `platform-seed` tự tạo DB `platform` và seed `oauth_clients/games/game_servers/game_devices/game_packages` (1962 gói từ `id.txt`) — không chạy SQL tay.
-
-**7 `[MỚI]` Hạ tầng + import dump:**
-```bash
-cd /opt/tcg/docker && docker compose -f docker-compose.image.yml pull
-docker compose -f docker-compose.image.yml up -d mysql mongo rabbitmq
-docker compose -f docker-compose.image.yml logs -f mysql | grep -m1 'ready for connections'     # Ctrl+C khi thấy
-docker compose -f docker-compose.image.yml exec mysql mysql -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= .env | cut -d= -f2-)" -e "SHOW DATABASES; SELECT code,name,ws_port FROM tcg.srv_game;"
-```
-Thiếu DB → `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 7.
-
-**8 `[MỚI]` Lên toàn bộ:**
-```bash
-docker compose -f docker-compose.image.yml up -d          # gom ca id/adapter/admin + platform-seed
-watch -n5 'docker compose -f docker-compose.image.yml ps'      # 5–8 phút, tất cả healthy; platform-seed "Exited (0)"
-```
-
-**9 `[MỚI]` Kiểm tra:**
-```bash
-docker compose -f docker-compose.image.yml logs game | grep -E '找不到excel|找不到sheet|加载错误|OutOfMemory'; echo "(rong = tot)"
-curl -s -o /dev/null -w 'console %{http_code}\n' http://127.0.0.1:9999/conf/global/get; curl -sI http://127.0.0.1/play-game | head -1
-curl -sI http://127.0.0.1/ | head -1; curl -s http://127.0.0.1:8080/.well-known/openid-configuration | head -c 120; echo   # trang chu (adapter) 200; ID tra JSON
-docker compose -f docker-compose.image.yml logs platform-seed | tail -8       # 6 dong dem, tat ca > 0
-docker stats --no-stream
-```
-Từ máy khác: `http://PUBLIC_HOST/play-game` → đăng ký → vào game. Màn đen: F12 xem client gọi `PUBLIC_HOST:9000` hay `192.168.1.69`.
-
-Ba chỗ dễ vấp: mật khẩu `.env` không khớp dump (6); volume cũ chặn import (7); nginx rewrite là suy đoán từ mã PHP, đăng ký/đăng nhập web có thể cần chỉnh `nginx/game.conf` (9).
+Ba chỗ dễ vấp: `PUBLIC_HOST` sai (bootstrap đoán IP public khi không truyền — sai thì `rm /opt/tcg/docker/.env`, chạy lại với `PUBLIC_HOST=`); volume cũ chặn khởi tạo (`down -v`); nginx rewrite — vẫn kiểm tra đăng nhập web sau lần `up` đầu.
 
 ---
 
-## Thử trước trên máy dev (macOS) — không cần dump
+## Thử trước trên máy dev (macOS) — cả cụm Java thật, không cần dump
 
-Trước khi đụng vào server thật, có thể dựng gần như toàn bộ hệ thống trên máy dev để xem
-giao diện và thử luồng tài khoản / ví / cổng giới hạn tải:
+Trước khi đụng vào server thật, dựng **toàn bộ** hệ thống trên máy dev: 9 service Java thật
+(console → world → meta → statistic → pay → group → game s1 → login → cross), hệ thống ID /
+Adapter / trang quản trị, PHP + nginx. MySQL nạp bộ seed sạch `docker/initdb/mysql/seed/` qua
+`zz-init.sh` — đúng đường mà server thật đi — Mongo trống, service tự tạo collection.
 
 ```bash
-./docker/dev-macos.sh --build     # lần đầu: dựng image rồi chạy
-./docker/dev-macos.sh             # các lần sau
+./docker/dev-macos.sh --build     # lần đầu: dựng image rồi chạy (Docker Desktop cấp >= 8 GB RAM, nên 10)
+./docker/dev-macos.sh             # các lần sau; mỗi lần là môi trường MỚI (bí mật sinh mới, DB tạo mới)
 ./docker/dev-macos.sh --down      # tắt hết
 ```
 
-Script tự in bảng truy cập và mật khẩu quản trị của lần chạy đó.
-
-**Chạy được tới đâu khi `tcg` rỗng** — đã đo, không phải suy đoán:
-
-| Thành phần | Không có dump |
-|---|---|
-| `console`, `world`, `meta`, `statistic` | ✅ khởi động bình thường (kèm lỗi `Table … doesn't exist` khi truy vấn) |
-| `login` | ❌ `/srv/game/list` và `/account/*` đọc bảng trong `tcg` |
-| `game`, `group`, `cross` | ❌ đọc `srv_game` / `srv_group_device` để biết mình là ai |
-| Hệ thống ID, Adapter, trang quản trị, trang game | ✅ đầy đủ (DB `platform` tự tạo bằng migration) |
-
-Nên client **vào được tới màn hình đăng nhập** — nó chỉ cần `meta` (`:12345`) — nhưng
-chọn máy chủ xong thì không nối được WebSocket vì không có tiến trình `game`. Script thay
-`login` bằng `cmd/fakelogin` (nói đúng giao thức đọc từ bytecode) để phần còn lại chạy.
+Script in bảng truy cập, tài khoản quản trị và mật khẩu console của lần chạy đó; log game:
+`docker exec op-game tail -f .logs/game-s1/info.log`. Client vào `http://127.0.0.1:8080/play.php`,
+WebSocket máy chủ s1 ở `:8001`. Muốn thử với dữ liệu cũ: đặt dump vào `docker/initdb/mysql/*.sql`
+và `docker/initdb/mongo/dump/` (gitignored) — `zz-init.sh` tự nhận ra.
 
 Hai điều khác biệt so với server thật, **chỉ là hạn chế của Docker Desktop trên Mac**:
 
@@ -164,7 +120,9 @@ python tools/mask-secrets.py --check     # phải in "sach"
 
 ---
 
-## Bước 0 — Chuẩn bị trên PC (10 phút)
+## Bước 0 — (Tuỳ chọn) Chuẩn bị trên PC (10 phút)
+
+> **Từ 2026-09-05 không cần secrets cũ**: `gen-env.sh` sinh bí mật mới, `zz-init.sh` ghi vào DB. Mục 0.1 chỉ còn cần khi muốn dùng lại API key nạp thẻ / MoMo / checksum bank của server cũ (điền tay vào `.env` sau bootstrap). Mục 0.2 vẫn đọc.
 
 **0.1 Gom secrets thành `secrets.env`** (file này đã gitignored, chỉ ở PC):
 
@@ -195,7 +153,9 @@ python tools/mask-secrets.py --mask && python tools/mask-secrets.py --check     
 
 ---
 
-## Bước 1 — Dump dữ liệu trên server cũ (15–30 phút, tuỳ DB)
+## Bước 1 — (Tuỳ chọn) Dump dữ liệu trên server cũ (15–30 phút, tuỳ DB)
+
+> **Từ 2026-09-05 bước này chỉ cần khi muốn giữ tài khoản/nhân vật cũ.** Không có dump, `initdb/mysql/zz-init.sh` nạp bộ seed sạch trong git (`initdb/mysql/seed/`) và game chạy được ngay; Mongo trống cũng được (service tự tạo collection). Có dump thì mật khẩu trong dump **không** cần khớp `.env` — `zz-init.sh` ghi mật khẩu `.env` vào `tcg.cloud_*`/`staff` sau khi import, và cũng tự đổi `192.168.1.69` → `PUBLIC_HOST` / `127.0.0.1`, nên **bỏ qua đoạn `sed` IP bên dưới**.
 
 ```bash
 # [CŨ]
@@ -251,7 +211,9 @@ ls /opt/tcg/docker                                          # docker-compose.ima
 
 ---
 
-## Bước 3 — Chuyển dump sang server mới (5 phút)
+## Bước 3 — (Tuỳ chọn, chỉ khi làm Bước 1) Chuyển dump sang server mới (5 phút)
+
+Đã chạy bootstrap không `NO_UP=1` thì stack đang lên với seed; đặt dump xong phải `docker compose -f docker-compose.image.yml down -v` rồi `up -d` lại để MySQL/Mongo khởi tạo lại từ dump.
 
 ```bash
 # [MỚI]
@@ -264,14 +226,16 @@ ls /opt/tcg/docker/initdb/mysql/ /opt/tcg/docker/initdb/mongo/dump/
 
 ---
 
-## Bước 4 — Điền `.env` (5 phút)
+## Bước 4 — `.env` (bootstrap đã tự làm; đọc khi cần sửa tay)
+
+Bootstrap gọi `gen-env.sh <PUBLIC_HOST>` khi chưa có `.env`: sinh `TCG_SECRET`, 3 mật khẩu hạ tầng, `CONSOLE_ADMIN_PASSWORD`, mã GM, khoá ký ID, `ID_INTERNAL_SECRET`, `ADAPTER_SECRET_ENC_KEY`, tài khoản owner trang quản trị, và đặt `ID_ISSUER`/`ADAPTER_REDIRECT_URI` theo `http://<PUBLIC_HOST>`. Mật khẩu **không** cần khớp server cũ (zz-init.sh ghi vào DB). Đoạn dưới chỉ để sửa tay:
 
 ```bash
 # [MỚI]
 cd /opt/tcg/docker && nano .env
 ```
 
-Bắt buộc điền: `PUBLIC_HOST`, `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD` (phải **khớp dump** — DB được tạo với đúng mật khẩu này), `CONSOLE_ADMIN_PASSWORD` (adapter dùng tài khoản `admin` của console để phát vật phẩm) và các secret PHP. `ASSETS_DIR=/opt/tcg/assets` giữ nguyên. Heap giữ mặc định lần đầu.
+Bắt buộc có: `PUBLIC_HOST`, `TCG_SECRET`, `MYSQL_ROOT_PASSWORD`, `MONGO_PASSWORD`, `RABBITMQ_PASSWORD`, `CONSOLE_ADMIN_PASSWORD` (zz-init.sh ghi vào `tcg.staff`; adapter + GM tool dùng) và các secret PHP muốn bật (nạp thẻ/MoMo/bank). Đổi mật khẩu hạ tầng sau khi DB đã tạo thì phải `down -v`. `ASSETS_DIR=/opt/tcg/assets` giữ nguyên. Heap giữ mặc định lần đầu.
 
 Nền tảng (`id`/`adapter`/`admin`) — chưa có domain thì dùng IP:
 
@@ -295,9 +259,9 @@ grep -c 'BEGIN.*PRIVATE KEY' .env      # 1
 
 ---
 
-## Bước 5 — Khởi động (10 phút)
+## Bước 5 — Khởi động (10 phút; bootstrap đã `up -d`, đọc khi cần làm lại)
 
-Lên hạ tầng trước, đợi import dump xong (lần đầu MySQL import vài phút):
+Bootstrap kết thúc bằng `docker compose -f docker-compose.image.yml up -d` (bỏ qua nếu `NO_UP=1`). Muốn làm tay hoặc khởi tạo lại sau khi đặt dump: lên hạ tầng trước, đợi MySQL khởi tạo xong (seed vài giây; dump thật vài phút) — log phải có dòng `[tcg-init] xong (seed)` hoặc `xong (dump)`:
 
 ```bash
 # [MỚI]  cd /opt/tcg/docker
@@ -313,7 +277,7 @@ docker compose -f docker-compose.image.yml exec mysql mysql -uroot -p"$(grep ^MY
 docker compose -f docker-compose.image.yml exec mongo mongo -u abc123 -p "$(grep ^MONGO_PASSWORD= .env | cut -d= -f2-)" --authenticationDatabase admin --quiet --eval 'db.adminCommand("listDatabases").databases.map(d=>d.name)'
 ```
 
-Phải thấy `tcg stat web cdks game_s1` (DB `platform` xuất hiện khi `platform-seed` chạy ở bước kế) và Mongo có `tcg`, `cross-yzx1`, `game-s1` (`statistic`, `group-offical` do service tự tạo). Nếu thiếu → dump chưa import (volume đã có từ lần chạy trước): `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 5.
+Phải thấy `tcg stat web cdks` và `SELECT` trả về `s1 … 8001` (với seed: `game_s1` xuất hiện khi `game` khởi động, Mongo trống; với dump: thêm `game_s1` và Mongo có `tcg`, `cross-yzx1`, `game-s1`; DB `platform` xuất hiện khi `platform-seed` chạy ở bước kế; `statistic`, `group-offical` do service tự tạo). Kiểm tra zz-init.sh đã điền `.env` vào DB: `docker compose -f docker-compose.image.yml logs mysql | grep tcg-init` → `xong (seed|dump)`. Nếu thiếu DB → volume đã có từ lần chạy trước (init chỉ chạy khi volume trống) hoặc zz-init.sh báo `LOI` (thiếu biến `.env`): `docker compose -f docker-compose.image.yml down -v` rồi làm lại bước 5.
 
 Lên toàn bộ:
 

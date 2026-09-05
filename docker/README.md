@@ -39,18 +39,22 @@ CPU: dùng `cpu_shares` (mềm) chứ không ép cứng, vì parse Excel lúc kh
 echo '0 4 * * * find /h5/server -path "*/.logs/*" -name "*.log" -mtime +7 -delete' | crontab -
 ```
 
-## 2. Chuẩn bị trên server cũ (pgaming)
+## 2. Dữ liệu MySQL: seed sạch trong git, dump server cũ chỉ là tuỳ chọn
 
-Không JAR nào chứa schema của `tcg`/`stat`/`web`/`cdks` hay Mongo (chỉ `tcg-game.jar` có 4 bảng `stat_*`). **Bắt buộc dump từ server đang chạy:**
+Không JAR nào chứa schema của `tcg`/`stat`/`web`/`cdks` hay Mongo (chỉ `tcg-game.jar` có 4 bảng `stat_*`), và ORM là MyBatis-Plus không auto-DDL. Từ 2026-09-05 schema + dữ liệu cấu hình tối thiểu nằm sẵn trong **`initdb/mysql/seed/*.sql`** (sinh bởi `tools/dump-to-seed.py` từ dump thật, đã che sạch bí mật; `python tools/dump-to-seed.py --check` để kiểm lại). Lần đầu MySQL khởi tạo, `initdb/mysql/zz-init.sh`:
 
-> **Không có dump thì chạy được tới đâu.** Đã đo: `console`, `world`, `meta`, `statistic` khởi động bình thường với `tcg` rỗng. `game`/`group`/`cross` thì không — chúng đọc `srv_game`/`srv_group_device` để biết mình là ai. `login` cũng không dùng được vì `/srv/game/list` và `/account/*` đọc bảng trong `tcg`. Đủ để xem giao diện và thử nền tảng mới, không đủ để vào game. Bộ chạy thử cục bộ: `docker/dev-macos.sh`.
+1. không thấy `tcg.srv_game` → nạp seed (59 bảng `tcg`, 20 `stat`, 21 `web`, 1 `cdks`; dữ liệu chỉ ở ~20 bảng cấu hình: `srv_game` s1, `srv_group(_device)`, `srv_cross`, `cloud_device/mysql/mongo/mq`, `app`, `srv_game_access`, `dynamic_conf`, `staff*`, `web.tichluy/webshop`);
+2. **dù seed hay dump thật**: ghi `MYSQL/MONGO/RABBITMQ_PASSWORD` của `.env` vào `tcg.cloud_*` (game/cross/group lấy credential ở đó, không đọc `env.yml`), `CONSOLE_ADMIN_PASSWORD` vào `tcg.staff`, `PUBLIC_HOST` vào `cloud_device`/`srv_login`, URL cross/group → `127.0.0.1`, tắt giới hạn platform ở `srv_game_access` (Adapter gọi `/srv/game/list` không kèm `platformCode`);
+3. thêm máy chủ theo `GAME_SERVERS` (copy dòng s1).
+
+Nên **`.env` không cần khớp mật khẩu server cũ nữa**, và Mongo/`game_sX` không cần dump (service tự tạo). Chỉ khi muốn giữ tài khoản/nhân vật cũ mới dump:
 
 ```bash
 export MYSQL_PW='...' MONGO_PW='...'
-bash prepare-dumps.sh          # -> /tmp/tcg-dumps/{mysql/*.sql, mongo/dump/}
+bash prepare-dumps.sh          # -> /tmp/tcg-dumps/{mysql/*.sql, mongo/dump/}  -> đặt vào initdb/mysql/ và initdb/mongo/dump/ (gitignored)
 ```
 
-Đồng thời tắt game cũ khi cắt chuyển: `/h5/server/stop.sh` (lưu ý script này **xoá log**).
+Có dump `*.sql` trong `initdb/mysql/` thì seed **không** được nạp. Đồng thời tắt game cũ khi cắt chuyển: `/h5/server/stop.sh` (lưu ý script này **xoá log**).
 
 ## 3. Chuẩn bị trên máy Docker
 
@@ -59,12 +63,12 @@ Yêu cầu: Docker Engine 24+ và plugin `docker compose` v2 trên Linux.
 ```bash
 # 1. Cây thư mục: /opt/tcg/{server,website,docker}  (đường dẫn tuỳ, chỉnh SERVER_DIR/WEBSITE_DIR trong .env)
 #    server/ là bản đã vá (JAR patched + Excel tên tiếng Anh + 5 file tái tạo + 6 sheet bổ sung)
-# 2. Dump
+# 2. (Tuỳ chọn) dump thật — không có thì zz-init.sh nạp seed sạch trong git
 cp /path/tcg-dumps/mysql/*.sql   docker/initdb/mysql/
 cp -r /path/tcg-dumps/mongo/dump docker/initdb/mongo/
 chmod +x docker/initdb/mongo/restore.sh docker/prepare-dumps.sh
-# 3. Cấu hình
-cd docker && cp .env.example .env && nano .env      # 3 mật khẩu phải KHỚP với env.yml / global.conf.json
+# 3. Cấu hình: sinh .env với bí mật ngẫu nhiên (mật khẩu KHÔNG cần khớp server cũ — zz-init.sh ghi vào DB)
+cd docker && ./gen-env.sh <IP-hoặc-domain>          # in ra tài khoản quản trị + console; sửa tay thêm nếu cần
 ```
 
 Sửa IP công khai (WAN) — 2 chỗ, thay `192.168.1.69` bằng IP/domain thật của máy mới:
@@ -145,7 +149,7 @@ Tất cả đọc secret từ `.env` và **dừng ngay lúc khởi động** n�
 ```bash
 docker compose restart game            # 1 service
 docker compose down                    # dừng hết, giữ volume
-docker compose down -v                 # XOÁ CẢ DB — chỉ khi muốn import lại dump
+docker compose down -v                 # XOÁ CẢ DB — khi muốn khởi tạo lại (seed/dump + zz-init.sh chỉ chạy lúc volume trống)
 docker compose logs -f --tail=200 cross
 ```
 
@@ -236,5 +240,6 @@ Các tài nguyên client còn lại (`libs/`, `bmFont/`, `icon/`, `iconshop/`, `
 1. **nginx rewrite đã lấy từ file gốc** (`www/server/panel/vhost/rewrite/192.168.1.69.conf`, bản copy aaPanel của server cũ, gitignored). Đăng nhập/đăng ký web thật đi qua `/user-mlogin`, `/user-mreg` → `api/config.php?act=…`; 4 đường `/user/login.php|register.php|email.php|quenmatkhau.php` không tồn tại cả trên server cũ (404), chỉ giữ map tạm. Vẫn kiểm tra đăng nhập/đăng ký web ngay sau khi lên.
 2. **Heap là ước lượng.** Không có số đo steady-state từ server cũ. Bộ số mặc định để *khởi động được* trên 8 GB; chỉnh theo `docker stats`.
 3. **Chưa từng `up` thật.** Máy chuẩn bị bộ này không có Docker; chỉ lint được cú pháp compose.
-4. **`cross` gọi group/game qua `192.168.1.69:20001`/`30001`** (giá trị trong `tcg.srv_cross.url`, `srv_group_device.url`). Với host network và IP đã đổi, cập nhật 2 cột `url` đó trong DB hoặc qua console `/srv/cross/update`, `/srv/group/conf/update`.
+4. **`tcg.srv_cross.url` / `srv_group_device.url`** được `zz-init.sh` đặt về `http://127.0.0.1:<port>/` lúc khởi tạo (cả seed lẫn dump) — game gọi cross/group qua loopback. Nếu sau này tách cross/group sang máy khác, đổi 2 cột `url` đó qua console `/srv/cross/update`, `/srv/group/conf/update`.
+5. **`zz-init.sh` chưa chạy trong container MySQL thật** — mới mô phỏng bằng stub (`docker_process_sql` giả) ở cả 3 nhánh seed / dump / thiếu biến. Lần `up` đầu: `docker compose logs mysql | grep tcg-init` phải thấy `xong (seed)` và danh sách máy chủ.
 5. Thời điểm thay JAR mới từ nhà phát hành: chạy lại `python tools/patch-excel-names.py --apply`, nếu không bytecode quay về tìm tên Excel tiếng Trung.

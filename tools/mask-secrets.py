@@ -203,7 +203,11 @@ def do_check():
         for dp, dns, fns in os.walk(os.path.join(ROOT, base)):
             dns[:] = [d for d in dns if not d.startswith(skip)]
             for f in fns:
-                if not f.lower().endswith(('.php', '.yml', '.yaml', '.json', '.js', '.md', '.txt', '.ini', '.conf', '.properties', '.sh', '.py', '.html')):
+                if not f.lower().endswith(('.php', '.yml', '.yaml', '.json', '.js', '.md', '.txt', '.ini', '.conf', '.properties', '.sh', '.py', '.html', '.sql')):
+                    continue
+                # .sql: chi quet bo seed trong git (docker/initdb/mysql/seed/). Dump that *.sql cung
+                # thu muc cha la gitignored va DUONG NHIEN chua mat khau cu — khong phai lot.
+                if f.lower().endswith('.sql') and os.path.basename(dp) != 'seed':
                     continue
                 p = os.path.join(dp, f)
                 try: s = read(p)

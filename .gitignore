@@ -11,6 +11,7 @@ server/erl_crash.dump
 secrets.env
 docker/.env
 docker/initdb/mysql/*.sql
+# (docker/initdb/mysql/seed/*.sql = bo seed SACH sinh boi tools/dump-to-seed.py — CO trong git)
 docker/initdb/mongo/dump/
 server/login/*.keystore
 website/game/api/temp/
