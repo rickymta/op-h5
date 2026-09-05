@@ -50,3 +50,6 @@ docker/docker-compose.game.yml
 
 # trang thai cuc bo cua docker/dev-macos.sh (khoa ky + bi mat moi lan chay)
 docker/.dev-macos/
+
+# Backup do tools/patch-meta-announce.py tao truoc khi va jar (58 MB, khong push)
+*.jar.bak
