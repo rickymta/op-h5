@@ -142,6 +142,7 @@ func main() {
 	mux.HandleFunc("GET /api/games", api.apiGames)
 	mux.HandleFunc("GET /api/news", api.apiNews)
 	mux.HandleFunc("GET /api/news/{id}", api.apiNewsDetail)
+	mux.HandleFunc("GET /api/pages/{slug}", api.apiPage)
 	// --- tai khoan & vi (api.go, account.go, pages.go) ---
 	mux.HandleFunc("POST /api/register", api.register)
 	mux.HandleFunc("POST /api/login", api.login)
@@ -152,9 +153,11 @@ func main() {
 	mux.HandleFunc("GET /api/me", api.me)
 	mux.HandleFunc("POST /api/me/email", api.updateEmail)
 	mux.HandleFunc("GET /api/me/games", api.myGames)
+	mux.HandleFunc("GET /api/me/orders", api.myOrders)
 	mux.HandleFunc("GET /api/me/sessions", api.mySessions)
 	mux.HandleFunc("POST /api/me/sessions/revoke-others", api.revokeOtherSessions)
 	mux.HandleFunc("GET /api/wallet/balance", api.balance)
+	mux.HandleFunc("GET /api/wallet/summary", api.walletSummary)
 	mux.HandleFunc("GET /api/wallet/history", api.history)
 	// --- noi bo: callback cong thanh toan o tang PHP goi vao ---
 	mux.HandleFunc("POST /internal/wallet/topup", api.internalTopup)

@@ -16,10 +16,15 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/rickymta/op-h5/platform/internal/catalog"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
+	"github.com/rickymta/op-h5/platform/internal/textnorm"
 	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
@@ -37,6 +42,20 @@ var storeCategories = []storeCategory{
 	{"limited", "Gói giới hạn", "Số suất có hạn, mỗi người mua một lần."},
 	{"event", "Gói sự kiện", "Chỉ mua được khi sự kiện đang mở trong game. Game từ chối thì Xu được hoàn ngay."},
 	{"item", "Vật phẩm", "Gửi qua thư trong game, nhận ở hòm thư."},
+}
+
+// isStoreCategory: chi cac nhom co trong storeCategories moi hien tren web.
+//
+// Bang game_packages con nhom 'ingame' (1.870 muc nap chi de tra gia khi nguoi choi bam mua
+// TRONG game). Chung khong co ten tieng Viet tu te va khong ban tren web, nen phai loc o
+// MOI cua vao — danh sach, tim kiem, va ca trang chi tiet mot goi.
+func isStoreCategory(key string) bool {
+	for _, c := range storeCategories {
+		if c.Key == key {
+			return true
+		}
+	}
+	return false
 }
 
 type pkgView struct {
@@ -88,12 +107,8 @@ func toPkgView(p wallet.Package) pkgView {
 	}
 }
 
-// groupedPackages xep goi dang mo theo tab; tab khong co goi thi bo.
-func (s *adapterServer) groupedPackages(r *http.Request, only string) ([]catView, error) {
-	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
-	if err != nil {
-		return nil, err
-	}
+// groupCategories xep goi theo tab; tab khong co goi thi bo. only != "" chi giu mot tab.
+func groupCategories(pkgs []wallet.Package, only string) []catView {
 	byCat := map[string][]pkgView{}
 	for _, p := range pkgs {
 		byCat[p.Category] = append(byCat[p.Category], toPkgView(p))
@@ -108,7 +123,231 @@ func (s *adapterServer) groupedPackages(r *http.Request, only string) ([]catView
 		}
 		out = append(out, catView{Key: c.Key, Title: c.Title, Hint: c.Hint, Packages: byCat[c.Key]})
 	}
-	return out, nil
+	return out
+}
+
+// groupedPackages xep goi dang mo theo tab (trang Go cu o /cu/cua-hang).
+func (s *adapterServer) groupedPackages(r *http.Request, only string) ([]catView, error) {
+	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
+	if err != nil {
+		return nil, err
+	}
+	return groupCategories(pkgs, only), nil
+}
+
+// ---------------------------------------------------------------- tim, loc, phan trang
+
+// storeQuery la bo loc cua bang goi tren trang cua hang (hop dong dot 3 muc 3.1).
+type storeQuery struct {
+	Q        string // tu khoa, khop khong dau tren ten + noi dung + mo ta
+	Cat      string // nhom goi; rong = moi nhom
+	Sort     string // "price_asc" | "price_desc" | "popular"
+	Page     int
+	PageSize int
+	// On = client co gui tham so loc nao khong. Khong gui thi giu nguyen khuon cu
+	// (chi `categories`) de trang Go cu va ban React truoc do khong doi hanh vi.
+	On bool
+}
+
+// parseStoreQuery doc ?q=&cat=&sort=&page=&page_size=. Gia tri la (nhom khong ton tai, sort
+// khong hieu, trang am) khong bao loi ma lui ve mac dinh: day la trang cong khai, mot lien
+// ket cu voi tham so sai van phai ra bang goi.
+func parseStoreQuery(q url.Values) storeQuery {
+	sq := storeQuery{
+		Q:    strings.TrimSpace(q.Get("q")),
+		Cat:  strings.TrimSpace(q.Get("cat")),
+		Sort: strings.TrimSpace(q.Get("sort")),
+	}
+	for _, k := range []string{"q", "cat", "sort", "page", "page_size"} {
+		if q.Has(k) {
+			sq.On = true
+		}
+	}
+	if sq.Cat != "" && !isStoreCategory(sq.Cat) {
+		sq.Cat = ""
+	}
+	if sq.Sort != "price_asc" && sq.Sort != "price_desc" {
+		sq.Sort = "popular"
+	}
+	sq.Page, _ = strconv.Atoi(q.Get("page"))
+	if sq.Page < 1 {
+		sq.Page = 1
+	}
+	sq.PageSize = catalog.ParseLimit(q.Get("page_size"), 20, 100)
+	return sq
+}
+
+// searchText la phan van ban dem so voi tu khoa: ten goi, noi dung, mo ta.
+func searchText(p wallet.Package) string {
+	return p.Name + " " + p.ItemName + " " + p.Description
+}
+
+// listView la khoi `list` tra kem `categories`.
+type listView struct {
+	Packages []pkgView `json:"packages"`
+	Page     int       `json:"page"`
+	PageSize int       `json:"page_size"`
+	Total    int       `json:"total"`
+	Pages    int       `json:"pages"`
+}
+
+// buildList loc, sap xep va cat trang.
+//
+// "popular" giu nguyen thu tu tu DB (`sort_order, price_xu, package_id`) — do chinh la thu tu
+// hien thi ma trang quan tri dat, nen khong sap lai. Hai kieu con lai dung sap on dinh de goi
+// cung gia van giu thu tu hien thi.
+func buildList(pkgs []wallet.Package, sq storeQuery) listView {
+	matched := make([]wallet.Package, 0, len(pkgs))
+	for _, p := range pkgs {
+		if !isStoreCategory(p.Category) {
+			continue
+		}
+		if sq.Cat != "" && p.Category != sq.Cat {
+			continue
+		}
+		if !textnorm.Matches(searchText(p), sq.Q) {
+			continue
+		}
+		matched = append(matched, p)
+	}
+	switch sq.Sort {
+	case "price_asc":
+		sort.SliceStable(matched, func(i, j int) bool { return matched[i].PriceXu < matched[j].PriceXu })
+	case "price_desc":
+		sort.SliceStable(matched, func(i, j int) bool { return matched[i].PriceXu > matched[j].PriceXu })
+	}
+
+	size := sq.PageSize
+	total := len(matched)
+	pages := (total + size - 1) / size
+	if pages < 1 {
+		pages = 1 // bang rong van la "trang 1/1", de thanh phan phan trang co gi de ve
+	}
+	page := sq.Page
+	if page > pages {
+		page = pages
+	}
+	start := (page - 1) * size
+	if start > total {
+		start = total
+	}
+	end := start + size
+	if end > total {
+		end = total
+	}
+	out := make([]pkgView, 0, end-start)
+	for _, p := range matched[start:end] {
+		out = append(out, toPkgView(p))
+	}
+	return listView{Packages: out, Page: page, PageSize: size, Total: total, Pages: pages}
+}
+
+// ---------------------------------------------------------------- noi dung mot goi
+
+// rewardLabels: nhan tieng Viet cho ba ma tien te trong game (docs/design-cua-hang.md muc 1.1).
+// Cac ma con lai khong tra cuu duoc o day (bang vat pham nam trong Excel cua game), nen lui ve
+// item_name hoac "Vật phẩm #<id>".
+var rewardLabels = map[string]string{
+	"0:1": "Nguyên Bảo",
+	"0:0": "Kim tệ",
+	"0:4": "EXP anh hùng",
+}
+
+type rewardItem struct {
+	Label string `json:"label"`
+	Count int64  `json:"count"`
+}
+
+// parseReward doc chuoi qua cua game: "type:id:count#type:id:count".
+//
+// itemName chi dung khi chuoi co DUNG MOT muc — luc do item_name mo ta chinh muc do. Nhieu
+// muc thi dan cung mot ten cho ca cum la sai, nen moi muc la khong tra cuu duoc deu hien
+// "Vật phẩm #<id>".
+func parseReward(reward, itemName string) []rewardItem {
+	parts := strings.Split(reward, "#")
+	out := make([]rewardItem, 0, len(parts))
+	single := len(parts) == 1 && strings.TrimSpace(itemName) != ""
+	for _, part := range parts {
+		f := strings.Split(strings.TrimSpace(part), ":")
+		if len(f) != 3 {
+			continue
+		}
+		n, err := strconv.ParseInt(strings.TrimSpace(f[2]), 10, 64)
+		if err != nil || n <= 0 {
+			continue
+		}
+		id := strings.TrimSpace(f[1])
+		label, ok := rewardLabels[strings.TrimSpace(f[0])+":"+id]
+		switch {
+		case ok:
+		case single:
+			label = strings.TrimSpace(itemName)
+		default:
+			label = "Vật phẩm #" + id
+		}
+		out = append(out, rewardItem{Label: label, Count: n})
+	}
+	return out
+}
+
+// rewardItems liet ke nguoi choi se nhan duoc gi.
+//
+// grant_mode='mail': doc chuoi `reward` — day la chuoi that ma console gui kem thu.
+// grant_mode='pay': game xu ly nhu mot lan nap, khong co chuoi qua; noi dung nam o
+// item_name/item_count (vd "10.000 Nguyên Bảo" x1).
+func rewardItems(p wallet.Package) []rewardItem {
+	if p.GrantMode == "mail" && strings.TrimSpace(p.Reward) != "" {
+		if items := parseReward(p.Reward, p.ItemName); len(items) > 0 {
+			return items
+		}
+	}
+	label := strings.TrimSpace(p.ItemName)
+	if label == "" {
+		label = p.Name
+	}
+	count := int64(p.ItemCount)
+	if count <= 0 {
+		count = 1
+	}
+	return []rewardItem{{Label: label, Count: count}}
+}
+
+// grantNote la mot cau giai thich hang ve bang duong nao.
+func grantNote(p wallet.Package) string {
+	switch p.GrantMode {
+	case "mail":
+		return "Vật phẩm được gửi qua thư trong game; mở hòm thư của nhân vật bạn chọn để nhận."
+	case "ingame":
+		return "Gói này chỉ mua được từ trong game."
+	default:
+		return "Game xử lý như một lần nạp: phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn."
+	}
+}
+
+type serverDays struct {
+	Min int `json:"min"`
+	Max int `json:"max"`
+}
+
+// pkgDetail la mot goi tren trang chi tiet: moi truong cua pkgView + noi dung va dieu kien.
+type pkgDetail struct {
+	pkgView
+	RewardItems []rewardItem `json:"reward_items"`
+	GrantNote   string       `json:"grant_note"`
+	ServerDays  serverDays   `json:"server_days"`
+	DailyLimit  int          `json:"daily_limit"`
+	VipRequired int          `json:"vip_required"`
+}
+
+func toPkgDetail(p wallet.Package) pkgDetail {
+	return pkgDetail{
+		pkgView:     toPkgView(p),
+		RewardItems: rewardItems(p),
+		GrantNote:   grantNote(p),
+		ServerDays:  serverDays{Min: p.ServerDayMin, Max: p.ServerDayMax},
+		DailyLimit:  p.DailyLimit,
+		VipRequired: p.VipRequired,
+	}
 }
 
 // ---------------------------------------------------------------- trang va API web
@@ -190,15 +429,99 @@ func (s *adapterServer) quyDoiRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/cua-hang", http.StatusMovedPermanently)
 }
 
-// listPackages tra ve danh muc theo tab; ?category= de loc mot tab.
+// listPackages tra ve danh muc theo tab; ?category= de loc mot tab (khuon cu, giu nguyen).
+//
+// Co bat ky tham so nao trong nhom ?q= ?cat= ?sort= ?page= ?page_size= thi tra THEM khoi
+// `list` da loc/sap/cat trang cho bang goi cua trang cua hang moi. `categories` van tra du
+// de trang ve o chon nhom — mot luot goi, mot luot doc DB.
 func (s *adapterServer) listPackages(w http.ResponseWriter, r *http.Request) {
-	cats, err := s.groupedPackages(r, r.URL.Query().Get("category"))
+	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
 	if err != nil {
 		s.log.Error("doc bang gia", "err", err)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được bảng giá.")
 		return
 	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"categories": cats})
+	q := r.URL.Query()
+	out := map[string]any{"categories": groupCategories(pkgs, strings.TrimSpace(q.Get("category")))}
+	if sq := parseStoreQuery(q); sq.On {
+		out["list"] = buildList(pkgs, sq)
+	}
+	httpx.JSON(w, http.StatusOK, out)
+}
+
+// packageDetail tra ve mot goi cho trang /cua-hang/{id}.
+//
+// Goi an, goi khong ton tai va goi thuoc nhom 'ingame' deu la 404 `package_unknown`: nhom
+// 'ingame' chi de tra gia khi nguoi choi bam mua trong game, khong phai hang ban tren web.
+func (s *adapterServer) packageDetail(w http.ResponseWriter, r *http.Request) {
+	id := strings.TrimSpace(r.PathValue("id"))
+	notFound := func() {
+		httpx.Error(w, http.StatusNotFound, "package_unknown", "Gói này không còn bán.")
+	}
+	if id == "" {
+		notFound()
+		return
+	}
+	p, err := s.wallet.PackageByID(r.Context(), s.cfg.GameCode, id, false)
+	if err != nil {
+		if !errors.Is(err, wallet.ErrPackageUnknown) {
+			s.log.Error("doc goi", "err", err, "goi", id)
+			httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được gói.")
+			return
+		}
+		notFound()
+		return
+	}
+	if !isStoreCategory(p.Category) {
+		notFound()
+		return
+	}
+	httpx.JSON(w, http.StatusOK, toPkgDetail(p))
+}
+
+// storeStats la vai con so cho phan dau trang cua hang. Chi so THAT: so goi dang ban va so
+// nhom co hang. Khong bia so luot giao dich hay so nguoi mua.
+func (s *adapterServer) storeStats(w http.ResponseWriter, r *http.Request) {
+	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
+	if err != nil {
+		s.log.Error("doc bang gia", "err", err)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được bảng giá.")
+		return
+	}
+	n, cats, firstBuy := 0, map[string]bool{}, false
+	for _, p := range pkgs {
+		if !isStoreCategory(p.Category) {
+			continue
+		}
+		n++
+		cats[p.Category] = true
+		// Thuong lan dau x2 la luat cua cac MOC doi Nguyen Bao (nhom 'diamond'); khong co
+		// moc nao dang ban thi khong duoc noi la co.
+		if p.Category == "diamond" {
+			firstBuy = true
+		}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"packages":        n,
+		"categories":      len(cats),
+		"rate_note":       "1 Xu = 1 Nguyên Bảo",
+		"first_buy_bonus": firstBuy,
+	})
+}
+
+// gamePage tra ve mot trang noi dung tinh: ban rieng cua game truoc, khong co thi ban chung.
+func (s *adapterServer) gamePage(w http.ResponseWriter, r *http.Request) {
+	p, err := catalog.PageBySlug(r.Context(), s.db, strings.TrimSpace(r.PathValue("slug")), s.cfg.GameCode)
+	if err != nil {
+		if errors.Is(err, catalog.ErrNotFound) {
+			httpx.Error(w, http.StatusNotFound, "not_found", "Không có trang này.")
+			return
+		}
+		s.log.Error("doc trang noi dung", "err", err, "slug", r.PathValue("slug"))
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được trang.")
+		return
+	}
+	httpx.JSON(w, http.StatusOK, p)
 }
 
 // listOrders tra ve cac don mua gan day cua nguoi choi (trang tu hoi de cap nhat trang thai).
@@ -303,6 +626,7 @@ func (s *adapterServer) legacyCheck(w http.ResponseWriter, r *http.Request) {
 //   - moi loi deu tra "false" (khong bao gio HTML/500 — game so sanh chuoi);
 //   - tru Xu roi ghi game_grants status='granted', grant_mode='ingame' (khong goi console);
 //   - idempotency 10 giay: game goi mot lan moi lan bam, bam doi trong 10 s tinh mot.
+//
 // Rui ro con lai: game tru Xu xong moi kiem PayAvailable/removeItem; buoc sau hong thi Xu da
 // mat — thay o Don mua (grant_mode=ingame) de doi soat. Xem docs/design-cua-hang.md muc 4.2.
 func (s *adapterServer) legacyCharge(w http.ResponseWriter, r *http.Request) {

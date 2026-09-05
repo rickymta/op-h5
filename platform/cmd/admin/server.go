@@ -32,6 +32,13 @@ type server struct {
 	// console la duong toi game (phat vat pham, gui thu, kho do). nil khi chua cau hinh:
 	// trang quan tri van chay, chi cac thao tac GM la bao "chua cau hinh console".
 	console *console.Client
+	// public: ADMIN_PUBLIC=1 — trang duoc nginx cho di vao tu Internet. Van bind loopback;
+	// co nay chi siet cac lop o tang ung dung (login.go).
+	public bool
+	// sessionTTL la tuoi tho phien quan tri (12 gio, con 4 gio khi mo cong khai).
+	sessionTTL time.Duration
+	// guard dem so lan dang nhap sai theo ten dang nhap va theo IP.
+	guard *loginGuard
 }
 
 // nowUnix tach ra de test co the co dinh thoi gian sau nay.
@@ -108,16 +115,48 @@ func (s *server) audit(ctx context.Context, adminID int64, action, target, detai
 
 // ---------------------------------------------------------------- dang nhap
 
-func (s *server) loginPage(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "login.html", map[string]any{"Error": r.URL.Query().Get("loi")})
+// loginErrors doi ma loi trong URL thanh cau hien tren form.
+//
+// Truoc day trang in thang ?loi= ra man hinh. html/template co escape nen khong thanh XSS,
+// nhung mot lien ket kieu /dang-nhap?loi=<cau du> van dat duoc chu cua ke tan cong len
+// trang dang nhap that. Bang tra cuu dong nay lai.
+var loginErrors = map[string]string{
+	"1":     "Tài khoản hoặc mật khẩu không đúng.",
+	"nhieu": "Sai quá nhiều lần. Vui lòng thử lại sau ít phút.",
 }
 
+func (s *server) loginPage(w http.ResponseWriter, r *http.Request) {
+	s.render(w, "login.html", map[string]any{"Error": loginErrors[r.URL.Query().Get("loi")]})
+}
+
+// loginFailed tra ve form kem thong bao. status != 200 duoc dat TRUOC khi render vi sau
+// WriteHeader thi khong doi duoc ma trang thai nua.
+func (s *server) loginFailed(w http.ResponseWriter, status int, code string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	s.render(w, "login.html", map[string]any{"Error": loginErrors[code]})
+}
+
+// doLogin xu ly form dang nhap quan tri.
+//
+// Ghi log MOI luot, ca thanh cong lan that bai, kem IP: khi trang mo ra Internet thi day la
+// nguon duy nhat de nhin thay mot dot do mat khau dang dien ra.
 func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		http.Redirect(w, r, "/dang-nhap?loi=1", http.StatusFound)
+		s.loginFailed(w, http.StatusBadRequest, "1")
 		return
 	}
 	ctx := r.Context()
+	user, pass := r.FormValue("username"), r.FormValue("password")
+	// nginx dat X-Forwarded-For; ClientIP chi tin header do khi request den tu proxy noi bo.
+	ip := httpx.ClientIP(r)
+
+	if s.guard.blocked(ctx, user, ip) {
+		s.log.Warn("dang nhap quan tri: khoa tam vi qua nhieu lan sai", "user", user, "ip", ip)
+		s.loginFailed(w, http.StatusTooManyRequests, "nhieu")
+		return
+	}
+
 	var (
 		id     int64
 		hash   string
@@ -125,16 +164,20 @@ func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
 	)
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, password_hash, status FROM admin_users WHERE username = ?`,
-		r.FormValue("username")).Scan(&id, &hash, &status)
+		user).Scan(&id, &hash, &status)
 	if err != nil || status != "active" {
 		// Van bam mot lan de thoi gian phan hoi khong tiet lo tai khoan co ton tai khong.
-		_, _ = identity.HashPassword(r.FormValue("password"))
-		http.Redirect(w, r, "/dang-nhap?loi=1", http.StatusFound)
+		_, _ = identity.HashPassword(pass)
+		s.guard.record(ctx, user, ip, false)
+		s.log.Warn("dang nhap quan tri that bai", "user", user, "ip", ip, "ly_do", "khong co tai khoan hoac bi khoa")
+		s.loginFailed(w, http.StatusUnauthorized, "1")
 		return
 	}
-	ok, err := identity.VerifyPassword(r.FormValue("password"), hash)
+	ok, err := identity.VerifyPassword(pass, hash)
 	if err != nil || !ok {
-		http.Redirect(w, r, "/dang-nhap?loi=1", http.StatusFound)
+		s.guard.record(ctx, user, ip, false)
+		s.log.Warn("dang nhap quan tri that bai", "user", user, "ip", ip, "ly_do", "sai mat khau")
+		s.loginFailed(w, http.StatusUnauthorized, "1")
 		return
 	}
 
@@ -144,18 +187,25 @@ func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sid := base64.RawURLEncoding.EncodeToString(b)
+	ttl := s.sessionTTL
+	if ttl <= 0 {
+		ttl = 12 * time.Hour
+	}
 	if _, err := s.db.ExecContext(ctx, `
 		INSERT INTO admin_sessions (id, admin_id, expires_at)
-		VALUES (?,?,DATE_ADD(NOW(), INTERVAL 12 HOUR))`, sid, id); err != nil {
+		VALUES (?,?,DATE_ADD(NOW(), INTERVAL ? SECOND))`, sid, id, int(ttl.Seconds())); err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không tạo được phiên.")
 		return
 	}
 	_, _ = s.db.ExecContext(ctx, `UPDATE admin_users SET last_login_at = NOW() WHERE id = ?`, id)
 	http.SetCookie(w, &http.Cookie{
 		Name: adminCookie, Value: sid, Path: "/", HttpOnly: true,
-		Secure: s.secure, SameSite: http.SameSiteStrictMode, MaxAge: 12 * 3600,
+		Secure: s.secure, SameSite: http.SameSiteStrictMode, MaxAge: int(ttl.Seconds()),
 	})
-	s.audit(ctx, id, "login", r.FormValue("username"), "")
+	s.guard.record(ctx, user, ip, true)
+	s.log.Info("dang nhap quan tri", "user", user, "id", id, "ip", ip, "phien_gio", int(ttl.Hours()))
+	detail, _ := json.Marshal(map[string]any{"ip": ip, "public": s.public})
+	s.audit(ctx, id, "login", user, string(detail))
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 

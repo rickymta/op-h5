@@ -26,8 +26,14 @@ nguồn thật và có test.
 hỏi `GET <adapter_url>/api/game/servers` với timeout 3 s, **cache 30 s mỗi Adapter**, chống dồn;
 Adapter chết thì `live:false`; URL ảnh tương đối được ghép với `site_url`), `GET /api/news`,
 `GET /api/news/{id}`. API có phiên: `POST /api/login`, `/api/logout`, `GET /api/me` (mở rộng),
-`POST /api/me/email`, `GET /api/me/games`, `GET /api/me/sessions` + `POST …/revoke-others`,
-`GET /api/wallet/history?kind=&page=&page_size=`.
+`POST /api/me/email`, `GET /api/me/games`, `GET /api/me/orders?limit=` (đơn mua ở **mọi** game),
+`GET /api/me/sessions` + `POST …/revoke-others`, `GET /api/wallet/history?kind=&page=&page_size=`,
+`GET /api/wallet/summary` (số dư + tổng đã nạp / đã đổi / đã hoàn + số đơn theo trạng thái, đọc
+thẳng từ sổ cái và `game_grants` nên không bao giờ lệch với số dư).
+
+Nội dung tĩnh sửa được ở trang quản trị: `GET /api/pages/{slug}` → `{slug,title,body,updated_at}`
+(bảng `pages`, migration 0011; `body` là **văn bản thuần** — đoạn cách nhau bằng dòng trống, `## `
+tiêu đề phụ, `- ` gạch đầu dòng — không phải HTML, để tầng hiển thị không phải lọc XSS).
 
 `ID_SPA=1`: bundle React `web/apps/portal` (nhúng bằng `go:embed` từ `cmd/id/dist`) phục vụ mọi
 đường không phải `/api/*`, `/oauth/*`, `/.well-known/*`, `/internal/*`, `/healthz`; trang Go cũ
@@ -54,12 +60,48 @@ mặc định `"Cửa hàng " + tên game`. Ảnh thương hiệu đặt ở `AS
 `/brand/`; URL trong bảng có thể tương đối so với `site_url`. Tin của game + tin chung:
 `GET /api/game/news?limit=`, `GET /api/game/news/{id}`; trạng thái đăng nhập: `GET /api/game/me`.
 
+**Cửa hàng.** `GET /api/game/packages` giữ khuôn cũ (`{categories:[…]}`) và nhận thêm
+`?q=&cat=&sort=price_asc|price_desc|popular&page=&page_size=`; có bất kỳ tham số nào trong nhóm đó
+thì trả **thêm** khối `{list:{packages,page,page_size,total,pages}}` — một lượt gọi, một lượt đọc DB.
+Tìm kiếm **bỏ dấu tiếng Việt ở Go** (`internal/textnorm`), không dựa vào collation: bảng dùng
+`utf8mb4_unicode_ci`, collation đó coi `ê` khác `e` nên `LIKE '%nguyen%'` không bao giờ khớp
+"Nguyên Bảo". `GET /api/game/packages/{id}` trả thêm `reward_items` (dựng từ chuỗi quà
+`type:id:count#…`; `0:1`=Nguyên Bảo, `0:0`=Kim tệ, `0:4`=EXP anh hùng), `grant_note`, `server_days`,
+`daily_limit`, `vip_required`. `GET /api/game/store/stats` trả số gói và số nhóm **thật**.
+Nhóm `ingame` (các mục nạp chỉ để tra giá khi mua trong game) bị lọc ở **mọi** cửa vào — danh sách,
+tìm kiếm và cả trang chi tiết (404 `package_unknown`).
+
+Trang tĩnh của game: `GET /api/game/pages/{slug}` — tra `(slug, game_code)` trước, không có thì lùi
+về bản chung, nên một game chỉ phải viết lại những trang nó muốn khác.
+
 `ADAPTER_SPA=1`: bundle React `web/apps/game` (assetsDir `app/`, vì `/assets/` trên host game đã
 thuộc client LayaAir) phục vụ `/`, `/may-chu`, `/cua-hang`, `/tin-tuc*`; trang Go cũ lui về `/cu/`;
 `/choi-game`, `/auth/*`, `/api/*`, `/srv/*`, `/quy-doi` và trang `full.html` giữ nguyên. **Một bundle
 chạy cho mọi game** — game mới chỉ cần dòng `games` + ảnh trong `brand/`, không build lại image.
+Đường SPA hiện có: `/`, `/may-chu`, `/cua-hang`, `/cua-hang/{id}`, `/tin-tuc`, `/tin-tuc/{id}`,
+`/gioi-thieu`, `/huong-dan`, `/faq`, `/app/` — thêm đường mới phải sửa **cả** danh sách này trong
+`cmd/adapter/main.go` **và** `docker/nginx/game_site.conf`, thiếu một bên là 404.
 
 **Chưa làm:** tích hợp login server và console THẬT (cần dump DB từ server cũ).
+
+### Trang quản trị (`cmd/admin`, :8100)
+
+Ngoài đội máy chủ / gói / đơn / game / nhân viên / tin tức, còn `GET /api/pages`, `POST /api/pages`
+(upsert theo `slug` + `game_code`), `POST /api/pages/{id}/delete` — vai trò `operator` trở lên, ghi
+`admin_audit`, thân request tối đa 256 KB.
+
+**Mở ra Internet (`ADMIN_PUBLIC=1`).** Dịch vụ **vẫn bind `127.0.0.1:8100`** — nginx là thứ duy nhất
+nối ra ngoài; cờ này chỉ siết ba lớp ở tầng ứng dụng (`cmd/admin/login.go`):
+
+1. Đăng nhập đếm số lần sai theo **tên đăng nhập** và theo **IP** (`httpx.ClientIP`, tôn trọng
+   `X-Forwarded-For` do nginx đặt), mặc định khoá tạm sau **8 lần / 15 phút** → HTTP 429 kèm thông
+   báo tiếng Việt. Bảng riêng `admin_login_attempts` chứ không dùng chung `login_attempts` của
+   người chơi: dùng chung thì một người chơi gõ sai mật khẩu sẽ khoá nhầm tài khoản quản trị trùng
+   tên. Mọi lượt đăng nhập, thành công hay thất bại, đều vào log kèm IP.
+2. Cookie phiên bắt buộc `Secure` và `MaxAge` rút từ 12 giờ xuống **4 giờ**.
+3. **Dừng hẳn lúc khởi động** nếu còn tài khoản `owner` mang cờ `must_change_password` — tức là còn
+   dùng mật khẩu mặc định ghi trong `main.go` của một repo **công khai**. Thông báo lỗi nói rõ cách
+   sửa. Đổi mật khẩu ở trang Tài khoản là cờ tắt và khởi động lại được.
 
 ## Vì sao logic giới hạn tải nằm ở đây, không nằm trong game
 
@@ -217,6 +259,9 @@ mọi lần nạp đều vào nhật ký.
 | `ID_SPA` | | `0` — `1` = giao diện React `web/apps/portal` phục vụ từ gốc, trang Go cũ ở `/cu/` |
 | `ID_BRAND_NAME` | | `Cổng game` — thương hiệu, trả qua `GET /api/site` (cả adapter cũng đọc biến này) |
 | `ID_SUPPORT_URL` / `ID_FANPAGE_URL` / `ID_TOPUP_URL` / `ID_LEGAL_NOTE` | | rỗng — link hỗ trợ, fanpage, trang nạp Xu (rỗng = chưa có cổng nạp), dòng pháp lý ở chân trang |
+| `ADMIN_PUBLIC` | | `0` — `1` = trang quản trị được nginx cho vào từ Internet: cookie ép `Secure`, phiên còn 4 giờ, và **không khởi động** nếu `owner` còn mật khẩu mặc định. Không đổi địa chỉ bind |
+| `ADMIN_LOGIN_MAX_ATTEMPT` / `ADMIN_LOGIN_WINDOW` | | `8` / `15m` — ngưỡng khoá tạm khi đăng nhập quản trị sai, đếm theo tên đăng nhập **và** theo IP |
+| `ADMIN_COOKIE_SECURE` | | `true` — đặt `false` khi chạy HTTP thuần lúc dev; `ADMIN_PUBLIC=1` bỏ qua giá trị này |
 
 **Không có "chế độ ghi log" thay cho gửi email thật.** Một đường đặt lại mật khẩu in ra
 log là một đường chiếm tài khoản cho bất kỳ ai đọc được log. Chưa cấu hình SMTP thì tính

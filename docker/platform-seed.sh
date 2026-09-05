@@ -12,6 +12,8 @@
 #        game_devices   <- tcg.srv_game.device_code (+ ten tu tcg.cloud_device), max_online 1600
 #        game_servers   <- tcg.srv_game (code, name, device_code, ws_port); khong co tcg -> GAME_SERVERS
 #        game_packages  <- /seed/data/game_packages.<game>.sql (sinh boi tools/gen-game-packages.py)
+#        news           <- /seed/data/news.<game>.sql — tin mau, file tu chan: chi chen khi
+#                          bang `news` con TRONG, nen chay lai khong nhan ban
 #   Tai khoan quan tri dau tien do `admin` tu tao tu ADMIN_BOOTSTRAP_USER/PASSWORD (khi bang trong).
 #
 # Chay tay ngoai compose (may co client mysql):
@@ -152,6 +154,26 @@ if [ -f "$PKG" ]; then
   fi
 else
   echo "[seed] khong co $PKG — bo qua game_packages (sinh bang tools/gen-game-packages.py)"
+fi
+
+# 3e) tin mau (bang news, migration 0010). File tu chan: chi chen khi bang con TRONG, nen chay
+#     lai seed khong nhan ban tin va khong ghi de tin nguoi van hanh da soan o trang quan tri.
+NEWS="$SEED_DIR/news.$GAME.sql"
+if [ -f "$NEWS" ]; then
+  has_news_tbl=1
+  if [ "$PRINT" = 0 ]; then
+    has_news_tbl=$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB' AND table_name='news';" 2>/dev/null || echo 0)
+  fi
+  if [ "${has_news_tbl:-0}" -ge 1 ]; then
+    if [ "$PRINT" = 1 ]; then echo "-- [$DB] < $NEWS"; else
+      mysql -h"$DB_HOST" -P"$DB_PORT" -uroot --default-character-set=utf8mb4 "$DB" < "$NEWS"
+      echo "[seed] news nap tu $NEWS (chi chen khi bang con trong)"
+    fi
+  else
+    echo "[seed] CANH BAO: chua co bang 'news' (migration 0010) — bo qua tin mau; pull/build lai id" >&2
+  fi
+else
+  echo "[seed] khong co $NEWS — bo qua tin mau"
 fi
 
 [ "$PRINT" = 1 ] && exit 0
