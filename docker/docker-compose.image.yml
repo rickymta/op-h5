@@ -188,7 +188,12 @@ services:
     depends_on: { pay: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:30001/"]
+      # KHONG dung `-f`: group khong co route o "/" nen Tomcat tra 404, ma `curl -f` coi
+      # 404 la that bai -> container ket o "health: starting" du service da len hoan toan
+      # (da dinh that tren server: FailingStreak 34, chan ca game/login/cross phia sau).
+      # Bo `-f` thi bat ky phan hoi HTTP nao cung tinh la song — dung y dinh: cho biet
+      # Tomcat da phuc vu duoc hay chua.
+      test: ["CMD-SHELL", "curl -sS -m 5 -o /dev/null http://127.0.0.1:30001/"]
 
   game:
     <<: *java
@@ -224,7 +229,12 @@ services:
     depends_on: { login: { condition: service_healthy } }
     healthcheck:
       <<: *java-health
-      test: ["CMD-SHELL", "curl -fsS -m 5 -o /dev/null http://127.0.0.1:20001/"]
+      # KHONG dung `-f`: cross khong co route o "/" nen Tomcat tra 404, ma `curl -f` coi
+      # 404 la that bai -> container ket o "health: starting" du service da len hoan toan
+      # (da dinh that tren server: FailingStreak 34, chan ca game/login/cross phia sau).
+      # Bo `-f` thi bat ky phan hoi HTTP nao cung tinh la song — dung y dinh: cho biet
+      # Tomcat da phuc vu duoc hay chua.
+      test: ["CMD-SHELL", "curl -sS -m 5 -o /dev/null http://127.0.0.1:20001/"]
 
   php:
     image: ${IMAGE_PHP:-ghcr.io/rickymta/op-h5-php:latest}
@@ -239,6 +249,10 @@ services:
       # GM tool (gmhanglong/config/auth.php) doc bang platform.gm_users qua 4 bien ID_DB_*
       # (KHONG co fallback sang MYSQL_ROOT_PASSWORD) va tao tai khoan GM dau tien tu
       # GM_BOOTSTRAP_* khi bang con rong. web-entrypoint dua chung vao pool php-fpm.
+      # id_wallet.php co fallback "http://127.0.0.1:8080" — trung ID_PORT mac dinh nen
+      # thieu bien nay van chay, nhung doi ID_PORT la PHP goi nham cong ma khong bao gi.
+      # Dat tuong minh de no bam theo ID_PORT (loopback: PHP goi he thong ID trong may).
+      ID_BASE_URL: "http://127.0.0.1:${ID_PORT:-8080}"
       ID_DB_HOST: "127.0.0.1"
       ID_DB_NAME: ${ID_DB_NAME:-platform}
       ID_DB_USER: root
