@@ -154,7 +154,7 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 | 5.2 | 9 JVM `running`, `GameLoading` đúng host/port | ✅ | cả 9 `running`; `wsPort=8001`, mongo/mysql `host=127.0.0.1`, cross `url=http://127.0.0.1:20001/`, group `:30001/` |
 | 5.3 | game không thiếu Excel; group không OOM; `game_s1` tự tạo | ⚠️ | group OOM = 0 ✅; `game_s1` có đủ 4 bảng `stat_*` ✅; game còn **9** dòng thiếu excel — 5 file `bt-*` (không cần, `gameVer=mainland`, CLAUDE.md 11.4) + 4 `加载错误`; world **1** NPE (đã biết, CLAUDE.md 11.3) |
 | 5.4 | console 200, `/srv/game/list` có s1, web 200, OIDC JSON | ✅ | console `200`; `/srv/game/list` → `[{"code":"s1",...}]`; `/` và `/play.php` `200`; OIDC discovery trả JSON |
-| 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ❌ *(chặn ở tài nguyên thiếu)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Nguyên nhân: **`website/game/template/` không có trong snapshot** |
+| 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ⚠️ *(vào được, tạo nhân vật cần retest)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Thiếu `website/game/template/` (đã tái tạo, mục 11). Sau đó tạo nhân vật hỏng vì `channelCode` không phải số (mục 12) — đã vá, **cần chạy lại để xác nhận** |
 | 5.6 | platform-seed 6 dòng đếm | ✅ | `oauth_clients 1, games 1, game_devices 1, game_servers 1, game_packages 1962`; `admin_users 1` do service `admin` tự tạo (không phải platform-seed) |
 | — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
 | — | Thời gian tới khi login lên | ✅ | ~2 phút: console → world (5s) → statistic (10s) → pay (5s) → group (25s) → game (30s) → login (5s) → cross |
@@ -198,10 +198,43 @@ Login server thật trả **khoá dạng thô** trong `data.account.password`, m
 **10. Cache bundle giữ host cũ tới 30 ngày.**
 nginx phục vụ `/libs/` với `immutable, 30d` còn `?v=` là `appVersion` cố định (28.3). Đổi `PUBLIC_HOST` thì `web-entrypoint` sed host mới vào bundle nhưng URL không đổi → trình duyệt giữ bản cũ. Đã dính thật: client tiếp tục gọi `192.168.1.69:7788` từ cache. Sửa: `play.php` phát `opBundleV` theo `filemtime`, `a3b31` gắn `&b=`, và `a3b31` cũng được gắn `?v=filemtime`.
 
-**11. ❌ CHƯA GIẢI QUYẾT — `website/game/template/` không có trong snapshot.**
-Client cần `template/perLoadTpls.json` và `template/dongtaitishi.txt`; thư mục không có trong git, không bị gitignore, không có trong tarball `assets-v1`. Đây là lý do client đứng ở "Đang tải cấu hình giao diện… 0%" và **không bao giờ mở WebSocket** — giải thích luôn vì sao mọi phiên trước đều không vào được game.
-Thử đặt `perLoadTpls.json = []` và chép `dongtaitishi.txt` từ `server/excel/release/`: hết 404 nhưng client **vẫn** kẹt, và hàng đợi nạp của Laya treo ở 4 mục dù HTTP đều 200. Nên nội dung thật của `perLoadTpls.json` là cần thiết, và có thể còn thiếu tài nguyên khác.
-**Việc cần làm:** lấy `template/` từ server cũ (`/www/wwwroot/game/template`) rồi đưa vào tarball `assets-v1` cùng `res/ sound/ spine/`. Hai file thử nghiệm đã xoá, không commit — để không che mất vấn đề.
+**11. `website/game/template/` không có trong snapshot — đã tái tạo, có tác dụng.**
+Client cần `template/perLoadTpls.json` và `template/dongtaitishi.txt`; thư mục không có
+trong git, không bị gitignore, không có trong release `assets-v1`. Đây là lý do client
+đứng ở "Đang tải cấu hình giao diện… 0%" — giải thích luôn vì sao mọi phiên trước đều
+không vào được game.
+
+Tái tạo: `perLoadTpls.json` = `[]` (danh sách nạp trước, rỗng = không nạp trước gì) và
+`dongtaitishi.txt` chép từ `server/excel/release/`. **Đã kiểm chứng là đủ** — client đi
+hết màn hình tải và tới được bước tạo nhân vật.
+
+*Đính chính:* ban đầu tôi kết luận bản tái tạo "không có tác dụng" rồi xoá đi. Sai. Lúc
+đó tab trình duyệt của tôi kẹt vì lý do khác (tài nguyên cũ trong cache sau nhiều lần
+dựng lại), còn client sạch thì qua được — bằng chứng là các lần thử tạo nhân vật lúc
+19:42 trong `game/.logs/game-s1/error.log`. Nay đã khôi phục và commit.
+
+Vẫn nên lấy bản thật từ `/www/wwwroot/game/template` trên server cũ: `[]` chỉ tắt bước
+nạp trước, không phải nội dung gốc.
+
+**12. `channelCode` phải là SỐ — tạo nhân vật thất bại.**
+Đăng nhập vào được nhưng tạo nhân vật hỏng, và client không nói gì rõ ràng; lỗi chỉ nằm
+trong `game/.logs/game-s1/error.log`:
+
+```
+CreateReq Line:78 - 创建主角失败:
+java.lang.NumberFormatException: For input string: "web"
+  at com.ososx.tcg.game.chat.ChatRule.exe_v2(ChatRule.java:146)
+  at com.ososx.tcg.game.master.po.ProfilePO.nameCheck(ProfilePO.java:167)
+  at com.ososx.tcg.game.master.MasterHolder.create(MasterHolder.java:229)
+```
+
+`"web"` chính là `ADAPTER_CHANNEL_CODE`. Bước kiểm duyệt tên nhân vật parse `channelCode`
+thành int (`ChatRule` có cặp trường `channelid` / `channelCode`). Đổi mặc định sang `0`
+ở `main.go`, `.env.example`, hai compose và `dev-macos.sh`.
+
+`0` = kênh trực tiếp, là suy luận chứ không phải giá trị lấy từ nhà phát hành — nếu có mã
+kênh riêng thì điền số đó. Cột `tcg.account.channel_code` là `varchar(32)` nên DB không
+chặn, chỉ mã game mới đòi số.
 
 ## 8. Trước khi commit — bắt buộc
 

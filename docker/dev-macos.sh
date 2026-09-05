@@ -217,7 +217,7 @@ docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_CONSOLE_BASE_URL="http://127.0.0.1:9999" \
   -e ADAPTER_CONSOLE_USER=admin -e ADAPTER_CONSOLE_PASSWORD="$CONSOLE_PW" \
   # develop = ma platform duy nhat con bat dang nhap username+mat khau tren login server.
-  -e ADAPTER_PLATFORM_CODE=develop \
+  -e ADAPTER_PLATFORM_CODE=develop -e ADAPTER_CHANNEL_CODE=0 \
   -e ADAPTER_PUBLIC_HOST="127.0.0.1" -e ADAPTER_POLL_INTERVAL=3s -e ADAPTER_GRANT_INTERVAL=5s \
   op-h5-adapter >/dev/null
 

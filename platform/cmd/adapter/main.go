@@ -75,7 +75,7 @@ func main() {
 		DB: db, Vault: vault, Login: loginClient,
 		Game: cfg.GameCode, GameID: envOr("ADAPTER_GAME_ID", "10091"),
 		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "develop"),
-		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "web"),
+		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "0"),
 	}
 	tracker := capacity.NewTracker(loginSource{loginClient}, db, cfg.GameCode, cfg.TicketTTL, log)
 
@@ -89,7 +89,7 @@ func main() {
 	worker := &grants.Worker{
 		DB: db, Console: consoleClient, GameCode: cfg.GameCode, Log: log,
 		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "develop"),
-		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "web"),
+		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "0"),
 		CurrencyCode: envOr("ADAPTER_CURRENCY_CODE", "VND"),
 		Mode:         cfg.ConsolePayMode,
 	}
