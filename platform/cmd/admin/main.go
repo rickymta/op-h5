@@ -148,6 +148,11 @@ func main() {
 	mux.HandleFunc("POST /api/staff", s.requireOwner(s.apiStaffCreate))
 	mux.HandleFunc("POST /api/staff/{id}", s.requireOwner(s.apiStaffUpdate))
 	mux.HandleFunc("POST /api/staff/{id}/password", s.requireOwner(s.apiStaffPassword))
+	// Tin tuc & su kien (news.go): operator tro len, ke ca doc — bang co ca ban nhap.
+	mux.HandleFunc("GET /api/news", s.requireWrite(s.apiNewsList))
+	mux.HandleFunc("POST /api/news", s.requireWrite(s.apiNewsCreate))
+	mux.HandleFunc("POST /api/news/{id}", s.requireWrite(s.apiNewsUpdate))
+	mux.HandleFunc("POST /api/news/{id}/delete", s.requireWrite(s.apiNewsDelete))
 	// Nguoi choi (players.go): xem thi can vai tro gm, khoa/mo thi can operator.
 	mux.HandleFunc("GET /api/players", s.requireGM(s.apiPlayerList))
 	mux.HandleFunc("GET /api/players/{id}", s.requireGM(s.apiPlayerDetail))

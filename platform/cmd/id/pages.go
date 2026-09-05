@@ -76,13 +76,9 @@ func (a *apiServer) userForPage(r *http.Request) *identity.User {
 	return u
 }
 
-// portal la trang chu: danh sach game dang mo.
+// portal la trang chu (ban Go cu): danh sach game dang mo. Dang ky voi pattern "/{$}" (hoac
+// "/cu/{$}" khi ID_SPA=1) nen chi khop dung duong dan goc; duong khac do mux tra 404.
 func (s *pageServer) portal(w http.ResponseWriter, r *http.Request) {
-	// Chi phuc vu duong dan goc; moi duong dan la khac tra 404 thay vi hien trang chu.
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
 	var games []gameCard
 	rows, err := s.api.db.QueryContext(r.Context(),
 		`SELECT code, name, COALESCE(site_url,'') FROM games WHERE status='active' ORDER BY sort_order, code`)

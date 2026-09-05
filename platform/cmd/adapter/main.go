@@ -26,6 +26,7 @@ import (
 	"github.com/rickymta/op-h5/platform/internal/gameacct"
 	"github.com/rickymta/op-h5/platform/internal/grants"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
+	"github.com/rickymta/op-h5/platform/internal/spa"
 	"github.com/rickymta/op-h5/platform/internal/store"
 	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
@@ -47,6 +48,13 @@ func (l loginSource) Online(ctx context.Context) (map[string]int, error) {
 
 //go:embed all:templates
 var templatesFS embed.FS
+
+// Giao dien React da build (web/apps/game -> dist/, assetsDir "app"). Thu muc luon ton tai nho
+// dist/.gitkeep, nen `go build` chay duoc ca khi chua `npm run build`; luc do spa.Handler tra
+// trang huong dan.
+//
+//go:embed all:dist
+var distFS embed.FS
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -85,6 +93,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Ten game lay tu bang games (migration 0010); ADAPTER_GAME_NAME chi la du phong (meta.go).
+	gameName := lookupGameName(db, cfg.GameCode, cfg.GameName)
+
 	consoleClient := console.New(cfg.ConsoleBaseURL, cfg.ConsoleUser, cfg.ConsolePassword, cfg.TcgSecret)
 	wal := &wallet.Service{DB: db}
 	worker := &grants.Worker{
@@ -93,7 +104,7 @@ func main() {
 		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "0"),
 		CurrencyCode: envOr("ADAPTER_CURRENCY_CODE", "VND"),
 		Mode:         cfg.ConsolePayMode,
-		MailTitle:    envOr("ADAPTER_MAIL_TITLE", "Cửa hàng Đại Hải Trình"),
+		MailTitle:    envOr("ADAPTER_MAIL_TITLE", "Cửa hàng "+gameName),
 		MailContent:  os.Getenv("ADAPTER_MAIL_CONTENT"),
 		// Console tu choi hoac het lan thu -> hoan Xu ngay (quyet dinh 2026-09-05).
 		Refund: wal.RefundGrant,
@@ -120,19 +131,45 @@ func main() {
 		// dia chi noi bo (127.0.0.1).
 		publicHost: envOr("ADAPTER_PUBLIC_HOST", ""),
 		useTLS:     os.Getenv("ADAPTER_TLS") == "true",
+		gameName:   gameName,
+		brand:      cfg.BrandName,
 		// 10 luot/phut cho mot nguoi: du cho tai lai trang vai lan va cho client thu
 		// lai, nhung chan duoc vong lap. Nguoi choi binh thuong dung 1-2 luot moi phien.
 		sessionLimit: httpx.NewLimiter(10, time.Minute),
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", srv.home)
-	mux.HandleFunc("GET /may-chu", srv.serversPage)
-	mux.HandleFunc("GET /cua-hang", srv.storePage)
+	// ADAPTER_SPA=1: giao dien React (web/apps/game) phuc vu /, /may-chu, /cua-hang, /tin-tuc,
+	// /tin-tuc/{id} va tai san /app/* (Vite assetsDir "app" — tren host game nginx da danh
+	// /assets/ va regex \.(js|css)$ cho client LayaAir); trang Go cu lui ve /cu/. /choi-game,
+	// /auth/*, /api/*, /srv/*, /quy-doi, /healthz va trang full.html (trong luong /choi-game)
+	// khong doi. nginx phai proxy them /tin-tuc, /tin-tuc/, /app/, /cu/ (docker/nginx/game_site.conf).
+	goPage := func(pattern string, h http.HandlerFunc) {
+		if cfg.SPA {
+			mux.HandleFunc("GET /cu"+pattern, h)
+			return
+		}
+		mux.HandleFunc("GET "+pattern, h)
+	}
+	if cfg.SPA {
+		spaHandler := spa.Handler(distFS, "dist")
+		for _, p := range []string{"/{$}", "/may-chu", "/cua-hang", "/tin-tuc", "/tin-tuc/{id}", "/app/"} {
+			mux.Handle("GET "+p, spaHandler)
+		}
+		log.Info("giao dien React bat (ADAPTER_SPA=1); trang cu o /cu/")
+	}
+	goPage("/{$}", srv.home)
+	goPage("/may-chu", srv.serversPage)
+	goPage("/cua-hang", srv.storePage)
 	mux.HandleFunc("GET /quy-doi", srv.quyDoiRedirect) // duong cu, chuyen ve /cua-hang
 	mux.HandleFunc("GET /choi-game", srv.playGame)
 	mux.HandleFunc("GET /auth/callback", srv.authCallback)
 	mux.HandleFunc("GET /auth/logout", srv.logout)
+	// Bo mat cua game cho trang React (meta.go).
+	mux.HandleFunc("GET /api/game/meta", srv.gameMeta)
+	mux.HandleFunc("GET /api/game/news", srv.gameNews)
+	mux.HandleFunc("GET /api/game/news/{id}", srv.gameNewsDetail)
+	mux.HandleFunc("GET /api/game/me", srv.gameMe)
 	mux.HandleFunc("GET /api/game/servers", srv.listServers)
 	mux.HandleFunc("POST /api/game/session", srv.createSession)
 	mux.HandleFunc("GET /api/game/packages", srv.listPackages)
@@ -160,7 +197,7 @@ func main() {
 
 	go func() {
 		log.Info("adapter khoi dong",
-			"addr", cfg.Addr, "game", cfg.GameCode,
+			"addr", cfg.Addr, "game", cfg.GameCode, "name", gameName, "spa", cfg.SPA,
 			"issuer", cfg.Issuer, "login", cfg.LoginBaseURL)
 		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("http server dung", "err", err)

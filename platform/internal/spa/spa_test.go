@@ -51,6 +51,26 @@ func TestHashedAssetIsImmutable(t *testing.T) {
 	}
 }
 
+// apps/game build voi assetsDir "app" (tren host game, /assets/ da thuoc client LayaAir):
+// app/ cung phai duoc coi la bat bien, con duong khong phai file van ve index.html.
+func TestAppDirIsImmutableToo(t *testing.T) {
+	fsys := built()
+	fsys["dist/app/index-def456.js"] = &fstest.MapFile{Data: []byte("console.log(2)")}
+	h := Handler(fsys, "dist")
+	rec := get(h, "/app/index-def456.js")
+	if rec.Code != http.StatusOK || rec.Body.String() != "console.log(2)" {
+		t.Fatalf("muon noi dung file that, duoc %d %q", rec.Code, rec.Body.String())
+	}
+	if cc := rec.Header().Get("Cache-Control"); cc != "public, max-age=31536000, immutable" {
+		t.Errorf("app/ phai immutable, duoc %q", cc)
+	}
+	// /tin-tuc/5 khong phai file -> index.html, khong cache.
+	rec = get(h, "/tin-tuc/5")
+	if rec.Body.String() != "<!doctype html>trang" || rec.Header().Get("Cache-Control") != "no-store" {
+		t.Errorf("/tin-tuc/5 phai tra index.html no-store, duoc %q %q", rec.Body.String(), rec.Header().Get("Cache-Control"))
+	}
+}
+
 // Chua chay `npm run build` (chi co .gitkeep) thi khong duoc chet luc khoi dong: dich vu
 // van phai phuc vu API, chi trang giao dien la bao chua build.
 func TestMissingBuildExplainsInsteadOfCrashing(t *testing.T) {

@@ -18,6 +18,7 @@ on:
       - 'website/game/**'
       - 'docker/**'
       - 'platform/**'
+      - 'web/**'
       - '.dockerignore'
       - '.github/workflows/build-images.yml'
 
@@ -125,7 +126,7 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
-          ls -la ../platform/cmd/admin/dist
+          ls -la ../platform/cmd/admin/dist ../platform/cmd/id/dist ../platform/cmd/adapter/dist
 
       # ---- nen tang (Go): context la platform/, mot Dockerfile, chon binary bang ARG CMD ----
       - name: Build & push id
