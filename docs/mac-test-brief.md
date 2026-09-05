@@ -52,13 +52,20 @@ Hỏng ở đâu thì log quyết định: `docker exec op-game tail -50 .logs/g
 ### 0.4 Kiểm nhanh các bản vá còn lại
 
 ```bash
-docker logs op-mysql 2>&1 | grep -cE 'Row size too large|ERROR'                                  # 0 — seed đã DYNAMIC tại nguồn
+# `ERROR` khop ca chuoi ERROR_FOR_DIVISION_BY_ZERO trong mot dong Warning vo hai cua MySQL 8
+# (dem ra 3 chu khong phai 0). Chi can bat loi that:
+docker logs op-mysql 2>&1 | grep -cE 'Row size too large|\[ERROR\]'                             # 0 — seed đã DYNAMIC tại nguồn
 $M -N -e "SELECT table_name, row_format FROM information_schema.tables WHERE table_schema='web' AND table_name='card_log'"   # Dynamic
 docker inspect -f '{{.State.Status}} {{.State.OOMKilled}}' op-group op-cross                     # running false ×2 (heap 1152m)
 docker exec op-group grep -ciE 'OutOfMemory|GC overhead' .logs/group-group-offical/info.log      # 0
 curl -s -o /dev/null -w '%{http_code}
 ' http://127.0.0.1:8080/.well-known/acme-challenge/x      # 404 (location ACME có, thư mục trống) — KHÔNG được 500
-bash -n docker/enable-domain.sh && (command -v shellcheck >/dev/null && shellcheck -S warning docker/enable-domain.sh docker/server-bootstrap.sh docker/gen-env.sh || echo "khong co shellcheck")
+# QUET CA dev-macos.sh: loi 14 la mot SC2215 ma dong lenh cu (thieu file nay) khong thay.
+# Khong co shellcheck tren may thi chay qua docker — dung ban stable, khong can cai gi.
+docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable -S warning \
+  docker/enable-domain.sh docker/server-bootstrap.sh docker/gen-env.sh docker/dev-macos.sh
+awk 'p ~ /\\$/ && /^[[:space:]]*#/ {print FILENAME":"FNR; n++} {p=$0} END{print "comment giua dong noi:", n+0}' \
+  $(find . -name '*.sh' -not -path './.git/*' -not -path './_backup*')
 ```
 
 Đọc `docker/enable-domain.sh` một lượt với con mắt "sẽ chạy trên Ubuntu bằng root": thấy chỗ nào sai
@@ -227,8 +234,8 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 | 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ⚠️ *(vào được, tạo nhân vật cần retest)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Thiếu `website/game/template/` (đã tái tạo, mục 11). Sau đó tạo nhân vật hỏng vì `channelCode` không phải số (mục 12) — đã vá, **cần chạy lại để xác nhận** |
 | 5.6 | platform-seed 6 dòng đếm | ✅ | `oauth_clients 1, games 1, game_devices 1, game_servers 1, game_packages 1962`; `admin_users 1` do service `admin` tự tạo (không phải platform-seed) |
 | 5.5b | **Đợt 2:** tạo nhân vật → vào thế giới; vào lại đi thẳng nhân vật | | |
-| 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | | |
-| 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | | |
+| 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | ⏳ *(chờ bước trình duyệt)* | Đã đo phần không cần đăng nhập: `/adminportal` → **302** → `/gmhanglong/login.php?next=%2Fadminportal` → **200**, đúng form "Công cụ GM"; `/gmhanglong/gm/index.php` → **302** về login; `/gm/index.php` → **302** (chốt chặn đã ở đầu file); `/gmhanglong/gm/api.php` → **401**; sai mật khẩu bị từ chối bằng thông báo chung và ghi `login_failed` vào `gm_audit`; `gm_users` = 1 dòng `gm`/`owner`/hash **60** ký tự/`active`; `php-fpm env: 10 bien`. **Còn lại:** đăng nhập đúng + gửi thư — cần người dùng nhập mật khẩu |
+| 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | ✅ | `Row size too large` **0**, `[ERROR]` **0** (dòng lệnh cũ đếm 3 là dương tính giả — xem 0.4); `web.card_log` = **Dynamic** tại nguồn, `zz-init.sh` không phải sed nữa; `op-group`/`op-cross` `running`, `OOMKilled=false`, `OutOfMemory` **0**; `/.well-known/acme-challenge/x` → **404**; `enable-domain.sh` đọc soát ra **lỗi 13** (đã sửa), shellcheck 4 script sạch |
 | — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
 | — | Thời gian tới khi login lên | ✅ | ~2 phút: console → world (5s) → statistic (10s) → pay (5s) → group (25s) → game (30s) → login (5s) → cross |
 
@@ -321,6 +328,31 @@ thành int (`ChatRule` có cặp trường `channelid` / `channelCode`). Đổi 
 `0` = kênh trực tiếp, là suy luận chứ không phải giá trị lấy từ nhà phát hành — nếu có mã
 kênh riêng thì điền số đó. Cột `tcg.account.channel_code` là `varchar(32)` nên DB không
 chặn, chỉ mã game mới đòi số.
+
+**13. `enable-domain.sh` chết lặng khi thiếu một khoá trong `.env`.**
+Chỉ đọc mã, chưa chạy (script dành cho Ubuntu/root). `envget` lấy giá trị bằng
+`grep "^$1=" .env | ...`. Với `set -o pipefail`, `grep` không khớp trả 1 → cả pipeline trả 1
+→ `V=$(envget X)` làm `set -e` thoát **ngay**, không in gì. Đã dính thật: `ACME_DIR` không có
+trong `.env.example` lẫn `gen-env.sh`, nên trên máy sạch script sẽ chết trước cả khi in được
+"bước 1/7" — người chạy chỉ thấy nó im lặng thoát. Sửa: `envget` dùng `sed -n "s/^$1=//p"`
+(trả 0 kể cả khi không khớp), và thêm `ACME_DIR=/var/www/acme`, `NGINX_DIR=/opt/tcg/nginx`
+vào `docker/.env.example`. Đã kiểm chứng bằng một test bash độc lập tái hiện đúng cú thoát.
+
+**14. Comment nằm GIỮA các dòng nối `\` của `docker run` — lỗi do chính tôi gây ra.**
+`./docker/dev-macos.sh` chỉ dựng được **15/19 container**; thiếu `op-adapter`, `op-admin`,
+`op-php`, `op-nginx`, và seed in `admin_users 0`. Thông báo duy nhất là một dòng
+`docker: 'docker run' requires at least 1 argument`. Nguyên nhân: hai khối ghi chú tiếng Việt
+tôi thêm ở lần trước nằm *bên trong* khối `docker run -d --name op-adapter ... \`. Shell kết
+thúc lệnh ngay tại dòng comment đầu tiên, nên `docker run` chạy không có image; phần còn lại
+thành các lệnh rác. Sửa: dời toàn bộ ghi chú lên **trên** khối lệnh.
+
+Hai điều rút ra, vì đây là loại lỗi dễ lặp lại:
+- **`bash -n` không bắt được** — cú pháp hoàn toàn hợp lệ, chỉ là lệnh bị cắt sớm.
+- **`shellcheck` BẮT ĐƯỢC** (`SC2215: This flag is used as a command name. Bad line break?`,
+  mức *warning*). Lý do nó không kêu lần trước: dòng lệnh ở mục 0.4 chỉ liệt kê
+  `enable-domain.sh`, `server-bootstrap.sh`, `gen-env.sh` — **không có `dev-macos.sh`**. Đã
+  thêm vào (mục 0.4) và đã quét toàn bộ `*.sh` của repo: không còn chỗ nào vi phạm.
+
 
 ## 8. Trước khi commit — bắt buộc
 

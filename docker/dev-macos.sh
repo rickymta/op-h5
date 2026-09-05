@@ -210,6 +210,17 @@ docker run --rm --network "$NET" \
   -v "$REPO/docker/platform-seed:/seed/data:ro" \
   mysql:8.0 bash /seed/platform-seed.sh | sed 's/^/    /'
 
+# KHONG dat comment GIUA cac dong noi `\` cua `docker run`: shell ket thuc lenh ngay o
+# dong comment dau tien, phan con lai thanh lenh rac va docker bao
+# "'docker run' requires at least 1 argument". Moi ghi chu de o tren khoi lenh.
+#
+#   ADAPTER_PLATFORM_CODE=develop  develop la ma platform duy nhat con bat dang nhap
+#                                  username+mat khau tren login server. Cac ma khac tra
+#                                  errorcode=0 nhung uid/token null (thanh cong gia).
+#   ADAPTER_CHANNEL_CODE=0         phai la SO: ChatRule.exe_v2 parse int, "web" -> NFE.
+#   ADAPTER_PUBLIC_PORT=8080       may dev phuc vu o 8080 chu khong phai 80. Adapter phai
+#                                  cong bo dung cong do trong /srv/game/connect/target,
+#                                  neu khong client noi WebSocket vao ws://host:80/game.
 docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_ADDR=":8090" -e ADAPTER_GAME_CODE=haitac \
   -e ID_DB_PASSWORD="$MYSQL_PW" -e ID_DB_NAME=platform \
@@ -219,10 +230,7 @@ docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_SECRET_ENC_KEY="$ENC_KEY" \
   -e ADAPTER_CONSOLE_BASE_URL="http://127.0.0.1:9999" \
   -e ADAPTER_CONSOLE_USER=admin -e ADAPTER_CONSOLE_PASSWORD="$CONSOLE_PW" \
-  # develop = ma platform duy nhat con bat dang nhap username+mat khau tren login server.
   -e ADAPTER_PLATFORM_CODE=develop -e ADAPTER_CHANNEL_CODE=0 \
-  # May dev phuc vu o 8080 chu khong phai 80: Adapter phai cong bo dung cong do trong
-  # /srv/game/connect/target, neu khong client noi WebSocket vao ws://host:80/game.
   -e ADAPTER_PUBLIC_PORT=8080 \
   -e ADAPTER_PUBLIC_HOST="127.0.0.1" -e ADAPTER_POLL_INTERVAL=3s -e ADAPTER_GRANT_INTERVAL=5s \
   op-h5-adapter >/dev/null

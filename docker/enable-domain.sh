@@ -33,7 +33,11 @@ case "$D" in *://*|*/*|www.*|id.*|haitac.*) echo "chi dua ten goc, vd antfarms.x
 [ -f nginx/domains.conf ] && [ -f nginx/tls.conf ] || { echo "thieu nginx/domains.conf hoac nginx/tls.conf" >&2; exit 1; }
 
 NAMES="$D www.$D id.$D haitac.$D"
-envget() { grep -E "^$1=" .env | head -1 | cut -d= -f2- | sed 's/ *#.*//'; }
+# Doc mot khoa trong .env. Dung `sed -n ...p` chu khong phai `grep`: voi `set -o pipefail`,
+# grep khong khop tra ve 1 -> ca pipeline tra 1 -> `V=$(envget X)` lam `set -e` thoat NGAY,
+# khong in gi. Da dinh that: ACME_DIR khong co trong .env.example nen script chet o dong
+# nay truoc khi in duoc buoc 1/7. sed -n tra 0 ke ca khi khong khop.
+envget() { sed -n "s/^$1=//p" .env | head -1 | sed 's/ *#.*//'; }
 ACME_DIR=$(envget ACME_DIR); ACME_DIR="${ACME_DIR:-/var/www/acme}"
 NGX="${NGINX_DIR:-/opt/tcg/nginx}"
 OVERLAY=docker-compose.domain.yml
