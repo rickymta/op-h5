@@ -2,6 +2,76 @@
 
 Tài liệu này viết cho một phiên Claude Code chạy trên máy macOS có Docker Desktop. Đọc hết trước khi làm. Mọi thứ cần biết nằm ở đây, [CLAUDE.md](../CLAUDE.md) (mục 15–16) và [docker/README.md](../docker/README.md).
 
+## 0. ĐỢT 2 (2026-09-05 đêm) — retest tạo nhân vật + kiểm các bản vá mới. LÀM PHẦN NÀY TRƯỚC
+
+Đợt 1 (mục 7) dừng ở bước **tạo nhân vật**: lỗi `channelCode` không phải số đã vá (mục 7, lỗi 12) nhưng
+**chưa chạy lại để xác nhận**. Sau đó phiên trên PC Windows commit `77054c6` vá thêm 7 chỗ cho server
+thật; trong đó ba thứ chạy được trên Mac: `dev-macos.sh` truyền tài khoản GM cho php, seed sinh lại với
+`ROW_FORMAT=DYNAMIC` (không còn dựa vào `sed` trong `zz-init.sh`), và `game.conf` có thêm location ACME.
+Phần còn lại (`enable-domain.sh`, compose cho server, heap trong `.env.example`) chỉ đọc, không chạy được ở đây.
+
+### 0.1 Chuẩn bị
+
+```bash
+git pull && git lfs pull                       # phải thấy 77054c6 trong git log
+./docker/dev-macos.sh --down && ./docker/dev-macos.sh     # không cần --build: image không đổi; seed/dev-macos được chép lại mỗi lần chạy
+```
+
+Mở client bằng **cửa sổ ẩn danh** hoặc xoá cache trước — lỗi 10 (bundle cache 30 ngày) từng làm một tab "kẹt" vì tài nguyên cũ.
+
+Các lệnh dưới dùng `$M` như mục 5: `M=docker exec op-mysql mysql -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= docker/.dev-macos/creds.txt | cut -d= -f2-)"`.
+
+### 0.2 Tạo nhân vật — điểm chặn của đợt 1
+
+1. `http://127.0.0.1:8081` đăng ký tài khoản mới → `http://127.0.0.1:8080/may-chu` → `/choi-game`.
+2. Client qua màn hình tải (không được đứng ở "Đang tải cấu hình giao diện… 0%"), bấm CHIẾN GAME, đặt tên, tạo nhân vật, vào được thế giới (thấy nhân vật/thành).
+3. Bằng chứng phía server, ghi vào mục 7:
+
+```bash
+docker exec op-game grep -cE 'NumberFormatException|创建主角失败' .logs/game-s1/error.log        # 0
+docker exec op-game grep -E '角色登录请求|创建主角' .logs/game-s1/info.log | tail -5                # có dòng tạo/đăng nhập nhân vật
+$M -N -e "SELECT username, platform_code, channel_code FROM tcg.account"                        # channel_code = 0, platform_code = develop
+$M -N -e "SELECT account_uid, srv_code, master_name, master_level FROM tcg.account_master"      # 1 dòng, tên vừa đặt
+docker exec op-mongo mongo -u abc123 -p "$(grep ^MONGO_PASSWORD= docker/.dev-macos/creds.txt | cut -d= -f2-)" --authenticationDatabase admin --quiet game-s1 --eval 'db.master.countDocuments({})'   # 1
+```
+
+Hỏng ở đâu thì log quyết định: `docker exec op-game tail -50 .logs/game-s1/error.log` và `docker logs op-adapter | tail -30`. Tạo nhân vật hỏng mà error.log không có gì → xem `docker exec op-login tail -30 .logs/info.log`.
+
+4. Thoát rồi vào lại `/choi-game`: phải vào **thẳng nhân vật vừa tạo**, không qua màn hình chọn máy chủ (Adapter đăng nhập hộ + `masterList`).
+
+### 0.3 GM tool với tài khoản có mật khẩu băm (mới ở đợt này)
+
+`dev-macos.sh` giờ in dòng `GM tool http://127.0.0.1:8080/adminportal: gm / <mật khẩu>` (cũng có trong `docker/.dev-macos/creds.txt`, khoá `GM_BOOTSTRAP_PASSWORD`).
+
+1. `http://127.0.0.1:8080/adminportal` → form đăng nhập; sai mật khẩu bị từ chối; đúng thì vào.
+2. Chưa đăng nhập mà mở thẳng `/gmhanglong/gm/index.php` → 302 về login; `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/gmhanglong/gm/api.php` → 401.
+3. `$M -N -e "SELECT username, role, LENGTH(password_hash), status FROM platform.gm_users; SELECT action, COUNT(*) FROM platform.gm_audit GROUP BY action"` → 1 dòng `gm`, hash 60 ký tự; audit có `login_failed` và đăng nhập thành công.
+4. Một thao tác GM **an toàn** để chứng minh đường console: gửi thư kèm 1 vật phẩm nhỏ **cho đúng nhân vật vừa tạo** (không gửi toàn server), rồi vào game mở hòm thư. Kết quả ghi vào mục 7.
+5. `docker logs op-php 2>&1 | grep 'php-fpm env'` → `10 bien` (4 biến ví ID + 4 `ID_DB_*` + 2 `GM_BOOTSTRAP_*`); ít hơn là `dev-macos.sh` chưa truyền đủ.
+
+### 0.4 Kiểm nhanh các bản vá còn lại
+
+```bash
+docker logs op-mysql 2>&1 | grep -cE 'Row size too large|ERROR'                                  # 0 — seed đã DYNAMIC tại nguồn
+$M -N -e "SELECT table_name, row_format FROM information_schema.tables WHERE table_schema='web' AND table_name='card_log'"   # Dynamic
+docker inspect -f '{{.State.Status}} {{.State.OOMKilled}}' op-group op-cross                     # running false ×2 (heap 1152m)
+docker exec op-group grep -ciE 'OutOfMemory|GC overhead' .logs/group-group-offical/info.log      # 0
+curl -s -o /dev/null -w '%{http_code}
+' http://127.0.0.1:8080/.well-known/acme-challenge/x      # 404 (location ACME có, thư mục trống) — KHÔNG được 500
+bash -n docker/enable-domain.sh && (command -v shellcheck >/dev/null && shellcheck -S warning docker/enable-domain.sh docker/server-bootstrap.sh docker/gen-env.sh || echo "khong co shellcheck")
+```
+
+Đọc `docker/enable-domain.sh` một lượt với con mắt "sẽ chạy trên Ubuntu bằng root": thấy chỗ nào sai
+logic (thứ tự, biến chưa đặt, lệnh không có trên Ubuntu 22.04) thì sửa và ghi vào mục 7. Không chạy nó ở đây.
+
+### 0.5 Báo cáo và cập nhật
+
+- Điền các dòng **5.5b**, **5.7**, **5.8** trong bảng mục 7 (đã chèn sẵn), thêm mục lỗi mới (đánh số tiếp từ 13) nếu có.
+- Nếu 0.2 qua: sửa `docker/README.md` mục 7 dòng 3 (bỏ "Còn chặn ở bước vào thế giới…") và `CLAUDE.md` mục 15 dòng "đã `up` thật trên macOS" thành "vào được thế giới, tạo được nhân vật".
+- Làm đúng mục 8 trước khi commit. Không push.
+
+---
+
 ## 1. Mục tiêu
 
 Kiểm chứng lần đầu rằng cụm game lên được **từ số không, không cần dump server cũ**, bằng đúng đường mà server thật sẽ đi:
@@ -156,6 +226,9 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 | 5.4 | console 200, `/srv/game/list` có s1, web 200, OIDC JSON | ✅ | console `200`; `/srv/game/list` → `[{"code":"s1",...}]`; `/` và `/play.php` `200`; OIDC discovery trả JSON |
 | 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ⚠️ *(vào được, tạo nhân vật cần retest)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Thiếu `website/game/template/` (đã tái tạo, mục 11). Sau đó tạo nhân vật hỏng vì `channelCode` không phải số (mục 12) — đã vá, **cần chạy lại để xác nhận** |
 | 5.6 | platform-seed 6 dòng đếm | ✅ | `oauth_clients 1, games 1, game_devices 1, game_servers 1, game_packages 1962`; `admin_users 1` do service `admin` tự tạo (không phải platform-seed) |
+| 5.5b | **Đợt 2:** tạo nhân vật → vào thế giới; vào lại đi thẳng nhân vật | | |
+| 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | | |
+| 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | | |
 | — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
 | — | Thời gian tới khi login lên | ✅ | ~2 phút: console → world (5s) → statistic (10s) → pay (5s) → group (25s) → game (30s) → login (5s) → cross |
 
