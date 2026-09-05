@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 	"testing"
+
+	"github.com/rickymta/op-h5/platform/internal/catalog"
 )
 
 // Ma game thanh client_id OIDC va tien to cua moi bang khac, nen chi nhan khuon hep.
@@ -99,5 +101,36 @@ func TestDefaultAdminConstants(t *testing.T) {
 	}
 	if len(defaultAdminPass) < 8 {
 		t.Errorf("mat khau mac dinh qua ngan: %d ky tu", len(defaultAdminPass))
+	}
+}
+
+// Form game gui accent/badge/URL anh vao thang bang games; khuon kiem tra la cua internal/catalog,
+// nhung cac gia tri ma form thuc te dua len phai qua duoc o day.
+func TestGameBrandingValidators(t *testing.T) {
+	for _, s := range []string{"", "#EE4623", "#0b0f14"} {
+		if !catalog.ValidAccent(s) {
+			t.Errorf("accent %q phai hop le", s)
+		}
+	}
+	if catalog.ValidAccent("EE4623") || catalog.ValidAccent("#EE46") {
+		t.Error("accent khong dung #RRGGBB phai bi tu choi")
+	}
+	for _, b := range []string{"", "new", "hot", "soon"} {
+		if !catalog.ValidBadge(b) {
+			t.Errorf("badge %q phai hop le", b)
+		}
+	}
+	if catalog.ValidBadge("sale") {
+		t.Error("badge ngoai enum phai bi tu choi")
+	}
+	for _, u := range []string{"", "/assets/images/logo.png", "/brand/haitac/cover.jpg", "https://cdn.x/y.png"} {
+		if !catalog.ValidAssetURL(u) {
+			t.Errorf("URL %q phai hop le", u)
+		}
+	}
+	for _, u := range []string{"assets/logo.png", "javascript:alert(1)", "ftp://a/b"} {
+		if catalog.ValidAssetURL(u) {
+			t.Errorf("URL %q phai bi tu choi", u)
+		}
 	}
 }

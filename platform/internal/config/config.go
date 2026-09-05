@@ -88,6 +88,15 @@ type ID struct {
 	CookieSecure    bool
 	LoginMaxAttempt int // so lan sai toi da trong cua so
 	LoginWindow     time.Duration
+
+	// SPA (ID_SPA=1): giao dien React web/apps/portal phuc vu tu goc, trang Go cu lui ve /cu/.
+	SPA bool
+	// Thuong hieu cua cong, tra qua GET /api/site cho trang chinh va chan trang cac trang game.
+	BrandName  string
+	SupportURL string
+	FanpageURL string
+	TopupURL   string // rong = chua co cong nap tren web (trang Vi hien huong dan "nap qua trang game")
+	LegalNote  string // dong phap ly o chan trang, vd "Công ty … · Giấy phép số …"
 }
 
 func LoadID() (ID, error) {
@@ -110,6 +119,12 @@ func LoadID() (ID, error) {
 		CookieSecure:    l.opt("ID_COOKIE_SECURE", "true") == "true",
 		LoginMaxAttempt: l.optInt("ID_LOGIN_MAX_ATTEMPT", 10),
 		LoginWindow:     l.optDur("ID_LOGIN_WINDOW", 15*time.Minute),
+		SPA:             l.opt("ID_SPA", "0") == "1",
+		BrandName:       l.opt("ID_BRAND_NAME", "Cổng game"),
+		SupportURL:      l.opt("ID_SUPPORT_URL", ""),
+		FanpageURL:      l.opt("ID_FANPAGE_URL", ""),
+		TopupURL:        l.opt("ID_TOPUP_URL", ""),
+		LegalNote:       l.opt("ID_LEGAL_NOTE", ""),
 	}
 	return c, l.missing.Err()
 }
@@ -144,6 +159,15 @@ type Adapter struct {
 	TicketTTL time.Duration
 	// Chu ky doc lai onlineNum tu login server
 	PollInterval time.Duration
+
+	// GameName la ten hien thi DU PHONG (ADAPTER_GAME_NAME) khi bang games chua co dong cua game
+	// nay; binh thuong ten, tagline, anh... doc tu bang games (migration 0010). Mac dinh = ma game.
+	GameName string
+	// BrandName la thuong hieu cua nen tang (ID_BRAND_NAME), hien o chan trang cua game.
+	BrandName string
+	// SPA (ADAPTER_SPA=1): giao dien React web/apps/game phuc vu /, /may-chu, /cua-hang, /tin-tuc;
+	// trang Go cu lui ve /cu/.
+	SPA bool
 }
 
 func LoadAdapter() (Adapter, error) {
@@ -174,6 +198,9 @@ func LoadAdapter() (Adapter, error) {
 		GrantInterval:   l.optDur("ADAPTER_GRANT_INTERVAL", 15*time.Second),
 		TicketTTL:       l.optDur("ADAPTER_TICKET_TTL", 60*time.Second),
 		PollInterval:    l.optDur("ADAPTER_POLL_INTERVAL", 10*time.Second),
+		BrandName:       l.opt("ID_BRAND_NAME", "Cổng game"),
+		SPA:             l.opt("ADAPTER_SPA", "0") == "1",
 	}
+	c.GameName = l.opt("ADAPTER_GAME_NAME", c.GameCode)
 	return c, l.missing.Err()
 }

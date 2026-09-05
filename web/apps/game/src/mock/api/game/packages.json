@@ -1,0 +1,37 @@
+{
+  "categories": [
+    {
+      "key": "diamond",
+      "title": "Nguyên Bảo",
+      "hint": "Đổi Xu lấy Nguyên Bảo. Game tính như nạp thật: mỗi mốc lần đầu mua được x2 và cộng điểm VIP.",
+      "packages": [
+        { "id": "nb-60", "name": "60 Nguyên Bảo", "category": "diamond", "grant_mode": "pay", "description": "Mốc nhỏ để thử; lần đầu mua được x2.", "badge": "", "cond": "", "item_name": "Nguyên Bảo", "item_count": 60, "price_xu": 50000, "price_fmt": "50.000", "vip_points": 50 },
+        { "id": "nb-300", "name": "300 Nguyên Bảo", "category": "diamond", "grant_mode": "pay", "description": "Mốc phổ biến nhất. Lần đầu mua được x2 và cộng điểm VIP.", "badge": "Hot", "cond": "", "item_name": "Nguyên Bảo", "item_count": 300, "price_xu": 100000, "price_fmt": "100.000", "vip_points": 100 },
+        { "id": "nb-980", "name": "980 Nguyên Bảo", "category": "diamond", "grant_mode": "pay", "description": "Tặng thêm 80 Nguyên Bảo so với giá gốc.", "badge": "", "cond": "", "item_name": "Nguyên Bảo", "item_count": 980, "price_xu": 300000, "price_fmt": "300.000", "vip_points": 300 },
+        { "id": "nb-1980", "name": "1980 Nguyên Bảo", "category": "diamond", "grant_mode": "pay", "description": "Mốc lớn, tặng thêm 180 Nguyên Bảo và lên thẳng VIP 5.", "badge": "", "cond": "VIP ≥ 3", "item_name": "Nguyên Bảo", "item_count": 1980, "price_xu": 600000, "price_fmt": "600.000", "vip_points": 600 }
+      ]
+    },
+    {
+      "key": "card",
+      "title": "Thẻ tuần",
+      "hint": "Kích hoạt trong game, nhận thưởng mỗi ngày trong 7 ngày.",
+      "packages": [
+        { "id": "card-week", "name": "Thẻ tuần", "category": "card", "grant_mode": "pay", "description": "Nhận 100 Nguyên Bảo mỗi ngày trong 7 ngày.", "badge": "", "cond": "1 lần/ngày", "item_name": "Thẻ tuần", "item_count": 1, "price_xu": 40000, "price_fmt": "40.000", "vip_points": 40 },
+        { "id": "card-week-hero", "name": "Thẻ tuần Hải tặc", "category": "card", "grant_mode": "pay", "description": "Mỗi ngày nhận mảnh tướng cam và 50 Nguyên Bảo.", "badge": "Mới", "cond": "từ ngày 3 sau mở máy chủ", "item_name": "Thẻ tuần Hải tặc", "item_count": 1, "price_xu": 60000, "price_fmt": "60.000", "vip_points": 60 },
+        { "id": "card-month", "name": "Thẻ tháng", "category": "card", "grant_mode": "pay", "description": "Nhận 120 Nguyên Bảo mỗi ngày trong 30 ngày.", "badge": "", "cond": "", "item_name": "Thẻ tháng", "item_count": 1, "price_xu": 120000, "price_fmt": "120.000", "vip_points": 120 },
+        { "id": "card-forever", "name": "Thẻ vĩnh viễn", "category": "card", "grant_mode": "pay", "description": "Mua một lần, nhận 80 Nguyên Bảo mỗi ngày mãi mãi.", "badge": "", "cond": "VIP ≥ 4", "item_name": "Thẻ vĩnh viễn", "item_count": 1, "price_xu": 500000, "price_fmt": "500.000", "vip_points": 500 }
+      ]
+    },
+    {
+      "key": "item",
+      "title": "Vật phẩm",
+      "hint": "Gửi qua thư trong game, nhận ở hòm thư.",
+      "packages": [
+        { "id": "it-stamina", "name": "Bình thể lực ×10", "category": "item", "grant_mode": "mail", "description": "Hồi 50 thể lực mỗi bình.", "badge": "", "cond": "3 lần/ngày", "item_name": "Bình thể lực", "item_count": 10, "price_xu": 20000, "price_fmt": "20.000", "vip_points": 0 },
+        { "id": "it-summon", "name": "Vé chiêu mộ ×10", "category": "item", "grant_mode": "mail", "description": "Dùng ở Chiêu mộ cao cấp.", "badge": "", "cond": "", "item_name": "Vé chiêu mộ", "item_count": 10, "price_xu": 80000, "price_fmt": "80.000", "vip_points": 0 },
+        { "id": "it-skin", "name": "Trang phục Thuyền trưởng Đỏ", "category": "item", "grant_mode": "mail", "description": "Trang phục giới hạn, +5% sát thương toàn đội.", "badge": "Giới hạn", "cond": "ngày 1–14 sau mở máy chủ", "item_name": "Trang phục Thuyền trưởng Đỏ", "item_count": 1, "price_xu": 180000, "price_fmt": "180.000", "vip_points": 0 },
+        { "id": "it-gold", "name": "Rương vàng lớn", "category": "item", "grant_mode": "mail", "description": "Nhận vàng bằng 24 giờ treo máy.", "badge": "", "cond": "", "item_name": "Rương vàng lớn", "item_count": 1, "price_xu": 30000, "price_fmt": "30.000", "vip_points": 0 }
+      ]
+    }
+  ]
+}

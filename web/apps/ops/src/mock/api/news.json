@@ -1,0 +1,31 @@
+{
+  "news": [
+    {
+      "id": 4, "game_code": null, "game_name": "", "kind": "notice", "title": "Bảo trì hệ thống ID 08:00–09:00 ngày 07/09",
+      "summary": "Đăng nhập và nạp Xu tạm ngưng trong một giờ; trong game không ảnh hưởng.",
+      "body": "Sáng 07/09, hệ thống tài khoản bảo trì để nâng cấp máy chủ.\n\nTrong thời gian này không đăng nhập mới được; ai đang trong game vẫn chơi bình thường.",
+      "image_url": "", "link_url": "", "pinned": true, "status": "published", "published_at": "2026-09-05T18:30:00+07:00",
+      "created_by": 1, "created_by_name": "admin", "created_at": "2026-09-05T18:25:12+07:00", "updated_at": "2026-09-05T18:30:00+07:00"
+    },
+    {
+      "id": 3, "game_code": "haitac", "game_name": "Đại Hải Trình", "kind": "event", "title": "Sự kiện Trung thu: nhận x2 Xu khi đổi gói",
+      "summary": "Từ 10/09 đến 17/09, mọi gói đổi ở cửa hàng được tặng thêm 100% giá trị.",
+      "body": "Chi tiết sự kiện.\n\nĐoạn hai.",
+      "image_url": "/assets/images/banner-min.png", "link_url": "", "pinned": false, "status": "published", "published_at": "2026-09-04T10:00:00+07:00",
+      "created_by": 1, "created_by_name": "admin", "created_at": "2026-09-03T09:12:00+07:00", "updated_at": "2026-09-04T10:00:00+07:00"
+    },
+    {
+      "id": 2, "game_code": "haitac", "game_name": "Đại Hải Trình", "kind": "news", "title": "Mở máy chủ S4 – Hắc Long",
+      "summary": "Máy chủ mới mở 10:00 ngày 06/09, tặng gói tân thủ cho 1.000 người đầu tiên.",
+      "body": "", "image_url": "", "link_url": "https://haitac.example.com/may-chu", "pinned": false, "status": "draft", "published_at": null,
+      "created_by": 2, "created_by_name": "an.nguyen", "created_at": "2026-09-02T15:40:00+07:00", "updated_at": "2026-09-02T15:40:00+07:00"
+    },
+    {
+      "id": 1, "game_code": null, "game_name": "", "kind": "news", "title": "Ra mắt cổng game mới",
+      "summary": "Một tài khoản, một ví Xu, chơi mọi game của chúng tôi.",
+      "body": "Nội dung.", "image_url": "https://picsum.photos/seed/op/200/120", "link_url": "", "pinned": false, "status": "published", "published_at": "2026-08-20T08:00:00+07:00",
+      "created_by": 1, "created_by_name": "admin", "created_at": "2026-08-20T07:55:00+07:00", "updated_at": "2026-08-20T08:00:00+07:00"
+    }
+  ],
+  "has_more": true
+}

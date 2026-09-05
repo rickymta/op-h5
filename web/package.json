@@ -8,9 +8,14 @@
   ],
   "scripts": {
     "dev:ops": "npm run dev -w @op/ops",
-    "build": "npm run build -w @op/ops",
-    "typecheck": "tsc -p packages/ui --noEmit && tsc -p apps/ops --noEmit",
-    "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
+    "dev:portal": "npm run dev -w @op/portal",
+    "dev:game": "npm run dev -w @op/game",
+    "build": "npm run build -w @op/ops && npm run build -w @op/portal && npm run build -w @op/game",
+    "build:ops": "npm run build -w @op/ops",
+    "build:portal": "npm run build -w @op/portal",
+    "build:game": "npm run build -w @op/game",
+    "typecheck": "tsc -p packages/ui --noEmit && tsc -p apps/ops --noEmit && tsc -p apps/portal --noEmit && tsc -p apps/game --noEmit",
+    "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist','../platform/cmd/id/dist','../platform/cmd/adapter/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
   },
   "devDependencies": {
     "typescript": "~5.7.2",

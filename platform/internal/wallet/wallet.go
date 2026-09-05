@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 var (
@@ -543,4 +544,60 @@ func (s *Service) History(ctx context.Context, userID int64, limit int) ([]Entry
 		out = append(out, e)
 	}
 	return out, rows.Err()
+}
+
+// HistoryItem la mot dong lich su voi thoi diem dang time.Time (API moi tra RFC 3339).
+type HistoryItem struct {
+	TxnID  int64
+	Kind   string
+	Amount int64
+	Memo   sql.NullString
+	At     time.Time
+}
+
+// HistoryKinds la cac loai giao dich loc duoc o /api/wallet/history.
+var HistoryKinds = []string{"topup", "convert", "refund", "adjust"}
+
+// HistoryPage tra ve mot trang lich su cua nguoi dung, moi nhat truoc; kind rong = moi loai.
+// hasMore cho biet con trang sau (doc limit+1 dong thay vi COUNT(*) — bang nay chi tang).
+func (s *Service) HistoryPage(ctx context.Context, userID int64, kind string, offset, limit int) (items []HistoryItem, hasMore bool, err error) {
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	q := `
+		SELECT t.id, t.kind, e.amount, t.memo, e.created_at
+		  FROM ledger_entries e
+		  JOIN wallet_accounts a ON a.id = e.account_id
+		  JOIN ledger_txns t ON t.id = e.txn_id
+		 WHERE a.kind = 'user' AND a.user_id = ?`
+	args := []any{userID}
+	if kind != "" {
+		q += ` AND t.kind = ?`
+		args = append(args, kind)
+	}
+	q += ` ORDER BY e.id DESC LIMIT ? OFFSET ?`
+	args = append(args, limit+1, offset)
+	rows, err := s.DB.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, false, err
+	}
+	defer func() { _ = rows.Close() }()
+	items = []HistoryItem{}
+	for rows.Next() {
+		var it HistoryItem
+		if err := rows.Scan(&it.TxnID, &it.Kind, &it.Amount, &it.Memo, &it.At); err != nil {
+			return nil, false, err
+		}
+		items = append(items, it)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+	if len(items) > limit {
+		items, hasMore = items[:limit], true
+	}
+	return items, hasMore, nil
 }

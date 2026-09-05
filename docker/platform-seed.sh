@@ -7,7 +7,8 @@
 #   2. Doi `id` chay migration xong (bang oauth_clients/games/game_servers/game_devices/game_packages co mat).
 #   3. Upsert:
 #        oauth_clients  <- ADAPTER_CLIENT_ID + ADAPTER_REDIRECT_URI (client cong khai, chi PKCE)
-#        games          <- ADAPTER_GAME_CODE/NAME, adapter_url 127.0.0.1:ADAPTER_PORT, site_url
+#        games          <- ADAPTER_GAME_CODE/NAME, adapter_url 127.0.0.1:ADAPTER_PORT, site_url;
+#                          bo mat (tagline/the loai/anh/noi bat, migration 0010) chi dien vao o con TRONG
 #        game_devices   <- tcg.srv_game.device_code (+ ten tu tcg.cloud_device), max_online 1600
 #        game_servers   <- tcg.srv_game (code, name, device_code, ws_port); khong co tcg -> GAME_SERVERS
 #        game_packages  <- /seed/data/game_packages.<game>.sql (sinh boi tools/gen-game-packages.py)
@@ -79,6 +80,37 @@ sql "INSERT INTO oauth_clients (client_id, name, secret_hash, redirect_uris, pos
 sql "INSERT INTO games (code, name, adapter_url, site_url, status, sort_order)
      VALUES ('$(q "$GAME")', '$(q "$GAME_NAME")', '$(q "$ADAPTER_URL")', '$(q "$SITE_URL")', 'active', 1)
      ON DUPLICATE KEY UPDATE name=VALUES(name), adapter_url=VALUES(adapter_url), site_url=VALUES(site_url);" "$DB"
+
+# 3b') bo mat cua game (migration 0010): tagline, the loai, ba anh, noi bat. Chi dien vao o con TRONG
+#      de khong ghi de cai admin da sua o trang quan tri; noi bat chi bat khi CHUA co game nao noi bat.
+#      Mac dinh la cua haitac (anh nam san trong website/game/assets/images, tuong doi so voi site_url);
+#      game khac dat ADAPTER_GAME_TAGLINE/GENRE/COVER/BANNER/LOGO, khong dat thi de trong.
+TAGLINE=${ADAPTER_GAME_TAGLINE:-}; GENRE=${ADAPTER_GAME_GENRE:-}
+COVER=${ADAPTER_GAME_COVER:-}; BANNER=${ADAPTER_GAME_BANNER:-}; LOGO=${ADAPTER_GAME_LOGO:-}
+if [ "$GAME" = haitac ]; then
+  TAGLINE=${TAGLINE:-Ra khơi cùng băng hải tặc của riêng bạn}; GENRE=${GENRE:-Đấu tướng · Idle}
+  COVER=${COVER:-/assets/images/banner-min.png}; BANNER=${BANNER:-/assets/images/bg_pc.jpg}; LOGO=${LOGO:-/assets/images/logo.png}
+fi
+has_brand=1
+if [ "$PRINT" = 0 ]; then
+  # Image `id` cu chua co migration 0010 -> cot khong ton tai; doi mot chut roi bo qua (khong chan seed).
+  for ((t=0; t<60; t+=5)); do
+    c=$(sql "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$DB' AND table_name='games' AND column_name='tagline';" 2>/dev/null || echo 0)
+    [ "${c:-0}" -ge 1 ] && break
+    sleep 5
+  done
+  [ "${c:-0}" -ge 1 ] || { has_brand=0; echo "[seed] CANH BAO: games chua co cot 'tagline' (migration 0010) — bo qua bo mat game; pull/build lai id" >&2; }
+fi
+if [ "$has_brand" = 1 ]; then
+  sql "UPDATE games SET tagline    = IF(tagline='',    '$(q "$TAGLINE")', tagline),
+                        genre      = IF(genre='',      '$(q "$GENRE")',   genre),
+                        cover_url  = IF(cover_url='',  '$(q "$COVER")',   cover_url),
+                        banner_url = IF(banner_url='', '$(q "$BANNER")',  banner_url),
+                        logo_url   = IF(logo_url='',   '$(q "$LOGO")',    logo_url)
+        WHERE code = '$(q "$GAME")';
+       UPDATE games g JOIN (SELECT COUNT(*) AS n FROM games WHERE featured = 1) f
+          SET g.featured = 1 WHERE g.code = '$(q "$GAME")' AND f.n = 0;" "$DB"
+fi
 
 # 3c) doi server: uu tien tcg.srv_game (nguon su that cua cum game), khong co thi doc GAME_SERVERS
 has_tcg=0

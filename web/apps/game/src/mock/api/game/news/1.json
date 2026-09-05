@@ -1,0 +1,13 @@
+{
+  "id": 1,
+  "game_code": null,
+  "game_name": "",
+  "kind": "notice",
+  "title": "Bảo trì hệ thống ID và ví Xu sáng 08/09",
+  "summary": "Từ 02:00 đến 04:00 ngày 08/09, đăng nhập và nạp Xu tạm dừng. Nhân vật và số dư không bị ảnh hưởng.",
+  "body": "Để nâng cấp máy chủ cơ sở dữ liệu, hệ thống ID (đăng nhập, ví Xu, trang tài khoản) sẽ tạm dừng từ 02:00 đến 04:00 ngày 08/09/2026.\n\nTrong thời gian này người đang chơi không bị đẩy ra; chỉ không đăng nhập mới, không nạp Xu và không mua gói ở cửa hàng được. Đơn mua đang ở trạng thái \"Đang phát…\" sẽ được phát tiếp ngay sau bảo trì.\n\nMọi thắc mắc liên hệ kênh hỗ trợ ở chân trang.",
+  "image_url": "",
+  "link_url": "",
+  "pinned": true,
+  "published_at": "2026-09-05T20:00:00+07:00"
+}

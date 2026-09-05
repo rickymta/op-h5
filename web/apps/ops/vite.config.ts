@@ -1,12 +1,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { mockApi } from "../../scripts/mock-api.mjs";
 
 // Xuat thang vao platform/cmd/admin/dist de Go nhung bang go:embed. Khong co buoc copy
 // rieng: mot buoc it di la mot cho it quen.
 //
 // dist/ nam trong .gitignore cua platform — CI dung `npm run build` truoc `docker build`.
 export default defineConfig({
-  plugins: [react()],
+  // VITE_MOCK=1: trả src/mock/api/*.json thay cho admin thật (npm run dev:mock -w @op/ops).
+  plugins: [react(), mockApi(["/api/"])],
   build: {
     outDir: "../../../platform/cmd/admin/dist",
     // Khong dung emptyOutDir: no xoa ca .gitkeep (xem scripts/clean-dist.mjs).

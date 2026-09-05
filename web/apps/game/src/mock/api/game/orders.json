@@ -1,0 +1,7 @@
+{
+  "orders": [
+    { "id": 1042, "name": "60 Nguyên Bảo", "srv_code": "s2", "amount_fmt": "50.000", "status": "pending", "status_vi": "Đang phát…", "grant_mode": "pay", "created_at": "2026-09-06 08:41" },
+    { "id": 1031, "name": "Vé chiêu mộ ×10", "srv_code": "s2", "amount_fmt": "80.000", "status": "granted", "status_vi": "Đã gửi thư", "grant_mode": "mail", "created_at": "2026-09-04 21:14" }
+  ],
+  "balance": 102000
+}
