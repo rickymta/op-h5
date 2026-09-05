@@ -218,6 +218,32 @@ def do_check():
             for v in vals:
                 if v in s:
                     found += 1; print('   CON SOT %s : %s' % (md, v[:8] + '…'))
+    # Doi chieu thu hai: moi file trong RULES phai CON placeholder cua no.
+    # Phep so voi backup o tren chi bat duoc gia tri GOC quay lai; no mu hoan toan voi mot
+    # gia tri MOI SINH duoc dien vao dung o do (vi du web-entrypoint cua container dien mat
+    # khau MySQL cua lan chay dev vao website/game/new/config.php). Voi repo public thi
+    # truong hop do moi la nguy hiem, nen phai kiem tra rieng.
+    for rel, rule in RULES:
+        p = os.path.join(ROOT, rel)
+        if not os.path.exists(p):
+            continue
+        try: s = read(p)
+        except Exception: continue
+        if isinstance(rule, str):
+            # rule dang 'yaml'/'json': che bang logic rieng, khong biet truoc ten placeholder
+            # nao se duoc dat -> chi doi hoi file con giu it nhat mot placeholder.
+            if not re.search(r'__[A-Z0-9_]{4,}__', s):
+                found += 1
+                print('   DA DIEN %s : khong con placeholder nao' % rel)
+            continue
+        want = set()
+        for item in rule:
+            repl = item[1] if isinstance(item, (tuple, list)) and len(item) > 1 else ''
+            want.update(re.findall(r'__[A-Z0-9_]{4,}__', repl))
+        missing = sorted(ph for ph in want if ph not in s)
+        if missing:
+            found += len(missing)
+            print('   DA DIEN %s : %s' % (rel, ', '.join(missing)))
     print('   -> %s' % ('sach, %d gia tri that da duoc che' % len(vals) if not found else '%d cho con sot' % found))
     return found
 

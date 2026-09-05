@@ -117,11 +117,18 @@ Hai điều khác biệt so với server thật, **chỉ là hạn chế của D
   netns có publish sẵn mọi cổng; các container khác join netns đó. Trên Ubuntu không cần.
 - Vì thế trang game ở `:8080` và hệ thống ID ở `:8081`, thay vì `:80` và `:8080`.
 
-⚠️ `web-entrypoint` sed thẳng vào cây nguồn khi bind-mount (thay `192.168.1.69` bằng
-`PUBLIC_HOST` trong 3 file — đó chính là lý do client gọi `127.0.0.1:12345`). Xong việc:
+⚠️ `web-entrypoint` sed thẳng vào cây nguồn khi bind-mount, **hai loại thay đổi**:
+`192.168.1.69` → `PUBLIC_HOST` (3 file — đó là lý do client gọi `127.0.0.1:12345`), và
+**điền mật khẩu thật vào ~10 file PHP** thay cho placeholder. Loại thứ hai nguy hiểm với repo
+public: `mask-secrets.py --check` bản cũ so với `_backup-secrets-original/` nên **không** thấy
+một giá trị mới sinh nằm đúng ô placeholder. Từ 2026-09-05 `--check` kiểm tra thêm sự có mặt
+của placeholder, nên khi container đang chạy nó sẽ báo `DA DIEN` — đúng như vậy.
+
+Trước khi commit, **dừng container php trước** rồi mới dọn (không thì nó điền lại ngay):
 
 ```bash
-git checkout -- website/game/ && rm -f website/game/.public-host
+docker rm -f op-php && git checkout -- website/game/ && rm -f website/game/.public-host
+python tools/mask-secrets.py --check     # phải in "sach"
 ```
 
 ---

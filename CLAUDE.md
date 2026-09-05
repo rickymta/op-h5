@@ -485,6 +485,8 @@ Cây này là git repo, `origin` = `https://github.com/rickymta/op-h5.git` (**pu
 
 - **Secrets đã bị che** bằng `tools/mask-secrets.py --mask`: mọi mật khẩu/API key trong 27 file thành `__PLACEHOLDER__` (danh sách ở [SECRETS.md](SECRETS.md)). Bản thật nằm ở `_backup-secrets-original/` — gitignored. **Cây local không chạy được** cho tới khi `python tools/mask-secrets.py --fill secrets.env` (file `secrets.env` cũng gitignored).
 - **Trước mọi commit**: `python tools/mask-secrets.py --check` phải in `sach`. Không commit `secrets.env`, `docker/.env`, `docker/initdb/**`, `.logs/`, keystore.
+- `--check` làm **hai** phép: (1) giá trị gốc có quay lại cây không — so với `_backup-secrets-original/`; (2) mọi file trong `RULES` có **còn** placeholder không. Phép (2) thêm 2026-09-05 vì phép (1) mù với giá trị *mới sinh*: `web-entrypoint.sh` của container php sed thẳng vào bind mount, nên chạy `docker/dev-macos.sh` xong là `api/config.php`, `new/config.php`, `user/index.php`, `user/indexapk.php`… mang mật khẩu MySQL sống — mà `--check` cũ vẫn in `sach`.
+- **Đang chạy dev thì `--check` sẽ báo `DA DIEN`.** Đó là đúng. Trước khi commit: dừng `op-php` rồi `git checkout -- website/game/`.
 - **Không nằm trong git**: `website/game/res|sound|spine` (1.6 GB), `home.zip`, backup `_backup-*/`, `excel-staging/`, `build/`, 19 file rác `%3F`. Chuyển bằng WinSCP.
 - **8 fat JAR qua Git LFS** (`.gitattributes`); `tcg-game.jar` và `game/lib/*.jar` ở git thường. Clone cần `git lfs install`.
 - Thứ tự khi deploy: `--fill secrets.env` → `tools/set-server-host.py <ip> --apply` → upload. Đừng commit sau khi fill (check sẽ báo).
