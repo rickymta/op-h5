@@ -4,6 +4,7 @@ import { api, type Me } from "./api";
 import { Account } from "./pages/Account";
 import { Games } from "./pages/Games";
 import { GM } from "./pages/GM";
+import { News } from "./pages/News";
 import { Orders } from "./pages/Orders";
 import { Players } from "./pages/Players";
 import { Staff } from "./pages/Staff";
@@ -24,6 +25,7 @@ function Nav({ me }: { me?: Me }) {
         {item("/gm", "Công cụ GM")}
         {item("/nguoi-choi", "Người chơi")}
         {item("/game", "Game")}
+        {item("/tin-tuc", "Tin tức")}
         {item("/nap-tay", "Nạp tay")}
         {item("/goi", "Gói")}
         {item("/don-mua", "Đơn mua")}
@@ -68,6 +70,7 @@ export function App() {
         <Route path="/gm" component={GM} />
         <Route path="/nguoi-choi" component={Players} />
         <Route path="/game" component={Games} />
+        <Route path="/tin-tuc" component={News} />
         <Route path="/nhan-vien" component={Staff} />
         <Route path="/tai-khoan" component={Account} />
         <Route path="/don-mua" component={Orders} />

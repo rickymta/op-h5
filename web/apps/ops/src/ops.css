@@ -1,0 +1,29 @@
+/* Bổ sung riêng cho trang quản trị, nằm ngoài @op/ui để không đụng bảng dùng chung.
+ *
+ * base.css chỉ ép 44px cho thanh điều hướng. Ở điện thoại, nút và ô nhập trong nội dung
+ * cũng phải đủ cao để bấm trúng bằng ngón tay (đo ở 375 px). */
+
+/* Thẻ chỉnh sửa: hai cột trên màn rộng, một cột trên điện thoại. */
+.form-luoi { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 20px; }
+.form-luoi .rong { grid-column: 1 / -1; }
+
+/* Ô xem trước ảnh 48px cạnh ô nhập URL. */
+.xem-truoc {
+  width: 48px; height: 48px; flex: 0 0 48px; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--surface2); object-fit: cover; display: block;
+}
+.xem-truoc.trong {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-family: var(--mono); font-size: 10px;
+}
+
+/* Ô màu nhấn: ô nhập, ô chọn màu của trình duyệt và ô hiển thị. */
+.o-mau { width: 44px; height: 36px; padding: 2px; flex: 0 0 44px; cursor: pointer; }
+.mau-hien { width: 36px; height: 36px; flex: 0 0 36px; border: 1px solid var(--line); border-radius: 3px; }
+
+fieldset.tran { border: 0; padding: 0; margin: 0; min-width: 0; }
+
+@media (max-width: 640px) {
+  main button, main input:not([type="checkbox"]), main select { min-height: 44px; }
+  .o-mau { height: 44px; }
+}
