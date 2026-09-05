@@ -146,10 +146,8 @@ func (t *Tracker) Run(ctx context.Context, every time.Duration) {
 	}
 }
 
-// snapshot tra ve Fleet hien tai da cong ve giu cho.
-func (t *Tracker) snapshot() *Fleet {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
+// fleetLocked dung Fleet tu trang thai hien tai. Ben goi PHAI dang giu khoa.
+func (t *Tracker) fleetLocked() *Fleet {
 	now := time.Now()
 	servers := make([]ServerState, 0, len(t.fleet.Servers))
 	for _, s := range t.fleet.Servers {
@@ -170,29 +168,34 @@ func (t *Tracker) snapshot() *Fleet {
 }
 
 // Fleet tra ve anh chup hien tai (chi doc, dung cho danh sach server va trang quan tri).
-func (t *Tracker) Fleet() *Fleet { return t.snapshot() }
+func (t *Tracker) Fleet() *Fleet {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.fleetLocked()
+}
 
-// reserve ghi mot ve cho server.
-func (t *Tracker) reserve(srvCode string) {
+// admit ra quyet dinh VA giu cho trong CUNG mot lan giu khoa.
+//
+// Hai buoc nay bat buoc phai nguyen tu. Neu doc tai roi tha khoa roi moi giu cho, thi
+// giua hai buoc cac goroutine khac cung doc duoc con so cu va tat ca deu duoc cho vao —
+// do dung la tinh huong cong nay sinh ra de chan. Da do: 50 request dong thoi lot het
+// vao mot server chi con 5 cho.
+func (t *Tracker) admit(decide func(*Fleet) Decision) Decision {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.tickets[srvCode] = append(t.tickets[srvCode], time.Now())
+	d := decide(t.fleetLocked())
+	if d.Allowed {
+		t.tickets[d.SrvCode] = append(t.tickets[d.SrvCode], time.Now())
+	}
+	return d
 }
 
 // AdmitReturning quyet dinh cho nguoi choi da co nhan vat, va giu cho neu duoc vao.
 func (t *Tracker) AdmitReturning(srvCode string) Decision {
-	d := t.snapshot().AdmitReturning(srvCode)
-	if d.Allowed {
-		t.reserve(d.SrvCode)
-	}
-	return d
+	return t.admit(func(f *Fleet) Decision { return f.AdmitReturning(srvCode) })
 }
 
 // AdmitNew chon server cho nguoi choi moi va giu cho.
 func (t *Tracker) AdmitNew() Decision {
-	d := t.snapshot().AdmitNew()
-	if d.Allowed {
-		t.reserve(d.SrvCode)
-	}
-	return d
+	return t.admit(func(f *Fleet) Decision { return f.AdmitNew() })
 }

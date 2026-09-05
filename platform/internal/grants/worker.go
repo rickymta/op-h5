@@ -96,6 +96,18 @@ func (w *Worker) Tick(ctx context.Context) (int, error) {
 		if err := ctx.Err(); err != nil {
 			return done, err
 		}
+		// Gianh lenh truoc khi goi console. Tick() chay tu HAI noi — vong lap nen va
+		// mot lan chay ngay sau khi nguoi choi quy doi — nen khong gianh thi ca hai
+		// cung lay mot dong va phat hai lan. Khong duoc trong cay vao console tu chong
+		// trung: phat hang la viec khong duoc phep phu thuoc vao ben kia lam dung.
+		ok, err := w.claim(ctx, d)
+		if err != nil {
+			w.Log.Error("gianh lenh phat hang", "grant", d.ID, "err", err)
+			continue
+		}
+		if !ok {
+			continue // tien trinh khac dang lo
+		}
 		if err := w.deliver(ctx, d); err != nil {
 			w.fail(ctx, d, err)
 			continue
@@ -104,6 +116,26 @@ func (w *Worker) Tick(ctx context.Context) (int, error) {
 		done++
 	}
 	return done, nil
+}
+
+// leaseTTL la thoi gian mot lenh bi "giu" sau khi gianh. Neu tien trinh giu no chet
+// giua chung, het thoi gian nay lenh se duoc lay lai.
+const leaseTTL = 2 * time.Minute
+
+// claim danh dau mot lenh la dang duoc xu ly, bang cach day next_retry_at ve tuong lai.
+// RowsAffected == 1 nghia la ta gianh duoc; 0 nghia la tien trinh khac vua gianh truoc.
+func (w *Worker) claim(ctx context.Context, d Delivery) (bool, error) {
+	res, err := w.DB.ExecContext(ctx, `
+		UPDATE game_grants
+		   SET next_retry_at = DATE_ADD(NOW(), INTERVAL ? SECOND)
+		 WHERE id = ? AND status = 'pending'
+		   AND (next_retry_at IS NULL OR next_retry_at <= NOW())`,
+		int(leaseTTL.Seconds()), d.ID)
+	if err != nil {
+		return false, err
+	}
+	n, err := res.RowsAffected()
+	return n == 1, err
 }
 
 // due lay cac lenh dang cho va da toi luc thu lai.
