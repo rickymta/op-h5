@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "ops",         "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "web", "run", "dev",      "-w", "@op/ops"],    "port": 5173 },
+    { "name": "portal-mock", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "web", "run", "dev:mock", "-w", "@op/portal"], "port": 5174 },
+    { "name": "game-mock",   "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "web", "run", "dev:mock", "-w", "@op/game"],   "port": 5175 }
+  ]
+}

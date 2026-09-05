@@ -1,0 +1,165 @@
+/* Kiểu riêng của apps/portal, tiền tố `pt-`. Mọi token và thành phần chung nằm ở
+ * @op/ui/publisher.css; ở đây chỉ có bố cục của từng trang. Đo ở 375 px: không gì rộng
+ * hơn màn hình, bảng cuộn trong khung riêng. */
+
+.pt-page { padding-top: 32px; }
+.pt-page__head { margin-bottom: 20px; }
+.pt-page__head h1 { font-size: clamp(26px, 4vw, 36px); margin-bottom: 6px; }
+.pt-page__head .pb-sub { max-width: 60ch; }
+
+/* Chỗ giữ khi đang tải / khi lỗi: cùng chiều cao để trang không nhảy. */
+.pt-loading { color: var(--muted); padding: 20px 0; }
+.pt-error { margin-top: 16px; }
+.pt-stack > * + * { margin-top: 16px; }
+.pt-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+/* ------------------------------------------------------------------ thanh trên: tên · Xu */
+.pt-who { max-width: 52vw; }
+.pt-who__name { overflow: hidden; text-overflow: ellipsis; }
+.pt-who__xu { color: var(--brass); font-family: var(--mono); font-weight: 500; }
+
+/* ------------------------------------------------------------------ trang chính */
+.pt-stats { padding-top: 28px; }
+/* Liên kết "Game" nhảy tới #game: chừa chỗ cho thanh trên dính, không che tiêu đề. */
+.pb-section[id] { scroll-margin-top: calc(var(--pb-topbar-h) + 8px); }
+.pt-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.pt-step { position: relative; }
+.pt-step__n {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em; color: var(--accent);
+  margin-bottom: 10px;
+}
+.pt-step h3 { margin-bottom: 6px; }
+.pt-step p { margin: 0; color: var(--muted); font-size: 14px; }
+.pt-hero-fallback { color: var(--muted); }
+
+/* ------------------------------------------------------------------ đăng nhập / đăng ký */
+.pt-auth { display: grid; place-items: center; padding: 40px 16px 56px; min-height: calc(100dvh - var(--pb-topbar-h) - 220px); }
+.pt-auth__box { width: 100%; max-width: 420px; }
+.pt-auth__box h1 { font-size: 26px; margin-bottom: 6px; }
+.pt-auth__box .pb-sub { margin-bottom: 20px; }
+.pt-auth__foot { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.pt-auth__foot a { display: inline-flex; align-items: center; min-height: 44px; }
+.pt-auth__foot .pt-sep { margin: 0 8px; opacity: 0.5; }
+.pt-auth form .pb-btn { margin-top: 6px; }
+.pt-code { font-family: var(--mono); font-size: 13px; }
+
+/* ------------------------------------------------------------------ khu tài khoản */
+.pt-account { padding-top: 24px; }
+.pt-account__body { min-width: 0; }
+.pt-account__body > * + * { margin-top: 16px; }
+.pt-account__head { margin-bottom: 4px; }
+.pt-account__head h1 { font-size: 24px; }
+.pt-account .pb-section { padding-top: 24px; }
+
+.pt-balance { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.pt-balance__k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.pt-balance__v {
+  font-family: var(--mono); font-size: clamp(30px, 6vw, 44px); font-weight: 500; letter-spacing: -0.03em;
+  color: var(--brass); font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px;
+}
+.pt-balance__v small { font-size: 0.45em; letter-spacing: 0.04em; margin-left: 6px; color: var(--brass); opacity: 0.85; }
+
+/* Hàng game trong tài khoản: logo · tên/tài khoản game · nút. */
+.pt-gamerow { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.pt-gamerow:first-child { border-top: 0; padding-top: 0; }
+.pt-gamerow__logo {
+  width: 48px; height: 48px; border-radius: 10px; background: var(--surface-2); flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  font-weight: 800; font-size: 20px; color: var(--muted);
+}
+.pt-gamerow__logo img { width: 100%; height: 100%; object-fit: contain; }
+.pt-gamerow__main { flex: 1 1 auto; min-width: 0; }
+.pt-gamerow__name { font-weight: 700; }
+.pt-gamerow__sub { font-size: 13px; color: var(--muted); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-gamerow .pb-btn { flex: 0 0 auto; }
+
+/* Bảng: cuộn trong khung riêng để trang không tràn ở 375 px. */
+.pt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pt-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.pt-table th, .pt-table td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.pt-table th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.pt-table tr:last-child td { border-bottom: 0; }
+.pt-table .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pt-table .memo { color: var(--muted); min-width: 160px; }
+.pt-table .amt { text-align: right; }
+.pt-amount--pos { color: var(--ok); }
+.pt-amount--neg { color: var(--danger); }
+.pt-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.pt-tag--me { color: var(--brass); border: 1px solid var(--brass); background: transparent; margin-left: 6px; }
+
+/* Bộ lọc dạng pill (lịch sử, tin tức). */
+.pt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pt-pill {
+  min-height: 44px; padding: 0 16px; border-radius: var(--radius-pill); border: 1px solid var(--line);
+  background: var(--surface); color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.pt-pill:hover { color: var(--text); border-color: var(--brass); }
+.pt-pill.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pt-filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 16px; }
+.pt-filters .pt-pills { margin-bottom: 0; }
+.pt-filters select { width: auto; min-width: 160px; }
+
+/* Form trong thẻ: tối đa 480 px để dòng không quá dài. */
+.pt-form { max-width: 480px; }
+.pt-form .pb-btn { margin-top: 4px; }
+.pt-form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.pt-form-row .pb-field { flex: 1 1 220px; margin-bottom: 0; }
+
+/* ------------------------------------------------------------------ tin tức */
+.pt-article { max-width: 72ch; }
+.pt-article__meta { color: var(--muted); font-size: 13.5px; font-family: var(--mono); margin-bottom: 18px; }
+.pt-article__meta b { color: var(--brass); font-weight: 500; }
+.pt-article__img { border-radius: var(--radius-card); margin: 0 0 20px; overflow: hidden; background: var(--surface-2); }
+.pt-article p { font-size: 16px; line-height: 1.65; }
+.pt-article .pt-actions { margin-top: 24px; }
+
+/* ------------------------------------------------------------------ trang tĩnh */
+.pt-static { max-width: 72ch; }
+.pt-static h2 { font-size: 18px; margin: 24px 0 8px; }
+.pt-static p { color: var(--muted); }
+.pt-static .pt-fill { color: var(--warn); }
+
+/* ------------------------------------------------------------------ điện thoại */
+@media (max-width: 720px) {
+  .pt-page { padding-top: 20px; }
+  .pt-steps { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .pt-auth { padding: 20px 0 40px; min-height: 0; }
+  /* Thanh trên hẹp: có số dư thì chỉ hiện số dư, giấu tên (cắt thành "ha…" thì vô nghĩa). */
+  .pt-who { max-width: 46vw; }
+  .pt-who--bal .pt-who__name, .pt-who--bal .pt-who__sep { display: none; }
+  .pt-gamerow { flex-wrap: wrap; }
+  .pt-gamerow .pb-btn { flex: 1 1 100%; }
+  .pt-filters select { width: 100%; }
+}
+
+/* Bảng hẹp: mỗi dòng xếp chồng thay vì cuộn ngang, để cột quan trọng (số Xu, thiết bị) luôn thấy. */
+@media (max-width: 560px) {
+  .pt-hist thead, .pt-sess thead { display: none; }
+  .pt-hist tbody, .pt-sess tbody { display: block; }
+  .pt-hist td, .pt-sess td { display: block; padding: 0; border: 0; }
+  .pt-hist tr, .pt-sess tr { display: grid; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .pt-hist tr:last-child, .pt-sess tr:last-child { border-bottom: 0; }
+
+  .pt-hist tr { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when amt" "kind amt" "memo amt";
+    column-gap: 12px; row-gap: 4px; align-items: start; }
+  .pt-hist td.when { grid-area: when; font-size: 12.5px; color: var(--muted); }
+  .pt-hist td.kind { grid-area: kind; }
+  .pt-hist td.memo { grid-area: memo; min-width: 0; font-size: 13px; }
+  .pt-hist td.amt { grid-area: amt; align-self: center; font-size: 17px; }
+
+  .pt-sess tr { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "dev dev" "ip ip" "created expires";
+    gap: 3px 12px; }
+  .pt-sess td.dev { grid-area: dev; font-weight: 600; }
+  .pt-sess td.ip { grid-area: ip; font-size: 13px; color: var(--muted); }
+  .pt-sess td.created, .pt-sess td.expires { font-size: 12px; color: var(--muted); white-space: normal; }
+  .pt-sess td.created { grid-area: created; }
+  .pt-sess td.expires { grid-area: expires; }
+  .pt-sess td.created::before { content: "Đăng nhập "; font-family: var(--sans); }
+  .pt-sess td.expires::before { content: "Hết hạn "; font-family: var(--sans); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-pill { transition: none; }
+}
