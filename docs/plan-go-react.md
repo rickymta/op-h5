@@ -473,3 +473,12 @@ Bố cục sidebar trái trên desktop, tab ngang cuộn được trên điện 
 | | **Tổng** | **7–9 ngày** |
 
 Thứ tự: 1 → 2 → 3 (chưa đổi gì người chơi thấy) → 4 → 5. Dừng sau bất kỳ bước nào hệ vẫn chạy. Xong 5 thì quay lại phần còn lại của giai đoạn 1 và 2, rồi 4, 5, 6, 7 như mục 6.
+
+### 15.7 ĐÃ LÀM 2026-09-06 (năm agent song song theo một hợp đồng API + thành phần; build và test xanh, **chưa chạy với Go thật**)
+
+Sáu commit tách theo phần: tài liệu → `platform` (A) → `@op/ui/publisher` (B) → `apps/ops` (E) → `apps/portal` (C) → `apps/game` (D).
+
+- **Dữ liệu và Go**: migration 0010, package `internal/catalog` dùng chung; `id` có `/api/site`, `/api/games` (hỏi Adapter song song, cache 30 s), `/api/news`, `/api/login|logout`, `/api/me/*`; `adapter` có `/api/game/meta|news|me`; `admin` có CRUD tin tức và `featured` độc quyền. CSP của `id` đã cho `'self'` và ảnh https. Seed haitac điền ảnh/tagline chỉ khi còn trống.
+- **Lệch hợp đồng có chủ ý** (đã đối chiếu với ba app): `game_code` của tin chung trả `""`; 429 mang hai lời khác nhau (thử sai nhiều, tài khoản bị khoá) và portal hiện lời server; `servers_open` chỉ đếm `running`; `featured` rỗng khi không game nào nổi bật, portal tự lấy game đầu.
+- **Kích thước** (gzip): ops 87 KB, portal 87 KB + 6 KB CSS, game 81 KB + 5 KB CSS, CSS publisher 6 KB. Mọi route của ba app đo `scrollWidth = 375` ở 375 px, không nút dưới 44 px.
+- **Chưa làm**: chạy `dev-macos.sh` với ba cờ SPA bật để đi hết luồng đăng ký → tài khoản → trang game → mua gói trên Go thật; ảnh thương hiệu vào `ASSETS_DIR/brand/haitac/` (seed hiện trỏ `/assets/images/*` của client cũ); chèn `<title>`/meta theo route cho SEO (mục 3 của tài liệu tham khảo); trang Điều khoản/Chính sách còn là khung để điền.
