@@ -6,8 +6,8 @@ Không có container riêng, không cần Node lúc chạy. Kế hoạch đầy 
 | App | Nhúng vào | Đường | Trạng thái |
 |---|---|---|---|
 | `apps/ops` | `platform/cmd/admin/dist` | trang quản trị (loopback) | giai đoạn 0: mới có trang Đơn mua |
-| `apps/portal` | `platform/cmd/id/dist` | cổng tài khoản | chưa làm (giai đoạn 2) |
-| `apps/game` | `platform/cmd/adapter/dist` | trang game | chưa làm (giai đoạn 2) |
+| `apps/portal` | `platform/cmd/id/dist` | trang chính + cổng tài khoản | chưa làm — **ưu tiên hiện tại**, xem plan mục 15 |
+| `apps/game` | `platform/cmd/adapter/dist` | trang game (một bundle cho mọi game) | chưa làm — **ưu tiên hiện tại**, xem plan mục 15 |
 
 ## Lệnh
 
@@ -35,6 +35,6 @@ npm run dev:ops       # Vite dev server :5173, proxy /api sang admin đang chạ
 
 ## Ngân sách
 
-App người chơi ≤ 120 KB gzip (game chủ yếu chơi trên điện thoại). Hiện `ops` là 76 KB gzip.
+App người chơi ≤ 120 KB gzip (game chủ yếu chơi trên điện thoại). Hiện `ops` là 82 KB gzip (đo 2026-09-05).
 Vượt ngân sách thì đổi sang Preact + `preact/compat`: sửa alias trong `vite.config.ts`, mã
 React giữ nguyên.

@@ -1,6 +1,6 @@
 # Phương án: chuyển toàn bộ PHP sang Go, giao diện dùng React
 
-Soạn 2026-09-05, cập nhật cùng ngày theo bốn quyết định của người vận hành (mục 11). Số liệu ở mục 1–2 là **đo được** từ cây hiện tại, không phải ước lượng.
+Soạn 2026-09-05, cập nhật cùng ngày theo bốn quyết định của người vận hành (mục 11) và quyết định kéo giai đoạn 3 lên trước (mục 15). Số liệu ở mục 1–2 là **đo được** từ cây hiện tại, không phải ước lượng.
 
 ## 1. Hiện trạng tầng PHP
 
@@ -168,6 +168,8 @@ Chỉ tạo khi bảng `admin_users` còn trống. Mật khẩu này nằm trong
 **Còn lại của giai đoạn 2**: doanh thu (thay `adminphp@2024`), thêm thiết bị máy chủ, `platform_settings`.
 
 ### Giai đoạn 3 — Cổng người chơi
+
+> **Cập nhật 2026-09-05:** giai đoạn này được kéo lên làm ngay, trước phần còn lại của giai đoạn 1 và 2. Bố cục ba trang, bảng token, dữ liệu cần thêm và ước lượng ở **mục 15**.
 
 - `apps/portal` (id.domain): đăng ký, đăng nhập, ví, lịch sử giao dịch, đổi mật khẩu, quên mật khẩu.
 - `apps/game` (haitac.domain): trang chủ, máy chủ, cửa hàng, cổng vào game.
@@ -379,3 +381,95 @@ Thay `adminphp@2024` (541 dòng, và đăng nhập admin của nó luôn thành 
 
 Bảng `platform_settings` dạng khoá và giá trị cho những thứ hôm nay nằm trong `.env` mà đổi phải khởi động lại: phí chợ, ngưỡng chặn tải mặc định, thông báo trên trang, bật tắt đăng ký. Những gì là bí mật thì **ở lại `.env`**, không đưa vào database.
 
+
+## 15. Ưu tiên mới (2026-09-05): ba trang công khai cho cổng phát hành nhiều game
+
+Quyết định của người vận hành cùng ngày: **kéo giai đoạn 3 lên làm ngay**, trước phần còn lại của giai đoạn 1 (CDK) và 2 (doanh thu, thiết bị, `platform_settings`). Lý do: hai giai đoạn đầu đã đủ để vận hành; phần công khai mới là bộ mặt của nhà phát hành, và hiện nó vẫn là "một game" chứ chưa phải "một cổng".
+
+### 15.1 Hiện trạng đo được từ mã
+
+| Trang | Hôm nay | Vấn đề với ngữ cảnh nhiều game |
+|---|---|---|
+| **Trang chính** `domain.com` | `id` phục vụ `/` bằng `portal.html` **20 dòng**: tên game, mã, nút Chơi ngay. | Không có ảnh, mô tả, thể loại, tin tức, chân trang. Cùng tiến trình, cùng template với `id.domain.com` nên hai domain trông y hệt — người mới không phân biệt được "cổng" và "tài khoản". |
+| **Trang game** `haitac.domain.com` | 5 template của Adapter, số liệu máy chủ sống, cửa hàng chạy được. | Tên "Đại Hải Trình" **gắn cứng trong 5 template**; logo và ảnh nền nằm ở `website/game/assets/images/` (bên trong image nginx); tiêu đề thư ở biến môi trường. Game thứ hai = chép cả bộ template và build image riêng. |
+| **Trang ID** `id.domain.com` | 7 template: đăng ký, đăng nhập OIDC, ví, lịch sử, đổi/quên mật khẩu. Đủ chức năng. | Bảng màu sáng trung tính, khác hẳn trang game. Chưa có: nạp tiền (còn PHP), nhân vật theo game (dữ liệu `game_identities` đã có nhưng không hiện), phiên đang mở/đăng xuất mọi nơi (`RevokeAllForUser` đã có). |
+| **Dữ liệu** | `games`: `code, name, adapter_url, site_url, status, sort_order`. | Không có gì để dựng một thẻ game tử tế: không tagline, thể loại, ảnh bìa, nhãn Mới/Hot. |
+
+Hai điểm kỹ thuật **chặn** React trên `id`, phải sửa trước khi nhúng bundle:
+
+- CSP của `httpx.SecurityHeaders`: `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'` — **không có `'self'`** nên file JS/CSS của Vite bị chặn, và **không có `img-src`/`font-src`** nên ảnh bìa game và font cũng bị chặn. `admin` không dùng middleware này nên `apps/ops` mới chạy được.
+- Cookie phiên của `id` là host-only (`identity/session.go` không đặt `Domain`), nên `domain.com` không biết người dùng đã đăng nhập ở `id.domain.com`. **Chấp nhận, không mở rộng cookie ra `.domain.com`**: trang chính là trang giới thiệu, không cần trạng thái đăng nhập; nút Đăng nhập trỏ thẳng sang `id.domain.com`. Mở cookie ra toàn bộ sub domain là đưa phiên ID sang cả trang game mà không có lý do.
+
+### 15.2 Ngôn ngữ thiết kế chung
+
+Rút từ 7 ảnh tham khảo người vận hành gửi (Redrex, Nexora launcher, WarHex, Game Island, GameTron, Solar/Redsky, một storefront tối). Đối chiếu với khảo sát 8 cổng game Việt Nam và quốc tế ở [tham-khao-giao-dien-cong-game.md](tham-khao-giao-dien-cong-game.md) — 12 kết luận ở mục 1 của tài liệu đó đã được áp vào bố cục dưới đây. Điểm chung của cả bảy: **nền tối gần đen, một màu nhấn đỏ/đỏ cam, chữ tiêu đề trắng to đậm, hero full-bleed bằng key visual hoặc logo game, nút chính đỏ đặc + nút phụ viền**. `#EE4623` của game đã đúng tông này, nên cả ba trang công khai dùng chung một bảng token — trang ID bỏ bảng sáng hiện tại. Trang quản trị giữ bảng riêng.
+
+| Token | Giá trị | Dùng cho |
+|---|---|---|
+| `--bg` / `--surface` / `--surface-2` | `#0B0F14` / `#131A22` / `#1A2330` | nền trang / thẻ / thẻ lồng |
+| `--line` | `#263240` | viền 1 px |
+| `--text` / `--muted` | `#F2F5F7` / `#9AA9B7` | chữ / chữ phụ |
+| `--accent` / `--accent-dim` | `#EE4623` / `#C4381B` | nút chính, liên kết nổi, nhãn Hot |
+| `--brass` | `#D9A945` | số Xu, số dư, mốc |
+| `--ok` / `--warn` / `--danger` | `#3FB89F` / `#E0A63F` / `#E0685A` | Mượt / Đông / Đầy và trạng thái đơn |
+| Bo góc | thẻ 12–16 px, nút 6 px, pill 999 px | kiểu "launcher" trong ảnh GameTron/Nexora |
+| Chữ | hệ thống cho thân; H1 hero 700–800, `letter-spacing:-.02em`; **tuỳ chọn** một font display condensed self-host ≤ 40 KB woff2, subset Latin + Việt | không nạp Google Fonts |
+
+Thành phần dùng chung trong `packages/ui` (bảng "publisher", tách khỏi bảng "ops"): `TopBar`, `Hero`, `StatTiles`, `GameCard`, `NewsList`, `ServerRow` (chuyển từ template), `SideNav`/`TabNav`, `Footer`. Mỗi thành phần phải đo ở 375 px trước khi dùng.
+
+**Không bắt chước** từ các ảnh: banner xoay tự động, popup, số liệu giả kiểu "Trusted by 30.250+", thanh bạn bè/Discord, chat widget, khối giải đấu, menu nhiều tầng dropdown. Mỗi thứ đều tốn tài nguyên hoặc làm chậm điện thoại mà không bán thêm được gói nào.
+
+### 15.3 Trang chính — bố cục từ trên xuống
+
+1. **Thanh thông báo mỏng** (tuỳ chọn): một dòng, từ tin ghim. Không có tin thì không hiện.
+2. **TopBar**: logo nhà phát hành · Game · Tin tức · Hỗ trợ · nút viền **Đăng nhập** → `id.domain.com`. Điện thoại: gập thành nút menu 44 px.
+3. **Hero**: game nổi bật (`games.featured`, mặc định game có `sort_order` nhỏ nhất) — key visual phủ tối, tên game, tagline, **[Chơi ngay]** → `site_url/choi-game`, **[Máy chủ]** → `site_url/may-chu`.
+4. **Ô số liệu**: game đang mở · đang chơi (tổng online mọi game, hỏi Adapter qua `adapter_url`, cache 30 s — chép `fleetFetcher` của admin) · máy chủ đang mở. Số thật, không có số nào bịa.
+5. **Thẻ game**: mọi game `active` — bìa, tên, pill thể loại, nhãn Mới/Hot/Sắp ra, nút Chơi. Điện thoại 2 cột.
+6. **Tin tức & sự kiện**: 5 tin mới nhất của mọi game (ảnh nhỏ, tiêu đề, "x ngày trước").
+7. **Một tài khoản, một ví**: ba bước đăng ký → nạp Xu → chơi game nào tuỳ bạn. Đây là điểm bán của nền tảng, đặt ngay trên chân trang.
+8. **Chân trang**: điều khoản, chính sách bảo mật, hỗ trợ (fanpage/Zalo/email), độ tuổi, bản quyền.
+
+Trang chính và trang tài khoản dùng **cùng bundle `apps/portal`**: route `/` là trang chính, `/tai-khoan/*` là tài khoản. Trên `id.domain.com/`, nếu đã đăng nhập thì chuyển sang `/tai-khoan`. Không cần phân biệt host trong Go.
+
+### 15.4 Trang game — tham số hoá rồi mới làm đẹp
+
+Việc đầu tiên không phải giao diện mà là **bỏ tên gắn cứng**: Adapter đã có kết nối DB (nó đọc `users`), nên đọc luôn dòng `games` của chính nó và phát ra `GET /api/game/meta` (`name, tagline, genre, cover_url, banner_url, logo_url, accent, links, news`). Một bundle `apps/game` chạy cho mọi game; tiêu đề thư `ADAPTER_MAIL_TITLE` cũng lấy từ đó.
+
+Ảnh thương hiệu chuyển khỏi image nginx: `ASSETS_DIR/brand/<game>/{cover,banner,logo}.*`, nginx phục vụ `/brand/` từ mount có sẵn. Thêm game mới thì chỉ chép ảnh và điền form ở trang quản trị, không build lại image.
+
+Bố cục:
+
+1. TopBar của game: logo game · Máy chủ · Cửa hàng · Tin tức · tên người chơi / Đăng nhập.
+2. **Hero** full-bleed: `banner_url` phủ tối, `logo_url` (như ảnh Redsky/WarHex), tagline, **[Chơi ngay]** to, và ngay dưới là **gợi ý máy chủ** cho người mới (đã có `AdmitNew`) — người chơi thấy "Máy chủ Đông Hải · Mượt" trước khi bấm.
+3. Máy chủ: giữ `ServerRow` sống như hiện tại.
+4. Cửa hàng: giữ nguyên luồng đã làm (tab thể loại, hộp xác nhận, đơn gần đây), chỉ đổi skin.
+5. Tin tức & sự kiện của game (lọc `game_code`).
+6. Chân trang chung của nền tảng + liên kết về trang chính.
+
+Trang `full.html` (bị chặn vì quá tải) **giữ Go template**: nó hiện trong luồng `/choi-game` trước khi tải client, không cần React.
+
+### 15.5 Trang ID — dạng bảng điều khiển
+
+Bố cục sidebar trái trên desktop, tab ngang cuộn được trên điện thoại (kiểu GameTron/Nexora): **Tổng quan · Ví & nạp Xu · Lịch sử · Nhân vật · Bảo mật**.
+
+- **Tổng quan**: số dư to (màu brass), nút **Nạp Xu**, game gần đây (từ `game_identities` + đơn mua gần nhất, mỗi dòng có nút Vào game), thông báo hệ thống.
+- **Ví & nạp Xu**: tới khi giai đoạn 5 xong, nút Nạp Xu trỏ sang trang nạp PHP hiện có. Khi sang Go: chọn phương thức → mệnh giá → xác nhận → trạng thái đơn, một màn hình, không tải lại trang.
+- **Lịch sử**: bộ lọc pill Tất cả / Nạp / Quy đổi / Hoàn, phân trang; `GET /api/wallet/history` đã có, thêm tham số lọc.
+- **Nhân vật**: theo game — tên game, tài khoản game, máy chủ, nút Vào game. Cần `GET /api/me/games` (đọc `game_identities` nối `games`).
+- **Bảo mật**: đổi mật khẩu (có), email khôi phục (sửa được), **phiên đang mở + đăng xuất mọi nơi** (dùng `RevokeAllForUser`), chỗ để sau này gắn 2 lớp. Người chơi Việt nạp tiền nhìn vào mục này để quyết định có tin không.
+- Trang đăng nhập OIDC (`login.html`) và các trang đặt lại mật khẩu **giữ Go template**: form POST, không có gì để React làm; chỉ đổi skin theo token chung.
+
+### 15.6 Việc kỹ thuật và ước lượng
+
+| # | Việc | Công |
+|---|---|---|
+| 1 | Migration 0010: `games` + `tagline, genre, description, cover_url, banner_url, logo_url, accent, badge('new','hot','soon',''), featured`; bảng `news(id, game_code NULL, title, summary, body_md, image_url, link_url, pinned, published_at, status)`. Ops: form game mở rộng, trang Tin tức. | 1 ngày |
+| 2 | API công khai: `id` `GET /api/games` (kèm online tổng, cache 30 s) và `GET /api/news?game=&limit=`; adapter `GET /api/game/meta`; `id` `GET /api/me/games`. | 1 ngày |
+| 3 | `packages/ui`: bảng token "publisher" + 8 thành phần ở 15.2; CSP của `id` thêm `'self'` cho script/style, `img-src 'self' data:`, `font-src 'self'`. | 1 ngày |
+| 4 | `apps/portal` sau cờ `ID_SPA=1`: trang chính + tài khoản 5 mục; trang Go cũ lui về `/cu/` như admin. | 2–3 ngày |
+| 5 | `apps/game` sau cờ `ADAPTER_SPA=1`: trang chủ game, máy chủ, cửa hàng, tin tức; xoá 5 chỗ gắn cứng tên. | 2–3 ngày |
+| 6 | Đo 375 px cho từng trang (`scrollWidth`, vùng chạm 44 px), kích thước ≤ 120 KB gzip mỗi app (`ops` đang 82 KB). | trong từng bước |
+| | **Tổng** | **7–9 ngày** |
+
+Thứ tự: 1 → 2 → 3 (chưa đổi gì người chơi thấy) → 4 → 5. Dừng sau bất kỳ bước nào hệ vẫn chạy. Xong 5 thì quay lại phần còn lại của giai đoạn 1 và 2, rồi 4, 5, 6, 7 như mục 6.
