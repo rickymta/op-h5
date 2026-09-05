@@ -62,6 +62,21 @@
   #toast.show{opacity:1}
   #toast.bad{border-left-color:var(--signal)}
   :focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+  /* Bang rong hon man hinh thi CUON TRONG KHUNG cua no, khong day ca trang cuon ngang.
+     Do o 375px: bang doi may chu rong 751px, tong trang 796px — nut "Luu" va o trang thai
+     nam han ngoai man hinh va khong the cham toi. */
+  .bang-cuon{overflow-x:auto; -webkit-overflow-scrolling:touch}
+  .bang-cuon table{min-width:640px}
+
+  @media (max-width:640px){
+    header{flex-wrap:wrap; gap:8px 14px}
+    header nav{margin-left:0; width:100%; flex-wrap:wrap; gap:6px 14px}
+    header nav a, header nav button{min-height:44px; display:inline-flex; align-items:center}
+    main{padding:0 14px 48px}
+    /* O so tren dien thoai: 16px de trinh duyet khong tu phong to khi bam vao. */
+    input, select, button{font-size:16px}
+    input[type=number]{width:100%; max-width:120px}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 {{end}}

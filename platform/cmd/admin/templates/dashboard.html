@@ -20,7 +20,7 @@
         Cấu hình bên dưới vẫn sửa được, nhưng cột “đang chơi” chưa có số liệu.</p>
     {{end}}
 
-    <table>
+    <div class="bang-cuon"><table>
       <thead><tr>
         <th>Máy chủ</th><th>Máy vật lý</th><th>Dải</th><th>Đang chơi</th>
         <th>Ngưỡng mềm</th><th>Biên tràn</th><th>Chặn ở</th><th>Trạng thái</th><th>Gợi ý</th><th></th>
@@ -52,11 +52,11 @@
         </tr>
       {{end}}
       </tbody>
-    </table>
+    </table></div>
 
     {{if .Devices}}
     <p class="sub" style="margin-top:22px">Trần máy vật lý — tầng thứ hai: hai máy chủ đều còn chỗ nhưng cộng lại vượt sức máy thì vẫn chặn.</p>
-    <table>
+    <div class="bang-cuon"><table>
       <thead><tr><th>Máy</th><th>Tên</th><th>Đang chơi</th><th>Trần</th><th></th></tr></thead>
       <tbody>
       {{range .Devices}}
@@ -72,7 +72,7 @@
         </tr>
       {{end}}
       </tbody>
-    </table>
+    </table></div>
     {{end}}
   </div>
   {{end}}

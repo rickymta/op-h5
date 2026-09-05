@@ -79,6 +79,28 @@
   footer{border-top:1px solid var(--line);margin-top:60px;padding:22px 26px;
          color:var(--mist);font-size:13px;text-align:center}
   :focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  /* ---- man hinh hep (dien thoai) ----
+     Game nay chu yeu choi tren dien thoai, nen day khong phai truong hop bien.
+     Truoc khi co khoi nay: o 375px thanh dieu huong rong 409px — ten site xuong 3 dong,
+     lien ket "Thoat" bi cat mat, va ca trang cuon ngang duoc (scrollWidth 408).
+     Vung cham cua lien ket cung chi cao 23px, duoi muc 44px de bam trung bang ngon tay. */
+  @media (max-width:560px){
+    .top{flex-wrap:wrap; gap:8px 14px; padding:10px 16px}
+    .top .logo{font-size:15px; gap:8px}
+    .top .logo img{height:26px}
+    /* Khong day nav xuong dong rieng bang margin-left:auto nua: o day nav tu xuong dong
+       khi khong du cho, va can trai cho thang hang voi noi dung ben duoi. */
+    .top nav{margin-left:0; width:100%; gap:6px 16px; flex-wrap:wrap; font-size:15px}
+    /* 44px la nguong bam trung bang ngon tay; padding doc lo ra vung cham do ma khong
+       lam thanh dieu huong cao them. */
+    .top nav a, .top nav form button{min-height:44px; display:inline-flex; align-items:center}
+    .who{font-size:13px}
+    main{padding:0 16px 56px}
+    section{padding-top:32px}
+    .panel{padding:18px 16px}
+    /* Bang/hang may chu: xuong dong thay vi tran ra ngoai. */
+    .srv{flex-wrap:wrap; gap:6px 10px}
+  }
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
 {{end}}
