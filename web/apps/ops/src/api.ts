@@ -96,3 +96,26 @@ export interface BagSlot {
   num: number;
   name: string;
 }
+
+// ---------------------------------------------------------------- quản trị nền tảng
+
+export interface Game {
+  code: string;
+  name: string;
+  adapter_url: string;
+  site_url: string;
+  status: "active" | "hidden";
+  sort_order: number;
+  servers: number;
+  packages: number;
+  has_client: boolean;
+}
+
+export interface Staff {
+  id: number;
+  username: string;
+  role: "viewer" | "gm" | "operator" | "owner";
+  status: "active" | "disabled";
+  last_login_at: string;
+  created_at: string;
+}

@@ -84,7 +84,7 @@ platform/internal/spa/        serve embed.FS: index.html fallback, cache-control
 
 CI thêm một bước trước khi build image: `npm ci && npm run build` rồi copy `dist` vào `platform/cmd/*/`. Ba Dockerfile Go không đổi.
 
-## 6. Bảy giai đoạn
+## 6. Tám giai đoạn
 
 Mỗi giai đoạn là một commit độc lập, **triển khai được và lùi được**. Ranh giới giai đoạn là chỗ dừng an toàn: dừng sau bất kỳ giai đoạn nào thì hệ vẫn chạy, chỉ là còn PHP. Thứ tự dưới đây theo quyết định 3 và 5: công cụ GM trước; cổng thanh toán để sau vì phức tạp và đang chạy ổn; **chợ để sau cùng** vì đó là tính năng mới, không phải phần việc chuyển PHP.
 
@@ -129,7 +129,32 @@ Chưa xác thực lại trong React: chưa đăng nhập thì API trả 401 và 
 
 **Còn lại của giai đoạn 1**: quản lý CDK (`gmhanglong/cdk/`, `pay/`), và quyết định ở mục 13 về dịch vụ tự phục vụ. Chưa gỡ `gmhanglong/` khỏi nginx vì hai phần đó còn ở PHP.
 
-### Giai đoạn 2 — Cổng người chơi
+### Giai đoạn 2 — Trang quản trị toàn diện
+
+Hôm nay trang quản trị chỉ làm được bốn việc: đội máy chủ, nạp tay, gói, đơn mua. Những thứ còn lại đang nằm ở script seed hoặc biến môi trường, tức muốn đổi là phải vào server. Chi tiết phạm vi ở mục 14.
+
+Thiếu rõ nhất, xếp theo mức chặn:
+
+| Nhóm | Bảng | Hôm nay |
+|---|---|---|
+| **Nhân viên** | `admin_users` | không có giao diện; tài khoản đầu tạo từ biến môi trường, không thêm được người thứ hai |
+| **Game** | `games`, `oauth_clients` | chỉ `platform-seed.sh` ghi được |
+| Người chơi | `users`, `wallet_accounts`, `game_identities` | không có giao diện |
+| Thiết bị máy chủ | `game_devices` | sửa được, thêm thì không |
+| Doanh thu | `ledger_txns`, `game_grants` | chưa có, `adminphp@2024` vẫn giữ vai này |
+| Tham số hệ thống | bảng `platform_settings` (chưa có) | nằm trong `.env`, đổi phải khởi động lại |
+
+**Xong khi**: thêm được một game mới và một nhân viên mới mà không đụng vào server, và `adminphp@2024` bị gỡ khỏi nginx.
+
+**ĐÃ LÀM hai phần đầu 2026-09-05** (build và test xanh, chưa chạy với database thật):
+
+- **Game**: `GET /api/games`, `POST /api/games`, `POST /api/games/{code}`. Thêm game ghi cả bốn bảng trong **một giao dịch** — ghi rời rạc để lại một game nửa vời có dòng trong `games` mà không có client OIDC, và người chơi bấm Đăng nhập sẽ nhận một lỗi không giải thích được. Sửa `site_url` thì `redirect_uris` đổi theo, vì OIDC so khớp tuyệt đối. Trang nói rõ nó chỉ ghi database: tiến trình Adapter của game mới vẫn phải khởi động riêng, kèm đúng ba biến môi trường cần đặt.
+- **Nhân viên**: `GET/POST /api/staff`, `POST /api/staff/{id}`, `POST /api/staff/{id}/password`. Chỉ `owner` vào được. Mật khẩu do hệ thống sinh và hiện **một lần**. Ba chỗ tự chặn đã cài: không tự hạ quyền hay tự khoá mình, không bỏ người `owner` hoạt động cuối cùng, và khoá tài khoản hay đổi mật khẩu thì cắt luôn phiên đang mở.
+- Chín test mới cho khuôn mã game, tên đăng nhập, URL, vai trò và độ ngẫu nhiên của mật khẩu.
+
+**Còn lại của giai đoạn 2**: người chơi, doanh thu (thay `adminphp@2024`), thiết bị máy chủ, `platform_settings`.
+
+### Giai đoạn 3 — Cổng người chơi
 
 - `apps/portal` (id.domain): đăng ký, đăng nhập, ví, lịch sử giao dịch, đổi mật khẩu, quên mật khẩu.
 - `apps/game` (haitac.domain): trang chủ, máy chủ, cửa hàng, cổng vào game.
@@ -140,14 +165,14 @@ Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sa
 
 **Xong khi**: `user/` và `api/config.php` không còn được nginx trỏ tới; người chơi vào link cũ vẫn tới đúng chỗ.
 
-### Giai đoạn 3 — Trang nạp client
+### Giai đoạn 4 — Trang nạp client
 
 `play.php` hiện gọi `curl` sang adapter rồi nhúng `window.__opAuto`. Chuyển vào adapter là bỏ được một chặng mạng và một chỗ đặt cookie.
 
 - Adapter phục vụ `/play.php` (giữ nguyên đường vì `a3b31` trỏ tới), sinh HTML kèm `__opAuto`, `opBundleV` theo `filemtime`.
 - Bỏ `hiente.php`, `index.php`, `ios.html` theo quyết định 4.
 
-### Giai đoạn 4 — Cổng thanh toán
+### Giai đoạn 5 — Cổng thanh toán
 
 Để sau cùng vì đây là chỗ duy nhất đang chạy ổn mà hỏng thì mất tiền thật của người chơi.
 
@@ -157,7 +182,7 @@ Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sa
 
 **Xong khi**: nạp thẻ và nhận callback bank/momo chạy hết bằng Go, đối chiếu số dư khớp giữa hai bảng trong 7 ngày.
 
-### Giai đoạn 5 — Dọn
+### Giai đoạn 6 — Dọn
 
 - Gỡ container `php`, `docker/php/`, `web-entrypoint.sh` phần điền secret PHP.
 - Xoá `website/game/{api,user,gm,gmhanglong,adminphp@2024,new,adminhl@2024}`; `website/game` chỉ còn tài nguyên tĩnh của client.
@@ -166,7 +191,7 @@ Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sa
 
 **Kết quả**: 7.906 dòng PHP → 0. Một container ít hơn, 192 MB RAM tiết kiệm, và mọi truy vấn SQL đi qua tham số thay vì nối chuỗi.
 
-### Giai đoạn 6 — Chợ Xu ⇄ Nguyên Bảo (sau cùng)
+### Giai đoạn 7 — Chợ Xu ⇄ Nguyên Bảo (sau cùng)
 
 Làm sau khi PHP đã bỏ hết: đây là tính năng mới, không phải phần việc chuyển đổi, nên không chặn giai đoạn nào khác. Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market`, lệnh ký gửi qua console, trang chợ trong `apps/game`, trang giám sát trong `apps/ops`.
 
@@ -212,12 +237,13 @@ Làm sau khi PHP đã bỏ hết: đây là tính năng mới, không phải ph�
 |---|---|
 | 0 — bộ khung React | 1–2 ngày |
 | 1 — công cụ GM | 3–5 ngày |
-| 2 — cổng người chơi | 4–6 ngày |
-| 3 — trang nạp client | 1 ngày |
-| 4 — cổng thanh toán | 2–3 ngày |
-| 5 — dọn | 1 ngày |
-| 6 — chợ (sau cùng) | 3–4 ngày |
-| **Tổng** | **15–22 ngày công** |
+| 2 — trang quản trị toàn diện | 4–6 ngày |
+| 3 — cổng người chơi | 4–6 ngày |
+| 4 — trang nạp client | 1 ngày |
+| 5 — cổng thanh toán | 2–3 ngày |
+| 6 — dọn | 1 ngày |
+| 7 — chợ (sau cùng) | 3–4 ngày |
+| **Tổng** | **19–28 ngày công** |
 
 Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật phẩm viết bằng SQL nối chuỗi. Giai đoạn 5 gỡ được rủi ro tiền bạc nhưng để sau cùng theo quyết định 3.
 
@@ -228,7 +254,7 @@ Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật ph
 3. **Hoãn cổng thanh toán**, làm công cụ GM trước. Thứ tự giai đoạn ở mục 6 đã xếp lại theo đó.
 4. **Bỏ `hiente.php` và bản APK.** Bản điện thoại làm lại sau, không kế thừa.
 
-## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 6)
+## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 7)
 
 Bảng `web.sellcoin` cũ cho người chơi bán Nguyên Bảo lấy Xu, nhưng **chưa bao giờ chạy**: nó gọi `gmhanglong/gm/coin.php`, file đó không tồn tại trong bản triển khai (lỗi số 6 trong CLAUDE.md). Nên đây là làm mới, không phải khôi phục.
 
@@ -301,3 +327,42 @@ Ba hướng, cần bạn chọn:
 3. **Giữ nguyên phần CDK ở PHP** thêm một thời gian, chuyển nốt ở giai đoạn 5.
 
 Chưa có câu trả lời thì mình làm tiếp giai đoạn 2 và để `gmhanglong/` chạy song song.
+
+## 14. Phạm vi trang quản trị toàn diện (giai đoạn 2)
+
+Một chỗ duy nhất để vận hành cả nền tảng, không phải SSH vào server để đổi một dòng.
+
+### 14.1 Game
+
+Thêm một game vào hệ thống nghĩa là ghi bốn thứ, hiện chỉ `platform-seed.sh` làm được:
+
+| Bảng | Nội dung |
+|---|---|
+| `games` | mã, tên, `adapter_url` (nơi Adapter của game đó nghe), `site_url`, thứ tự, ẩn/hiện |
+| `oauth_clients` | client OIDC của game, `redirect_uris` phải khớp `site_url` + `/auth/callback` |
+| `game_devices` | máy vật lý và trần người online của nó |
+| `game_servers` | từng máy chủ: `srv_code`, cổng WebSocket, ngưỡng mềm, biên tràn |
+
+Giao diện ghi đủ bốn bảng trong một biểu mẫu. **Nó không khởi động được tiến trình**: mỗi game cần một container Adapter riêng với `ADAPTER_GAME_CODE`, và cụm Java của game đó phải chạy. Trang nói rõ điều này sau khi tạo, kèm đúng dòng lệnh cần chạy.
+
+### 14.2 Nhân viên
+
+`admin_users` hiện không có giao diện nào. Tài khoản đầu tiên sinh từ `ADMIN_BOOTSTRAP_*` và **chỉ khi bảng còn trống**, nên muốn thêm người thứ hai là phải vào database. Cần: danh sách, thêm, đổi vai trò, khoá, đặt lại mật khẩu. Chỉ `owner` được vào.
+
+Ba chỗ tự chặn, vì mất quyền vào trang quản trị là sự cố không tự sửa được:
+- không tự hạ quyền hoặc tự khoá chính mình;
+- không khoá hoặc hạ quyền người `owner` cuối cùng;
+- mật khẩu đặt lại hiện **một lần**, không lưu lại chỗ nào đọc lại được.
+
+### 14.3 Người chơi
+
+Tìm theo tên hoặc email, xem số dư ví và lịch sử, xem nhân vật trong từng game (`game_identities`), khoá hoặc mở tài khoản. Không xem được mật khẩu và không có nút đăng nhập hộ.
+
+### 14.4 Doanh thu
+
+Thay `adminphp@2024` (541 dòng, và đăng nhập admin của nó luôn thành công vì kiểm `rowCount() < 0`). Nguồn số liệu là `ledger_txns` và `game_grants`, không phải bảng `web` cũ: nạp theo ngày, quy đổi theo gói, gói bán chạy, số Xu chưa tiêu.
+
+### 14.5 Tham số hệ thống
+
+Bảng `platform_settings` dạng khoá và giá trị cho những thứ hôm nay nằm trong `.env` mà đổi phải khởi động lại: phí chợ, ngưỡng chặn tải mặc định, thông báo trên trang, bật tắt đăng ký. Những gì là bí mật thì **ở lại `.env`**, không đưa vào database.
+

@@ -137,6 +137,14 @@ func main() {
 	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
 	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))
 	mux.HandleFunc("POST /api/orders/{id}/refund", s.requireWrite(s.apiOrderRefund))
+	// Quan tri nen tang (platform.go): game va nhan vien.
+	mux.HandleFunc("GET /api/games", s.requireAdminAPI(s.apiGameList))
+	mux.HandleFunc("POST /api/games", s.requireWrite(s.apiGameCreate))
+	mux.HandleFunc("POST /api/games/{code}", s.requireWrite(s.apiGameUpdate))
+	mux.HandleFunc("GET /api/staff", s.requireOwner(s.apiStaffList))
+	mux.HandleFunc("POST /api/staff", s.requireOwner(s.apiStaffCreate))
+	mux.HandleFunc("POST /api/staff/{id}", s.requireOwner(s.apiStaffUpdate))
+	mux.HandleFunc("POST /api/staff/{id}/password", s.requireOwner(s.apiStaffPassword))
 	// Cong cu GM (gm.go): thao tac tren nhan vat qua console.
 	mux.HandleFunc("GET /api/gm/meta", s.requireAdminAPI(s.apiGMMeta))
 	mux.HandleFunc("GET /api/gm/roles", s.requireGM(s.apiGMRoles))
