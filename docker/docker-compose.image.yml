@@ -398,6 +398,8 @@ services:
       ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-false}
       ADMIN_BOOTSTRAP_USER: ${ADMIN_BOOTSTRAP_USER:-}
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      # 1 = giao dien React (nhung san trong image), trang Go cu lui ve /cu/
+      ADMIN_SPA: ${ADMIN_SPA:-0}
     depends_on:
       id: { condition: service_healthy }
     mem_limit: 96m

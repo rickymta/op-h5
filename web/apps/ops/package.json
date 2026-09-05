@@ -1,0 +1,22 @@
+{
+  "name": "@op/ops",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node ../../scripts/clean-dist.mjs ../../../platform/cmd/admin/dist && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@op/ui": "*",
+    "@tanstack/react-query": "^5.62.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "wouter": "^3.3.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  }
+}

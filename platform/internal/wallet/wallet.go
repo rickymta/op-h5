@@ -397,19 +397,19 @@ func (s *Service) RefundGrant(ctx context.Context, grantID int64, memo string) (
 
 // Order la mot lenh mua hien cho nguoi choi (va cho trang quan tri).
 type Order struct {
-	ID        int64
-	UserID    int64
-	Username  string
-	PackageID string
-	Name      string
-	SrvCode   string
-	AmountXu  int64
-	Status    string
-	GrantMode string
-	LastError string
-	Attempts  int
-	CreatedAt string
-	GrantedAt string
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	Username  string `json:"username"`
+	PackageID string `json:"package_id"`
+	Name      string `json:"name"`
+	SrvCode   string `json:"srv_code"`
+	AmountXu  int64  `json:"amount_xu"`
+	Status    string `json:"status"`
+	GrantMode string `json:"grant_mode"`
+	LastError string `json:"last_error"`
+	Attempts  int    `json:"attempts"`
+	CreatedAt string `json:"created_at"`
+	GrantedAt string `json:"granted_at"`
 }
 
 const orderSelect = `

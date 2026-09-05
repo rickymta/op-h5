@@ -1,0 +1,43 @@
+/* Biến màu và kiểu chữ dùng chung cho mọi app React.
+ *
+ * Chép nguyên từ platform/cmd/admin/templates/base.html (bảng "ops", sáng/tối theo máy)
+ * và platform/cmd/adapter/templates/shell.html (bảng "player", biển đêm). Giữ nguyên tên
+ * biến để trang Go cũ và trang React mới trông giống hệt nhau trong lúc chạy song song —
+ * lệch một sắc là người trực tưởng mình bấm nhầm trang. */
+
+/* ---------------------------------------------------------------- ops (quản trị, GM) */
+:root {
+  --bg: #eef1f4;
+  --surface: #fff;
+  --surface2: #e4e9ed;
+  --text: #0d1620;
+  --muted: #4a5a68;
+  --line: #c9d3da;
+  --brass: #8a6317;
+  --sea: #1f6a63;
+  --amber: #94600f;
+  --signal: #9e2f24;
+  --sea-bg: #dceae8;
+  --amber-bg: #f5e7ce;
+  --signal-bg: #f4deda;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1620;
+    --surface: #152130;
+    --surface2: #1d2b3b;
+    --text: #dfe7ec;
+    --muted: #a3b3c0;
+    --line: #2a3b4d;
+    --brass: #d9a945;
+    --sea: #4fb3a6;
+    --amber: #e0a63f;
+    --signal: #e0685a;
+    --sea-bg: #12312e;
+    --amber-bg: #33280f;
+    --signal-bg: #3a1e1a;
+  }
+}

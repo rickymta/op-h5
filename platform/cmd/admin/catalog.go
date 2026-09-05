@@ -32,7 +32,10 @@ func validCategory(c string) bool {
 	return false
 }
 
-type gameOpt struct{ Code, Name string }
+type gameOpt struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
 
 func (s *server) games(ctx context.Context) []gameOpt {
 	rows, err := s.db.QueryContext(ctx, `SELECT code, name FROM games ORDER BY sort_order, code`)
@@ -332,6 +335,49 @@ func (s *server) ordersPage(w http.ResponseWriter, r *http.Request, a *admin) {
 	}
 	s.render(w, "orders.html", map[string]any{
 		"Admin": a, "Games": games, "Game": game, "Status": status, "Orders": orders, "Counts": counts,
+	})
+}
+
+// apiOrders la ban JSON cua ordersPage, cho giao dien React (web/apps/ops).
+// Tra kem danh sach game va so dem de trang khong phai goi ba lan.
+func (s *server) apiOrders(w http.ResponseWriter, r *http.Request, _ *admin) {
+	ctx := r.Context()
+	games := s.games(ctx)
+	game := pickGame(r, games)
+	status := r.URL.Query().Get("status")
+	switch status {
+	case "pending", "granted", "failed", "refunded":
+	default:
+		status = ""
+	}
+	wal := &wallet.Service{DB: s.db}
+	orders, err := wal.RecentOrders(ctx, game, status, 200)
+	if err != nil {
+		s.log.Error("doc don mua", "err", err)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được đơn mua.")
+		return
+	}
+	counts := map[string]int{}
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT status, COUNT(*) FROM game_grants WHERE game_code = ? GROUP BY status`, game)
+	if err == nil {
+		for rows.Next() {
+			var st string
+			var n int
+			if rows.Scan(&st, &n) == nil {
+				counts[st] = n
+			}
+		}
+		_ = rows.Close()
+	}
+	if orders == nil {
+		orders = []wallet.Order{}
+	}
+	if games == nil {
+		games = []gameOpt{}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"orders": orders, "counts": counts, "games": games, "game": game,
 	})
 }
 

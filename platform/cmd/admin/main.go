@@ -21,11 +21,18 @@ import (
 
 	"github.com/rickymta/op-h5/platform/internal/config"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
+	"github.com/rickymta/op-h5/platform/internal/spa"
 	"github.com/rickymta/op-h5/platform/internal/store"
 )
 
 //go:embed all:templates
 var templatesFS embed.FS
+
+// Giao dien React da build (web/apps/ops -> dist/). Thu muc luon ton tai nho dist/.gitkeep,
+// nen `go build` chay duoc ca khi chua `npm run build`; luc do spa.Handler tra trang huong dan.
+//
+//go:embed all:dist
+var distFS embed.FS
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -75,20 +82,39 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", s.requireAdmin(s.dashboard))
+
+	// ADMIN_SPA=1: giao dien React phuc vu tu goc, trang Go cu lui ve tien to /cu/.
+	// Hai ban dung chung API va chung phien dang nhap, nen bat/tat khong mat gi —
+	// day la cach chuyen dan tung trang ma van lui duoc trong mot lan restart.
+	useSPA := os.Getenv("ADMIN_SPA") == "1"
+	goPage := func(path string, h http.HandlerFunc) {
+		if useSPA {
+			mux.HandleFunc("GET /cu"+path, h)
+			return
+		}
+		mux.HandleFunc("GET "+path, h)
+	}
+	if useSPA {
+		spaHandler := spa.Handler(distFS, "dist")
+		mux.Handle("GET /", spaHandler)
+		log.Info("giao dien React bat (ADMIN_SPA=1); trang cu o /cu/")
+	}
+
+	goPage("/{$}", s.requireAdmin(s.dashboard))
 	mux.HandleFunc("GET /dang-nhap", s.loginPage)
 	mux.HandleFunc("POST /dang-nhap", s.doLogin)
 	mux.HandleFunc("POST /dang-xuat", s.doLogout)
-	mux.HandleFunc("GET /nhat-ky", s.requireAdmin(s.auditPage))
-	mux.HandleFunc("GET /nap-tay", s.requireAdmin(s.walletPage))
+	goPage("/nhat-ky", s.requireAdmin(s.auditPage))
+	goPage("/nap-tay", s.requireAdmin(s.walletPage))
 	// API: trang dung fetch, va cong cu ngoai cung goi duoc.
 	mux.HandleFunc("GET /api/fleet", s.requireAdminAPI(s.apiFleet))
+	mux.HandleFunc("GET /api/orders", s.requireAdminAPI(s.apiOrders))
 	mux.HandleFunc("POST /api/servers/{game}/{srv}", s.requireWrite(s.apiUpdateServer))
 	mux.HandleFunc("POST /api/devices/{game}/{device}", s.requireWrite(s.apiUpdateDevice))
 	mux.HandleFunc("POST /api/wallet/topup", s.requireWrite(s.apiTopup))
 	// Cua hang: danh muc goi va don mua (catalog.go)
-	mux.HandleFunc("GET /goi", s.requireAdmin(s.packagesPage))
-	mux.HandleFunc("GET /don-mua", s.requireAdmin(s.ordersPage))
+	goPage("/goi", s.requireAdmin(s.packagesPage))
+	goPage("/don-mua", s.requireAdmin(s.ordersPage))
 	mux.HandleFunc("POST /api/packages/{game}", s.requireWrite(s.apiCreatePackage))
 	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
 	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))

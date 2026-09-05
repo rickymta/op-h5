@@ -1,6 +1,6 @@
 # Phương án: chuyển toàn bộ PHP sang Go, giao diện dùng React
 
-Soạn 2026-09-05. Số liệu trong mục 1–2 là **đo được** từ cây hiện tại, không phải ước lượng.
+Soạn 2026-09-05, cập nhật cùng ngày theo bốn quyết định của người vận hành (mục 11). Số liệu ở mục 1–2 là **đo được** từ cây hiện tại, không phải ước lượng.
 
 ## 1. Hiện trạng tầng PHP
 
@@ -84,20 +84,31 @@ platform/internal/spa/        serve embed.FS: index.html fallback, cache-control
 
 CI thêm một bước trước khi build image: `npm ci && npm run build` rồi copy `dist` vào `platform/cmd/*/`. Ba Dockerfile Go không đổi.
 
-## 6. Sáu giai đoạn
+## 6. Bảy giai đoạn
 
-Mỗi giai đoạn là một commit độc lập, **triển khai được và lùi được**. Ranh giới giai đoạn là chỗ dừng an toàn: dừng sau bất kỳ giai đoạn nào thì hệ vẫn chạy, chỉ là còn PHP.
+Mỗi giai đoạn là một commit độc lập, **triển khai được và lùi được**. Ranh giới giai đoạn là chỗ dừng an toàn: dừng sau bất kỳ giai đoạn nào thì hệ vẫn chạy, chỉ là còn PHP. Thứ tự dưới đây theo quyết định 3: công cụ GM trước, cổng thanh toán để sau cùng vì phức tạp và đang chạy ổn.
 
 ### Giai đoạn 0 — Bộ khung (không đổi hành vi người dùng)
 
 - Dựng `web/` workspace, `packages/ui` chép nguyên bộ biến CSS và quy tắc điện thoại từ `shell.html` + `base.html`.
 - `platform/internal/spa`: serve `embed.FS`, fallback `index.html`, header cache đúng.
 - CI: bước Node trước Docker; cache `node_modules` theo `package-lock.json`.
-- Một trang thật để chứng minh đường ống: `/may-chu` bằng React, chạy song song trang Go cũ sau cờ `ADAPTER_SPA=1`.
+- Chứng minh đường ống bằng chính app sẽ dùng ở giai đoạn 1: `apps/ops` với trang đăng nhập và một trang đã có (Đơn mua), chạy song song bản Go sau cờ `ADMIN_SPA=1`.
 
-**Xong khi**: `docker compose up` cho ra trang máy chủ React giống hệt bản Go, tắt cờ thì về bản cũ.
+**Xong khi**: `docker compose up` cho ra trang quản trị React giống bản Go, tắt cờ thì về bản cũ.
 
-### Giai đoạn 1 — Công cụ GM (giá trị cao nhất)
+**ĐÃ LÀM 2026-09-05** (build và test xanh trên PC, chưa chạy trong container):
+
+- `web/` workspace: Vite 6 + React 19 + TypeScript, `packages/ui` (biến CSS chép từ `base.html`, `Pill`, `Toast`, `Field`, `formatInt`), `apps/ops`.
+- `platform/internal/spa`: phục vụ `embed.FS`, fallback `index.html`, `assets/` immutable còn `index.html` `no-store`, chưa build thì trả trang hướng dẫn thay vì chết. Bốn test, kể cả chặn thoát thư mục bằng `../`.
+- `admin`: `ADMIN_SPA=1` bật React ở gốc và đẩy trang Go về `/cu/`; thêm `GET /api/orders` (bản JSON của trang Đơn mua) và thẻ JSON cho `wallet.Order`.
+- Trang Đơn mua bằng React: lọc theo game và trạng thái, tự cập nhật 5 giây khi còn đơn `pending`, phát lại và hoàn Xu.
+- CI: bước Node 22 (`npm ci`, `typecheck`, `build`) **trước** ba image Go.
+- Kích thước: **76 KB gzip** JS + 1,4 KB CSS, dưới ngân sách 120 KB.
+
+Chưa xác thực lại trong React: chưa đăng nhập thì API trả 401 và trang chuyển sang form đăng nhập của Go. Dựng form trong React là việc của giai đoạn 1.
+
+### Giai đoạn 1 — Công cụ GM
 
 Đây là chỗ React trả công rõ nhất: `gmhanglong/gm/index.php` là **599 dòng** trộn HTML, jQuery và SQL trong một file; mỗi thao tác là một lần tải lại trang.
 
@@ -108,7 +119,35 @@ Mỗi giai đoạn là một commit độc lập, **triển khai được và l�
 
 **Xong khi**: làm được đủ 6 thao tác GM qua giao diện mới, `gm_audit` ghi đủ, `gmhanglong/` và `gm/` bị gỡ khỏi nginx.
 
-### Giai đoạn 2 — Cổng thanh toán
+### Giai đoạn 2 — Cổng người chơi
+
+- `apps/portal` (id.domain): đăng ký, đăng nhập, ví, lịch sử giao dịch, đổi mật khẩu, quên mật khẩu.
+- `apps/game` (haitac.domain): trang chủ, máy chủ, cửa hàng, cổng vào game.
+- `/api/getSession.php` chuyển sang `adapter` — **giữ nguyên đường và khuôn trả về** (`true` / `taoaccmoi` / `lamgiday`), nhưng đối chiếu với `platform.users` thay vì `web.user`.
+- Các rewrite cũ `/user-*`, `/act-*`, `/tai-khoan`, `/nap-tien`… trả 301 sang route mới.
+
+Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sang `api/card.php` cũ cho tới giai đoạn 5.
+
+**Xong khi**: `user/` và `api/config.php` không còn được nginx trỏ tới; người chơi vào link cũ vẫn tới đúng chỗ.
+
+### Giai đoạn 3 — Chợ Xu ⇄ Nguyên Bảo
+
+Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market`, lệnh ký gửi qua console, trang chợ trong `apps/game`, trang giám sát trong `apps/ops`.
+
+**Trước hết phải thử `numType=1`** trên máy dev: đăng một tin nhỏ, xem Nguyên Bảo có thật sự rời nhân vật không. Sai giá trị này là trừ nhầm loại tiền.
+
+**Xong khi**: bán → mua → nhận Nguyên Bảo trong game chạy hết một vòng, phí vào `market_fee`, huỷ tin trả lại đúng số lượng.
+
+### Giai đoạn 4 — Trang nạp client
+
+`play.php` hiện gọi `curl` sang adapter rồi nhúng `window.__opAuto`. Chuyển vào adapter là bỏ được một chặng mạng và một chỗ đặt cookie.
+
+- Adapter phục vụ `/play.php` (giữ nguyên đường vì `a3b31` trỏ tới), sinh HTML kèm `__opAuto`, `opBundleV` theo `filemtime`.
+- Bỏ `hiente.php`, `index.php`, `ios.html` theo quyết định 4.
+
+### Giai đoạn 5 — Cổng thanh toán
+
+Để sau cùng vì đây là chỗ duy nhất đang chạy ổn mà hỏng thì mất tiền thật của người chơi.
 
 - Go trong `id`: bảng `topup_orders` thay `web.card_log`; đơn thẻ cào gọi thesieutoc.net; ba webhook kiểm chữ ký như hiện tại (`hash_equals`, không phụ thuộc thời gian).
 - nginx giữ nguyên ba đường `.php` của webhook, trỏ sang `id`. Ghi rõ trong runbook: **không được đổi ba đường này**.
@@ -116,30 +155,14 @@ Mỗi giai đoạn là một commit độc lập, **triển khai được và l�
 
 **Xong khi**: nạp thẻ và nhận callback bank/momo chạy hết bằng Go, đối chiếu số dư khớp giữa hai bảng trong 7 ngày.
 
-### Giai đoạn 3 — Cổng người chơi
-
-- `apps/portal` (id.domain): đăng ký, đăng nhập, ví, lịch sử giao dịch, đổi mật khẩu, quên mật khẩu, **nạp tiền** (thẻ/bank/momo từ giai đoạn 2).
-- `apps/game` (haitac.domain): trang chủ, máy chủ, cửa hàng, cổng vào game.
-- `/api/getSession.php` chuyển sang `adapter` — **giữ nguyên đường và khuôn trả về** (`true` / `taoaccmoi` / `lamgiday`), nhưng đối chiếu với `platform.users` thay vì `web.user`.
-- Các rewrite cũ `/user-*`, `/act-*`, `/tai-khoan`, `/nap-tien`… trả 301 sang route mới.
-
-**Xong khi**: `user/` và `api/config.php` không còn được nginx trỏ tới; người chơi cũ vào link cũ vẫn tới đúng chỗ.
-
-### Giai đoạn 4 — Trang nạp client
-
-`play.php` hiện gọi `curl` sang adapter rồi nhúng `window.__opAuto`. Chuyển vào adapter là bỏ được một chặng mạng và một chỗ đặt cookie.
-
-- Adapter phục vụ `/play.php` (giữ nguyên đường vì `a3b31` trỏ tới), sinh HTML kèm `__opAuto`, `opBundleV` theo `filemtime`.
-- Bỏ `hiente.php`, `index.php`, `ios.html` nếu không còn ai dùng — kiểm bằng access log 7 ngày trước khi bỏ.
-
-### Giai đoạn 5 — Dọn
+### Giai đoạn 6 — Dọn
 
 - Gỡ container `php`, `docker/php/`, `web-entrypoint.sh` phần điền secret PHP.
 - Xoá `website/game/{api,user,gm,gmhanglong,adminphp@2024,new,adminhl@2024}`; `website/game` chỉ còn tài nguyên tĩnh của client.
 - `mask-secrets.py`: bỏ 27 quy tắc PHP, giữ lại phần server Java.
 - nginx `game_site.conf` rút còn: tĩnh + proxy + ba đường tương thích.
 
-**Kết quả**: 7.906 dòng PHP → 0. Một container ít hơn, ~190 MB RAM tiết kiệm, và mọi truy vấn SQL đi qua tham số thay vì nối chuỗi.
+**Kết quả**: 7.906 dòng PHP → 0. Một container ít hơn, 192 MB RAM tiết kiệm, và mọi truy vấn SQL đi qua tham số thay vì nối chuỗi.
 
 ## 7. Dữ liệu: 21 bảng `web` đi đâu
 
@@ -154,7 +177,7 @@ Mỗi giai đoạn là một commit độc lập, **triển khai được và l�
 | `admin_user` | `platform.gm_users` (giai đoạn 1) |
 | `giftcode`, `gift_log` | `cdks.cdk` giữ nguyên, GM tool đọc trực tiếp |
 | `diemdanh` | bỏ (điểm danh web, game đã có điểm danh riêng) |
-| `sellcoin`, `sellcoin_log` | **bỏ** — mua bán Xu giữa người chơi, quyết định ở mục 11 |
+| `sellcoin`, `sellcoin_log` | không port dữ liệu (chưa từng chạy được), nhưng **dựng lại chức năng** thành chợ: `market_listings` + `market_events` — mục 12 |
 | `cms` | bỏ (bài viết, 1 file dùng) |
 | `setting`, `transaction`, `bot_tele_gram` | **bỏ** — 0 file PHP nào tham chiếu |
 
@@ -162,7 +185,7 @@ Mỗi giai đoạn là một commit độc lập, **triển khai được và l�
 
 - `gm/` — công cụ GM cũ, mọi chức năng đã có trong `gmhanglong`.
 - `adminhl@2024/admtool` (15 MB) — bản build React của GMC-2 do nhà phát hành làm, giao diện tiếng Trung, **không có mã nguồn**. Không sửa được, không dịch được.
-- `api/api2.php`, `api/apiapk.php`, `user/indexapk.php`, `user/naptien2.php`, `hiente.php` — bản sao cho APK và cho domain cũ.
+- `api/api2.php`, `api/apiapk.php`, `user/indexapk.php`, `user/naptien2.php`, `hiente.php`, `ios.html` — bản sao cho APK và cho domain cũ. **Bỏ cả hai** (quyết định 4); bản điện thoại sẽ làm lại sau, không dựa trên mấy file này.
 - `api/bankQR.php` — file rỗng 0 dòng.
 
 ## 9. Rủi ro
@@ -177,19 +200,80 @@ Mỗi giai đoạn là một commit độc lập, **triển khai được và l�
 
 | Giai đoạn | Công |
 |---|---|
-| 0 — bộ khung | 1–2 ngày |
-| 1 — GM tool | 3–5 ngày |
-| 2 — thanh toán | 2–3 ngày |
-| 3 — cổng người chơi | 4–6 ngày |
+| 0 — bộ khung React | 1–2 ngày |
+| 1 — công cụ GM | 3–5 ngày |
+| 2 — cổng người chơi | 4–6 ngày |
+| 3 — chợ | 3–4 ngày |
 | 4 — trang nạp client | 1 ngày |
-| 5 — dọn | 1 ngày |
-| **Tổng** | **12–18 ngày công** |
+| 5 — cổng thanh toán | 2–3 ngày |
+| 6 — dọn | 1 ngày |
+| **Tổng** | **15–22 ngày công** |
 
-Thứ tự trên xếp theo giá trị trên mỗi ngày công, không theo thứ tự kỹ thuật. Giai đoạn 1 gỡ được lỗ hổng lớn nhất (công cụ phát vật phẩm viết bằng SQL nối chuỗi); giai đoạn 2 gỡ được rủi ro tiền bạc.
+Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật phẩm viết bằng SQL nối chuỗi. Giai đoạn 5 gỡ được rủi ro tiền bạc nhưng để sau cùng theo quyết định 3.
 
-## 11. Cần bạn quyết
+## 11. Quyết định (2026-09-05)
 
-1. **React cho cả ba app, hay chỉ cho quản trị và GM?** Trang người chơi hiện là template Go, nhẹ, chạy tốt trên điện thoại, không cần build. React trả công rõ ở GM và quản trị (bảng, biểu mẫu, trạng thái sống), còn ở trang người chơi thì lợi ích mỏng hơn chi phí bundle. Mình đề nghị làm cả ba nếu bạn muốn một nền tảng thống nhất, nhưng nếu ưu tiên tốc độ trên điện thoại thì giữ trang người chơi bằng Go.
-2. **Mua bán Xu giữa người chơi** (`sellcoin`): bỏ hẳn hay dựng lại trong hệ mới?
-3. **Thứ tự**: làm theo 0→5 như trên, hay đẩy giai đoạn 2 (thanh toán) lên trước giai đoạn 1 vì liên quan tiền?
-4. **Bỏ `hiente.php` và bản APK**: còn ai dùng không, hay xoá luôn ở giai đoạn 4?
+1. **React cho cả ba app**, kể cả trang người chơi.
+2. **Dựng lại mua bán Xu** nhưng thành một **chợ riêng có thu phí** — thiết kế ở mục 12.
+3. **Hoãn cổng thanh toán**, làm công cụ GM trước. Thứ tự giai đoạn ở mục 6 đã xếp lại theo đó.
+4. **Bỏ `hiente.php` và bản APK.** Bản điện thoại làm lại sau, không kế thừa.
+
+## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 3)
+
+Bảng `web.sellcoin` cũ cho người chơi bán Nguyên Bảo lấy Xu, nhưng **chưa bao giờ chạy**: nó gọi `gmhanglong/gm/coin.php`, file đó không tồn tại trong bản triển khai (lỗi số 6 trong CLAUDE.md). Nên đây là làm mới, không phải khôi phục.
+
+### 12.1 Ký gửi được, đã kiểm chứng
+
+Console có sẵn hai lệnh cần thiết (đọc từ bytecode `RoleWalletController`):
+
+```
+POST /role/wallet/query   {srvCode, roleId}                      -> số dư nhân vật
+POST /role/wallet/reduce  {srvCode, roleId, numType, num, note}  -> trừ tiền của nhân vật
+```
+
+`numType` là một byte. Suy từ `gm/item.txt` (`0:1` = Nguyên Bảo) thì `numType=1`, **chưa chạy thật lần nào** — phải thử trên máy dev trước khi mở chợ.
+
+Chiều ngược lại (giao Nguyên Bảo cho người mua) dùng đúng đường thư đã có: `game_grants` với `grant_mode='mail'`, phần quà `0:1:<số lượng>`.
+
+### 12.2 Luồng
+
+**Đăng bán** — ký gửi trước, niêm yết sau. Không có bước ký gửi thì người bán tiêu hết Nguyên Bảo rồi vẫn còn tin rao.
+
+1. Người bán chọn nhân vật, số Nguyên Bảo, giá (Xu cho mỗi 1.000 Nguyên Bảo).
+2. Ghi `market_listings` trạng thái `escrowing` **trước khi** gọi console.
+3. Gọi `/role/wallet/reduce`. Thành công → `active`. Console từ chối → `void`, người bán không mất gì.
+
+**Mua** — một giao dịch DB duy nhất, khoá dòng tin trước:
+
+1. Khoá tin (`SELECT … FOR UPDATE`), kiểm còn `active`.
+2. Trừ Xu người mua; cộng cho người bán phần đã trừ phí; phí vào tài khoản hệ thống `market_fee`. Cả ba dòng trong một `ledger_txns` loại `market`, tổng bằng 0 như mọi giao dịch khác.
+3. Tin → `sold`, tạo `game_grants` giao Nguyên Bảo cho nhân vật người mua.
+4. Worker phát hàng như cửa hàng, kể cả hoàn Xu nếu game từ chối.
+
+**Huỷ tin**: tạo lệnh trả Nguyên Bảo về nhân vật người bán qua thư, tin → `cancelled`.
+
+### 12.3 Phí và giới hạn giá
+
+| Tham số | Mặc định | Vì sao |
+|---|---|---|
+| `MARKET_FEE_PCT` | 5% | trừ vào phần **người bán** nhận, hiện rõ trước khi đăng |
+| `MARKET_PRICE_MAX_PCT` | 100% giá cửa hàng | bán đắt hơn cửa hàng thì không ai mua, chỉ làm rác bảng |
+| `MARKET_PRICE_MIN_PCT` | 50% giá cửa hàng | chặn bán tháo và chặn chuyển Xu trá hình qua giá gần 0 |
+| `MARKET_MAX_OPEN_LISTINGS` | 5 tin/người | chặn spam bảng |
+| `MARKET_MAX_DAILY_VOLUME` | cấu hình | trần khối lượng mỗi người mỗi ngày |
+
+Cửa hàng bán 1 Xu = 1 Nguyên Bảo và lần đầu mỗi mốc được x2. Chợ luôn rẻ hơn cửa hàng theo thiết kế, nên **phí là thứ duy nhất giữ cho cửa hàng không bị chợ ăn hết**. Nếu doanh thu cửa hàng tụt sau khi mở chợ thì nâng phí hoặc nâng giá sàn, không phải đóng chợ.
+
+### 12.4 Dữ liệu (migration 0009)
+
+```
+market_listings   id, game_code, srv_code, seller_user_id, seller_role_id, seller_role_name,
+                  num_type, amount, price_xu, fee_xu, status, escrow_error,
+                  buyer_user_id, buyer_role_id, txn_id, created_at, sold_at
+market_events     nhật ký: listing_id, actor_user_id, action, detail, ip, created_at
+wallet_accounts   thêm một dòng hệ thống: code = 'market_fee'
+```
+
+### 12.5 Chỗ hỏng không tự chữa được
+
+Nếu `/role/wallet/reduce` thành công mà ghi DB hỏng ngay sau đó, Nguyên Bảo đã rời nhân vật nhưng không có tin rao. Ghi dòng `escrowing` trước khi gọi console giúp phát hiện: mọi dòng `escrowing` quá hai phút được đánh dấu và hiện ở trang quản trị để xử lý tay. Không tự hoàn được, vì console không có lệnh "cộng lại" nào an toàn để gọi mù.

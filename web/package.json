@@ -1,0 +1,20 @@
+{
+  "name": "op-h5-web",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:ops": "npm run dev -w @op/ops",
+    "build": "npm run build -w @op/ops",
+    "typecheck": "tsc -p packages/ui --noEmit && tsc -p apps/ops --noEmit",
+    "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.0.7",
+    "@vitejs/plugin-react": "^4.3.4"
+  }
+}

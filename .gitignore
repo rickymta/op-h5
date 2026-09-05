@@ -54,3 +54,8 @@ docker/.dev-macos/
 
 # Backup do tools/patch-meta-announce.py tao truoc khi va jar (58 MB, khong push)
 *.jar.bak
+
+# ---- giao dien React: chi commit ma nguon, khong commit ban build
+web/node_modules/
+platform/cmd/*/dist/*
+!platform/cmd/*/dist/.gitkeep

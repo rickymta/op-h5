@@ -244,6 +244,7 @@ docker run -d --name op-admin --network "$NET" \
   -e ADMIN_ADDR=":8100" -e ID_DB_PASSWORD="$MYSQL_PW" -e ID_DB_NAME=platform \
   -e ADMIN_COOKIE_SECURE=false \
   -e ADMIN_BOOTSTRAP_USER=quantri -e ADMIN_BOOTSTRAP_PASSWORD="$ADMIN_PW" \
+  -e ADMIN_SPA="${ADMIN_SPA:-0}" \
   op-h5-admin >/dev/null
 
 echo "==> 8/8 php-fpm + nginx"

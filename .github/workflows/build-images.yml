@@ -109,6 +109,24 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
 
+      # ---- giao dien React: build TRUOC image Go, vi `go:embed all:dist` nhung ban build ----
+      # Bo qua khi khong co thay doi nao trong web/ ? Khong: dist/ khong nam trong git, nen
+      # moi lan build image deu phai co ban build moi, khong thi binary nhung .gitkeep rong.
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build giao dien React
+        working-directory: web
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+          ls -la ../platform/cmd/admin/dist
+
       # ---- nen tang (Go): context la platform/, mot Dockerfile, chon binary bang ARG CMD ----
       - name: Build & push id
         uses: docker/build-push-action@v6

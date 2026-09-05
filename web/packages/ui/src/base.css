@@ -1,0 +1,104 @@
+/* Kiểu nền dùng chung. Chép từ admin/templates/base.html để trang React và trang Go cũ
+ * trông giống nhau trong lúc chạy song song.
+ *
+ * Hai quy tắc điện thoại ở cuối KHÔNG được bỏ: đã đo ở khổ 375 px, thiếu chúng thì bảng
+ * đội máy chủ rộng 751 px đẩy cả trang cuộn ngang và nút "Lưu" nằm ngoài màn hình. */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 var(--sans);
+}
+
+a { color: var(--brass); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h2 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; font-family: var(--mono); }
+.muted { color: var(--muted); }
+
+header {
+  display: flex; align-items: center; gap: 20px;
+  padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--surface);
+}
+header h1 { margin: 0; font-size: 16px; letter-spacing: -0.01em; }
+header nav { display: flex; gap: 16px; margin-left: auto; align-items: center; font-size: 14px; }
+header .who { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+
+main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+  padding: 18px 20px; margin-bottom: 20px;
+}
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+thead th {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.pill {
+  display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 2px; white-space: nowrap;
+}
+.pill.ok { background: var(--sea-bg); color: var(--sea); }
+.pill.warn { background: var(--amber-bg); color: var(--amber); }
+.pill.crit { background: var(--signal-bg); color: var(--signal); }
+.pill.unknown { background: var(--surface2); color: var(--muted); }
+
+button {
+  padding: 5px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+  color: var(--bg); background: var(--brass); border: 0; border-radius: 3px;
+}
+button:hover { filter: brightness(1.08); }
+button:disabled { opacity: 0.55; cursor: not-allowed; filter: none; }
+button.ghost { background: transparent; color: var(--brass); border: 1px solid var(--line); }
+
+input, select, textarea {
+  padding: 6px 9px; font: inherit; font-size: 14px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 3px;
+}
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+
+.err {
+  background: var(--signal-bg); color: var(--signal); border-left: 3px solid var(--signal);
+  padding: 10px 12px; font-size: 13px; margin: 0 0 14px;
+}
+.okbox {
+  background: var(--sea-bg); color: var(--sea); border-left: 3px solid var(--sea);
+  padding: 10px 12px; font-size: 13px; margin: 0 0 14px;
+}
+
+#toast {
+  position: fixed; right: 20px; bottom: 20px; background: var(--surface);
+  border: 1px solid var(--line); border-left: 3px solid var(--sea);
+  padding: 10px 14px; font-size: 13px; border-radius: 3px;
+  opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 60;
+}
+#toast.show { opacity: 1; }
+#toast.bad { border-left-color: var(--signal); }
+
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+
+/* Bảng rộng hơn màn hình thì CUỘN TRONG KHUNG của nó, không đẩy cả trang cuộn ngang. */
+.bang-cuon { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.bang-cuon table { min-width: 640px; }
+
+@media (max-width: 640px) {
+  header { flex-wrap: wrap; gap: 8px 14px; }
+  header nav { margin-left: 0; width: 100%; flex-wrap: wrap; gap: 6px 14px; }
+  /* 44px là ngưỡng bấm trúng bằng ngón tay. */
+  header nav a, header nav button { min-height: 44px; display: inline-flex; align-items: center; }
+  main { padding: 0 14px 48px; }
+  /* 16px để trình duyệt không tự phóng to khi bấm vào ô nhập. */
+  input, select, textarea, button { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
