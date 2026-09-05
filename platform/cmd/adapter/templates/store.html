@@ -1,0 +1,230 @@
+{{define "store.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Cửa hàng · Đại Hải Trình</title>
+<style>
+  .wallet{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;justify-content:space-between}
+  .bal{font-family:var(--mono);font-size:30px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:2px 0 0}
+  .bal small{font-size:14px;color:var(--mist);margin-left:6px}
+  .target{font-size:14px;color:var(--mist);margin:6px 0 0}
+  .target select{font:inherit;font-size:14px;color:var(--foam);background:var(--abyss);border:1px solid var(--line);
+                 border-radius:3px;padding:6px 8px;max-width:100%}
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 2px;margin:22px 0 4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;padding:9px 14px;border:1px solid var(--line);border-radius:3px;background:transparent;
+       color:var(--mist);font:inherit;font-size:14px;cursor:pointer;min-height:44px}
+  .tab[aria-selected="true"]{background:var(--panel);color:var(--foam);border-color:var(--brass)}
+  .hint{color:var(--mist);font-size:13.5px;margin:6px 0 14px}
+  .pkgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .pkg{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px;display:flex;
+       flex-direction:column;gap:6px;text-align:left;font:inherit;color:inherit;cursor:pointer;position:relative}
+  .pkg:hover{border-color:var(--brass)}
+  .pkg .nm{font-weight:600;font-size:15.5px;line-height:1.3}
+  .pkg .desc{font-size:13px;color:var(--mist);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .pkg .cond{font-family:var(--mono);font-size:11.5px;color:var(--busy)}
+  .pkg .price{font-family:var(--mono);font-size:15px;color:var(--brass);margin-top:auto;padding-top:6px;
+              font-variant-numeric:tabular-nums}
+  .pkg .badge{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+              padding:2px 7px;border-radius:2px;background:var(--brand);color:#fff}
+  .pkg.poor .price{color:var(--full)}
+  .orders .row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .orders .row:last-child{border-bottom:0}
+  .orders .meta{font-family:var(--mono);font-size:12px;color:var(--mist)}
+  .st{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:2px;white-space:nowrap;align-self:center}
+  .st.granted{background:var(--smooth-bg);color:var(--smooth)} .st.pending{background:var(--busy-bg);color:var(--busy)}
+  .st.failed,.st.refunded{background:var(--full-bg);color:var(--full)}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(7,18,28,.78);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal[open]{display:flex}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:22px;max-width:420px;width:100%}
+  .box h3{margin:0 0 10px;font-size:18px}
+  .box .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0 0 16px}
+  .box .kv b{font-family:var(--mono);font-weight:500;color:var(--mist)}
+  .box .acts{display:flex;gap:10px;justify-content:flex-end}
+  @media (max-width:560px){.pkgs{grid-template-columns:1fr 1fr;gap:10px}.pkg{padding:12px}.bal{font-size:26px}}
+</style>
+</head><body>
+{{template "nav" .}}
+<main>
+  <section>
+    <p class="eyebrow">Cửa hàng</p>
+    <h1 style="font-size:30px">Mua bằng Xu trong ví</h1>
+    <p class="lead">Xu là tiền chung của cả hệ thống. Nạp ở trang tài khoản, dùng ở game nào tuỳ bạn.</p>
+
+    {{if not .User}}
+      <div class="panel">
+        <p style="margin:0 0 16px">Đăng nhập để xem số dư và mua gói.</p>
+        <a class="btn" href="/choi-game">Đăng nhập</a>
+      </div>
+    {{else}}
+      <div class="panel wallet">
+        <div>
+          <span class="muted" style="font-size:13px">Số dư ví</span>
+          <p class="bal" id="bal" data-xu="{{.Balance}}">{{.BalanceFmt}}<small>Xu</small></p>
+          <p class="target">Nhận ở: <select id="role"><option value="">đang tải nhân vật…</option></select></p>
+        </div>
+        <a class="btn ghost" href="{{.IDBase}}/tai-khoan">Nạp thêm Xu</a>
+      </div>
+
+      <div id="msg" style="margin-top:14px"></div>
+
+      {{if .Categories}}
+      <div class="tabs" role="tablist" id="tabs">
+        {{range $i, $c := .Categories}}<button class="tab" role="tab" data-cat="{{$c.Key}}" aria-selected="{{if eq $i 0}}true{{else}}false{{end}}">{{$c.Title}}</button>{{end}}
+      </div>
+      {{range $i, $c := .Categories}}
+      <div class="cat" data-cat="{{$c.Key}}" {{if ne $i 0}}hidden{{end}}>
+        <p class="hint">{{$c.Hint}}</p>
+        <div class="pkgs">
+          {{range $c.Packages}}
+          <button type="button" class="pkg" data-id="{{.ID}}" data-name="{{.Name}}" data-price="{{.PriceXu}}" data-mode="{{.GrantMode}}">
+            {{if .Badge}}<span class="badge">{{.Badge}}</span>{{end}}
+            <span class="nm">{{.Name}}</span>
+            {{if .Description}}<span class="desc">{{.Description}}</span>{{end}}
+            {{if .Cond}}<span class="cond">{{.Cond}}</span>{{end}}
+            <span class="price">{{.PriceFmt}} Xu</span>
+          </button>
+          {{end}}
+        </div>
+      </div>
+      {{end}}
+      {{else}}
+      <div class="panel"><p class="muted" style="margin:0">Chưa có gói nào được mở.</p></div>
+      {{end}}
+
+      <div class="panel orders" style="margin-top:28px">
+        <h2 style="font-size:16px;margin-bottom:8px">Đơn gần đây</h2>
+        <div id="orders">
+          {{range .Orders}}
+          <div class="row"><div>{{.Name}}<div class="meta">{{.CreatedAt}} · {{.SrvCode}} · {{.AmountFmt}} Xu</div></div><span class="st {{.Status}}">{{.StatusVi}}</span></div>
+          {{else}}<p class="muted" style="margin:0;font-size:14px">Chưa mua gì.</p>{{end}}
+        </div>
+      </div>
+    {{end}}
+  </section>
+</main>
+{{template "foot" .}}
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h3 id="m-name">Xác nhận</h3>
+    <div class="kv">
+      <b>Giá</b><span id="m-price"></span>
+      <b>Nhận ở</b><span id="m-role"></span>
+      <b>Số dư sau</b><span id="m-after"></span>
+    </div>
+    <p class="sub" id="m-note" style="margin:0 0 14px"></p>
+    <div class="acts"><button class="btn ghost" id="m-cancel">Để sau</button><button class="btn" id="m-ok">Mua</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var balEl = document.getElementById('bal');
+  if (!balEl) return;
+  var balance = parseInt(balEl.dataset.xu, 10) || 0;
+  var roleSel = document.getElementById('role'), msg = document.getElementById('msg');
+  var modal = document.getElementById('modal'), chosen = null;
+  var fmt = function(n){ return Number(n).toLocaleString('vi-VN'); };
+
+  // Tab
+  document.getElementById('tabs') && document.getElementById('tabs').addEventListener('click', function(ev){
+    var b = ev.target.closest('.tab'); if (!b) return;
+    document.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+    document.querySelectorAll('.cat').forEach(function(c){ c.hidden = c.dataset.cat !== b.dataset.cat; });
+  });
+  function paintAffordable(){
+    document.querySelectorAll('.pkg').forEach(function(p){ p.classList.toggle('poor', parseInt(p.dataset.price, 10) > balance); });
+  }
+  paintAffordable();
+
+  // Nhan vat / may chu: tu masterList; khong co thi de chon may chu.
+  var servers = {{.Servers}};
+  function fillRoles(roles){
+    roleSel.innerHTML = '';
+    if (roles && roles.length) {
+      roles.forEach(function(r){
+        var o = document.createElement('option');
+        o.value = r.srv_code + '|' + r.master_id_hex;
+        o.textContent = r.name + ' · Lv' + r.level + ' · ' + r.srv_code;
+        roleSel.appendChild(o);
+      });
+    } else {
+      (servers || []).forEach(function(s){
+        var o = document.createElement('option'); o.value = s.Code + '|';
+        o.textContent = 'Máy chủ ' + s.Name + ' (chưa có nhân vật)'; roleSel.appendChild(o);
+      });
+      if (!roleSel.options.length) { var o = document.createElement('option'); o.value=''; o.textContent='Chưa đọc được máy chủ'; roleSel.appendChild(o); }
+    }
+  }
+  fetch('/api/game/roles').then(function(r){ return r.json(); }).then(function(d){ fillRoles(d.roles); }).catch(function(){ fillRoles([]); });
+
+  // Chon goi -> modal
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest('.pkg'); if (!b) return;
+    chosen = { id: b.dataset.id, name: b.dataset.name, price: parseInt(b.dataset.price, 10), mode: b.dataset.mode };
+    document.getElementById('m-name').textContent = chosen.name;
+    document.getElementById('m-price').textContent = fmt(chosen.price) + ' Xu';
+    document.getElementById('m-role').textContent = roleSel.options[roleSel.selectedIndex] ? roleSel.options[roleSel.selectedIndex].textContent : '—';
+    var after = balance - chosen.price;
+    document.getElementById('m-after').textContent = fmt(after) + ' Xu';
+    var ok = document.getElementById('m-ok'), note = document.getElementById('m-note');
+    if (after < 0) { ok.disabled = true; note.textContent = 'Thiếu ' + fmt(-after) + ' Xu. Nạp thêm ở trang tài khoản.'; }
+    else if (chosen.mode === 'mail' && roleSel.value.split('|')[1] === '') { ok.disabled = true; note.textContent = 'Gói này gửi qua thư: cần có nhân vật. Hãy vào game tạo nhân vật trước.'; }
+    else { ok.disabled = false; note.textContent = chosen.mode === 'mail' ? 'Vật phẩm vào hòm thư trong game, thường trong một phút.' : 'Game xử lý như một lần nạp. Game từ chối (hết lượt, chưa tới ngày) thì Xu được hoàn ngay.'; }
+    modal.setAttribute('open', '');
+  });
+  document.getElementById('m-cancel').addEventListener('click', function(){ modal.removeAttribute('open'); });
+  modal.addEventListener('click', function(ev){ if (ev.target === modal) modal.removeAttribute('open'); });
+
+  document.getElementById('m-ok').addEventListener('click', async function(){
+    if (!chosen) return;
+    var ok = this; ok.disabled = true; msg.innerHTML = '';
+    var parts = roleSel.value.split('|'), srv = parts[0] || '', role = parts[1] || '';
+    // Khoa chong trung: bam hai lan vi sot ruot khong bi tru hai lan.
+    var key = chosen.id + '-' + srv + '-' + (role || '-') + '-' + Math.floor(Date.now()/60000);
+    try {
+      var r = await fetch('/api/game/convert', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({package_id: chosen.id, srv_code: srv, role_id: role, idempotency_key: key})});
+      var d = await r.json().catch(function(){ return {}; });
+      modal.removeAttribute('open');
+      if (r.ok) {
+        balance = Number(d.balance); balEl.innerHTML = fmt(balance) + '<small>Xu</small>'; paintAffordable();
+        msg.innerHTML = '<p class="msg ok">Đã trừ ' + fmt(chosen.price) + ' Xu cho ' + chosen.name + '. ' + (d.message || '') + '</p>';
+        pollOrders(8);
+      } else {
+        msg.innerHTML = '<p class="msg err">' + (d.error_description || 'Không thực hiện được.') + '</p>';
+      }
+    } catch (e) {
+      modal.removeAttribute('open');
+      msg.innerHTML = '<p class="msg err">Mất kết nối. Vui lòng thử lại.</p>';
+    }
+    ok.disabled = false;
+  });
+
+  // Don gan day: hoi lai vai lan sau khi mua de thay 'Đang phát…' -> 'Đã phát'.
+  function renderOrders(list){
+    var el = document.getElementById('orders');
+    if (!list || !list.length) { el.innerHTML = '<p class="muted" style="margin:0;font-size:14px">Chưa mua gì.</p>'; return; }
+    el.innerHTML = list.slice(0, 10).map(function(o){
+      return '<div class="row"><div>' + esc(o.name) + '<div class="meta">' + esc(o.created_at) + ' · ' + esc(o.srv_code) + ' · ' + esc(o.amount_fmt) + ' Xu</div></div>' +
+             '<span class="st ' + esc(o.status) + '">' + esc(o.status_vi) + '</span></div>';
+    }).join('');
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  var polling = 0;
+  function pollOrders(times){
+    if (polling) return; polling = times;
+    (function tick(){
+      fetch('/api/game/orders').then(function(r){ return r.json(); }).then(function(d){
+        renderOrders(d.orders);
+        // Hoan Xu tu dong (game tu choi) lam so du doi ma khong qua tay nguoi choi.
+        if (typeof d.balance === 'number' && d.balance !== balance) {
+          balance = d.balance; balEl.innerHTML = fmt(balance) + '<small>Xu</small>'; paintAffordable();
+        }
+        var busy = (d.orders || []).some(function(o){ return o.status === 'pending'; });
+        if (--polling > 0 && busy) setTimeout(tick, 3000); else polling = 0;
+      }).catch(function(){ polling = 0; });
+    })();
+  }
+})();
+</script>
+</body></html>{{end}}

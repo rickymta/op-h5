@@ -56,6 +56,14 @@ if [ "$PRINT" = 0 ]; then
     sleep 5
   done
   [ "${n:-0}" -ge 5 ] || { echo "[seed] LOI: sau ${WAIT}s van chua thay du bang — id chua chay migration? xem: docker compose logs id" >&2; exit 1; }
+  # game_packages.<game>.sql (sinh 2026-09-05+) dung cac cot cua migration 0007 (category, grant_mode,
+  # reward...). Image `id` cu chua co 0007 -> INSERT chet "Unknown column". Doi rieng cot nay.
+  for ((t=0; t<60; t+=5)); do
+    c=$(sql "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$DB' AND table_name='game_packages' AND column_name='category';" 2>/dev/null || echo 0)
+    [ "${c:-0}" -ge 1 ] && break
+    sleep 5
+  done
+  [ "${c:-0}" -ge 1 ] || { echo "[seed] LOI: game_packages chua co cot 'category' (migration 0007) — image id cu? pull/build lai id roi up lai" >&2; exit 1; }
 fi
 
 # 3a) OIDC client cua game — cong khai (PKCE), secret_hash giu NULL; doi redirect khi PUBLIC_HOST doi

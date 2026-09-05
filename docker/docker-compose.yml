@@ -21,6 +21,11 @@ x-java: &java
   image: eclipse-temurin:8-jre-jammy
   network_mode: host
   restart: unless-stopped
+  # tcg-game.jar goi http://hakihuyenthoai.net/api/apisv.php (HARDCODE) khi nguoi choi bam mua
+  # trong game. Ghim ve loopback de nginx -> Adapter tru vi ID; khong ghim thi nut mua chet,
+  # va ai chiem duoc domain do la mua mien phi. Xem docs/design-cua-hang.md.
+  extra_hosts:
+    - "hakihuyenthoai.net:127.0.0.1"
   environment: &java-env
     TZ: Asia/Ho_Chi_Minh
     JAVA_TOOL_OPTIONS: >-

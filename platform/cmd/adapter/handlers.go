@@ -428,32 +428,7 @@ func (s *adapterServer) health(w http.ResponseWriter, r *http.Request) {
 }
 
 // ---------------------------------------------------------------- quy doi Xu -> vat pham
-
-type packageView struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	PriceXu   int64  `json:"price_xu"`
-	ItemName  string `json:"item_name"`
-	ItemCount int    `json:"item_count"`
-}
-
-// listPackages tra ve bang gia cua game nay.
-func (s *adapterServer) listPackages(w http.ResponseWriter, r *http.Request) {
-	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
-	if err != nil {
-		s.log.Error("doc bang gia", "err", err)
-		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được bảng giá.")
-		return
-	}
-	out := make([]packageView, 0, len(pkgs))
-	for _, p := range pkgs {
-		out = append(out, packageView{
-			ID: p.ID, Name: p.Name, PriceXu: p.PriceXu,
-			ItemName: p.ItemName, ItemCount: p.ItemCount,
-		})
-	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"packages": out})
-}
+// (danh muc, trang cua hang va duong mua trong game nam o store.go)
 
 type convertRequest struct {
 	PackageID string `json:"package_id"`
@@ -524,6 +499,8 @@ func (s *adapterServer) convert(w http.ResponseWriter, r *http.Request) {
 			httpx.Error(w, http.StatusPaymentRequired, "insufficient", "Số dư không đủ.")
 		case errors.Is(err, wallet.ErrPackageUnknown):
 			httpx.Error(w, http.StatusNotFound, "unknown_package", "Gói quy đổi không tồn tại.")
+		case errors.Is(err, wallet.ErrRoleRequired):
+			httpx.Error(w, http.StatusBadRequest, "role_required", "Gói này gửi qua thư, hãy chọn nhân vật nhận.")
 		default:
 			s.log.Error("quy doi", "err", err, "user", uid)
 			httpx.Error(w, http.StatusInternalServerError, "server_error", "Không thực hiện được.")

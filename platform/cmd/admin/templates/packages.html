@@ -1,0 +1,108 @@
+{{define "packages.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Gói cửa hàng</title>
+<style>
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+  .filters label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .filters input[type=text]{padding:5px 8px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px;min-width:180px}
+  .cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;font-family:var(--mono);font-size:12px}
+  .cats a{padding:3px 9px;border:1px solid var(--line);border-radius:2px;color:var(--text);text-decoration:none}
+  .cats a.on{background:var(--brass);color:var(--bg);border-color:var(--brass)}
+  td input[type=text]{width:100%;padding:4px 6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px}
+  td input.num{width:96px;font-family:var(--mono)}
+  td .id{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  td .rw{font-family:var(--mono);font-size:11px;color:var(--muted);word-break:break-all;max-width:220px}
+  tr.dirty td{background:var(--amber-bg)}
+  .new{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+  .new input{width:100%;padding:6px 8px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:3px}
+</style></head><body>
+{{template "nav" .}}
+<main>
+  <h2>Gói cửa hàng</h2>
+  <p class="sub">Giá, nhóm, nội dung do <code>tools/gen-game-packages.py</code> sinh; <b>tên</b> và <b>trạng thái</b> sửa ở đây được giữ khi sinh lại. Ẩn gói = không hiện trên web, nhưng vẫn mua được từ trong game.</p>
+
+  <form class="filters" method="GET" action="/goi">
+    <div><label>Game</label>
+      <select name="game" onchange="this.form.submit()">{{range .Games}}<option value="{{.Code}}" {{if eq .Code $.Game}}selected{{end}}>{{.Name}} ({{.Code}})</option>{{end}}</select></div>
+    <div><label>Trạng thái</label>
+      <select name="status" onchange="this.form.submit()">
+        <option value="">tất cả</option><option value="active" {{if eq .Status "active"}}selected{{end}}>đang bán</option><option value="hidden" {{if eq .Status "hidden"}}selected{{end}}>ẩn</option>
+      </select></div>
+    <div><label>Tìm</label><input type="text" name="q" value="{{.Q}}" placeholder="tên hoặc mã gói"></div>
+    <input type="hidden" name="category" value="{{.Category}}">
+    <div><button type="submit">Lọc</button></div>
+  </form>
+
+  <div class="cats">
+    <a href="/goi?game={{.Game}}&status={{.Status}}&q={{.Q}}" class="{{if not .Category}}on{{end}}">tất cả</a>
+    {{range .Cats}}<a href="/goi?game={{$.Game}}&category={{.Category}}&status={{$.Status}}&q={{$.Q}}" class="{{if eq .Category $.Category}}on{{end}}">{{.Category}} {{.Active}}/{{.Total}}</a>{{end}}
+  </div>
+
+  <div class="card">
+    <div class="bang-cuon"><table id="t">
+      <thead><tr><th>Mã</th><th>Tên</th><th>Nhóm · phát</th><th>Giá Xu</th><th>Nhãn</th><th>Mô tả</th><th>Quà (mail)</th><th>Thứ tự</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>
+      {{range .Rows}}
+      <tr data-id="{{.ID}}">
+        <td class="id">{{.ID}}{{if .ItemTid}}<br><span class="muted">tid {{.ItemTid}}</span>{{end}}</td>
+        <td><input type="text" name="name" value="{{.Name}}"></td>
+        <td><span class="pill unknown">{{.Category}}</span> <span class="muted" style="font-family:var(--mono);font-size:11px">{{.GrantMode}}</span></td>
+        <td><input type="text" class="num" name="price_xu" value="{{.PriceXu}}"></td>
+        <td><input type="text" name="badge" value="{{.Badge}}" style="width:110px"></td>
+        <td><input type="text" name="description" value="{{.Description}}" style="min-width:240px"></td>
+        <td class="rw">{{if eq .GrantMode "mail"}}<input type="text" name="reward" value="{{.Reward}}">{{else}}{{.Reward}}{{end}}</td>
+        <td><input type="text" class="num" name="sort_order" value="{{.SortOrder}}" style="width:64px"></td>
+        <td><select name="status"><option value="active" {{if eq .Status "active"}}selected{{end}}>đang bán</option><option value="hidden" {{if eq .Status "hidden"}}selected{{end}}>ẩn</option></select></td>
+        <td><button type="button" class="save">Lưu</button></td>
+      </tr>
+      {{else}}<tr><td colspan="10" class="muted">Không có gói nào khớp bộ lọc.</td></tr>{{end}}
+      </tbody>
+    </table></div>
+    {{if ge (len .Rows) 400}}<p class="muted" style="margin:10px 0 0">Chỉ hiện 400 gói đầu — dùng ô tìm để thu hẹp.</p>{{end}}
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px">Thêm gói vật phẩm (gửi qua thư)</h2>
+    <p class="sub">Quà dạng <code>type:id:count</code>, nhiều món nối bằng <code>#</code>. <code>0:1:N</code> = N Nguyên Bảo, <code>0:0:N</code> = Kim tệ, <code>0:4:N</code> = EXP anh hùng, <code>3:id:N</code> = vật phẩm (tra <code>gmhanglong/gm/item.txt</code>).</p>
+    <div id="newmsg"></div>
+    <form id="new" class="new">
+      <div><label>Mã gói</label><input name="id" placeholder="web-knb-500k" required></div>
+      <div><label>Tên</label><input name="name" placeholder="500 vạn Nguyên Bảo" required></div>
+      <div><label>Giá Xu</label><input name="price_xu" type="number" min="1" required></div>
+      <div><label>Quà</label><input name="reward" placeholder="0:1:5000000" required></div>
+      <div><label>Mô tả</label><input name="description" placeholder="hiện dưới tên gói"></div>
+      <div><button type="submit">Thêm</button></div>
+    </form>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+var GAME = {{.Game}};
+function toast(msg, bad){ var t=document.getElementById('toast'); t.textContent=msg; t.className='show'+(bad?' bad':''); setTimeout(function(){t.className='';},2600); }
+document.querySelectorAll('#t input, #t select').forEach(function(el){ el.addEventListener('input', function(){ el.closest('tr').classList.add('dirty'); }); });
+document.querySelectorAll('#t .save').forEach(function(btn){
+  btn.addEventListener('click', async function(){
+    var tr = btn.closest('tr'), id = tr.dataset.id, body = {};
+    tr.querySelectorAll('input,select').forEach(function(el){
+      var v = el.value.trim();
+      if (el.name === 'price_xu' || el.name === 'sort_order') { if (v !== '') body[el.name] = parseInt(v, 10); }
+      else body[el.name] = v;
+    });
+    btn.disabled = true;
+    var r = await fetch('/api/packages/' + encodeURIComponent(GAME) + '/' + encodeURIComponent(id), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    var d = await r.json().catch(function(){ return {}; });
+    btn.disabled = false;
+    if (r.ok) { tr.classList.remove('dirty'); toast('Đã lưu ' + id); } else { toast(d.error_description || 'Lỗi', true); }
+  });
+});
+document.getElementById('new').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var f = ev.target, body = {};
+  f.querySelectorAll('input').forEach(function(el){ body[el.name] = el.name === 'price_xu' ? parseInt(el.value, 10) : el.value.trim(); });
+  var r = await fetch('/api/packages/' + encodeURIComponent(GAME), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  var d = await r.json().catch(function(){ return {}; });
+  var m = document.getElementById('newmsg');
+  if (r.ok) { m.innerHTML = '<p class="warnbox" style="background:var(--sea-bg);color:var(--sea);border-left-color:var(--sea)">Đã thêm ' + body.id + '. Tải lại trang để thấy trong bảng.</p>'; f.reset(); }
+  else { m.innerHTML = '<p class="err">' + (d.error_description || 'Có lỗi xảy ra.') + '</p>'; }
+});
+</script>
+</body></html>{{end}}

@@ -79,6 +79,46 @@ logic (thứ tự, biến chưa đặt, lệnh không có trên Ubuntu 22.04) th
 
 ---
 
+## 0b. ĐỢT 3 — cửa hàng và nút mua trong game (sau đợt 2)
+
+Commit "cửa hàng" (2026-09-05 đêm) thêm trang `/cua-hang`, migration `0007`, nhánh phát hàng qua thư, hoàn Xu tự động, và hai endpoint thay `api/api.php` + `api/apisv.php` mà **nút mua trong game** gọi. Bối cảnh và cách hoạt động: [design-cua-hang.md](design-cua-hang.md) mục 1.5, 4.2, 9. Tất cả chỉ mới build/test xanh trên PC — chưa chạy với JAR thật.
+
+Chạy `./docker/dev-macos.sh --build` (image adapter/admin đổi). `op-net` giờ có `--add-host hakihuyenthoai.net:127.0.0.1`; kiểm: `docker exec op-game getent hosts hakihuyenthoai.net` → `127.0.0.1`.
+
+### 0b.1 Migration + seed
+
+```bash
+$M -N -e "SELECT name FROM platform.schema_migrations ORDER BY name"                     # có 0007_store_catalog.sql
+$M -N -e "SELECT category, grant_mode, COUNT(*) FROM platform.game_packages GROUP BY 1,2" # diamond 8, card 8, fund 7, privilege 6, daily 10, limited 15, event ~1870, item 9 (mail)
+docker logs op-mysql 2>&1 | grep -c "Unknown column"                                       # 0; platform-seed không được báo thiếu cột category
+```
+
+### 0b.2 Trang cửa hàng (`http://127.0.0.1:8080/cua-hang`, `/quy-doi` phải 301 về đây)
+
+1. Đăng nhập, có nhân vật (đợt 2). Ô "Nhận ở" tự liệt kê nhân vật (từ `/api/game/roles`); không có nhân vật thì liệt kê máy chủ.
+2. Nạp Xu tay ở trang quản trị (`/nap-tay`) cho tài khoản test, ví dụ 3.000.000.
+3. **Tab Nguyên Bảo**: mua mốc `10.000` → modal → Mua → "Đã trừ…", đơn hiện "Đang phát…" rồi "Đã phát" trong ~5 s. Trong game: +10.000 Nguyên Bảo (lần đầu x2 = 20.000?) — ghi số thực nhận. `docker logs op-adapter | grep -iE "grant|phat"`.
+4. **Tab Vật phẩm** (đường thư): mua `Đá trang bị Đỏ` (1.000 Xu). Đây là chỗ **chưa kiểm chứng** nhất: `console.MailCreate` đọc `id` phiếu từ `data` của `/gm/mail/x/create`. Nếu đơn `failed` với lỗi "console khong tra id phieu thu (data=…)": ghi nguyên văn `data`, rồi sửa `mailID()` trong `platform/internal/console/console.go` cho đúng khuôn (hoặc, nếu console không trả id, đọc `SELECT id FROM tcg.gm_mail_approval WHERE status=1` là cách gm/api.php làm — cần thêm cách lấy id, ghi vào mục 7). Thành công thì thư có trong hòm thư game.
+5. **Hoàn Xu tự động**: mua một gói ngày (`19001`) 4 lần liên tiếp (giới hạn 3/ngày) hoặc gói ưu đãi quỹ `17101` sau ngày 7 — lần bị game từ chối phải chuyển `refunded`, số dư tăng lại, `/don-mua` ghi lý do trong cột Lỗi. Nếu console **không** từ chối mà vẫn "granted" trong khi game không phát gì → ghi lại (game nuốt lỗi), đây là rủi ro đã nêu ở thiết kế 4.1.
+6. Tắt `op-console`, mua một gói: đơn ở "Đang phát…" và thử lại theo backoff; bật lại console → "Đã phát".
+
+### 0b.3 Nút mua TRONG GAME — điểm quan trọng nhất của đợt này
+
+1. Trong game mở shop (ví dụ nạp Nguyên Bảo mốc nhỏ nhất). Trước khi bấm: `docker exec op-game tail -0f .logs/game-s1/info.log` ở một terminal, `docker logs -f op-adapter` ở terminal khác.
+2. Bấm mua. Mong đợi: adapter log `apisv: mua trong game user=… payid=… xu=…`, game log in `ok` (println của `PayWithTokenMoneyReq`), rồi hàng vào túi; `/don-mua` có dòng `grant_mode=ingame`, ví bị trừ.
+3. **Điểm chưa biết**: sau `true`, game gọi `BagPropPO.removeItem(999999, giá)`. Nếu client báo "không đủ …" và `error.log`/`info.log` có dòng về 999999 → đường này không chạy: Xu đã bị trừ nhưng không có hàng. Ghi rõ dòng log, hoàn Xu tay ở `/don-mua`, rồi chuyển sang phương án `payRedirect` (thiết kế 4.3): thử đặt `payRedirect=1` — nằm trong `GameLoading` do console phát (`/conf/global/get` hay `dynamic_conf`? tìm bằng `docker exec op-game grep -m1 payRedirect .logs/game-s1/info.log` và grep trong `console/store/global.conf.json`), xem client có mở `app.client_path` không.
+4. Kiểm bảo vệ: từ máy Mac `curl -s 'http://127.0.0.1:8080/api/apisv.php?payid=18001&user=id000000001'` phải là **403** (nginx `allow 127.0.0.1` — trên Mac request đi qua proxy Docker Desktop nên có thể thấy 172.17.0.1 → nếu 403 cả từ trong container thì ghi nhận, đó là hạn chế môi trường Mac, trên Linux game gọi qua loopback thật). Từ trong netns: `docker exec op-console curl -s 'http://127.0.0.1/api/apisv.php?payid=18001&user=khong-co'` → `false`.
+
+### 0b.4 Quản trị
+
+`http://127.0.0.1:8100/goi`: lọc theo nhóm, sửa tên một gói và ẩn một gói → trang cửa hàng phản ánh ngay. Thêm một gói thư (`0:1:5000`). `/don-mua`: nút Phát lại với đơn failed, Hoàn Xu với đơn pending (tắt console trước để có pending).
+
+### 0b.5 Báo cáo
+
+Điền dòng **5.9–5.12** ở bảng mục 7 (đã chèn), lỗi mới đánh số tiếp. Cập nhật `docs/design-cua-hang.md` mục 9 theo kết quả (đặc biệt 0b.2.4 và 0b.3.3).
+
+---
+
 ## 1. Mục tiêu
 
 Kiểm chứng lần đầu rằng cụm game lên được **từ số không, không cần dump server cũ**, bằng đúng đường mà server thật sẽ đi:
@@ -234,8 +274,12 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 | 5.5 | đăng ký → `/choi-game` → WebSocket 8001 → tạo nhân vật | ⚠️ *(vào được, tạo nhân vật cần retest)* | Đăng ký ✅, `/may-chu` hiện s1 ✅, `/choi-game` → client vào thẳng màn hình chọn máy chủ **không qua form đăng nhập cũ** ✅, tài khoản game thật `id000000001` trong `tcg.account` ✅, `ws://127.0.0.1:8001/game` ✅. Nhưng bấm CHIẾN GAME thì client đứng ở "Đang tải cấu hình giao diện… 0%", **không mở WebSocket nào**; `角色登录请求 total=0`. Thiếu `website/game/template/` (đã tái tạo, mục 11). Sau đó tạo nhân vật hỏng vì `channelCode` không phải số (mục 12) — đã vá, **cần chạy lại để xác nhận** |
 | 5.6 | platform-seed 6 dòng đếm | ✅ | `oauth_clients 1, games 1, game_devices 1, game_servers 1, game_packages 1962`; `admin_users 1` do service `admin` tự tạo (không phải platform-seed) |
 | 5.5b | **Đợt 2:** tạo nhân vật → vào thế giới; vào lại đi thẳng nhân vật | | |
-| 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | ⏳ *(chờ bước trình duyệt)* | Đã đo phần không cần đăng nhập: `/adminportal` → **302** → `/gmhanglong/login.php?next=%2Fadminportal` → **200**, đúng form "Công cụ GM"; `/gmhanglong/gm/index.php` → **302** về login; `/gm/index.php` → **302** (chốt chặn đã ở đầu file); `/gmhanglong/gm/api.php` → **401**; sai mật khẩu bị từ chối bằng thông báo chung và ghi `login_failed` vào `gm_audit`; `gm_users` = 1 dòng `gm`/`owner`/hash **60** ký tự/`active`; `php-fpm env: 10 bien`. **Còn lại:** đăng nhập đúng + gửi thư — cần người dùng nhập mật khẩu |
-| 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | ✅ | `Row size too large` **0**, `[ERROR]` **0** (dòng lệnh cũ đếm 3 là dương tính giả — xem 0.4); `web.card_log` = **Dynamic** tại nguồn, `zz-init.sh` không phải sed nữa; `op-group`/`op-cross` `running`, `OOMKilled=false`, `OutOfMemory` **0**; `/.well-known/acme-challenge/x` → **404**; `enable-domain.sh` đọc soát ra **lỗi 13** (đã sửa), shellcheck 4 script sạch |
+| 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | | |
+| 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | | |
+| 5.9 | **Đợt 3:** migration 0007 + seed 1.933 gói theo nhóm | | |
+| 5.10 | **Đợt 3:** /cua-hang mua mốc Nguyên Bảo → granted → nhận trong game | | |
+| 5.11 | **Đợt 3:** gói thư (`item`) nhận được; hoàn Xu tự động khi game từ chối | | |
+| 5.12 | **Đợt 3:** nút mua trong game → apisv → trừ ví → hàng vào túi (hoặc kết luận payRedirect) | | |
 | — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
 | — | Thời gian tới khi login lên | ✅ | ~2 phút: console → world (5s) → statistic (10s) → pay (5s) → group (25s) → game (30s) → login (5s) → cross |
 

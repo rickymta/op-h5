@@ -113,44 +113,4 @@ func (s *adapterServer) serversPage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type pkgView struct {
-	ID        string
-	Name      string
-	ItemName  string
-	ItemCount int
-	PriceXu   int64
-	PriceFmt  string
-}
-
-func (s *adapterServer) convertPage(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
-		"User": s.username(r), "Servers": s.visibleServers(),
-		"IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
-	}
-	uid, ok := s.currentUser(r)
-	if !ok {
-		s.render(w, "convert.html", data)
-		return
-	}
-	ctx := r.Context()
-
-	bal, err := s.wallet.Balance(ctx, uid)
-	if err != nil {
-		s.log.Error("doc so du", "err", err, "user", uid)
-	}
-	data["BalanceFmt"] = formatInt(bal)
-
-	pkgs, err := s.wallet.Packages(ctx, s.cfg.GameCode)
-	if err != nil {
-		s.log.Error("doc bang gia", "err", err)
-	}
-	views := make([]pkgView, 0, len(pkgs))
-	for _, p := range pkgs {
-		views = append(views, pkgView{
-			ID: p.ID, Name: p.Name, ItemName: p.ItemName, ItemCount: p.ItemCount,
-			PriceXu: p.PriceXu, PriceFmt: formatInt(p.PriceXu),
-		})
-	}
-	data["Packages"] = views
-	s.render(w, "convert.html", data)
-}
+// Trang cua hang (/cua-hang) nam o store.go.

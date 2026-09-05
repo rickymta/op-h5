@@ -95,7 +95,12 @@ chmod 600 "$STATE/creds.txt"
 # Client hardcode so cong (12345 meta, 7788 statistic, 9000 login, 8001+ game WS) nen
 # phai publish DUNG cac so do, khong doi duoc.
 echo "==> 3/8 Container giu netns (publish cong ra macOS)"
+# --add-host dat o container giu netns: cac container join (--network container:) dung chung
+# /etc/hosts cua no, va Docker khong cho --add-host o che do container:. tcg-game.jar goi
+# http://hakihuyenthoai.net/api/apisv.php (hardcode) khi bam mua trong game -> ve loopback
+# -> nginx -> Adapter tru vi ID (docs/design-cua-hang.md).
 docker run -d --name op-net --restart unless-stopped \
+  --add-host hakihuyenthoai.net:127.0.0.1 \
   -p 127.0.0.1:8080:80    -p 127.0.0.1:8081:8081 \
   -p 127.0.0.1:8100:8100  -p 127.0.0.1:8025:8025 \
   -p 127.0.0.1:12345:12345 -p 127.0.0.1:7788:7788 \

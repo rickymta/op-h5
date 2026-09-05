@@ -5,6 +5,10 @@
 // giua chung, nguoi choi mat tien ma khong nhan duoc gi, va ta khong co cach nao biet
 // da giao hang hay chua. Tach ra thi lenh nam lai trong bang o trang thai `pending`
 // va se duoc thu lai — mat ket noi chi lam cham, khong lam mat tien.
+//
+// Hai duong phat (grant_mode): "pay" = console /gm/pay/manual (game xu ly nhu nap that),
+// "mail" = thu kem qua. Console TU CHOI (loi nghiep vu: het luot, chua toi ngay...) thi
+// khong thu lai ma hoan Xu ngay; chi loi mang moi backoff.
 package grants
 
 import (
@@ -13,14 +17,15 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/console"
 )
 
 // MaxAttempts la so lan thu truoc khi bo cuoc va danh dau `failed`.
-// Bo cuoc khong phai la mat tien: lenh van nam trong bang, nguoi truc thay o trang
-// quan tri va xu ly tay.
+// Bo cuoc khong phai la mat tien: Xu duoc hoan (Refund) va lenh van nam trong bang de
+// nguoi truc thay o trang quan tri.
 const MaxAttempts = 8
 
 // backoff gian cach thu lai theo cap so nhan, tran o 30 phut.
@@ -43,9 +48,11 @@ type Delivery struct {
 	AccountUID sql.NullString
 	RoleID     sql.NullString
 	PackageID  string
+	GrantMode  string
 	ItemTid    int
 	ItemCount  int
 	ItemName   sql.NullString
+	Reward     sql.NullString
 	AmountXu   int64
 	Attempts   int
 }
@@ -61,8 +68,13 @@ type Worker struct {
 	PlatformCode string
 	ChannelCode  string
 	CurrencyCode string
-	// Mode chon duong goi console: "manual" (mot buoc) hoac "approval" (hai buoc).
+	// Mode chon duong goi console cho grant_mode=pay: "manual" (mot buoc) hoac "approval" (hai buoc).
 	Mode string
+	// MailTitle / MailContent la tieu de va noi dung thu cho grant_mode=mail.
+	MailTitle   string
+	MailContent string
+	// Refund hoan Xu khi lenh that bai han (console tu choi hoac het lan thu). nil = khong hoan.
+	Refund func(ctx context.Context, grantID int64, memo string) (int64, error)
 }
 
 // Run chay vong lap cho den khi ctx bi huy.
@@ -142,7 +154,7 @@ func (w *Worker) claim(ctx context.Context, d Delivery) (bool, error) {
 func (w *Worker) due(ctx context.Context, limit int) ([]Delivery, error) {
 	rows, err := w.DB.QueryContext(ctx, `
 		SELECT id, txn_id, game_code, srv_code, user_id, account_uid, role_id,
-		       package_id, item_tid, item_count, item_name, amount_xu, attempts
+		       package_id, grant_mode, item_tid, item_count, item_name, reward, amount_xu, attempts
 		  FROM game_grants
 		 WHERE game_code = ? AND status = 'pending'
 		   AND (next_retry_at IS NULL OR next_retry_at <= NOW())
@@ -156,8 +168,8 @@ func (w *Worker) due(ctx context.Context, limit int) ([]Delivery, error) {
 	for rows.Next() {
 		var d Delivery
 		if err := rows.Scan(&d.ID, &d.TxnID, &d.GameCode, &d.SrvCode, &d.UserID,
-			&d.AccountUID, &d.RoleID, &d.PackageID, &d.ItemTid, &d.ItemCount,
-			&d.ItemName, &d.AmountXu, &d.Attempts); err != nil {
+			&d.AccountUID, &d.RoleID, &d.PackageID, &d.GrantMode, &d.ItemTid, &d.ItemCount,
+			&d.ItemName, &d.Reward, &d.AmountXu, &d.Attempts); err != nil {
 			return nil, err
 		}
 		out = append(out, d)
@@ -165,17 +177,27 @@ func (w *Worker) due(ctx context.Context, limit int) ([]Delivery, error) {
 	return out, rows.Err()
 }
 
+// errPermanent bao loi khong the sua bang cach thu lai (thieu du lieu trong lenh).
+type errPermanent struct{ error }
+
 // deliver goi console de phat hang.
 //
 // platformOrderId dat bang txn_id cua so cai: no la khoa duy nhat cua giao dich ben
 // he thong ID, nen neu console co chong trung theo ma don thi hai lan thu lai cung
 // mot lenh se khong phat hai lan.
 func (w *Worker) deliver(ctx context.Context, d Delivery) error {
+	switch d.GrantMode {
+	case "mail":
+		return w.deliverMail(ctx, d)
+	case "ingame":
+		// Game da tu phat sau khi Adapter tra `true`; lenh nay khong bao gio o 'pending'.
+		return nil
+	}
 	if d.ItemTid <= 0 {
-		return fmt.Errorf("goi %q chua khai bao item_tid", d.PackageID)
+		return errPermanent{fmt.Errorf("goi %q chua khai bao item_tid", d.PackageID)}
 	}
 	if !d.AccountUID.Valid || d.AccountUID.String == "" {
-		return errors.New("chua biet accountUid cua nguoi choi trong game")
+		return errPermanent{errors.New("chua biet accountUid cua nguoi choi trong game")}
 	}
 	rec := console.PayRecord{
 		OrderType:       0,
@@ -214,6 +236,29 @@ func (w *Worker) deliver(ctx context.Context, d Delivery) error {
 	return w.Console.PayManual(ctx, rec)
 }
 
+// deliverMail gui thu kem qua: tao phieu roi duyet, dung cach gmhanglong/gm/api.php lam.
+func (w *Worker) deliverMail(ctx context.Context, d Delivery) error {
+	if !d.RoleID.Valid || strings.TrimSpace(d.RoleID.String) == "" {
+		return errPermanent{errors.New("goi gui qua thu can masterIdHex cua nhan vat")}
+	}
+	if !d.Reward.Valid || strings.TrimSpace(d.Reward.String) == "" {
+		return errPermanent{fmt.Errorf("goi %q chua khai bao reward", d.PackageID)}
+	}
+	title, content := w.MailTitle, w.MailContent
+	if title == "" {
+		title = "Cửa hàng"
+	}
+	if content == "" {
+		content = "Bạn vừa mua " + d.ItemName.String + " từ cửa hàng. Vật phẩm đính kèm trong thư."
+	}
+	req := console.NewItemMail(d.SrvCode, d.RoleID.String, d.ItemName.String, w.PlatformCode, title, content, d.Reward.String)
+	id, err := w.Console.MailCreate(ctx, req)
+	if err != nil {
+		return err
+	}
+	return w.Console.MailComplete(ctx, id)
+}
+
 func (w *Worker) succeed(ctx context.Context, d Delivery) {
 	if _, err := w.DB.ExecContext(ctx, `
 		UPDATE game_grants
@@ -230,23 +275,36 @@ func (w *Worker) fail(ctx context.Context, d Delivery, cause error) {
 	if len(msg) > 500 {
 		msg = msg[:500]
 	}
-	if attempts >= MaxAttempts {
-		w.Log.Error("bo cuoc phat hang sau nhieu lan thu",
-			"grant", d.ID, "txn", d.TxnID, "so_lan", attempts, "err", msg)
+	var perm errPermanent
+	final := attempts >= MaxAttempts || console.IsRejected(cause) || errors.As(cause, &perm)
+	if !final {
+		wait := backoff(attempts)
+		w.Log.Warn("phat hang that bai, se thu lai",
+			"grant", d.ID, "lan", attempts, "cho", wait.String(), "err", msg)
 		if _, err := w.DB.ExecContext(ctx, `
-			UPDATE game_grants SET status='failed', attempts = ?, last_error = ?, next_retry_at = NULL
-			 WHERE id = ? AND status = 'pending'`, attempts, msg, d.ID); err != nil {
-			w.Log.Error("ghi trang thai that bai", "grant", d.ID, "err", err)
+			UPDATE game_grants
+			   SET attempts = ?, last_error = ?, next_retry_at = DATE_ADD(NOW(), INTERVAL ? SECOND)
+			 WHERE id = ? AND status = 'pending'`, attempts, msg, int(wait.Seconds()), d.ID); err != nil {
+			w.Log.Error("ghi lan thu that bai", "grant", d.ID, "err", err)
 		}
 		return
 	}
-	wait := backoff(attempts)
-	w.Log.Warn("phat hang that bai, se thu lai",
-		"grant", d.ID, "lan", attempts, "cho", wait.String(), "err", msg)
+	w.Log.Error("bo cuoc phat hang", "grant", d.ID, "txn", d.TxnID, "so_lan", attempts, "err", msg)
 	if _, err := w.DB.ExecContext(ctx, `
-		UPDATE game_grants
-		   SET attempts = ?, last_error = ?, next_retry_at = DATE_ADD(NOW(), INTERVAL ? SECOND)
-		 WHERE id = ? AND status = 'pending'`, attempts, msg, int(wait.Seconds()), d.ID); err != nil {
-		w.Log.Error("ghi lan thu that bai", "grant", d.ID, "err", err)
+		UPDATE game_grants SET status='failed', attempts = ?, last_error = ?, next_retry_at = NULL
+		 WHERE id = ? AND status = 'pending'`, attempts, msg, d.ID); err != nil {
+		w.Log.Error("ghi trang thai that bai", "grant", d.ID, "err", err)
+		return
+	}
+	if w.Refund == nil {
+		return
+	}
+	// Hoan Xu ngay: nguoi choi khong phai cho nguoi truc. Lenh chuyen 'refunded' va van
+	// hien o trang quan tri kem last_error de biet vi sao.
+	memo := fmt.Sprintf("hoan goi %s (%s/%s): %.120s", d.PackageID, d.GameCode, d.SrvCode, msg)
+	if id, err := w.Refund(ctx, d.ID, memo); err != nil {
+		w.Log.Error("hoan Xu that bai — can xu ly tay", "grant", d.ID, "err", err)
+	} else {
+		w.Log.Info("da hoan Xu", "grant", d.ID, "refund_txn", id, "xu", d.AmountXu)
 	}
 }

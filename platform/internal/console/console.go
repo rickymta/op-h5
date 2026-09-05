@@ -199,7 +199,7 @@ func (c *Client) do(req *http.Request, out any) error {
 		if strings.Contains(res.ErrorMsg, "登录") || strings.Contains(res.ErrorMsg, "登錄") {
 			return ErrUnauthorized
 		}
-		return fmt.Errorf("console tu choi (errorcode=%d): %s", code, res.ErrorMsg)
+		return &RejectedError{Code: code, Msg: res.ErrorMsg}
 	}
 	if out != nil && len(res.Data) > 0 && string(res.Data) != "null" {
 		if err := json.Unmarshal(res.Data, out); err != nil {
@@ -244,4 +244,100 @@ func (c *Client) Ping(ctx context.Context) error {
 		return fmt.Errorf("console HTTP %d", resp.StatusCode)
 	}
 	return nil
+}
+
+// RejectedError la loi NGHIEP VU tu console (errorcode != 0): het luot mua, chua toi ngay,
+// nhan vat khong ton tai... Khac loi mang o cho thu lai vo ich — ben goi nen dung ngay
+// va hoan Xu thay vi cho backoff toi 30 phut roi thu tiep.
+type RejectedError struct {
+	Code int
+	Msg  string
+}
+
+func (e *RejectedError) Error() string {
+	return fmt.Sprintf("console tu choi (errorcode=%d): %s", e.Code, e.Msg)
+}
+
+// IsRejected cho biet loi co phai console tu choi (khong phai mat ket noi) khong.
+func IsRejected(err error) bool {
+	var r *RejectedError
+	return errors.As(err, &r)
+}
+
+// ---------------------------------------------------------------- thu kem qua
+
+// MailEntity la than thu. Khuon lay tu gmhanglong/gm/api.php (nhanh gui vat pham):
+// type=2, operation=12, reward dang "type:id:count#type:id:count".
+type MailEntity struct {
+	Type      int    `json:"type"`
+	Operation int    `json:"operation"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Reward    string `json:"reward"`
+}
+
+// MailTarget la nguoi nhan; masterIdHex/roleId la ID nhan vat trong game.
+type MailTarget struct {
+	Type         int    `json:"type"`
+	SrvCode      string `json:"srvCode"`
+	MasterIDHex  string `json:"masterIdHex"`
+	Name         string `json:"name"`
+	MasterName   string `json:"masterName"`
+	RoleID       string `json:"roleId"`
+	RoleName     string `json:"roleName"`
+	PlatformCode string `json:"platformCode"`
+}
+
+// MailCreateReq la payload cua /gm/mail/x/create.
+type MailCreateReq struct {
+	GmMailEntity MailEntity   `json:"gmMailEntity"`
+	GmMailTars   []MailTarget `json:"gmMailTars"`
+	Reward       string       `json:"reward"`
+}
+
+// NewItemMail dung mot thu kem qua cho mot nhan vat.
+func NewItemMail(srvCode, masterIDHex, masterName, platformCode, title, content, reward string) MailCreateReq {
+	return MailCreateReq{
+		GmMailEntity: MailEntity{Type: 2, Operation: 12, Title: title, Content: content, Reward: reward},
+		GmMailTars: []MailTarget{{
+			Type: 2, SrvCode: srvCode, MasterIDHex: masterIDHex, Name: masterName, MasterName: masterName,
+			RoleID: masterIDHex, RoleName: masterName, PlatformCode: platformCode,
+		}},
+		Reward: reward,
+	}
+}
+
+// MailCreate tao phieu thu cho duyet va tra ve id phieu (tcg.gm_mail_approval.id).
+//
+// CHUA KIEM CHUNG khuon phan hoi cua console: gm/api.php khong doc data ma quet bang
+// gm_mail_approval status=1 trong MySQL tcg. O day thu doc `data` la so hoac {"id":..};
+// khong doc duoc thi tra loi de worker thu lai va nguoi truc thay trong Don mua.
+func (c *Client) MailCreate(ctx context.Context, req MailCreateReq) (int64, error) {
+	var raw json.RawMessage
+	if err := c.callAuthed(ctx, "/gm/mail/x/create", req, &raw); err != nil {
+		return 0, err
+	}
+	if id, ok := mailID(raw); ok {
+		return id, nil
+	}
+	return 0, fmt.Errorf("console khong tra id phieu thu (data=%.120s) — xem console.MailCreate", raw)
+}
+
+func mailID(raw json.RawMessage) (int64, bool) {
+	var n int64
+	if err := json.Unmarshal(raw, &n); err == nil && n > 0 {
+		return n, true
+	}
+	var obj struct {
+		ID int64 `json:"id"`
+	}
+	if err := json.Unmarshal(raw, &obj); err == nil && obj.ID > 0 {
+		return obj.ID, true
+	}
+	return 0, false
+}
+
+// MailComplete duyet phieu thu (status=2) de thu duoc gui di — cung cach gm/api.php lam.
+func (c *Client) MailComplete(ctx context.Context, id int64) error {
+	return c.callAuthed(ctx, "/gm/mail/x/complete", map[string]any{"status": "2", "id": id}, nil)
 }

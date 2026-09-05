@@ -86,12 +86,17 @@ func main() {
 	}
 
 	consoleClient := console.New(cfg.ConsoleBaseURL, cfg.ConsoleUser, cfg.ConsolePassword, cfg.TcgSecret)
+	wal := &wallet.Service{DB: db}
 	worker := &grants.Worker{
 		DB: db, Console: consoleClient, GameCode: cfg.GameCode, Log: log,
 		PlatformCode: envOr("ADAPTER_PLATFORM_CODE", "develop"),
 		ChannelCode:  envOr("ADAPTER_CHANNEL_CODE", "0"),
 		CurrencyCode: envOr("ADAPTER_CURRENCY_CODE", "VND"),
 		Mode:         cfg.ConsolePayMode,
+		MailTitle:    envOr("ADAPTER_MAIL_TITLE", "Cửa hàng Đại Hải Trình"),
+		MailContent:  os.Getenv("ADAPTER_MAIL_CONTENT"),
+		// Console tu choi hoac het lan thu -> hoan Xu ngay (quyet dinh 2026-09-05).
+		Refund: wal.RefundGrant,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -105,7 +110,7 @@ func main() {
 		mapper:  mapper,
 		tracker: tracker,
 		login:   loginClient,
-		wallet:  &wallet.Service{DB: db},
+		wallet:  wal,
 		console: consoleClient,
 		worker:  worker,
 		db:      db,
@@ -123,7 +128,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", srv.home)
 	mux.HandleFunc("GET /may-chu", srv.serversPage)
-	mux.HandleFunc("GET /quy-doi", srv.convertPage)
+	mux.HandleFunc("GET /cua-hang", srv.storePage)
+	mux.HandleFunc("GET /quy-doi", srv.quyDoiRedirect) // duong cu, chuyen ve /cua-hang
 	mux.HandleFunc("GET /choi-game", srv.playGame)
 	mux.HandleFunc("GET /auth/callback", srv.authCallback)
 	mux.HandleFunc("GET /auth/logout", srv.logout)
@@ -131,6 +137,12 @@ func main() {
 	mux.HandleFunc("POST /api/game/session", srv.createSession)
 	mux.HandleFunc("GET /api/game/packages", srv.listPackages)
 	mux.HandleFunc("POST /api/game/convert", srv.convert)
+	mux.HandleFunc("GET /api/game/orders", srv.listOrders)
+	mux.HandleFunc("GET /api/game/roles", srv.listRoles)
+	// Nut mua TRONG GAME: nginx tro /api/api.php va /api/apisv.php (duong PHP cu ma client
+	// va tcg-game.jar hardcode) vao hai duong nay. Xem store.go.
+	mux.HandleFunc("GET /api/game/legacy/check", srv.legacyCheck)
+	mux.HandleFunc("GET /api/game/legacy/charge", srv.legacyCharge)
 	// Duong cua LOGIN SERVER ma nginx tro vao Adapter, de che dia chi cong khai
 	// (server chi mo 80/443). Xem ghi chu o connectTarget.
 	mux.HandleFunc("GET /srv/game/connect/target", srv.connectTarget)

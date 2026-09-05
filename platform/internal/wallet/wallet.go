@@ -17,12 +17,19 @@ import (
 )
 
 var (
-	ErrInsufficient = errors.New("số dư không đủ")
-	ErrNoWallet     = errors.New("người dùng chưa có ví")
-	ErrBadAmount    = errors.New("số tiền phải lớn hơn 0")
+	ErrInsufficient  = errors.New("số dư không đủ")
+	ErrNoWallet      = errors.New("người dùng chưa có ví")
+	ErrBadAmount     = errors.New("số tiền phải lớn hơn 0")
+	ErrRoleRequired  = errors.New("gói này gửi qua thư, cần chọn nhân vật nhận")
+	ErrCannotRefund  = errors.New("lệnh đã phát hàng, không hoàn được")
+	ErrGrantNotFound = errors.New("không có lệnh phát hàng này")
 )
 
 type Service struct{ DB *sql.DB }
+
+type querier interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
 
 // Balance tra ve so du hien tai cua nguoi dung.
 func (s *Service) Balance(ctx context.Context, userID int64) (int64, error) {
@@ -38,9 +45,7 @@ func (s *Service) Balance(ctx context.Context, userID int64) (int64, error) {
 	return bal.Int64, nil
 }
 
-func userAccount(ctx context.Context, q interface {
-	QueryRowContext(context.Context, string, ...any) *sql.Row
-}, userID int64) (int64, error) {
+func userAccount(ctx context.Context, q querier, userID int64) (int64, error) {
 	var id int64
 	err := q.QueryRowContext(ctx,
 		`SELECT id FROM wallet_accounts WHERE kind='user' AND user_id = ? AND currency='XU'`, userID).Scan(&id)
@@ -50,9 +55,7 @@ func userAccount(ctx context.Context, q interface {
 	return id, err
 }
 
-func systemAccount(ctx context.Context, q interface {
-	QueryRowContext(context.Context, string, ...any) *sql.Row
-}, code string) (int64, error) {
+func systemAccount(ctx context.Context, q querier, code string) (int64, error) {
 	var id int64
 	err := q.QueryRowContext(ctx,
 		`SELECT id FROM wallet_accounts WHERE kind='system' AND code = ? AND currency='XU'`, code).Scan(&id)
@@ -133,33 +136,90 @@ func (s *Service) Topup(ctx context.Context, userID, amount int64, idemKey, refe
 	return txnID, nil
 }
 
-// Package mo ta mot goi quy doi, doc tu bang game_packages.
+// ---------------------------------------------------------------- danh muc goi
+
+// Package mo ta mot goi trong cua hang, doc tu bang game_packages (migration 0007).
+//
+// GrantMode quyet dinh duong phat hang: "pay" = console /gm/pay/manual voi ItemTid la ID
+// muc nap (game xu ly nhu mot lan nap that); "mail" = thu kem qua theo chuoi Reward.
 type Package struct {
-	ID        string
-	Name      string
-	PriceXu   int64
-	ItemTid   int
-	ItemCount int
-	ItemName  string
+	ID           string
+	Name         string
+	Category     string
+	GrantMode    string
+	PriceXu      int64
+	ItemTid      int
+	ItemCount    int
+	ItemName     string
+	Reward       string
+	Description  string
+	Badge        string
+	VipPoints    int64
+	ServerDayMin int
+	ServerDayMax int
+	DailyLimit   int
+	VipRequired  int
+	Status       string
 }
 
 // ErrPackageUnknown bao goi khong ton tai hoac da bi an.
 var ErrPackageUnknown = errors.New("gói quy đổi không tồn tại")
 
-// lookupPackage doc goi trong cung giao dich dang mo.
-func lookupPackage(ctx context.Context, tx *sql.Tx, gameCode, packageID string) (Package, error) {
+const packageColumns = `package_id, name, category, grant_mode, price_xu, item_tid, item_count, item_name,
+		COALESCE(reward,''), COALESCE(description,''), COALESCE(badge,''), COALESCE(vip_points,0),
+		COALESCE(server_day_min,0), COALESCE(server_day_max,0), COALESCE(daily_limit,0), COALESCE(vip_required,0), status`
+
+func scanPackage(row interface{ Scan(...any) error }) (Package, error) {
 	var p Package
-	p.ID = packageID
-	err := tx.QueryRowContext(ctx, `
-		SELECT name, price_xu, item_tid, item_count, item_name
-		  FROM game_packages
-		 WHERE game_code = ? AND package_id = ? AND status = 'active'`,
-		gameCode, packageID).Scan(&p.Name, &p.PriceXu, &p.ItemTid, &p.ItemCount, &p.ItemName)
+	err := row.Scan(&p.ID, &p.Name, &p.Category, &p.GrantMode, &p.PriceXu, &p.ItemTid, &p.ItemCount, &p.ItemName,
+		&p.Reward, &p.Description, &p.Badge, &p.VipPoints,
+		&p.ServerDayMin, &p.ServerDayMax, &p.DailyLimit, &p.VipRequired, &p.Status)
+	return p, err
+}
+
+// lookupPackage doc mot goi. includeHidden=true dung cho duong mua TRONG GAME: client
+// game co the mua bat ky muc nap nao, ke ca muc khong hien tren web.
+func lookupPackage(ctx context.Context, q querier, gameCode, packageID string, includeHidden bool) (Package, error) {
+	cond := " AND status = 'active'"
+	if includeHidden {
+		cond = ""
+	}
+	p, err := scanPackage(q.QueryRowContext(ctx,
+		`SELECT `+packageColumns+` FROM game_packages WHERE game_code = ? AND package_id = ?`+cond,
+		gameCode, packageID))
 	if errors.Is(err, sql.ErrNoRows) {
 		return p, ErrPackageUnknown
 	}
 	return p, err
 }
+
+// PackageByID tra ve mot goi (ke ca goi an neu includeHidden).
+func (s *Service) PackageByID(ctx context.Context, gameCode, packageID string, includeHidden bool) (Package, error) {
+	return lookupPackage(ctx, s.DB, gameCode, packageID, includeHidden)
+}
+
+// Packages liet ke cac goi dang mo cua mot game, theo thu tu hien thi.
+func (s *Service) Packages(ctx context.Context, gameCode string) ([]Package, error) {
+	rows, err := s.DB.QueryContext(ctx,
+		`SELECT `+packageColumns+` FROM game_packages WHERE game_code = ? AND status = 'active'
+		 ORDER BY sort_order, price_xu, package_id`, gameCode)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var out []Package
+	for rows.Next() {
+		p, err := scanPackage(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, p)
+	}
+	return out, rows.Err()
+}
+
+// ---------------------------------------------------------------- quy doi
 
 // ConvertInput la tham so cua mot lenh quy doi.
 type ConvertInput struct {
@@ -170,6 +230,9 @@ type ConvertInput struct {
 	AccountUID string
 	PackageID  string
 	IdemKey    string
+	// Mode: "" (mua tren web: tao lenh phat hang cho worker) hoac "ingame" (game tu phat
+	// sau khi Adapter tra `true` cho apisv.php — chi tru Xu va ghi nhan, khong goi console).
+	Mode string
 }
 
 // Convert tru vi de doi sang vat pham trong game va tao mot lenh phat hang o trang
@@ -184,21 +247,26 @@ func (s *Service) Convert(ctx context.Context, in ConvertInput) (txnID int64, er
 	} else if ok {
 		return id, nil
 	}
-
+	ingame := in.Mode == "ingame"
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
 	defer func() { _ = tx.Rollback() }()
-
-	pkg, err := lookupPackage(ctx, tx, in.GameCode, in.PackageID)
+	pkg, err := lookupPackage(ctx, tx, in.GameCode, in.PackageID, ingame)
 	if err != nil {
 		return 0, err
 	}
 	if pkg.PriceXu <= 0 {
 		return 0, ErrBadAmount
 	}
-
+	grantMode := pkg.GrantMode
+	if ingame {
+		grantMode = "ingame"
+	} else if grantMode == "mail" && strings.TrimSpace(in.RoleID) == "" {
+		// Thu can masterIdHex; console khong tim nhan vat theo ten cho ta.
+		return 0, ErrRoleRequired
+	}
 	userAcc, err := userAccount(ctx, tx, in.UserID)
 	if err != nil {
 		return 0, err
@@ -218,10 +286,12 @@ func (s *Service) Convert(ctx context.Context, in ConvertInput) (txnID int64, er
 	if err != nil {
 		return 0, err
 	}
-
+	memo := fmt.Sprintf("%s/%s %s", in.GameCode, in.SrvCode, pkg.Name)
+	if ingame {
+		memo = fmt.Sprintf("%s/%s %s (mua trong game)", in.GameCode, in.SrvCode, pkg.Name)
+	}
 	res, err := tx.ExecContext(ctx,
-		`INSERT INTO ledger_txns (kind, idempotency_key, memo) VALUES ('convert',?,?)`,
-		in.IdemKey, fmt.Sprintf("%s/%s %s", in.GameCode, in.SrvCode, pkg.Name))
+		`INSERT INTO ledger_txns (kind, idempotency_key, memo) VALUES ('convert',?,?)`, in.IdemKey, memo)
 	if err != nil {
 		if isDuplicateKey(err) {
 			if id, ok, e := s.existingTxn(ctx, in.IdemKey); e == nil && ok {
@@ -236,14 +306,18 @@ func (s *Service) Convert(ctx context.Context, in ConvertInput) (txnID int64, er
 	if err = insertEntries(ctx, tx, txnID, [][2]int64{{userAcc, -pkg.PriceXu}, {revenue, pkg.PriceXu}}); err != nil {
 		return 0, err
 	}
+	status, grantedAt := "pending", "NULL"
+	if ingame {
+		status, grantedAt = "granted", "NOW()"
+	}
 	if _, err = tx.ExecContext(ctx, `
 		INSERT INTO game_grants
-		  (txn_id, game_code, srv_code, user_id, account_uid, role_id, package_id,
-		   item_tid, item_count, item_name, amount_xu)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+		  (txn_id, game_code, srv_code, user_id, account_uid, role_id, package_id, grant_mode,
+		   item_tid, item_count, item_name, reward, amount_xu, status, granted_at)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,`+grantedAt+`)`,
 		txnID, in.GameCode, in.SrvCode, in.UserID, nullIfEmpty(in.AccountUID),
-		nullIfEmpty(in.RoleID), in.PackageID,
-		pkg.ItemTid, pkg.ItemCount, pkg.ItemName, pkg.PriceXu); err != nil {
+		nullIfEmpty(strings.TrimSpace(in.RoleID)), in.PackageID, grantMode,
+		pkg.ItemTid, pkg.ItemCount, pkg.ItemName, nullIfEmpty(pkg.Reward), pkg.PriceXu, status); err != nil {
 		return 0, err
 	}
 	if err = tx.Commit(); err != nil {
@@ -252,26 +326,159 @@ func (s *Service) Convert(ctx context.Context, in ConvertInput) (txnID int64, er
 	return txnID, nil
 }
 
-// Packages liet ke cac goi dang mo cua mot game, de client hien bang gia.
-func (s *Service) Packages(ctx context.Context, gameCode string) ([]Package, error) {
-	rows, err := s.DB.QueryContext(ctx, `
-		SELECT package_id, name, price_xu, item_tid, item_count, item_name
-		  FROM game_packages WHERE game_code = ? AND status = 'active'
-		 ORDER BY sort_order, price_xu`, gameCode)
+// RefundGrant hoan Xu cho mot lenh phat hang khong thanh cong (console tu choi, het lan
+// thu, hoac quan tri quyet dinh). Idempotent theo txn_id: goi lai khong hoan hai lan.
+// Lenh da 'granted' khong hoan duoc — vat pham da vao game.
+func (s *Service) RefundGrant(ctx context.Context, grantID int64, memo string) (refundTxn int64, err error) {
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var (
+		txnID, userID, amount int64
+		status                string
+		existing              sql.NullInt64
+	)
+	err = tx.QueryRowContext(ctx, `
+		SELECT txn_id, user_id, amount_xu, status, refund_txn_id
+		  FROM game_grants WHERE id = ? FOR UPDATE`, grantID).
+		Scan(&txnID, &userID, &amount, &status, &existing)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrGrantNotFound
+	}
+	if err != nil {
+		return 0, err
+	}
+	if status == "refunded" && existing.Valid {
+		return existing.Int64, nil
+	}
+	if status == "granted" {
+		return 0, ErrCannotRefund
+	}
+	idem := fmt.Sprintf("refund-%d", txnID)
+	if id, ok, e := s.existingTxn(ctx, idem); e != nil {
+		return 0, e
+	} else if ok {
+		// Da ghi so cai nhung chua kip danh dau lenh (crash giua chung): chi cap nhat lenh.
+		refundTxn = id
+	} else {
+		userAcc, err := userAccount(ctx, tx, userID)
+		if err != nil {
+			return 0, err
+		}
+		revenue, err := systemAccount(ctx, tx, "game_revenue")
+		if err != nil {
+			return 0, err
+		}
+		res, err := tx.ExecContext(ctx,
+			`INSERT INTO ledger_txns (kind, idempotency_key, memo) VALUES ('refund',?,?)`, idem, nullIfEmpty(memo))
+		if err != nil {
+			return 0, err
+		}
+		if refundTxn, err = res.LastInsertId(); err != nil {
+			return 0, err
+		}
+		if err = insertEntries(ctx, tx, refundTxn, [][2]int64{{revenue, -amount}, {userAcc, amount}}); err != nil {
+			return 0, err
+		}
+	}
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE game_grants SET status = 'refunded', refund_txn_id = ?, next_retry_at = NULL
+		 WHERE id = ?`, refundTxn, grantID); err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return refundTxn, nil
+}
+
+// Order la mot lenh mua hien cho nguoi choi (va cho trang quan tri).
+type Order struct {
+	ID        int64
+	UserID    int64
+	Username  string
+	PackageID string
+	Name      string
+	SrvCode   string
+	AmountXu  int64
+	Status    string
+	GrantMode string
+	LastError string
+	Attempts  int
+	CreatedAt string
+	GrantedAt string
+}
+
+const orderSelect = `
+	SELECT g.id, g.user_id, COALESCE(u.username,''), g.package_id, COALESCE(p.name, g.item_name, g.package_id),
+	       g.srv_code, g.amount_xu, g.status, g.grant_mode, COALESCE(g.last_error,''), g.attempts,
+	       DATE_FORMAT(g.created_at, '%Y-%m-%d %H:%i'), COALESCE(DATE_FORMAT(g.granted_at, '%Y-%m-%d %H:%i'), '')
+	  FROM game_grants g
+	  LEFT JOIN game_packages p ON p.game_code = g.game_code AND p.package_id = g.package_id
+	  LEFT JOIN users u ON u.id = g.user_id`
+
+func scanOrders(rows *sql.Rows) ([]Order, error) {
+	defer func() { _ = rows.Close() }()
+	var out []Order
+	for rows.Next() {
+		var o Order
+		if err := rows.Scan(&o.ID, &o.UserID, &o.Username, &o.PackageID, &o.Name, &o.SrvCode, &o.AmountXu, &o.Status, &o.GrantMode,
+			&o.LastError, &o.Attempts, &o.CreatedAt, &o.GrantedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, o)
+	}
+	return out, rows.Err()
+}
+
+// Orders tra ve cac lenh mua cua mot nguoi choi trong mot game, moi nhat truoc.
+func (s *Service) Orders(ctx context.Context, userID int64, gameCode string, limit int) ([]Order, error) {
+	if limit <= 0 || limit > 200 {
+		limit = 30
+	}
+	rows, err := s.DB.QueryContext(ctx, orderSelect+`
+		 WHERE g.user_id = ? AND g.game_code = ? ORDER BY g.id DESC LIMIT ?`, userID, gameCode, limit)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
+	return scanOrders(rows)
+}
 
-	var out []Package
-	for rows.Next() {
-		var p Package
-		if err := rows.Scan(&p.ID, &p.Name, &p.PriceXu, &p.ItemTid, &p.ItemCount, &p.ItemName); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
+// RecentOrders liet ke lenh mua cua moi nguoi (trang quan tri); status rong = tat ca.
+func (s *Service) RecentOrders(ctx context.Context, gameCode, status string, limit int) ([]Order, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 100
 	}
-	return out, rows.Err()
+	q := orderSelect + ` WHERE g.game_code = ?`
+	args := []any{gameCode}
+	if status != "" {
+		q += ` AND g.status = ?`
+		args = append(args, status)
+	}
+	q += ` ORDER BY g.id DESC LIMIT ?`
+	args = append(args, limit)
+	rows, err := s.DB.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	return scanOrders(rows)
+}
+
+// RetryGrant dua mot lenh 'failed' ve 'pending' de worker thu lai (quan tri bam "phat lai").
+func (s *Service) RetryGrant(ctx context.Context, grantID int64) error {
+	res, err := s.DB.ExecContext(ctx, `
+		UPDATE game_grants SET status = 'pending', attempts = 0, next_retry_at = NULL, last_error = NULL
+		 WHERE id = ? AND status = 'failed'`, grantID)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrGrantNotFound
+	}
+	return nil
 }
 
 func insertEntries(ctx context.Context, tx *sql.Tx, txnID int64, pairs [][2]int64) error {

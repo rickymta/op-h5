@@ -1,0 +1,69 @@
+{{define "orders.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Đơn mua</title>
+<style>
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+  .filters label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;font-family:var(--mono);font-size:12px}
+  .tabs a{padding:3px 9px;border:1px solid var(--line);border-radius:2px;color:var(--text);text-decoration:none}
+  .tabs a.on{background:var(--brass);color:var(--bg);border-color:var(--brass)}
+  td.err{font-family:var(--mono);font-size:11px;color:var(--signal);max-width:260px;word-break:break-word}
+  td.who{font-family:var(--mono);font-size:12px;white-space:nowrap}
+</style></head><body>
+{{template "nav" .}}
+<main>
+  <h2>Đơn mua</h2>
+  <p class="sub">Mỗi dòng là một lần trừ Xu. <b>pending</b> đang chờ phát · <b>granted</b> đã phát · <b>failed</b> console từ chối hoặc hết lần thử (Xu hoàn tự động → <b>refunded</b>) · <b>ingame</b> = mua bằng nút trong game, game tự phát.</p>
+
+  <form class="filters" method="GET" action="/don-mua">
+    <div><label>Game</label>
+      <select name="game" onchange="this.form.submit()">{{range .Games}}<option value="{{.Code}}" {{if eq .Code $.Game}}selected{{end}}>{{.Name}} ({{.Code}})</option>{{end}}</select></div>
+  </form>
+  <div class="tabs">
+    <a href="/don-mua?game={{.Game}}" class="{{if not .Status}}on{{end}}">tất cả</a>
+    <a href="/don-mua?game={{.Game}}&status=pending" class="{{if eq .Status "pending"}}on{{end}}">pending {{index .Counts "pending"}}</a>
+    <a href="/don-mua?game={{.Game}}&status=granted" class="{{if eq .Status "granted"}}on{{end}}">granted {{index .Counts "granted"}}</a>
+    <a href="/don-mua?game={{.Game}}&status=failed" class="{{if eq .Status "failed"}}on{{end}}">failed {{index .Counts "failed"}}</a>
+    <a href="/don-mua?game={{.Game}}&status=refunded" class="{{if eq .Status "refunded"}}on{{end}}">refunded {{index .Counts "refunded"}}</a>
+  </div>
+
+  <div class="card">
+    <div class="bang-cuon"><table>
+      <thead><tr><th>#</th><th>Lúc</th><th>Người chơi</th><th>Gói</th><th>Máy chủ</th><th>Xu</th><th>Phát</th><th>Trạng thái</th><th>Lỗi</th><th></th></tr></thead>
+      <tbody>
+      {{range .Orders}}
+      <tr data-id="{{.ID}}">
+        <td class="num">{{.ID}}</td>
+        <td class="num">{{.CreatedAt}}</td>
+        <td class="who">{{if .Username}}{{.Username}}{{else}}#{{.UserID}}{{end}}</td>
+        <td>{{.Name}} <span class="muted" style="font-family:var(--mono);font-size:11px">{{.PackageID}}</span></td>
+        <td class="num">{{.SrvCode}}</td>
+        <td class="num">{{.AmountXu}}</td>
+        <td><span class="pill unknown">{{.GrantMode}}</span></td>
+        <td>{{if eq .Status "granted"}}<span class="pill ok">granted</span>{{else if eq .Status "pending"}}<span class="pill warn">pending · {{.Attempts}}</span>{{else if eq .Status "failed"}}<span class="pill crit">failed · {{.Attempts}}</span>{{else}}<span class="pill unknown">{{.Status}}</span>{{end}}</td>
+        <td class="err">{{.LastError}}</td>
+        <td style="white-space:nowrap">
+          {{if eq .Status "failed"}}<button type="button" class="ghost act" data-act="retry">Phát lại</button> <button type="button" class="act" data-act="refund">Hoàn Xu</button>{{end}}
+          {{if eq .Status "pending"}}<button type="button" class="ghost act" data-act="refund">Huỷ &amp; hoàn</button>{{end}}
+        </td>
+      </tr>
+      {{else}}<tr><td colspan="10" class="muted">Chưa có đơn nào.</td></tr>{{end}}
+      </tbody>
+    </table></div>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+function toast(msg, bad){ var t=document.getElementById('toast'); t.textContent=msg; t.className='show'+(bad?' bad':''); setTimeout(function(){t.className='';},2600); }
+document.querySelectorAll('.act').forEach(function(btn){
+  btn.addEventListener('click', async function(){
+    var id = btn.closest('tr').dataset.id, act = btn.dataset.act, body = {};
+    if (act === 'refund') { var why = prompt('Lý do hoàn Xu cho đơn #' + id + ' (vào nhật ký):'); if (why === null) return; body.reason = why; }
+    btn.disabled = true;
+    var r = await fetch('/api/orders/' + id + '/' + act, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    var d = await r.json().catch(function(){ return {}; });
+    if (r.ok) { toast((act === 'retry' ? 'Đã đưa về hàng đợi: #' : 'Đã hoàn Xu, giao dịch #') + (d.refund_txn || id)); setTimeout(function(){ location.reload(); }, 900); }
+    else { btn.disabled = false; toast(d.error_description || 'Lỗi', true); }
+  });
+});
+</script>
+</body></html>{{end}}

@@ -86,6 +86,13 @@ func main() {
 	mux.HandleFunc("POST /api/servers/{game}/{srv}", s.requireWrite(s.apiUpdateServer))
 	mux.HandleFunc("POST /api/devices/{game}/{device}", s.requireWrite(s.apiUpdateDevice))
 	mux.HandleFunc("POST /api/wallet/topup", s.requireWrite(s.apiTopup))
+	// Cua hang: danh muc goi va don mua (catalog.go)
+	mux.HandleFunc("GET /goi", s.requireAdmin(s.packagesPage))
+	mux.HandleFunc("GET /don-mua", s.requireAdmin(s.ordersPage))
+	mux.HandleFunc("POST /api/packages/{game}", s.requireWrite(s.apiCreatePackage))
+	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
+	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))
+	mux.HandleFunc("POST /api/orders/{id}/refund", s.requireWrite(s.apiOrderRefund))
 	mux.HandleFunc("GET /healthz", s.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))
