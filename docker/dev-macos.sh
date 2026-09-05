@@ -68,6 +68,10 @@ MYSQL_PW=$(gen); TCG_SECRET=$(gen); INT_SECRET=$(gen)
 ENC_KEY=$(openssl rand -base64 32)
 ADMIN_PW=$(gen 16)
 CONSOLE_PW=$(gen 16)
+# Ma uy quyen cua tang PHP cu (gm/, gmhanglong/, adminphp@2024/). Phai sinh o day:
+# thieu bien nao thi web-entrypoint de nguyen placeholder, va vi PHP dat error_reporting(0)
+# nen trang tuong ung chi tra 200 RONG chu khong bao loi.
+GM_CODE=$(gen 8); GMHANGLONG_CODE=$(gen 8); REV_KEY=$(gen 8)
 [ -f "$STATE/id-signing.pem" ] || openssl genrsa -out "$STATE/id-signing.pem" 2048 2>/dev/null
 cat > "$STATE/creds.txt" <<EOF
 MYSQL_ROOT_PASSWORD=$MYSQL_PW
@@ -78,6 +82,9 @@ ADMIN_BOOTSTRAP_USER=quantri
 ADMIN_BOOTSTRAP_PASSWORD=$ADMIN_PW
 CONSOLE_PASSWORD=$CONSOLE_PW
 ID_INTERNAL_SECRET=$INT_SECRET
+GM_CODE=$GM_CODE
+GMHANGLONG_CODE=$GMHANGLONG_CODE
+REV_QUERY_KEY=$REV_KEY
 EOF
 chmod 600 "$STATE/creds.txt"
 
@@ -219,6 +226,8 @@ docker run -d --name op-php --network "$NET" \
   -e PUBLIC_HOST=127.0.0.1 -e MYSQL_ROOT_PASSWORD="$MYSQL_PW" \
   -e ID_BASE_URL="http://127.0.0.1:8081" -e ID_INTERNAL_SECRET="$INT_SECRET" \
   -e ID_WALLET_ENABLED=1 \
+  -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" \
+  -e GM_CODE="$GM_CODE" -e GMHANGLONG_CODE="$GMHANGLONG_CODE" -e REV_QUERY_KEY="$REV_KEY" \
   -v "$REPO/website/game:/www/wwwroot/game" docker-php >/dev/null
 docker run -d --name op-nginx --network "$NET" \
   -v "$REPO/website/game:/www/wwwroot/game:ro" \

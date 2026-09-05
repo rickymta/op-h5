@@ -30,7 +30,11 @@ fi
 # 2) secrets (chi khi bien co gia tri)
 fill() { # $1 placeholder, $2 gia tri
   [ -n "$2" ] || return 0
-  grep -rlF "$1" "$W" --include='*.php' 2>/dev/null | while read -r f; do sed -i "s|$1|$(esc "$2")|g" "$f"; done
+  # KHONG dung `grep -r --include`: image la alpine, BusyBox grep khong co --include nen
+  # lenh chet voi "unrecognized option", stderr bi nuot, pipeline van tra 0 -> moi secret
+  # bi bo qua trong im lang va PHP chay voi placeholder (PDO that bai, trang tra 200 rong).
+  find "$W" -type f -name '*.php' -exec grep -lF "$1" {} + 2>/dev/null \
+    | while read -r f; do sed -i "s|$1|$(esc "$2")|g" "$f"; done
 }
 fill __MYSQL_ROOT_PASSWORD__    "${MYSQL_ROOT_PASSWORD:-}"
 fill __WEB_DB_PASSWORD_REV__    "${WEB_DB_PASSWORD_REV:-${MYSQL_ROOT_PASSWORD:-}}"
@@ -43,6 +47,19 @@ fill __GMHANGLONG_CODE__        "${GMHANGLONG_CODE:-}"
 fill __GM_LOGIN_TOKEN__         "${GM_LOGIN_TOKEN:-}"
 fill __MOMO_PHONE__             "${MOMO_PHONE:-}"
 fill __BANK_CALLBACK_CHECKSUM__ "${BANK_CALLBACK_CHECKSUM:-}"
+
+# 2b) Bao dong neu con placeholder. Khong the im lang o day: PHP dat error_reporting(0)
+#     nen `new PDO(... "__MYSQL_ROOT_PASSWORD__")` chi lam trang tra HTTP 200 THAN RONG,
+#     khong co dong log nao — nhin tu ngoai giong het nhu chay binh thuong.
+LEFT=$(find "$W" -type f -name '*.php' -exec grep -lE '__[A-Z0-9_]{4,}__' {} + 2>/dev/null | wc -l)
+if [ "$LEFT" -gt 0 ]; then
+  echo "[web-entrypoint] CANH BAO: con $LEFT file PHP giu placeholder chua dien:" >&2
+  find "$W" -type f -name '*.php' -exec grep -lE '__[A-Z0-9_]{4,}__' {} + 2>/dev/null \
+    | sed "s|^$W/|  - |" >&2
+  echo "[web-entrypoint] cac trang dung chung se tra 200 rong. Dat bien tuong ung trong .env." >&2
+else
+  echo "[web-entrypoint] secrets: da dien het, khong con placeholder"
+fi
 
 # 3) bien moi truong cho PHP. php-fpm xoa env cua tien trinh (clear_env) nen getenv() trong PHP
 #    khong thay .env; chi dua dung 3 bien cua vi ID vao pool, khong dua ca .env (secret khac
