@@ -31,8 +31,12 @@ export function Forgot() {
         <form onSubmit={(e) => { e.preventDefault(); if (email.trim()) send.mutate(); }}>
           {notConfigured ? (
             <Msg tone="warn">
-              Chức năng khôi phục mật khẩu qua email chưa được bật. Vui lòng liên hệ hỗ trợ để được
-              giúp{support ? <> qua <a href={support} target="_blank" rel="noopener">trang hỗ trợ</a></> : ""}.
+              Chức năng khôi phục mật khẩu qua email chưa được bật. Vui lòng liên hệ bộ phận hỗ trợ.{" "}
+              {support ? (
+                <a href={support} target="_blank" rel="noopener">Liên hệ hỗ trợ ↗</a>
+              ) : (
+                <a href="/ho-tro">Xem trang hỗ trợ →</a>
+              )}
             </Msg>
           ) : send.error ? (
             <Msg tone="err">{errText(send.error)}</Msg>

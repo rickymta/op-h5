@@ -32,6 +32,31 @@
 .pt-step p { margin: 0; color: var(--muted); font-size: 14px; }
 .pt-hero-fallback { color: var(--muted); }
 
+/* "Vì sao chơi ở đây": 4 ô. Tự xuống hàng theo bề rộng — hai cột ở máy tính bảng, một cột ở
+   điện thoại; không ép 4 cột vì tiêu đề dài sẽ vỡ chữ. */
+.pt-why { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.pt-why__i h3 { font-size: 16px; margin-bottom: 6px; }
+.pt-why__i p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+/* Câu hỏi thường gặp: <details> thật, mở/đóng không cần JS. Hàng câu hỏi cao ≥ 44 px. */
+.pt-faq { border-top: 1px solid var(--line); }
+.pt-faq__i { border-bottom: 1px solid var(--line); }
+.pt-faq__q {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 34px 10px 0;
+  position: relative; cursor: pointer; font-weight: 600; list-style: none;
+}
+.pt-faq__q::-webkit-details-marker { display: none; }
+.pt-faq__q::after {
+  content: "+"; position: absolute; right: 6px; font-family: var(--mono); font-size: 20px;
+  color: var(--brass); line-height: 1;
+}
+.pt-faq__i[open] .pt-faq__q::after { content: "−"; }
+.pt-faq__q:hover { color: var(--brass); }
+.pt-faq__q:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; border-radius: 4px; }
+.pt-faq__a { padding: 0 0 14px; }
+.pt-faq__a p { margin: 0 0 10px; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+.pt-faq__a p:last-child, .pt-faq__a ul:last-child { margin-bottom: 0; }
+
 /* ------------------------------------------------------------------ đăng nhập / đăng ký */
 .pt-auth { display: grid; place-items: center; padding: 40px 16px 56px; min-height: calc(100dvh - var(--pb-topbar-h) - 220px); }
 .pt-auth__box { width: 100%; max-width: 420px; }
@@ -52,6 +77,9 @@
 .pt-account .pb-section { padding-top: 24px; }
 
 .pt-balance { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.pt-balance__main { min-width: 0; }
+/* Đọc hỏng: nói rõ là lỗi kết nối. Không bao giờ để người dùng đoán giữa "0 Xu" và "chưa đọc được". */
+.pt-balance__err { margin: 6px 0 0; color: var(--warn); font-size: 13px; max-width: 46ch; }
 .pt-balance__k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .pt-balance__v {
   font-family: var(--mono); font-size: clamp(30px, 6vw, 44px); font-weight: 500; letter-spacing: -0.03em;
@@ -84,9 +112,18 @@
 .pt-table .amt { text-align: right; }
 .pt-amount--pos { color: var(--ok); }
 .pt-amount--neg { color: var(--danger); }
+/* Số trong DataTable (giờ, mã máy chủ, số Xu): chữ mono, không xuống dòng giữa số. */
+.pt-num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pt-dim { color: var(--muted); }
+/* Giờ đặt đơn nằm dưới tên gói ở máy tính, nối vào sau tên ở điện thoại (ô đã là một dòng). */
+.pt-order__at { display: block; font-size: 12.5px; font-family: var(--mono); margin-top: 2px; }
 .pt-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 4px;
   background: var(--surface-2); color: var(--muted); white-space: nowrap; }
 .pt-tag--me { color: var(--brass); border: 1px solid var(--brass); background: transparent; margin-left: 6px; }
+/* Trạng thái đơn mua: đã phát / đang chờ / thất bại. Màu chỉ để nhìn nhanh — chữ vẫn nói đủ. */
+.pt-tag--ok { color: var(--ok); }
+.pt-tag--warn { color: var(--warn); }
+.pt-tag--err { color: var(--danger); }
 
 /* Bộ lọc dạng pill (lịch sử, tin tức). */
 .pt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -117,9 +154,14 @@
 
 /* ------------------------------------------------------------------ trang tĩnh */
 .pt-static { max-width: 72ch; }
-.pt-static h2 { font-size: 18px; margin: 24px 0 8px; }
-.pt-static p { color: var(--muted); }
-.pt-static .pt-fill { color: var(--warn); }
+.pt-static h2 { font-size: 18px; margin: 26px 0 8px; }
+.pt-static p { color: var(--muted); line-height: 1.7; }
+/* Đoạn trong ngoặc vuông = chỗ người vận hành còn phải điền; tô vàng để không phát hành nhầm. */
+.pt-fill { color: var(--warn); }
+.pt-bullets { margin: 0 0 14px; padding-left: 20px; color: var(--muted); }
+.pt-bullets li { margin-bottom: 6px; line-height: 1.65; }
+.pt-static__at { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 13px; color: var(--muted); }
 
 /* ------------------------------------------------------------------ điện thoại */
 @media (max-width: 720px) {
@@ -134,22 +176,16 @@
   .pt-filters select { width: 100%; }
 }
 
-/* Bảng hẹp: mỗi dòng xếp chồng thay vì cuộn ngang, để cột quan trọng (số Xu, thiết bị) luôn thấy. */
+/* Bảng phiên đăng nhập ở màn hình hẹp: mỗi dòng xếp chồng thay vì cuộn ngang. (Lịch sử ví và
+   đơn mua đã chuyển sang `DataTable`, thành phần đó tự lo phần điện thoại.) */
 @media (max-width: 560px) {
-  .pt-hist thead, .pt-sess thead { display: none; }
-  .pt-hist tbody, .pt-sess tbody { display: block; }
-  .pt-hist td, .pt-sess td { display: block; padding: 0; border: 0; }
-  .pt-hist tr, .pt-sess tr { display: grid; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .pt-hist tr:last-child, .pt-sess tr:last-child { border-bottom: 0; }
+  .pt-sess thead { display: none; }
+  .pt-sess tbody { display: block; }
+  .pt-sess td { display: block; padding: 0; border: 0; }
+  .pt-sess tr:last-child { border-bottom: 0; }
 
-  .pt-hist tr { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when amt" "kind amt" "memo amt";
-    column-gap: 12px; row-gap: 4px; align-items: start; }
-  .pt-hist td.when { grid-area: when; font-size: 12.5px; color: var(--muted); }
-  .pt-hist td.kind { grid-area: kind; }
-  .pt-hist td.memo { grid-area: memo; min-width: 0; font-size: 13px; }
-  .pt-hist td.amt { grid-area: amt; align-self: center; font-size: 17px; }
-
-  .pt-sess tr { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "dev dev" "ip ip" "created expires";
+  .pt-sess tr { display: grid; padding: 10px 0; border-bottom: 1px solid var(--line);
+    grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "dev dev" "ip ip" "created expires";
     gap: 3px 12px; }
   .pt-sess td.dev { grid-area: dev; font-weight: 600; }
   .pt-sess td.ip { grid-area: ip; font-size: 13px; color: var(--muted); }

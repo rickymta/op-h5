@@ -167,3 +167,57 @@ export interface Session {
   expires_at: string;
   current: boolean;
 }
+
+/** `GET /api/wallet/summary` — bốn ô thống kê ở trang Ví (hợp đồng đợt 3, mục 3.2). */
+export interface WalletSummary {
+  balance: number;
+  topup_total: number;
+  convert_total: number;      // tổng đã tiêu để đổi vật phẩm, số dương
+  refunded_total: number;
+  orders_total: number;
+  orders_pending: number;
+  orders_granted: number;
+  since: string;              // ngày tạo tài khoản, RFC 3339 (rỗng nếu không đọc được)
+}
+
+export type OrderStatus = "pending" | "granted" | "failed" | "refunded";
+
+/**
+ * Một đơn mua gói. `last_error` server cố ý trả rỗng (là thông báo kỹ thuật của console game)
+ * nên trang tài khoản không hiện cột đó — giữ trong kiểu để khỏi lệch khuôn JSON.
+ */
+export interface Order {
+  id: number;
+  package_id: string;
+  name: string;
+  srv_code: string;
+  amount_xu: number;
+  status: OrderStatus | string;
+  grant_mode: "mail" | "pay" | string;
+  created_at: string;
+  granted_at: string;
+  game_code: string;
+  game_name: string;
+}
+
+export const ORDER_STATUS_LABEL: Record<string, string> = {
+  pending: "Đang xử lý", granted: "Đã phát", failed: "Thất bại", refunded: "Đã hoàn Xu",
+};
+
+/** Trạng thái nào tô màu gì trong bảng đơn. */
+export const ORDER_STATUS_TONE: Record<string, "ok" | "warn" | "err" | ""> = {
+  granted: "ok", pending: "warn", failed: "err", refunded: "",
+};
+
+/**
+ * `GET /api/pages/{slug}` — nội dung tĩnh người vận hành sửa được ở trang quản trị.
+ * `body` là VĂN BẢN THUẦN: đoạn cách nhau bằng dòng trống, `## ` là tiêu đề phụ, `- ` là gạch
+ * đầu dòng. Không bao giờ đưa vào innerHTML (xem lib/content.tsx).
+ */
+export interface PageDoc {
+  slug: string;
+  game_code: string;
+  title: string;
+  body: string;
+  updated_at: string;
+}

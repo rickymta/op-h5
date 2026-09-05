@@ -3,6 +3,8 @@ import { Card, Empty, GameCard, Hero, LinkButton, Msg, NewsList, Section, StatTi
 import { api, errText, type GamesResponse, type NewsItem } from "../api";
 import { useTitle } from "../lib/title";
 import { useMe, useSite } from "../lib/session";
+import { RichText } from "../lib/content";
+import { FAQ_ITEMS, WHY_ITEMS } from "../content/home";
 
 /** Đường tới tin: có `link_url` thì ra ngoài, không thì trang chi tiết trong cổng. */
 export function newsHref(n: NewsItem): string {
@@ -103,6 +105,21 @@ export function Home() {
         </Section>
 
         <Section
+          eyebrow="Vì sao chơi ở đây"
+          title="Bốn điều làm nên khác biệt"
+          sub="Không phải khẩu hiệu — đây là những thứ hệ thống đang làm được."
+        >
+          <div className="pt-why">
+            {WHY_ITEMS.map((it) => (
+              <Card className="pt-why__i" key={it.title}>
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </Card>
+            ))}
+          </div>
+        </Section>
+
+        <Section
           eyebrow="Mới nhất"
           title="Tin tức & sự kiện"
           action={<a href="/tin-tuc">Xem tất cả →</a>}
@@ -126,22 +143,31 @@ export function Home() {
           )}
         </Section>
 
-        <Section eyebrow="Vì sao chọn chúng tôi" title="Một tài khoản, một ví" sub="Đăng ký một lần, nạp một chỗ, chơi game nào tuỳ bạn.">
+        <Section eyebrow="Bắt đầu" title="Ba bước bắt đầu" sub="Đăng ký một lần, nạp một chỗ, chơi game nào tuỳ bạn.">
           <div className="pt-steps">
             <Card className="pt-step">
               <div className="pt-step__n">BƯỚC 1</div>
               <h3>Tạo tài khoản</h3>
-              <p>Một tên đăng nhập dùng cho mọi game. Không cần đăng ký lại khi có game mới.</p>
+              <p>
+                Một tên đăng nhập dùng cho mọi game, không phải đăng ký lại khi có game mới. Thêm email
+                khôi phục để tự lấy lại mật khẩu khi cần.
+              </p>
             </Card>
             <Card className="pt-step">
               <div className="pt-step__n">BƯỚC 2</div>
               <h3>Nạp Xu</h3>
-              <p>Xu nằm trong ví chung. Nạp một lần, đổi vật phẩm ở bất kỳ game nào.</p>
+              <p>
+                Xu nằm trong ví chung của tài khoản. Nạp một lần rồi đổi vật phẩm ở game nào tuỳ bạn;
+                mọi lần nạp và quy đổi đều ghi lại trong Lịch sử.
+              </p>
             </Card>
             <Card className="pt-step">
               <div className="pt-step__n">BƯỚC 3</div>
               <h3>Chơi game nào tuỳ bạn</h3>
-              <p>Bấm Chơi ngay ở mỗi game — tài khoản game tự tạo, không phải nhớ thêm mật khẩu.</p>
+              <p>
+                Bấm Chơi ngay là vào thẳng trong trình duyệt — tài khoản game tự tạo, không phải tải,
+                không phải nhớ thêm mật khẩu.
+              </p>
             </Card>
           </div>
           {me.data ? (
@@ -149,6 +175,27 @@ export function Home() {
           ) : (
             <LinkButton href="/dang-ky" size="lg">Tạo tài khoản</LinkButton>
           )}
+        </Section>
+
+        {/* Câu hỏi thường gặp: `<details>` thật nên mở/đóng được cả khi JS chưa chạy xong, và
+            Ctrl+F của trình duyệt tìm thấy chữ bên trong. Không cần thư viện accordion. */}
+        <Section
+          id="faq"
+          eyebrow="Giải đáp"
+          title="Câu hỏi thường gặp"
+          sub="Tám câu hay được hỏi nhất. Chưa có câu bạn cần thì xem trang Hỗ trợ."
+          action={<a href="/ho-tro">Trang hỗ trợ →</a>}
+        >
+          <div className="pt-faq">
+            {FAQ_ITEMS.map((it) => (
+              <details className="pt-faq__i" key={it.q}>
+                <summary className="pt-faq__q">{it.q}</summary>
+                <div className="pt-faq__a">
+                  <RichText body={it.a} />
+                </div>
+              </details>
+            ))}
+          </div>
         </Section>
       </main>
     </>
