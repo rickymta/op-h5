@@ -34,8 +34,11 @@ setv() { # $1 key, $2 value: thay ca dong "KEY=..." (bo comment cuoi dong), them
   fi
 }
 
-ADMIN_USER=quantri
-ADMIN_PW=$(hex 8)
+# Tai khoan quan tri: dung mac dinh admin / Admin@123 theo yeu cau van hanh. Tai khoan nay
+# bi danh dau phai doi mat khau, va giao dien hien canh bao o moi trang cho toi khi doi.
+ADMIN_USER=admin
+ADMIN_EMAIL=admin@antfarms.xyz
+ADMIN_PW='Admin@123'
 CONSOLE_PW=$(hex 12)
 GM_USER=gm
 GM_PW=$(hex 8)
@@ -57,6 +60,7 @@ setv ADAPTER_REDIRECT_URI   "http://$HOST/auth/callback"
 setv ADAPTER_SECRET_ENC_KEY "$(b64)"
 setv ADMIN_COOKIE_SECURE    false
 setv ADMIN_BOOTSTRAP_USER   "$ADMIN_USER"
+setv ADMIN_BOOTSTRAP_EMAIL  "$ADMIN_EMAIL"
 setv ADMIN_BOOTSTRAP_PASSWORD "$ADMIN_PW"
 setv GM_BOOTSTRAP_USER      "$GM_USER"
 setv GM_BOOTSTRAP_PASSWORD  "$GM_PW"
@@ -69,6 +73,7 @@ chmod 600 .env
 cat <<EOF
 Da sinh $(pwd)/.env cho PUBLIC_HOST=$HOST
   Trang quan tri (ssh -L 8100:127.0.0.1:8100 -> http://127.0.0.1:8100): $ADMIN_USER / $ADMIN_PW
+  ^ mat khau MAC DINH, ai doc ma nguon cung biet — doi ngay o /tai-khoan
   Console :9999 (Adapter phat vat pham): admin / $CONSOLE_PW
   GM tool /adminportal (chi loopback: ssh -L 8080:127.0.0.1:80 -> http://127.0.0.1:8080/adminportal): $GM_USER / $GM_PW
   Cac gia tri khac: grep -E '^(TCG_SECRET|MYSQL_ROOT_PASSWORD|MONGO_PASSWORD|RABBITMQ_PASSWORD|GM_CODE|GMHANGLONG_CODE|REV_QUERY_KEY)=' .env

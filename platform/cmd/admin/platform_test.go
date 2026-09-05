@@ -84,3 +84,20 @@ func TestNewPasswordIsRandomAndLongEnough(t *testing.T) {
 		seen[p] = true
 	}
 }
+
+// Mat khau mac dinh phai nam trong ma nguon de nguoi van hanh biet dang nhap bang gi, nhung
+// KHONG duoc dat lai chinh no khi doi mat khau. Test nay khoa lai hanh vi do.
+func TestDefaultAdminConstants(t *testing.T) {
+	if defaultAdminUser == "" || defaultAdminEmail == "" || defaultAdminPass == "" {
+		t.Fatal("thieu mot trong ba hang so tai khoan mac dinh")
+	}
+	if !strings.Contains(defaultAdminEmail, "@") {
+		t.Errorf("email mac dinh khong hop le: %q", defaultAdminEmail)
+	}
+	if !staffRe.MatchString(defaultAdminUser) {
+		t.Errorf("ten dang nhap mac dinh %q khong qua duoc chinh khuon cua no", defaultAdminUser)
+	}
+	if len(defaultAdminPass) < 8 {
+		t.Errorf("mat khau mac dinh qua ngan: %d ky tu", len(defaultAdminPass))
+	}
+}

@@ -317,6 +317,8 @@ func (s *server) apiGameUpdate(w http.ResponseWriter, r *http.Request, a *admin)
 type staffRow struct {
 	ID          int64  `json:"id"`
 	Username    string `json:"username"`
+	Email       string `json:"email"`
+	MustChange  bool   `json:"must_change_password"`
 	Role        string `json:"role"`
 	Status      string `json:"status"`
 	LastLoginAt string `json:"last_login_at"`
@@ -325,7 +327,7 @@ type staffRow struct {
 
 func (s *server) apiStaffList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	rows, err := s.db.QueryContext(r.Context(), `
-		SELECT id, username, role, status,
+		SELECT id, username, COALESCE(email,''), role, status, must_change_password,
 		       COALESCE(DATE_FORMAT(last_login_at, '%Y-%m-%d %H:%i'), ''),
 		       DATE_FORMAT(created_at, '%Y-%m-%d')
 		  FROM admin_users ORDER BY id`)
@@ -338,7 +340,8 @@ func (s *server) apiStaffList(w http.ResponseWriter, r *http.Request, _ *admin) 
 	out := []staffRow{}
 	for rows.Next() {
 		var x staffRow
-		if err := rows.Scan(&x.ID, &x.Username, &x.Role, &x.Status, &x.LastLoginAt, &x.CreatedAt); err == nil {
+		if err := rows.Scan(&x.ID, &x.Username, &x.Email, &x.Role, &x.Status, &x.MustChange,
+			&x.LastLoginAt, &x.CreatedAt); err == nil {
 			out = append(out, x)
 		}
 	}
@@ -360,6 +363,7 @@ func newPassword() (string, error) {
 func (s *server) apiStaffCreate(w http.ResponseWriter, r *http.Request, a *admin) {
 	var in struct {
 		Username string `json:"username"`
+		Email    string `json:"email"`
 		Role     string `json:"role"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
@@ -387,8 +391,8 @@ func (s *server) apiStaffCreate(w http.ResponseWriter, r *http.Request, a *admin
 	}
 	ctx := r.Context()
 	if _, err := s.db.ExecContext(ctx,
-		`INSERT INTO admin_users (username, password_hash, role) VALUES (?,?,?)`,
-		in.Username, hash, in.Role); err != nil {
+		`INSERT INTO admin_users (username, email, password_hash, role) VALUES (?,?,?,?)`,
+		in.Username, nullIfBlank(strings.TrimSpace(in.Email), 190), hash, in.Role); err != nil {
 		if strings.Contains(err.Error(), "Duplicate") {
 			httpx.Error(w, http.StatusConflict, "exists", "Tên đăng nhập này đã có.")
 			return
@@ -516,7 +520,8 @@ func (s *server) apiStaffPassword(w http.ResponseWriter, r *http.Request, a *adm
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không băm được mật khẩu.")
 		return
 	}
-	if _, err := s.db.ExecContext(ctx, `UPDATE admin_users SET password_hash = ? WHERE id = ?`, hash, id); err != nil {
+	if _, err := s.db.ExecContext(ctx,
+		`UPDATE admin_users SET password_hash = ?, must_change_password = 1 WHERE id = ?`, hash, id); err != nil {
 		s.log.Error("dat lai mat khau", "err", err, "id", id)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
 		return
@@ -529,4 +534,82 @@ func (s *server) apiStaffPassword(w http.ResponseWriter, r *http.Request, a *adm
 	}
 	s.audit(ctx, a.ID, "staff_password_reset", username, "")
 	httpx.JSON(w, http.StatusOK, map[string]any{"ok": true, "password": pass})
+}
+
+// ---------------------------------------------------------------- tai khoan cua chinh minh
+
+// apiMe tra ve nguoi dang dang nhap. Giao dien dung de biet hien menu nao va co phai canh
+// bao mat khau mac dinh khong.
+func (s *server) apiMe(w http.ResponseWriter, r *http.Request, a *admin) {
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"id": a.ID, "username": a.Username, "email": a.Email, "role": a.Role,
+		"must_change_password": a.MustChange,
+	})
+}
+
+// apiMePassword doi mat khau cua CHINH nguoi dang dang nhap.
+//
+// Truoc day khong co duong nao: chi `owner` dat lai mat khau cho nguoi khac duoc, nen mot
+// nhan vien muon doi mat khau cua minh phai nho nguoi khac lam ho — va nguoi do se biet
+// mat khau moi.
+func (s *server) apiMePassword(w http.ResponseWriter, r *http.Request, a *admin) {
+	var in struct {
+		Current string `json:"current"`
+		New     string `json:"new"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Dữ liệu không đọc được.")
+		return
+	}
+	if len([]rune(in.New)) < 10 {
+		httpx.Error(w, http.StatusBadRequest, "weak", "Mật khẩu mới phải từ 10 ký tự.")
+		return
+	}
+	if in.New == in.Current {
+		httpx.Error(w, http.StatusBadRequest, "same", "Mật khẩu mới phải khác mật khẩu cũ.")
+		return
+	}
+	if in.New == defaultAdminPass {
+		httpx.Error(w, http.StatusBadRequest, "default", "Đây là mật khẩu mặc định công khai, hãy chọn mật khẩu khác.")
+		return
+	}
+	ctx := r.Context()
+	var hash string
+	if err := s.db.QueryRowContext(ctx, `SELECT password_hash FROM admin_users WHERE id = ?`, a.ID).Scan(&hash); err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được tài khoản.")
+		return
+	}
+	ok, err := identity.VerifyPassword(in.Current, hash)
+	if err != nil || !ok {
+		httpx.Error(w, http.StatusForbidden, "wrong_password", "Mật khẩu hiện tại không đúng.")
+		return
+	}
+	newHash, err := identity.HashPassword(in.New)
+	if err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không băm được mật khẩu.")
+		return
+	}
+	if _, err := s.db.ExecContext(ctx,
+		`UPDATE admin_users SET password_hash = ?, must_change_password = 0 WHERE id = ?`, newHash, a.ID); err != nil {
+		s.log.Error("doi mat khau", "err", err, "id", a.ID)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
+		return
+	}
+	// Cat cac phien KHAC, giu phien hien tai: doi mat khau vi nghi bi lo thi phai duoi
+	// duoc nguoi kia ra, nhung khong co ly do gi bat chinh minh dang nhap lai.
+	if _, err := s.db.ExecContext(ctx, `
+		UPDATE admin_sessions SET revoked_at = NOW()
+		 WHERE admin_id = ? AND revoked_at IS NULL AND id <> ?`, a.ID, currentSessionID(r)); err != nil {
+		s.log.Error("thu hoi phien khac", "err", err, "id", a.ID)
+	}
+	s.audit(ctx, a.ID, "self_password_change", a.Username, "")
+	httpx.JSON(w, http.StatusOK, map[string]any{"ok": true})
+}
+
+// currentSessionID doc id phien tu cookie; rong neu khong co.
+func currentSessionID(r *http.Request) string {
+	if c, err := r.Cookie(adminCookie); err == nil {
+		return c.Value
+	}
+	return ""
 }

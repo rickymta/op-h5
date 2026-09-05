@@ -137,6 +137,9 @@ func main() {
 	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
 	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))
 	mux.HandleFunc("POST /api/orders/{id}/refund", s.requireWrite(s.apiOrderRefund))
+	// Tai khoan cua chinh nguoi dang dang nhap (platform.go).
+	mux.HandleFunc("GET /api/me", s.requireAdminAPI(s.apiMe))
+	mux.HandleFunc("POST /api/me/password", s.requireAdminAPI(s.apiMePassword))
 	// Quan tri nen tang (platform.go): game va nhan vien.
 	mux.HandleFunc("GET /api/games", s.requireAdminAPI(s.apiGameList))
 	mux.HandleFunc("POST /api/games", s.requireWrite(s.apiGameCreate))
@@ -145,6 +148,10 @@ func main() {
 	mux.HandleFunc("POST /api/staff", s.requireOwner(s.apiStaffCreate))
 	mux.HandleFunc("POST /api/staff/{id}", s.requireOwner(s.apiStaffUpdate))
 	mux.HandleFunc("POST /api/staff/{id}/password", s.requireOwner(s.apiStaffPassword))
+	// Nguoi choi (players.go): xem thi can vai tro gm, khoa/mo thi can operator.
+	mux.HandleFunc("GET /api/players", s.requireGM(s.apiPlayerList))
+	mux.HandleFunc("GET /api/players/{id}", s.requireGM(s.apiPlayerDetail))
+	mux.HandleFunc("POST /api/players/{id}", s.requireWrite(s.apiPlayerUpdate))
 	// Cong cu GM (gm.go): thao tac tren nhan vat qua console.
 	mux.HandleFunc("GET /api/gm/meta", s.requireAdminAPI(s.apiGMMeta))
 	mux.HandleFunc("GET /api/gm/roles", s.requireGM(s.apiGMRoles))
@@ -219,7 +226,22 @@ func tplFuncs() template.FuncMap {
 	}
 }
 
-// seedOwner tao tai khoan quan tri dau tien tu ADMIN_BOOTSTRAP_USER / _PASSWORD.
+// Tai khoan quan tri mac dinh, dung khi .env khong dat ADMIN_BOOTSTRAP_*.
+//
+// Mat khau nay nam trong ma nguon cua mot repo CONG KHAI, nen phai coi la ai cung biet.
+// No chap nhan duoc vi trang quan tri chi nghe loopback (vao bang SSH tunnel), nhung
+// tai khoan gieo bang no bi danh dau must_change_password: moi trang trong giao dien deu
+// hien canh bao cho toi khi doi.
+const (
+	defaultAdminUser  = "admin"
+	defaultAdminEmail = "admin@antfarms.xyz"
+	defaultAdminPass  = "Admin@123"
+)
+
+// seedOwner tao tai khoan quan tri dau tien khi bang con trong.
+//
+// Chi chay khi CHUA co tai khoan nao — khong bao gio ghi de tai khoan san co, ke ca khi
+// bien moi truong doi.
 func seedOwner(ctx context.Context, db *sql.DB, log *slog.Logger) error {
 	var n int
 	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM admin_users`).Scan(&n); err != nil {
@@ -228,21 +250,32 @@ func seedOwner(ctx context.Context, db *sql.DB, log *slog.Logger) error {
 	if n > 0 {
 		return nil
 	}
-	user := os.Getenv("ADMIN_BOOTSTRAP_USER")
+	user := envOr("ADMIN_BOOTSTRAP_USER", defaultAdminUser)
+	email := envOr("ADMIN_BOOTSTRAP_EMAIL", defaultAdminEmail)
 	pass := os.Getenv("ADMIN_BOOTSTRAP_PASSWORD")
-	if user == "" || pass == "" {
-		log.Warn("chua co tai khoan quan tri nao; dat ADMIN_BOOTSTRAP_USER va ADMIN_BOOTSTRAP_PASSWORD roi khoi dong lai")
-		return nil
+	usingDefault := pass == ""
+	if usingDefault {
+		pass = defaultAdminPass
 	}
 	hash, err := hashAdminPassword(pass)
 	if err != nil {
 		return err
 	}
+	mustChange := 0
+	if usingDefault {
+		mustChange = 1
+	}
 	if _, err := db.ExecContext(ctx,
-		`INSERT INTO admin_users (username, password_hash, role) VALUES (?,?,'owner')`,
-		user, hash); err != nil {
+		`INSERT INTO admin_users (username, email, password_hash, role, must_change_password)
+		 VALUES (?,?,?,'owner',?)`,
+		user, email, hash, mustChange); err != nil {
 		return err
 	}
-	log.Info("da tao tai khoan quan tri dau tien", "user", user)
+	if usingDefault {
+		log.Warn("da tao tai khoan quan tri dau tien voi MAT KHAU MAC DINH trong ma nguon — doi ngay sau khi dang nhap",
+			"user", user, "email", email)
+	} else {
+		log.Info("da tao tai khoan quan tri dau tien", "user", user, "email", email)
+	}
 	return nil
 }

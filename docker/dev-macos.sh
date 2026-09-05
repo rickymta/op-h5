@@ -66,7 +66,7 @@ MYSQL_PW=$(gen); TCG_SECRET=$(gen); INT_SECRET=$(gen)
 [ -f "$STATE/enc.key" ] || openssl rand -base64 32 > "$STATE/enc.key"
 chmod 600 "$STATE/enc.key"
 ENC_KEY=$(cat "$STATE/enc.key")
-ADMIN_PW=$(gen 16)
+ADMIN_PW='Admin@123'      # quan tri mac dinh: admin / Admin@123 (doi o /tai-khoan)
 CONSOLE_PW=$(gen 16)     # zz-init.sh ghi vao tcg.staff (admin) — Adapter va GM tool dung
 GM_PW=$(gen 8)           # tai khoan GM dau tien (platform.gm_users) cho /adminportal, /gmhanglong
 # Ma uy quyen cua tang PHP cu (gm/, gmhanglong/, adminphp@2024/). Phai sinh o day:
@@ -79,7 +79,8 @@ MYSQL_ROOT_PASSWORD=$MYSQL_PW
 MONGO_PASSWORD=$MYSQL_PW
 RABBITMQ_PASSWORD=$MYSQL_PW
 TCG_SECRET=$TCG_SECRET
-ADMIN_BOOTSTRAP_USER=quantri
+ADMIN_BOOTSTRAP_USER=admin
+ADMIN_BOOTSTRAP_EMAIL=admin@antfarms.xyz
 ADMIN_BOOTSTRAP_PASSWORD=$ADMIN_PW
 CONSOLE_ADMIN_PASSWORD=$CONSOLE_PW
 ID_INTERNAL_SECRET=$INT_SECRET
@@ -243,7 +244,8 @@ docker run -d --name op-adapter --network "$NET" \
 docker run -d --name op-admin --network "$NET" \
   -e ADMIN_ADDR=":8100" -e ID_DB_PASSWORD="$MYSQL_PW" -e ID_DB_NAME=platform \
   -e ADMIN_COOKIE_SECURE=false \
-  -e ADMIN_BOOTSTRAP_USER=quantri -e ADMIN_BOOTSTRAP_PASSWORD="$ADMIN_PW" \
+  -e ADMIN_BOOTSTRAP_USER=admin -e ADMIN_BOOTSTRAP_EMAIL=admin@antfarms.xyz \
+  -e ADMIN_BOOTSTRAP_PASSWORD="$ADMIN_PW" \
   -e ADMIN_SPA="${ADMIN_SPA:-0}" \
   -e CONSOLE_BASE_URL="http://127.0.0.1:9999" -e STAT_BASE_URL="http://127.0.0.1:7788" \
   -e CONSOLE_USER=admin -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" -e TCG_SECRET="$TCG_SECRET" \
@@ -286,7 +288,7 @@ printf "  %-32s %s\n" "http://127.0.0.1:8081"          "Cong game — dang ky / 
 printf "  %-32s %s\n" "http://127.0.0.1:8100"          "Trang quan tri"
 printf "  %-32s %s\n" "http://127.0.0.1:8025"          "Hop thu (email dat lai mat khau)"
 echo
-echo "  Quan tri: quantri / $ADMIN_PW"
+echo "  Quan tri: admin / $ADMIN_PW  (mat khau mac dinh — doi o /tai-khoan)"
 echo "  Console :9999: admin / $CONSOLE_PW"
 echo "  GM tool http://127.0.0.1:8080/adminportal: gm / $GM_PW"
 echo "  Bi mat khac: $STATE/creds.txt"

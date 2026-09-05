@@ -38,9 +38,11 @@ type server struct {
 func nowUnix() int64 { return time.Now().Unix() }
 
 type admin struct {
-	ID       int64
-	Username string
-	Role     string
+	ID         int64
+	Username   string
+	Email      string
+	Role       string
+	MustChange bool
 }
 
 func hashAdminPassword(p string) (string, error) { return identity.HashPassword(p) }
@@ -52,10 +54,10 @@ func (s *server) current(r *http.Request) (*admin, bool) {
 	}
 	var a admin
 	err = s.db.QueryRowContext(r.Context(), `
-		SELECT u.id, u.username, u.role
+		SELECT u.id, u.username, COALESCE(u.email,''), u.role, u.must_change_password
 		  FROM admin_sessions s JOIN admin_users u ON u.id = s.admin_id
 		 WHERE s.id = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
-		   AND u.status = 'active'`, c.Value).Scan(&a.ID, &a.Username, &a.Role)
+		   AND u.status = 'active'`, c.Value).Scan(&a.ID, &a.Username, &a.Email, &a.Role, &a.MustChange)
 	if err != nil {
 		return nil, false
 	}

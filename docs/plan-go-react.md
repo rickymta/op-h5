@@ -152,7 +152,20 @@ Thiếu rõ nhất, xếp theo mức chặn:
 - **Nhân viên**: `GET/POST /api/staff`, `POST /api/staff/{id}`, `POST /api/staff/{id}/password`. Chỉ `owner` vào được. Mật khẩu do hệ thống sinh và hiện **một lần**. Ba chỗ tự chặn đã cài: không tự hạ quyền hay tự khoá mình, không bỏ người `owner` hoạt động cuối cùng, và khoá tài khoản hay đổi mật khẩu thì cắt luôn phiên đang mở.
 - Chín test mới cho khuôn mã game, tên đăng nhập, URL, vai trò và độ ngẫu nhiên của mật khẩu.
 
-**Còn lại của giai đoạn 2**: người chơi, doanh thu (thay `adminphp@2024`), thiết bị máy chủ, `platform_settings`.
+- **Người chơi**: `GET /api/players`, `GET /api/players/{id}`, `POST /api/players/{id}`. Tìm theo tên đăng nhập, email hoặc số điện thoại; xem số dư, lịch sử ví, nhân vật trong từng game và đơn mua; khoá hoặc mở kèm lý do bắt buộc, và khoá thì cắt luôn phiên đang mở. Cố ý **không có** nút xem mật khẩu và không có nút đăng nhập hộ: một nút "vào tài khoản này" biến mọi nhật ký thành vô nghĩa.
+- **Tài khoản của chính mình**: `GET /api/me`, `POST /api/me/password`. Trước đây không có đường nào để nhân viên tự đổi mật khẩu, phải nhờ `owner` đặt lại và người đó sẽ biết mật khẩu mới. Đổi xong cắt các phiên **khác**, giữ phiên hiện tại.
+
+**Tài khoản quản trị mặc định** (migration 0009 thêm cột `email` và cờ phải đổi mật khẩu):
+
+| | |
+|---|---|
+| Tên đăng nhập | `admin` |
+| Email | `admin@antfarms.xyz` |
+| Mật khẩu | `Admin@123` |
+
+Chỉ tạo khi bảng `admin_users` còn trống. Mật khẩu này nằm trong mã nguồn của một kho **công khai**, nên phải coi là ai cũng biết. Chấp nhận được vì trang quản trị chỉ nghe loopback và vào bằng SSH tunnel, nhưng tài khoản gieo bằng nó bị đánh dấu phải đổi: mọi trang đều hiện một dải cảnh báo đỏ cho tới khi đổi ở `/tai-khoan`. Muốn tránh hẳn thì đặt `ADMIN_BOOTSTRAP_PASSWORD` trong `.env` **trước lần `up` đầu tiên**.
+
+**Còn lại của giai đoạn 2**: doanh thu (thay `adminphp@2024`), thêm thiết bị máy chủ, `platform_settings`.
 
 ### Giai đoạn 3 — Cổng người chơi
 

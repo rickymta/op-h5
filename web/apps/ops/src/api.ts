@@ -119,3 +119,29 @@ export interface Staff {
   last_login_at: string;
   created_at: string;
 }
+
+export interface Me {
+  id: number;
+  username: string;
+  email: string;
+  role: "viewer" | "gm" | "operator" | "owner";
+  must_change_password: boolean;
+}
+
+export interface Player {
+  id: number;
+  username: string;
+  email: string;
+  phone: string;
+  status: "active" | "locked" | "deleted";
+  balance: number;
+  last_login_at: string;
+  created_at: string;
+}
+
+export interface PlayerDetail {
+  player: Player;
+  identities: { game_code: string; game_username: string; account_uid: string; created_at: string }[];
+  history: { txn_id: number; kind: string; amount: number; memo: string; at: string }[];
+  orders: Order[];
+}
