@@ -15,7 +15,7 @@ func (f *fakeSource) Online(context.Context) (map[string]int, error) { return f.
 func newTestTracker(src LoadSource, servers []ServerState, devices []DeviceState, ttl time.Duration) *Tracker {
 	t := &Tracker{
 		Source: src, GameCode: "haitac", TicketTTL: ttl,
-		fleet: NewFleet("haitac", servers, devices), tickets: map[string][]time.Time{},
+		fleet: NewFleet("haitac", servers, devices), tickets: map[string]map[int64]time.Time{}, prevOnline: map[string]int{},
 	}
 	return t
 }
@@ -28,24 +28,27 @@ func (t *Tracker) refreshWith(servers []ServerState, devices []DeviceState, onli
 	for i := range servers {
 		servers[i].OnlineNum = online[servers[i].SrvCode]
 	}
-	for code, ts := range t.tickets {
-		kept := ts[:0]
-		for _, at := range ts {
-			if at.After(t.lastPoll) && now.Sub(at) < t.TicketTTL {
-				kept = append(kept, at)
+	for i := range servers {
+		code := servers[i].SrvCode
+		if delta := servers[i].OnlineNum - t.prevOnline[code]; delta > 0 {
+			releaseOldest(t.tickets[code], delta)
+		}
+		t.prevOnline[code] = servers[i].OnlineNum
+	}
+	for code, byUser := range t.tickets {
+		for user, at := range byUser {
+			if now.Sub(at) >= t.TicketTTL {
+				delete(byUser, user)
 			}
 		}
-		if len(kept) == 0 {
+		if len(byUser) == 0 {
 			delete(t.tickets, code)
-		} else {
-			t.tickets[code] = kept
 		}
 	}
 	for i := range servers {
 		servers[i].Reservations = len(t.tickets[servers[i].SrvCode])
 	}
 	t.fleet = NewFleet(t.GameCode, servers, devices)
-	t.lastPoll = now
 }
 
 // Day la ly do Tracker ton tai: giua hai nhip heartbeat, ve giu cho phai chan duoc
@@ -59,8 +62,8 @@ func TestTicketsStopBurstBetweenHeartbeats(t *testing.T) {
 	tr.refreshWith(servers, nil, map[string]int{"s1": 110})
 
 	admitted := 0
-	for range 20 {
-		if tr.AdmitReturning("s1").Allowed {
+	for i := range 20 { // hai muoi nguoi KHAC NHAU vao trong cung mot nhip
+		if tr.AdmitReturning(int64(i), "s1").Allowed {
 			admitted++
 		}
 	}
@@ -80,8 +83,8 @@ func TestTicketsClearedAfterHeartbeatCatchesUp(t *testing.T) {
 	tr := newTestTracker(&fakeSource{}, servers, nil, time.Minute)
 	tr.refreshWith(servers, nil, map[string]int{"s1": 100})
 
-	for range 5 {
-		tr.AdmitReturning("s1")
+	for i := range 5 { // nam nguoi khac nhau
+		tr.AdmitReturning(int64(i), "s1")
 	}
 	if got := tr.Fleet().Servers["s1"].Effective(); got != 105 {
 		t.Fatalf("tai hieu dung = %d, muon 105 (100 + 5 ve)", got)
@@ -103,8 +106,8 @@ func TestTicketsExpire(t *testing.T) {
 	tr := newTestTracker(&fakeSource{}, servers, nil, 50*time.Millisecond)
 	tr.refreshWith(servers, nil, map[string]int{"s1": 100})
 
-	for range 3 {
-		tr.AdmitReturning("s1")
+	for i := range 3 { // ba nguoi khac nhau
+		tr.AdmitReturning(int64(i), "s1")
 	}
 	if got := tr.Fleet().Servers["s1"].Effective(); got != 103 {
 		t.Fatalf("tai = %d, muon 103", got)
@@ -126,8 +129,8 @@ func TestNewPlayersSpreadAcrossServers(t *testing.T) {
 	tr.refreshWith(servers, nil, map[string]int{"s1": 10, "s2": 10})
 
 	counts := map[string]int{}
-	for range 10 {
-		if d := tr.AdmitNew(); d.Allowed {
+	for i := range 10 { // muoi nguoi KHAC NHAU
+		if d := tr.AdmitNew(int64(i)); d.Allowed {
 			counts[d.SrvCode]++
 		}
 	}
@@ -149,8 +152,8 @@ func TestDeviceCapAppliesAcrossServers(t *testing.T) {
 	tr.refreshWith(servers, devices, map[string]int{"s1": 48, "s2": 48}) // tong 96, tran may 100
 
 	admitted := 0
-	for range 10 {
-		if tr.AdmitNew().Allowed {
+	for i := range 10 { // muoi nguoi KHAC NHAU
+		if tr.AdmitNew(int64(i)).Allowed {
 			admitted++
 		}
 	}
@@ -191,7 +194,7 @@ func TestFleetSnapshotDoesNotReserve(t *testing.T) {
 	}
 
 	// Con AdmitNew() that thi van phai giu cho nhu cu.
-	if d := tr.AdmitNew(); !d.Allowed {
+	if d := tr.AdmitNew(1); !d.Allowed {
 		t.Fatalf("AdmitNew that bai: %q", d.Reason)
 	}
 	tr.mu.RLock()
@@ -199,5 +202,123 @@ func TestFleetSnapshotDoesNotReserve(t *testing.T) {
 	tr.mu.RUnlock()
 	if held != 1 {
 		t.Fatalf("AdmitNew phai giu dung 1 cho, dang giu %d", held)
+	}
+}
+
+// Mot nguoi goi nhieu lan chi duoc dem la MOT.
+//
+// Do bang tay truoc khi doi khoa ve sang theo nguoi: tai /play.php 15 lan lam tai hieu
+// dung cua mot may chu nhay tu 20 len 35 — 15 nguoi choi ma. Tu khoi sau mot nhip doc,
+// nhung sat nguong thi du de tu choi oan nguoi khac trong ca nhip do.
+func TestRepeatedAdmitCountsOnePlayer(t *testing.T) {
+	servers := []ServerState{{
+		SrvCode: "s1", Name: "S1", DeviceCode: "host-01", Status: StatusRunning,
+		Recommend: true, SoftLimit: 500, OverflowPct: 15,
+	}}
+	tr := newTestTracker(&fakeSource{}, servers, nil, time.Minute)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 20})
+
+	for range 15 {
+		if d := tr.AdmitReturning(7, "s1"); !d.Allowed {
+			t.Fatalf("phai cho vao, nhan duoc %q", d.Reason)
+		}
+	}
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 21 {
+		t.Fatalf("tai hieu dung = %d, phai la 21 (20 dang choi + 1 nguoi giu cho)", got)
+	}
+
+	// Nguoi khac thi van cong them.
+	tr.AdmitReturning(8, "s1")
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 22 {
+		t.Fatalf("tai hieu dung = %d, phai la 22 sau khi nguoi thu hai vao", got)
+	}
+}
+
+// Doi may chu thi khong duoc de lai cho o may cu.
+func TestSwitchingServerMovesTheTicket(t *testing.T) {
+	servers := []ServerState{
+		{SrvCode: "s1", Name: "S1", DeviceCode: "h1", Status: StatusRunning, Recommend: true, SoftLimit: 500, OverflowPct: 15},
+		{SrvCode: "s2", Name: "S2", DeviceCode: "h1", Status: StatusRunning, Recommend: true, SoftLimit: 500, OverflowPct: 15},
+	}
+	tr := newTestTracker(&fakeSource{}, servers, nil, time.Minute)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 10, "s2": 10})
+
+	tr.AdmitReturning(7, "s1")
+	tr.AdmitReturning(7, "s2")
+	f := tr.Fleet()
+	if got := f.Servers["s1"].Effective(); got != 10 {
+		t.Fatalf("s1 = %d, phai tro ve 10 sau khi nguoi do chuyen di", got)
+	}
+	if got := f.Servers["s2"].Effective(); got != 11 {
+		t.Fatalf("s2 = %d, phai la 11", got)
+	}
+}
+
+// Release tra lai cho khi cap phien that bai.
+func TestReleaseGivesTheSlotBack(t *testing.T) {
+	servers := []ServerState{{
+		SrvCode: "s1", Name: "S1", DeviceCode: "host-01", Status: StatusRunning,
+		Recommend: true, SoftLimit: 500, OverflowPct: 15,
+	}}
+	tr := newTestTracker(&fakeSource{}, servers, nil, time.Minute)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 10})
+
+	tr.AdmitReturning(7, "s1")
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 11 {
+		t.Fatalf("truoc khi tra: %d, phai la 11", got)
+	}
+	tr.Release(7)
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 10 {
+		t.Fatalf("sau khi tra: %d, phai tro ve 10", got)
+	}
+}
+
+// Ve chi duoc nha khi heartbeat THAT SU tang, khong phai khi den nhip doc ke tiep.
+//
+// Ban dau ve ngung duoc dem ngay o nhip sau, voi gia dinh "den luc nay nguoi do da nam
+// trong onlineNum". Gia dinh do sai: client phai tai ~9,4 MB roi con chon may chu moi
+// noi WebSocket. Trong khoang do nguoi da duoc cho vao khong nam trong onlineNum ma cung
+// khong con ve — vo hinh, va cong dem thieu dung luc dong nguoi nhat.
+func TestTicketHeldUntilHeartbeatActuallyRises(t *testing.T) {
+	servers := []ServerState{{
+		SrvCode: "s1", Name: "S1", DeviceCode: "host-01", Status: StatusRunning,
+		Recommend: true, SoftLimit: 500, OverflowPct: 15,
+	}}
+	tr := newTestTracker(&fakeSource{}, servers, nil, time.Hour)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 10})
+
+	tr.AdmitReturning(7, "s1")
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 11 {
+		t.Fatalf("ngay sau khi giu cho: %d, muon 11", got)
+	}
+
+	// Ba nhip troi qua ma nguoi do van dang tai client: ve PHAI con.
+	for i := range 3 {
+		tr.refreshWith(servers, nil, map[string]int{"s1": 10})
+		if got := tr.Fleet().Servers["s1"].Effective(); got != 11 {
+			t.Fatalf("sau nhip %d: %d, muon 11 — nguoi choi chua vao thi khong duoc nha ve", i+1, got)
+		}
+	}
+
+	// Heartbeat thay ho: nha ve, khong duoc dem hai lan.
+	tr.refreshWith(servers, nil, map[string]int{"s1": 11})
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 11 {
+		t.Fatalf("sau khi heartbeat bat kip: %d, muon 11 (khong duoc tinh hai lan)", got)
+	}
+}
+
+// Ai bam vao roi bo di phai duoc thu hoi cho, du heartbeat khong bao gio tang.
+func TestAbandonedTicketExpires(t *testing.T) {
+	servers := []ServerState{{
+		SrvCode: "s1", Name: "S1", DeviceCode: "host-01", Status: StatusRunning,
+		Recommend: true, SoftLimit: 500, OverflowPct: 15,
+	}}
+	tr := newTestTracker(&fakeSource{}, servers, nil, 50*time.Millisecond)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 10})
+
+	tr.AdmitReturning(7, "s1")
+	time.Sleep(80 * time.Millisecond)
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 10 {
+		t.Fatalf("sau khi ve het han: %d, muon 10", got)
 	}
 }

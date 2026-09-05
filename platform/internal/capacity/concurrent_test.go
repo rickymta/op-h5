@@ -26,17 +26,17 @@ func TestConcurrentAdmitDoesNotOvershoot(t *testing.T) {
 		allowed int
 		start   = make(chan struct{})
 	)
-	for range goroutines {
+	for i := range goroutines {
 		wg.Add(1)
-		go func() {
+		go func(userID int64) {
 			defer wg.Done()
 			<-start // tha ra cung luc de dung vao dung khe cua so
-			if tr.AdmitReturning("s1").Allowed {
+			if tr.AdmitReturning(userID, "s1").Allowed {
 				mu.Lock()
 				allowed++
 				mu.Unlock()
 			}
-		}()
+		}(int64(i))
 	}
 	close(start)
 	wg.Wait()
@@ -65,17 +65,17 @@ func TestConcurrentAdmitNewRespectsDeviceCap(t *testing.T) {
 		allowed int
 		start   = make(chan struct{})
 	)
-	for range 40 {
+	for i := range 40 {
 		wg.Add(1)
-		go func() {
+		go func(userID int64) {
 			defer wg.Done()
 			<-start
-			if tr.AdmitNew().Allowed {
+			if tr.AdmitNew(userID).Allowed {
 				mu.Lock()
 				allowed++
 				mu.Unlock()
 			}
-		}()
+		}(int64(i))
 	}
 	close(start)
 	wg.Wait()

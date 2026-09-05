@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -36,6 +37,8 @@ type adapterServer struct {
 	tpl        *template.Template
 	publicHost string
 	useTLS     bool
+	// sessionLimit chan bam lien tuc vao /api/game/session, khoa theo nguoi dung.
+	sessionLimit *httpx.Limiter
 }
 
 const (
@@ -256,6 +259,18 @@ func (s *adapterServer) createSession(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusUnauthorized, "unauthorized", "Chưa đăng nhập.")
 		return
 	}
+	// Moi luot goi deu dang nhap login server va giu mot cho. Ve da khoa theo nguoi nen
+	// khong con dem trung, nhung so luot goi thi van can chan: mot client thu lai vong
+	// lap se dap thang vao cum Java.
+	if !s.sessionLimit.Allow(strconv.FormatInt(uid, 10)) {
+		s.log.Warn("cap phien: qua tan suat", "user", uid)
+		httpx.JSON(w, http.StatusTooManyRequests, map[string]any{
+			"error":   "rate_limited",
+			"message": "Bạn thao tác quá nhanh. Vui lòng thử lại sau ít giây.",
+		})
+		return
+	}
+
 	var in sessionRequest
 	_ = json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in)
 
@@ -333,28 +348,52 @@ func (s *adapterServer) admit(ctx context.Context, uid int64, in sessionRequest)
 			return d, nil, nil
 		}
 		sess, err := s.mapper.Session(ctx, uid, in.ClientType)
-		return d, sess, err
+		if err != nil {
+			// Da giu cho o tren nhung khong vao duoc: tra lai ngay. Giu mot cho khong ai
+			// dung se chan nham nguoi khac cho den khi ve het han.
+			s.tracker.Release(uid)
+			return d, nil, err
+		}
+		return d, sess, nil
 	}
 
 	if in.SrvCode != "" {
-		return mint(s.tracker.AdmitReturning(in.SrvCode))
+		return mint(s.tracker.AdmitReturning(uid, in.SrvCode))
 	}
 	// Loi tra cuu thi di tiep bang nhanh 3 (duc phien roi doc masterList): chinh xac hon,
 	// chi ton them mot lan goi login server.
 	if _, found, err := s.mapper.Lookup(ctx, uid); err == nil && !found {
-		return mint(s.tracker.AdmitNew())
+		return mint(s.tracker.AdmitNew(uid))
 	}
 
 	sess, err := s.mapper.Session(ctx, uid, in.ClientType)
 	if err != nil {
 		return capacity.Decision{}, nil, err
 	}
+	if codes := sess.ServerCodes(); len(codes) > 0 {
+		// Biet ho choi o dau: xet dai nguoi CU cho chinh may chu do va giu ve o do.
+		// Nhieu nhan vat thi lay may chu dau tien cho vao duoc — client van co quyen
+		// chon khac, nhung phan lon nguoi choi di theo goi y.
+		var last capacity.Decision
+		for _, code := range codes {
+			last = s.tracker.AdmitReturning(uid, code)
+			if last.Allowed {
+				return last, sess, nil
+			}
+		}
+		// May chu cua ho dang day/bao tri: bao dung ly do do, khong doi thanh
+		// "het cho cho nguoi moi" — hai chuyen khac nhau va cach xu ly cung khac.
+		return last, sess, nil
+	}
 	if sess.HasCharacters() {
-		// Khong giu ve va khong tra srv_code: client se tu chon may chu cua nhan vat,
-		// ta chua biet la may nao nen giu ve o day se ghi sai so.
+		// Co nhan vat nhung khong doc duoc may chu (khuon masterList khac du doan).
+		// Cho vao, khong giu ve, khong tra srv_code — de client tu chon nhu truoc khi
+		// co lop nay. Dan nguoi choi sang may chu khac voi nhan vat cua ho te hon nhieu
+		// so voi viec dem thieu mot nguoi.
+		s.log.Warn("khong doc duoc may chu tu masterList; de client tu chon", "user", uid)
 		return capacity.Decision{Allowed: true, Reason: capacity.ReasonOK}, sess, nil
 	}
-	return s.tracker.AdmitNew(), sess, nil
+	return s.tracker.AdmitNew(uid), sess, nil
 }
 
 func reasonMessage(r capacity.Reason) string {

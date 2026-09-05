@@ -42,6 +42,18 @@ type account struct {
 	UID      string
 	Username string
 	Password string
+	// Masters: nhan vat cua tai khoan, moi may chu mot dong. Them qua
+	// /_test/master/add de thu nhanh "nguoi choi cu" cua Adapter.
+	Masters []master `json:",omitempty"`
+}
+
+// master la mot dong trong masterList. Chi giu cac truong Adapter thuc su doc;
+// login server that tra ve nhieu hon.
+type master struct {
+	SrvCode  string `json:"srvCode"`
+	RoleID   string `json:"roleId,omitempty"`
+	RoleName string `json:"roleName,omitempty"`
+	Level    int    `json:"level,omitempty"`
 }
 
 type srv struct {
@@ -61,6 +73,66 @@ type state struct {
 	accounts map[string]*account
 	servers  map[string]*srv
 	nextUID  int
+	// storePath: noi luu tai khoan giua cac lan chay. Rong = chi giu trong bo nho.
+	storePath string
+}
+
+// Luu tai khoan ra dia, va nap lai luc khoi dong.
+//
+// Login server that luu tai khoan o MySQL `tcg.account` nen chung ton tai qua moi lan
+// restart. Ban gia lap giu trong bo nho, va hau qua khong hien nhien: restart xong,
+// Adapter van con `game_identities.game_secret` da luu nhung tai khoan tuong ung da bien
+// mat, nen login tra ve `K_PASSWORD_ERROR` — thong bao tro vao mat khau chu khong phai
+// vao nguyen nhan that. Da lam mat thoi gian nhieu lan truoc khi co cho nay.
+type persisted struct {
+	NextUID  int                 `json:"nextUID"`
+	Accounts map[string]*account `json:"accounts"`
+}
+
+func (s *state) load() {
+	if s.storePath == "" {
+		return
+	}
+	b, err := os.ReadFile(s.storePath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.Printf("khong doc duoc %s: %v (bat dau voi kho rong)", s.storePath, err)
+		}
+		return
+	}
+	var p persisted
+	if err := json.Unmarshal(b, &p); err != nil {
+		log.Printf("%s hong: %v (bat dau voi kho rong)", s.storePath, err)
+		return
+	}
+	if p.Accounts != nil {
+		s.accounts = p.Accounts
+	}
+	if p.NextUID > s.nextUID {
+		s.nextUID = p.NextUID
+	}
+	log.Printf("da nap %d tai khoan tu %s", len(s.accounts), s.storePath)
+}
+
+// saveLocked ghi kho tai khoan. Ben goi PHAI dang giu khoa.
+func (s *state) saveLocked() {
+	if s.storePath == "" {
+		return
+	}
+	b, err := json.Marshal(persisted{NextUID: s.nextUID, Accounts: s.accounts})
+	if err != nil {
+		log.Printf("khong dong goi duoc kho tai khoan: %v", err)
+		return
+	}
+	// Ghi ra file tam roi doi ten: tat giua chung khong de lai file JSON cut doi.
+	tmp := s.storePath + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+		log.Printf("khong ghi duoc %s: %v", tmp, err)
+		return
+	}
+	if err := os.Rename(tmp, s.storePath); err != nil {
+		log.Printf("khong doi ten duoc %s: %v", tmp, err)
+	}
 }
 
 func main() {
@@ -71,9 +143,11 @@ func main() {
 	failFirst := flag.Int("fail-first", 0, "so lan dau tien /gm/pay/manual co y tra loi (de thu co che thu lai)")
 	secret := flag.String("secret", "", "tcg.secret bat buoc khi dang ky")
 	srvSpec := flag.String("servers", "s1:8001:0,s2:8002:0", "danh sach code:wsPort:online")
+	store := flag.String("store", "", "file luu tai khoan giua cac lan chay (rong = chi trong bo nho)")
 	flag.Parse()
 
-	st := &state{accounts: map[string]*account{}, servers: map[string]*srv{}, nextUID: 1000}
+	st := &state{accounts: map[string]*account{}, servers: map[string]*srv{}, nextUID: 1000, storePath: *store}
+	st.load()
 	for i, spec := range strings.Split(*srvSpec, ",") {
 		p := strings.Split(spec, ":")
 		if len(p) != 3 {
@@ -117,6 +191,7 @@ func main() {
 		st.accounts[u] = &account{
 			UID: fmt.Sprintf("uid%d", st.nextUID), Username: u, Password: r.FormValue("password"),
 		}
+		st.saveLocked()
 		ok(w, nil)
 	})
 
@@ -143,7 +218,7 @@ func main() {
 			// tu phan hoi nay (do bang Proxy tren client that). Thieu no thi client dang nhap
 			// xong nhung dung o man hinh trang — khong bao loi, vi no chi khong biet nen hien
 			// danh sach server hay vao thang nhan vat cu.
-			"masterList": []any{},
+			"masterList": mastersOf(acc),
 		})
 	})
 
@@ -186,6 +261,26 @@ func main() {
 		}
 		s.OnlineNum = n
 		ok(w, n)
+	})
+
+	// Cong cu thu: gan nhan vat cho mot tai khoan, de dien lai canh "nguoi choi cu"
+	// (Adapter phai xet dai nguoi CU cho dung may chu do thay vi dai nguoi MOI).
+	//   curl -X POST ':9000/_test/master/add?username=id000000001&srvCode=s1&roleName=Ten'
+	mux.HandleFunc("/_test/master/add", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		st.mu.Lock()
+		defer st.mu.Unlock()
+		acc, exists := st.accounts[q.Get("username")]
+		if !exists {
+			fail(w, 3, "khong co tai khoan nay")
+			return
+		}
+		acc.Masters = append(acc.Masters, master{
+			SrvCode: q.Get("srvCode"), RoleID: q.Get("roleId"),
+			RoleName: q.Get("roleName"), Level: 1,
+		})
+		st.saveLocked()
+		ok(w, acc.Masters)
 	})
 
 	if *consoleAddr != "" {
@@ -289,4 +384,15 @@ func allowCORS(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// mastersOf luon tra ve mot mang (khong bao gio nil).
+//
+// nil se thanh `null` trong JSON, ma client doc `masterList` roi lay `.length` — mot
+// truong null lam client dung o man hinh trang thay vi hien danh sach may chu.
+func mastersOf(a *account) []master {
+	if a == nil || a.Masters == nil {
+		return []master{}
+	}
+	return a.Masters
 }

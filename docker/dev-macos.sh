@@ -162,8 +162,12 @@ sleep 25
 echo "==> 7/9 Login gia (:9000) + console gia (:9998)"
 # Console THAT giu :9999 (client goi /status). Console gia o :9998 de Adapter phat
 # vat pham, vi console that khong phat duoc khi thieu schema `tcg`.
-docker run -d --name op-fake --network "$NET" op-h5-fakelogin \
-  -addr :9000 -secret "$TCG_SECRET" \
+# -store: giu tai khoan qua cac lan restart. Khong co no thi restart op-fake xong,
+# Adapter con game_secret da luu nhung tai khoan tuong ung da bien mat, va login tra ve
+# "K_PASSWORD_ERROR" — thong bao tro vao mat khau chu khong phai vao nguyen nhan that.
+docker run -d --name op-fake --network "$NET" \
+  -v "$STATE:/state" op-h5-fakelogin \
+  -addr :9000 -secret "$TCG_SECRET" -store /state/fakelogin.json \
   -servers "s1:8001:180,s2:8002:640,s3:8003:20" \
   -console-addr :9998 -console-user admin -console-pass "$CONSOLE_PW" >/dev/null
 

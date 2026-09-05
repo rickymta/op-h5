@@ -28,6 +28,10 @@ if ($adapterBase && isset($_COOKIE['haitac_sess'])) {
 		// header thi mot dau `;` cho phep gan them cookie tuy y vao request noi bo.
 		CURLOPT_COOKIE         => 'haitac_sess=' . preg_replace('/[^A-Za-z0-9._~+\/=-]/', '', $_COOKIE['haitac_sess']),
 		CURLOPT_RETURNTRANSFER => true,
+		// Hai timeout khac nhau: CONNECTTIMEOUT chan truong hop Adapter chet han (khong
+		// ai lang nghe) — khong co no thi moi luot tai trang treo du 5 giay. TIMEOUT la
+		// tran cho ca luot goi.
+		CURLOPT_CONNECTTIMEOUT => 2,
 		CURLOPT_TIMEOUT        => 5,
 	));
 	$body = curl_exec($ch);
@@ -167,5 +171,7 @@ function openNapTien(){
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
         // giu ban cu trong cache va thay doi khong co tac dung nao.
         echo @filemtime(__DIR__ . '/op-autologin.js') ?: '1'; ?>"></script>
+    <script type="text/javascript" src="op-dialog-close.js?v=<?php
+        echo @filemtime(__DIR__ . '/op-dialog-close.js') ?: '1'; ?>"></script>
 </body>
 </html>

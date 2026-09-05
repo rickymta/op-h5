@@ -115,6 +115,9 @@ func main() {
 		// dia chi noi bo (127.0.0.1).
 		publicHost: envOr("ADAPTER_PUBLIC_HOST", ""),
 		useTLS:     os.Getenv("ADAPTER_TLS") == "true",
+		// 10 luot/phut cho mot nguoi: du cho tai lai trang vai lan va cho client thu
+		// lai, nhung chan duoc vong lap. Nguoi choi binh thuong dung 1-2 luot moi phien.
+		sessionLimit: httpx.NewLimiter(10, time.Minute),
 	}
 
 	mux := http.NewServeMux()

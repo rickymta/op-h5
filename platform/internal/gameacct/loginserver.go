@@ -107,16 +107,64 @@ type AccountSession struct {
 // hon "con cho cho nguoi CU" (Muot va Dong). Coi nguoi cu la nguoi moi se chan ho khoi
 // chinh may chu co nhan vat cua ho.
 func (a *AccountSession) HasCharacters() bool {
+	return len(a.masters()) > 0
+}
+
+func (a *AccountSession) masters() []json.RawMessage {
 	if a == nil || len(a.Raw) == 0 {
-		return false
+		return nil
 	}
 	var probe struct {
 		MasterList []json.RawMessage `json:"masterList"`
 	}
 	if err := json.Unmarshal(a.Raw, &probe); err != nil {
-		return false
+		return nil
 	}
-	return len(probe.MasterList) > 0
+	return probe.MasterList
+}
+
+// srvCodeKeys la cac ten truong co the chua ma may chu trong mot dong masterList.
+//
+// KHONG kiem chung duoc voi login server that (chua chay duoc JAR do), nen day la mot
+// danh sach doan co kiem soat: thu lan luot, khong khop thi tra ve rong. Ten cua CHINH
+// truong `masterList` thi chac chan — do bang Proxy tren client that.
+var srvCodeKeys = []string{"srvCode", "code", "serverCode", "srv", "server"}
+
+// ServerCodes liet ke cac may chu ma tai khoan da co nhan vat.
+//
+// Tra ve rong co hai nghia — khong co nhan vat, hoac co nhung khong doc duoc khuon —
+// va ben goi PHAI xu ly ca hai theo huong an toan: de client tu chon may chu, thay vi
+// dan nguoi choi sang mot may chu khac voi nhan vat cua ho. Vi the ham nay khong tra ve
+// error: khong co truong hop nao ben goi lam khac di duoc.
+func (a *AccountSession) ServerCodes() []string {
+	rows := a.masters()
+	if len(rows) == 0 {
+		return nil
+	}
+	seen := map[string]bool{}
+	out := make([]string, 0, len(rows))
+	for _, row := range rows {
+		var m map[string]json.RawMessage
+		if err := json.Unmarshal(row, &m); err != nil {
+			continue
+		}
+		for _, key := range srvCodeKeys {
+			raw, ok := m[key]
+			if !ok {
+				continue
+			}
+			var code string
+			if err := json.Unmarshal(raw, &code); err != nil || code == "" {
+				continue
+			}
+			if !seen[code] {
+				seen[code] = true
+				out = append(out, code)
+			}
+			break
+		}
+	}
+	return out
 }
 
 // LoginClient goi login server qua HTTP.
