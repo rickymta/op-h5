@@ -474,7 +474,7 @@ Bố cục sidebar trái trên desktop, tab ngang cuộn được trên điện 
 
 Thứ tự: 1 → 2 → 3 (chưa đổi gì người chơi thấy) → 4 → 5. Dừng sau bất kỳ bước nào hệ vẫn chạy. Xong 5 thì quay lại phần còn lại của giai đoạn 1 và 2, rồi 4, 5, 6, 7 như mục 6.
 
-### 15.7 ĐÃ LÀM 2026-09-06 (năm agent song song theo một hợp đồng API + thành phần; build và test xanh, **chưa chạy với Go thật**)
+### 15.7 ĐÃ LÀM 2026-09-06 (năm agent song song theo một hợp đồng API + thành phần; build và test xanh; **đã chạy trên Go thật ở `haitac-test`**, xem 15.8)
 
 Sáu commit tách theo phần: tài liệu → `platform` (A) → `@op/ui/publisher` (B) → `apps/ops` (E) → `apps/portal` (C) → `apps/game` (D).
 
@@ -482,3 +482,11 @@ Sáu commit tách theo phần: tài liệu → `platform` (A) → `@op/ui/publis
 - **Lệch hợp đồng có chủ ý** (đã đối chiếu với ba app): `game_code` của tin chung trả `""`; 429 mang hai lời khác nhau (thử sai nhiều, tài khoản bị khoá) và portal hiện lời server; `servers_open` chỉ đếm `running`; `featured` rỗng khi không game nào nổi bật, portal tự lấy game đầu.
 - **Kích thước** (gzip): ops 87 KB, portal 87 KB + 6 KB CSS, game 81 KB + 5 KB CSS, CSS publisher 6 KB. Mọi route của ba app đo `scrollWidth = 375` ở 375 px, không nút dưới 44 px.
 - **Chưa làm**: chạy `dev-macos.sh` với ba cờ SPA bật để đi hết luồng đăng ký → tài khoản → trang game → mua gói trên Go thật; ảnh thương hiệu vào `ASSETS_DIR/brand/haitac/` (seed hiện trỏ `/assets/images/*` của client cũ); chèn `<title>`/meta theo route cho SEO (mục 3 của tài liệu tham khảo); trang Điều khoản/Chính sách còn là khung để điền.
+
+### 15.8 Triển khai lên `haitac-test` 2026-09-06 (image CI của `f3e2363`)
+
+- Cách làm: trên server `git pull --ff-only origin main` (bản sửa dở đã cất ở `git stash`, nội dung trùng origin), thêm `ID_SPA=1`, `ADAPTER_SPA=1`, `ADMIN_SPA=1`, `ID_BRAND_NAME=Antfarms` vào `.env` (có `.env.bak-*`), `compose pull` rồi `up -d` cho `id adapter admin nginx php`. Compose kéo theo khởi động lại cả cụm Java (~4 phút) dù image Java không đổi nội dung.
+- Đã kiểm: migration 0010 chạy, seed điền catalog haitac, ba dịch vụ báo bật React, `nginx -t` ok, 14 đường mới/cũ trên ba domain trả đúng mã (`/`, `/tin-tuc`, `/api/games`, `/api/game/meta`, `/cu/`, `/choi-game` 302, `/api/getSession.php` vẫn PHP), asset `app/` cache bất biến, CSP mới. Trình duyệt thật ở desktop và 375 px: trang chính, trang game, máy chủ, cửa hàng (khách), đăng nhập, đăng ký, chặn `/tai-khoan` → `/dang-nhap?next=`; `scrollWidth = 375`.
+- Chưa kiểm vì không tự tạo tài khoản hay đăng nhập: khu tài khoản đã đăng nhập, mua gói, trang quản trị Game/Tin tức (SPA và trang đăng nhập admin phản hồi qua tunnel).
+- Còn để trống trên server: `ID_LEGAL_NOTE`, `ID_SUPPORT_URL`, `ID_FANPAGE_URL`, `ID_TOPUP_URL`; ảnh thương hiệu vẫn lấy từ `/assets/images/` của client cũ. Console trình duyệt của khách có một lỗi 401 từ `/api/me` (vô hại, có thể đổi thành 200 `logged_in:false` sau).
+
