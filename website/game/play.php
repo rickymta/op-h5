@@ -245,6 +245,7 @@ function openNapTien(){
         // Cung ly do nhu opBundleV: file nay cung bi cache (7d) va no la noi quyet dinh
         // URL cua bundle chinh, nen ban cu se tiep tuc nap bundle cu.
         echo @filemtime(__DIR__ . '/a3b31-4c087-1dc2f.js') ?: '0'; ?>"></script>
+    <script type="text/javascript" src="op-console-en.js?v=<?php echo @filemtime(__DIR__ . '/op-console-en.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-https.js?v=<?php echo @filemtime(__DIR__ . '/op-https.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-autologin.js?v=<?php
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
