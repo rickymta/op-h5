@@ -43,6 +43,8 @@ echo '0 4 * * * find /h5/server -path "*/.logs/*" -name "*.log" -mtime +7 -delet
 
 Không JAR nào chứa schema của `tcg`/`stat`/`web`/`cdks` hay Mongo (chỉ `tcg-game.jar` có 4 bảng `stat_*`). **Bắt buộc dump từ server đang chạy:**
 
+> **Không có dump thì chạy được tới đâu.** Đã đo: `console`, `world`, `meta`, `statistic` khởi động bình thường với `tcg` rỗng. `game`/`group`/`cross` thì không — chúng đọc `srv_game`/`srv_group_device` để biết mình là ai. `login` cũng không dùng được vì `/srv/game/list` và `/account/*` đọc bảng trong `tcg`. Đủ để xem giao diện và thử nền tảng mới, không đủ để vào game. Bộ chạy thử cục bộ: `docker/dev-macos.sh`.
+
 ```bash
 export MYSQL_PW='...' MONGO_PW='...'
 bash prepare-dumps.sh          # -> /tmp/tcg-dumps/{mysql/*.sql, mongo/dump/}

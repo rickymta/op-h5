@@ -47,3 +47,6 @@ id-signing*
 
 # sinh tu dong boi gen-game-servers.sh
 docker/docker-compose.game.yml
+
+# trang thai cuc bo cua docker/dev-macos.sh (khoa ky + bi mat moi lan chay)
+docker/.dev-macos/

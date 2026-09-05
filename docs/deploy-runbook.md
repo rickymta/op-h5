@@ -84,6 +84,48 @@ Ba chỗ dễ vấp: mật khẩu `.env` không khớp dump (6); volume cũ ch�
 
 ---
 
+## Thử trước trên máy dev (macOS) — không cần dump
+
+Trước khi đụng vào server thật, có thể dựng gần như toàn bộ hệ thống trên máy dev để xem
+giao diện và thử luồng tài khoản / ví / cổng giới hạn tải:
+
+```bash
+./docker/dev-macos.sh --build     # lần đầu: dựng image rồi chạy
+./docker/dev-macos.sh             # các lần sau
+./docker/dev-macos.sh --down      # tắt hết
+```
+
+Script tự in bảng truy cập và mật khẩu quản trị của lần chạy đó.
+
+**Chạy được tới đâu khi `tcg` rỗng** — đã đo, không phải suy đoán:
+
+| Thành phần | Không có dump |
+|---|---|
+| `console`, `world`, `meta`, `statistic` | ✅ khởi động bình thường (kèm lỗi `Table … doesn't exist` khi truy vấn) |
+| `login` | ❌ `/srv/game/list` và `/account/*` đọc bảng trong `tcg` |
+| `game`, `group`, `cross` | ❌ đọc `srv_game` / `srv_group_device` để biết mình là ai |
+| Hệ thống ID, Adapter, trang quản trị, trang game | ✅ đầy đủ (DB `platform` tự tạo bằng migration) |
+
+Nên client **vào được tới màn hình đăng nhập** — nó chỉ cần `meta` (`:12345`) — nhưng
+chọn máy chủ xong thì không nối được WebSocket vì không có tiến trình `game`. Script thay
+`login` bằng `cmd/fakelogin` (nói đúng giao thức đọc từ bytecode) để phần còn lại chạy.
+
+Hai điều khác biệt so với server thật, **chỉ là hạn chế của Docker Desktop trên Mac**:
+
+- `network_mode: host` chỉ vào netns của VM Linux chứ không publish ra macOS, và không
+  publish được cổng mà container host-network đang giữ. Script dùng một container giữ
+  netns có publish sẵn mọi cổng; các container khác join netns đó. Trên Ubuntu không cần.
+- Vì thế trang game ở `:8080` và hệ thống ID ở `:8081`, thay vì `:80` và `:8080`.
+
+⚠️ `web-entrypoint` sed thẳng vào cây nguồn khi bind-mount (thay `192.168.1.69` bằng
+`PUBLIC_HOST` trong 3 file — đó chính là lý do client gọi `127.0.0.1:12345`). Xong việc:
+
+```bash
+git checkout -- website/game/ && rm -f website/game/.public-host
+```
+
+---
+
 ## Bước 0 — Chuẩn bị trên PC (10 phút)
 
 **0.1 Gom secrets thành `secrets.env`** (file này đã gitignored, chỉ ở PC):
