@@ -245,6 +245,8 @@ docker run -d --name op-admin --network "$NET" \
   -e ADMIN_COOKIE_SECURE=false \
   -e ADMIN_BOOTSTRAP_USER=quantri -e ADMIN_BOOTSTRAP_PASSWORD="$ADMIN_PW" \
   -e ADMIN_SPA="${ADMIN_SPA:-0}" \
+  -e CONSOLE_BASE_URL="http://127.0.0.1:9999" -e STAT_BASE_URL="http://127.0.0.1:7788" \
+  -e CONSOLE_USER=admin -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" -e TCG_SECRET="$TCG_SECRET" \
   op-h5-admin >/dev/null
 
 echo "==> 8/8 php-fpm + nginx"

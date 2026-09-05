@@ -67,8 +67,8 @@ func pickGame(r *http.Request, games []gameOpt) string {
 
 type pkgRow struct {
 	ID, Name, Category, GrantMode, Reward, Description, Badge, Status string
-	PriceXu                                                            int64
-	ItemTid, SortOrder                                                 int
+	PriceXu                                                           int64
+	ItemTid, SortOrder                                                int
 }
 
 type catCount struct {

@@ -150,6 +150,14 @@ services:
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       # 1 = giao dien React (nhung san trong image), trang Go cu lui ve /cu/
       ADMIN_SPA: ${ADMIN_SPA:-0}
+      # Cong cu GM goi console (phat vat pham, gui thu, kho do) va statistic (tra nhan vat
+      # theo TEN — console khong lam duoc). Thieu thi trang quan tri van chay, chi thao tac
+      # GM bao "chua cau hinh console".
+      CONSOLE_BASE_URL: ${CONSOLE_BASE_URL:-http://127.0.0.1:9999}
+      STAT_BASE_URL: ${STAT_BASE_URL:-http://127.0.0.1:7788}
+      CONSOLE_USER: ${ADAPTER_CONSOLE_USER:-admin}
+      CONSOLE_ADMIN_PASSWORD: ${CONSOLE_ADMIN_PASSWORD:-}
+      TCG_SECRET: ${TCG_SECRET:-}
     depends_on:
       id: { condition: service_healthy }
     mem_limit: 96m

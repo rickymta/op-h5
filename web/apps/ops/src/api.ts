@@ -69,3 +69,30 @@ export interface OrdersResponse {
   games: { code: string; name: string }[];
   game: string;
 }
+
+// ---------------------------------------------------------------- công cụ GM
+
+export interface GMMeta {
+  games: { code: string; name: string }[];
+  game: string;
+  servers: { code: string; name: string }[];
+  bags: { type: number; label: string; note: string }[];
+}
+
+export interface Role {
+  roleId: string;
+  roleName: string;
+  srvCode: string;
+  accountUid: string;
+  platformCode: string;
+  level: number;
+  vipLevel: number;
+  power: number;
+}
+
+export interface BagSlot {
+  id: string;
+  tid: number;
+  num: number;
+  name: string;
+}

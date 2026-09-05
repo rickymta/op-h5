@@ -86,7 +86,7 @@ CI thêm một bước trước khi build image: `npm ci && npm run build` rồi
 
 ## 6. Bảy giai đoạn
 
-Mỗi giai đoạn là một commit độc lập, **triển khai được và lùi được**. Ranh giới giai đoạn là chỗ dừng an toàn: dừng sau bất kỳ giai đoạn nào thì hệ vẫn chạy, chỉ là còn PHP. Thứ tự dưới đây theo quyết định 3: công cụ GM trước, cổng thanh toán để sau cùng vì phức tạp và đang chạy ổn.
+Mỗi giai đoạn là một commit độc lập, **triển khai được và lùi được**. Ranh giới giai đoạn là chỗ dừng an toàn: dừng sau bất kỳ giai đoạn nào thì hệ vẫn chạy, chỉ là còn PHP. Thứ tự dưới đây theo quyết định 3 và 5: công cụ GM trước; cổng thanh toán để sau vì phức tạp và đang chạy ổn; **chợ để sau cùng** vì đó là tính năng mới, không phải phần việc chuyển PHP.
 
 ### Giai đoạn 0 — Bộ khung (không đổi hành vi người dùng)
 
@@ -117,7 +117,17 @@ Chưa xác thực lại trong React: chưa đăng nhập thì API trả 401 và 
 - React `apps/ops`: tra nhân vật, xem kho đồ dạng bảng, gửi thư có xem trước phần quà, CDK, và các trang gói/đơn mua vừa làm.
 - nginx: `/adminportal` trỏ sang `admin` thay vì php-fpm.
 
-**Xong khi**: làm được đủ 6 thao tác GM qua giao diện mới, `gm_audit` ghi đủ, `gmhanglong/` và `gm/` bị gỡ khỏi nginx.
+**Xong khi**: làm được đủ 6 thao tác GM qua giao diện mới, nhật ký ghi đủ, `gmhanglong/` và `gm/` bị gỡ khỏi nginx.
+
+**ĐÃ LÀM một phần 2026-09-05** (build và test xanh, chưa chạy với console thật):
+
+- Migration 0008 gộp `gm_users` vào `admin_users`, thêm vai trò `gm`. Bốn mức: `viewer` chỉ xem, `gm` thao tác trên nhân vật, `operator` sửa cấu hình nền tảng, `owner` tất cả. Nhật ký dùng `admin_audit` sẵn có, `gm_audit` chết cùng PHP ở giai đoạn 5.
+- `internal/console`: thêm GET có `Login-Token` (nhóm `/role/*` nhận tham số qua query, khác nhóm `/gm/*` nhận JSON), `FindRoles` qua statistic, `BagQuery`, `BagReduce`.
+- `admin`: `/api/gm/{meta,roles,bag}` và `POST /api/gm/{bag/clear,pay,mail}`, tất cả đòi vai trò từ `gm` trở lên và ghi nhật ký kèm kết quả kể cả khi thất bại.
+- Trang GM bằng React: tra nhân vật, xem và xoá từng loại kho đồ, nạp tay, gửi thư kèm quà.
+- Khác PHP cũ ba chỗ, đều có chủ ý: xác thực bằng tài khoản chứ không phải mã tĩnh cộng "mật khẩu SDK"; xoá kho đồ phải khớp số ô vừa xem (`expect`) nên không xoá nhầm thứ mới rơi vào túi; console từ chối và console chết trả hai mã HTTP khác nhau.
+
+**Còn lại của giai đoạn 1**: quản lý CDK (`gmhanglong/cdk/`, `pay/`), và quyết định ở mục 13 về dịch vụ tự phục vụ. Chưa gỡ `gmhanglong/` khỏi nginx vì hai phần đó còn ở PHP.
 
 ### Giai đoạn 2 — Cổng người chơi
 
@@ -130,22 +140,14 @@ Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sa
 
 **Xong khi**: `user/` và `api/config.php` không còn được nginx trỏ tới; người chơi vào link cũ vẫn tới đúng chỗ.
 
-### Giai đoạn 3 — Chợ Xu ⇄ Nguyên Bảo
-
-Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market`, lệnh ký gửi qua console, trang chợ trong `apps/game`, trang giám sát trong `apps/ops`.
-
-**Trước hết phải thử `numType=1`** trên máy dev: đăng một tin nhỏ, xem Nguyên Bảo có thật sự rời nhân vật không. Sai giá trị này là trừ nhầm loại tiền.
-
-**Xong khi**: bán → mua → nhận Nguyên Bảo trong game chạy hết một vòng, phí vào `market_fee`, huỷ tin trả lại đúng số lượng.
-
-### Giai đoạn 4 — Trang nạp client
+### Giai đoạn 3 — Trang nạp client
 
 `play.php` hiện gọi `curl` sang adapter rồi nhúng `window.__opAuto`. Chuyển vào adapter là bỏ được một chặng mạng và một chỗ đặt cookie.
 
 - Adapter phục vụ `/play.php` (giữ nguyên đường vì `a3b31` trỏ tới), sinh HTML kèm `__opAuto`, `opBundleV` theo `filemtime`.
 - Bỏ `hiente.php`, `index.php`, `ios.html` theo quyết định 4.
 
-### Giai đoạn 5 — Cổng thanh toán
+### Giai đoạn 4 — Cổng thanh toán
 
 Để sau cùng vì đây là chỗ duy nhất đang chạy ổn mà hỏng thì mất tiền thật của người chơi.
 
@@ -155,7 +157,7 @@ Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market
 
 **Xong khi**: nạp thẻ và nhận callback bank/momo chạy hết bằng Go, đối chiếu số dư khớp giữa hai bảng trong 7 ngày.
 
-### Giai đoạn 6 — Dọn
+### Giai đoạn 5 — Dọn
 
 - Gỡ container `php`, `docker/php/`, `web-entrypoint.sh` phần điền secret PHP.
 - Xoá `website/game/{api,user,gm,gmhanglong,adminphp@2024,new,adminhl@2024}`; `website/game` chỉ còn tài nguyên tĩnh của client.
@@ -163,6 +165,14 @@ Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market
 - nginx `game_site.conf` rút còn: tĩnh + proxy + ba đường tương thích.
 
 **Kết quả**: 7.906 dòng PHP → 0. Một container ít hơn, 192 MB RAM tiết kiệm, và mọi truy vấn SQL đi qua tham số thay vì nối chuỗi.
+
+### Giai đoạn 6 — Chợ Xu ⇄ Nguyên Bảo (sau cùng)
+
+Làm sau khi PHP đã bỏ hết: đây là tính năng mới, không phải phần việc chuyển đổi, nên không chặn giai đoạn nào khác. Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market`, lệnh ký gửi qua console, trang chợ trong `apps/game`, trang giám sát trong `apps/ops`.
+
+**Trước hết phải thử `numType=1`** trên máy dev: đăng một tin nhỏ, xem Nguyên Bảo có thật sự rời nhân vật không. Sai giá trị này là trừ nhầm loại tiền.
+
+**Xong khi**: bán → mua → nhận Nguyên Bảo trong game chạy hết một vòng, phí vào `market_fee`, huỷ tin trả lại đúng số lượng.
 
 ## 7. Dữ liệu: 21 bảng `web` đi đâu
 
@@ -203,10 +213,10 @@ Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market
 | 0 — bộ khung React | 1–2 ngày |
 | 1 — công cụ GM | 3–5 ngày |
 | 2 — cổng người chơi | 4–6 ngày |
-| 3 — chợ | 3–4 ngày |
-| 4 — trang nạp client | 1 ngày |
-| 5 — cổng thanh toán | 2–3 ngày |
-| 6 — dọn | 1 ngày |
+| 3 — trang nạp client | 1 ngày |
+| 4 — cổng thanh toán | 2–3 ngày |
+| 5 — dọn | 1 ngày |
+| 6 — chợ (sau cùng) | 3–4 ngày |
 | **Tổng** | **15–22 ngày công** |
 
 Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật phẩm viết bằng SQL nối chuỗi. Giai đoạn 5 gỡ được rủi ro tiền bạc nhưng để sau cùng theo quyết định 3.
@@ -214,11 +224,11 @@ Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật ph
 ## 11. Quyết định (2026-09-05)
 
 1. **React cho cả ba app**, kể cả trang người chơi.
-2. **Dựng lại mua bán Xu** nhưng thành một **chợ riêng có thu phí** — thiết kế ở mục 12.
+2. **Dựng lại mua bán Xu** thành một **chợ riêng có thu phí** — thiết kế ở mục 12. Cập nhật 2026-09-05: **để sau cùng**, làm sau khi chuyển xong toàn bộ PHP.
 3. **Hoãn cổng thanh toán**, làm công cụ GM trước. Thứ tự giai đoạn ở mục 6 đã xếp lại theo đó.
 4. **Bỏ `hiente.php` và bản APK.** Bản điện thoại làm lại sau, không kế thừa.
 
-## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 3)
+## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 6)
 
 Bảng `web.sellcoin` cũ cho người chơi bán Nguyên Bảo lấy Xu, nhưng **chưa bao giờ chạy**: nó gọi `gmhanglong/gm/coin.php`, file đó không tồn tại trong bản triển khai (lỗi số 6 trong CLAUDE.md). Nên đây là làm mới, không phải khôi phục.
 
@@ -277,3 +287,17 @@ wallet_accounts   thêm một dòng hệ thống: code = 'market_fee'
 ### 12.5 Chỗ hỏng không tự chữa được
 
 Nếu `/role/wallet/reduce` thành công mà ghi DB hỏng ngay sau đó, Nguyên Bảo đã rời nhân vật nhưng không có tin rao. Ghi dòng `escrowing` trước khi gọi console giúp phát hiện: mọi dòng `escrowing` quá hai phút được đánh dấu và hiện ở trang quản trị để xử lý tay. Không tự hoàn được, vì console không có lệnh "cộng lại" nào an toàn để gọi mù.
+
+## 13. Cần bạn quyết: công cụ GM là của ai
+
+Đọc `gmhanglong/gm/api.php` mới thấy mô hình cũ không phải công cụ nội bộ. Người chơi mua một **CDK**, kích hoạt nó lên nhân vật của mình kèm một "mật khẩu SDK" tự đặt (`gmhanglong/pay/pay.php`), rồi **tự** dùng các chức năng: nạp, gửi thư, dọn kho đồ. Cột `cdk.type` quyết định người đó được dùng tới chức năng số mấy.
+
+Hiện tại đường này đã bị chặn: nginx chỉ cho loopback vào `/adminportal`, nên thực tế chỉ nhân viên dùng được. Bản Go mình vừa viết theo đúng thực tế đó, tức **chỉ nhân viên**.
+
+Ba hướng, cần bạn chọn:
+
+1. **Chỉ nhân viên** (đang làm). Bỏ luôn CDK và `cdks.cdk`. Đơn giản nhất, nhưng nếu trước đây có bán CDK thì mất một nguồn thu.
+2. **Giữ dịch vụ tự phục vụ**, dựng lại bằng tài khoản hệ thống ID thay cho "mật khẩu SDK": người chơi đăng nhập, nhập CDK, được mở một số thao tác trên chính nhân vật của mình. An toàn hơn bản cũ, nhưng là một tính năng riêng cần thiết kế.
+3. **Giữ nguyên phần CDK ở PHP** thêm một thời gian, chuyển nốt ở giai đoạn 5.
+
+Chưa có câu trả lời thì mình làm tiếp giai đoạn 2 và để `gmhanglong/` chạy song song.

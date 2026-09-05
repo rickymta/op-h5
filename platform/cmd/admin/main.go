@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/config"
+	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/spa"
 	"github.com/rickymta/op-h5/platform/internal/store"
@@ -75,10 +76,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Console dung chung cau hinh voi adapter: mot tai khoan `admin` cua console cho ca hai.
+	// Thieu bien nao thi console = nil va cac thao tac GM bao ro, khong chet luc khoi dong —
+	// trang quan tri con nhieu viec khac khong can console.
+	var consoleClient *console.Client
+	consoleUser := firstNonEmpty(os.Getenv("CONSOLE_USER"), os.Getenv("ADAPTER_CONSOLE_USER"), "admin")
+	consolePass := firstNonEmpty(os.Getenv("CONSOLE_ADMIN_PASSWORD"), os.Getenv("ADAPTER_CONSOLE_PASSWORD"))
+	tcgSecret := os.Getenv("TCG_SECRET")
+	if consolePass != "" && tcgSecret != "" {
+		consoleClient = console.New(
+			firstNonEmpty(os.Getenv("CONSOLE_BASE_URL"), os.Getenv("ADAPTER_CONSOLE_BASE_URL"), "http://127.0.0.1:9999"),
+			consoleUser, consolePass, tcgSecret)
+		consoleClient.StatBaseURL = firstNonEmpty(os.Getenv("STAT_BASE_URL"), "http://127.0.0.1:7788")
+	} else {
+		log.Warn("chua cau hinh console (thieu CONSOLE_ADMIN_PASSWORD hoac TCG_SECRET) — cong cu GM se bao loi khi dung")
+	}
+
 	s := &server{
 		db: db, log: log, tpl: tpl,
 		secure:  os.Getenv("ADMIN_COOKIE_SECURE") != "false",
 		fetcher: newFleetFetcher(),
+		console: consoleClient,
 	}
 
 	mux := http.NewServeMux()
@@ -119,6 +137,13 @@ func main() {
 	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
 	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))
 	mux.HandleFunc("POST /api/orders/{id}/refund", s.requireWrite(s.apiOrderRefund))
+	// Cong cu GM (gm.go): thao tac tren nhan vat qua console.
+	mux.HandleFunc("GET /api/gm/meta", s.requireAdminAPI(s.apiGMMeta))
+	mux.HandleFunc("GET /api/gm/roles", s.requireGM(s.apiGMRoles))
+	mux.HandleFunc("GET /api/gm/bag", s.requireGM(s.apiGMBag))
+	mux.HandleFunc("POST /api/gm/bag/clear", s.requireGM(s.apiGMBagClear))
+	mux.HandleFunc("POST /api/gm/pay", s.requireGM(s.apiGMPay))
+	mux.HandleFunc("POST /api/gm/mail", s.requireGM(s.apiGMMail))
 	mux.HandleFunc("GET /healthz", s.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))
@@ -145,6 +170,17 @@ func main() {
 	shutCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	_ = httpSrv.Shutdown(shutCtx)
+}
+
+// firstNonEmpty tra ve gia tri dau tien khong rong — de mot bien co nhieu ten (CONSOLE_*
+// cua rieng admin, hoac ADAPTER_CONSOLE_* dung chung voi adapter trong cung .env).
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v = strings.TrimSpace(v); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func envOr(key, def string) string {

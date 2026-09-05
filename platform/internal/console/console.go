@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -78,11 +80,14 @@ const (
 
 // Client goi console, tu quan ly token dang nhap.
 type Client struct {
-	BaseURL  string
-	Username string
-	Password string
-	Secret   string // tcg.secret
-	HTTP     *http.Client
+	BaseURL string
+	// StatBaseURL la dich vu statistic (:7788) — noi duy nhat tra cuu duoc roleId tu ten
+	// nhan vat. De trong thi dung 127.0.0.1:7788.
+	StatBaseURL string
+	Username    string
+	Password    string
+	Secret      string // tcg.secret
+	HTTP        *http.Client
 
 	mu    sync.Mutex
 	token string
@@ -150,6 +155,43 @@ func (c *Client) callAuthed(ctx context.Context, path string, payload, out any) 
 			return lerr
 		}
 		return c.post(ctx, path, token, payload, out)
+	}
+	return err
+}
+
+// getAuthed goi mot endpoint GET can dang nhap. Console nhan tham so qua query string o
+// nhom /role/* (khac nhom /gm/* nhan JSON) — day la khuon ma gmhanglong/gm/api.php dung
+// va da chay nhieu nam, khong phai phong doan.
+func (c *Client) getAuthed(ctx context.Context, base, path string, q url.Values, out any) error {
+	do := func(token string) error {
+		u := strings.TrimRight(base, "/") + path
+		if len(q) > 0 {
+			u += "?" + q.Encode()
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Login-Token", token)
+		return c.do(req, out)
+	}
+	token := c.cached()
+	if token == "" {
+		var err error
+		if token, err = c.login(ctx); err != nil {
+			return err
+		}
+	}
+	err := do(token)
+	if errors.Is(err, ErrUnauthorized) {
+		c.mu.Lock()
+		c.token = ""
+		c.mu.Unlock()
+		token, lerr := c.login(ctx)
+		if lerr != nil {
+			return lerr
+		}
+		return do(token)
 	}
 	return err
 }
@@ -340,4 +382,97 @@ func mailID(raw json.RawMessage) (int64, bool) {
 // MailComplete duyet phieu thu (status=2) de thu duoc gui di — cung cach gm/api.php lam.
 func (c *Client) MailComplete(ctx context.Context, id int64) error {
 	return c.callAuthed(ctx, "/gm/mail/x/complete", map[string]any{"status": "2", "id": id}, nil)
+}
+
+// ---------------------------------------------------------------- tra cuu nhan vat va kho do
+
+// StatBaseURL la dia chi cua dich vu statistic (:7788). Chi mot endpoint duoc dung:
+// /role/record/list — cach duy nhat tra ra roleId tu TEN nhan vat. Console (:9999) khong co.
+func (c *Client) statBase() string {
+	if c.StatBaseURL != "" {
+		return strings.TrimRight(c.StatBaseURL, "/")
+	}
+	return "http://127.0.0.1:7788"
+}
+
+// RoleRecord la mot dong ket qua tra cuu nhan vat.
+type RoleRecord struct {
+	RoleID       string `json:"roleId"`
+	RoleName     string `json:"roleName"`
+	SrvCode      string `json:"srvCode"`
+	AccountUID   string `json:"accountUid"`
+	PlatformCode string `json:"platformCode"`
+	Level        int    `json:"level"`
+	VipLevel     int    `json:"vipLevel"`
+	Power        int64  `json:"power"`
+}
+
+// FindRoles tim nhan vat theo ten trong mot may chu.
+//
+// Ten nhan vat co dau va co the co khoang trang; url.Values lo phan ma hoa.
+func (c *Client) FindRoles(ctx context.Context, srvCode, roleName string, limit int) ([]RoleRecord, error) {
+	if limit <= 0 || limit > 50 {
+		limit = 10
+	}
+	var out struct {
+		Records []RoleRecord `json:"records"`
+	}
+	q := url.Values{
+		"srvCode":  {srvCode},
+		"roleName": {roleName},
+		"page":     {"1"},
+		"pageSize": {strconv.Itoa(limit)},
+	}
+	if err := c.getAuthed(ctx, c.statBase(), "/role/record/list", q, &out); err != nil {
+		return nil, err
+	}
+	return out.Records, nil
+}
+
+// BagType la loai kho do. Gia tri lay tu CLAUDE.md muc 7 va tu gmhanglong/gm/api.php.
+type BagType int
+
+const (
+	BagHero         BagType = 1
+	BagEquipment    BagType = 2
+	BagItem         BagType = 3
+	BagFragment     BagType = 4
+	BagSeal         BagType = 5
+	BagBeastSoul    BagType = 6
+	BagArtifact     BagType = 7
+	BagArtifactFrag BagType = 8
+	BagCollection   BagType = 13
+)
+
+// BagSlot la mot o trong kho do.
+type BagSlot struct {
+	ID   string `json:"id"`
+	Tid  int    `json:"tid"`
+	Num  int64  `json:"num"`
+	Name string `json:"name"`
+}
+
+// BagQuery doc mot loai kho do cua nhan vat.
+func (c *Client) BagQuery(ctx context.Context, srvCode, roleID string, bag BagType) ([]BagSlot, error) {
+	var out struct {
+		List []BagSlot `json:"list"`
+	}
+	q := url.Values{"srvCode": {srvCode}, "roleId": {roleID}, "bagType": {strconv.Itoa(int(bag))}}
+	if err := c.getAuthed(ctx, c.BaseURL, "/role/bag/query", q, &out); err != nil {
+		return nil, err
+	}
+	return out.List, nil
+}
+
+// BagReduce tru mot o trong kho do.
+//
+// cmdMode=uid: xoa theo ma o (itemUid) chu khong theo tid. Xoa theo tid se cham vao moi o
+// cung loai, ke ca o ma nguoi truc khong nhin thay luc bam.
+func (c *Client) BagReduce(ctx context.Context, srvCode, roleID string, bag BagType, itemUID string, num int64, note string) error {
+	q := url.Values{
+		"cmdMode": {"uid"}, "srvCode": {srvCode}, "roleId": {roleID},
+		"bagType": {strconv.Itoa(int(bag))}, "num": {strconv.FormatInt(num, 10)},
+		"itemUid": {itemUID}, "note": {note},
+	}
+	return c.getAuthed(ctx, c.BaseURL, "/role/bag/reduce", q, nil)
 }

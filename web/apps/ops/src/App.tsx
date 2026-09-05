@@ -1,4 +1,5 @@
 import { Link, Route, Switch, useLocation } from "wouter";
+import { GM } from "./pages/GM";
 import { Orders } from "./pages/Orders";
 
 /** Thanh dieu huong: giu nguyen cac duong cua ban Go de nguoi truc khong phai hoc lai. */
@@ -14,6 +15,7 @@ function Nav() {
       <h1>Quản trị nền tảng</h1>
       <nav>
         {item("/", "Đội máy chủ")}
+        {item("/gm", "Công cụ GM")}
         {item("/nap-tay", "Nạp tay")}
         {item("/goi", "Gói")}
         {item("/don-mua", "Đơn mua")}
@@ -44,6 +46,7 @@ export function App() {
     <>
       <Nav />
       <Switch>
+        <Route path="/gm" component={GM} />
         <Route path="/don-mua" component={Orders} />
         <Route path="/">{() => <ChuaChuyen title="Đội máy chủ" goPath="/cu/" />}</Route>
         <Route path="/nap-tay">{() => <ChuaChuyen title="Nạp tay" goPath="/cu/nap-tay" />}</Route>

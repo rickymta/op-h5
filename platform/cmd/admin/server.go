@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
 	"github.com/rickymta/op-h5/platform/internal/wallet"
@@ -28,7 +29,13 @@ type server struct {
 	tpl     *template.Template
 	secure  bool
 	fetcher *fleetFetcher
+	// console la duong toi game (phat vat pham, gui thu, kho do). nil khi chua cau hinh:
+	// trang quan tri van chay, chi cac thao tac GM la bao "chua cau hinh console".
+	console *console.Client
 }
+
+// nowUnix tach ra de test co the co dinh thoi gian sau nay.
+func nowUnix() int64 { return time.Now().Unix() }
 
 type admin struct {
 	ID       int64
