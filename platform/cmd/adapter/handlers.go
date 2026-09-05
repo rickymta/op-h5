@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/capacity"
@@ -84,6 +85,10 @@ func (s *adapterServer) currentUser(r *http.Request) (int64, bool) {
 // playGame la cua vao: chua dang nhap thi chuyen sang he thong ID.
 func (s *adapterServer) playGame(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.currentUser(r); ok {
+		if d, blocked := s.tooFullForNewSession(); blocked {
+			s.renderFull(w, r, d)
+			return
+		}
 		http.Redirect(w, r, "/play.php", http.StatusFound)
 		return
 	}
@@ -452,5 +457,41 @@ func (s *adapterServer) convert(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]any{
 		"txn": txn, "balance": bal,
 		"message": "Đã trừ Xu. Vật phẩm sẽ vào hòm thư trong ít phút.",
+	})
+}
+
+// tooFullForNewSession xem co con cho khong, KHONG giu cho.
+//
+// Bat buoc chi doc: `/api/game/session` moi la noi giu ve. Neu o day cung giu thi moi
+// nguoi choi bi dem hai lan va cong tu that chat gap doi so voi nguong da cau hinh.
+//
+// Khi chua doc duoc so lieu (danh sach server rong — login server chet, hoac vua khoi
+// dong) thi CHO QUA. Chan o trang thai khong biet gi se lam ca game sap chi vi mot truc
+// trac giam sat; con neu that su khong vao duoc thi `/api/game/session` van chan o sau.
+func (s *adapterServer) tooFullForNewSession() (capacity.Decision, bool) {
+	f := s.tracker.Fleet()
+	if f == nil || len(f.Servers) == 0 {
+		return capacity.Decision{}, false
+	}
+	d := f.AdmitNew()
+	return d, !d.Allowed
+}
+
+// renderFull hien trang "dang qua tai" thay vi day nguoi choi vao client, noi ho chi
+// gap lai man hinh dang nhap cu ma khong hieu tai sao.
+func (s *adapterServer) renderFull(w http.ResponseWriter, r *http.Request, d capacity.Decision) {
+	// Hien trang thai THAT cua ca doi may chu, khong phai Decision.Alternatives:
+	// AdmitNew chi dien Alternatives khi CHO VAO, con luc tu choi thi truong do luon
+	// rong (khong con may chu nao nhan nguoi moi — do dung la ly do bi tu choi).
+	// Nguoi choi nhin bang trang thai con doan duoc bao gio nen quay lai.
+	servers := s.visibleServers()
+	s.log.Info("chan o /choi-game", "reason", string(d.Reason), "servers", len(servers))
+	// Dat Content-Type TRUOC WriteHeader: sau WriteHeader thi Header().Set khong con
+	// tac dung, va render() se khong kip dat -> trinh duyet phai tu doan kieu noi dung.
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusServiceUnavailable)
+	s.render(w, "full.html", map[string]any{
+		"User": s.username(r), "Message": reasonMessage(d.Reason),
+		"Servers": servers, "IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
 	})
 }

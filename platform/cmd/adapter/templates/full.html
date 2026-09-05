@@ -1,0 +1,41 @@
+{{define "full.html"}}<!doctype html>
+<html lang="vi"><head>{{template "head" .}}<title>Máy chủ đang đầy · Đại Hải Trình</title></head><body>
+{{template "nav" .}}
+<main>
+  <section>
+    <p class="eyebrow">Tạm chưa vào được</p>
+    <h1 style="font-size:30px">Máy chủ đang quá tải</h1>
+    <p class="lead">{{.Message}}</p>
+
+    {{if .Servers}}
+    <div class="panel">
+      <h2 style="font-size:17px">Tình trạng các máy chủ</h2>
+      <div style="margin-top:14px;display:grid;gap:10px">
+        {{range .Servers}}
+        <div class="srv">
+          <div><span class="nm">{{.Name}}</span><span class="code">{{.Code}}</span></div>
+          <div class="load">{{.OnlineFmt}} người</div>
+          <div><span class="pill {{.Band}}">{{.Label}}</span></div>
+        </div>
+        {{end}}
+      </div>
+      <p class="sub" style="margin:16px 0 0">
+        Khi có máy chủ trở lại “Mượt”, bấm “Thử lại” là vào được. Nhân vật cũ của bạn
+        không bị ảnh hưởng.
+      </p>
+    </div>
+    {{end}}
+
+    <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn" href="/choi-game">Thử lại</a>
+      <a class="btn ghost" href="/may-chu">Xem tất cả máy chủ</a>
+    </div>
+
+    <p class="sub" style="margin-top:26px">
+      Giới hạn này là cố ý: máy chủ nhận quá số người đã cấu hình thì cả những người
+      đang chơi cũng giật. Thà chờ vài phút còn hơn vào rồi không chơi được.
+    </p>
+  </section>
+</main>
+{{template "foot" .}}
+</body></html>{{end}}

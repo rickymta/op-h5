@@ -158,3 +158,46 @@ func TestDeviceCapAppliesAcrossServers(t *testing.T) {
 		t.Errorf("cho vao %d, chi duoc 4 (96 + 4 = tran may 100)", admitted)
 	}
 }
+
+// Fleet() phai la anh chup CHI DOC: goi bao nhieu lan cung khong duoc giu cho.
+//
+// Vi sao can khoa dieu nay bang test: `/choi-game` goi Fleet().AdmitNew() de chan som
+// va hien trang "may chu qua tai", roi `/api/game/session` moi giu ve that. Neu Fleet()
+// lo giu cho thi moi nguoi choi bi dem hai lan — cong tu that chat gap doi nguong da
+// cau hinh, va trieu chung ("server day trong khi bang dieu khien bao con nua cho")
+// rat kho lan ra nguyen nhan.
+func TestFleetSnapshotDoesNotReserve(t *testing.T) {
+	servers := []ServerState{{
+		SrvCode: "s1", Name: "S1", DeviceCode: "host-01", Status: StatusRunning,
+		Recommend: true, SoftLimit: 100, OverflowPct: 15,
+	}}
+	tr := newTestTracker(&fakeSource{}, servers, nil, time.Minute)
+	tr.refreshWith(servers, nil, map[string]int{"s1": 10})
+
+	for range 20 {
+		if d := tr.Fleet().AdmitNew(); !d.Allowed {
+			t.Fatalf("anh chup phai cho vao, nhan duoc %q", d.Reason)
+		}
+	}
+
+	tr.mu.RLock()
+	held := len(tr.tickets["s1"])
+	tr.mu.RUnlock()
+	if held != 0 {
+		t.Fatalf("Fleet() da giu %d cho, phai la 0", held)
+	}
+	if got := tr.Fleet().Servers["s1"].Effective(); got != 10 {
+		t.Fatalf("tai hieu dung = %d, phai van la 10", got)
+	}
+
+	// Con AdmitNew() that thi van phai giu cho nhu cu.
+	if d := tr.AdmitNew(); !d.Allowed {
+		t.Fatalf("AdmitNew that bai: %q", d.Reason)
+	}
+	tr.mu.RLock()
+	held = len(tr.tickets["s1"])
+	tr.mu.RUnlock()
+	if held != 1 {
+		t.Fatalf("AdmitNew phai giu dung 1 cho, dang giu %d", held)
+	}
+}
