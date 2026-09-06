@@ -1,7 +1,0 @@
-{
-  "slug": "gioi-thieu",
-  "game_code": "",
-  "title": "Giới thiệu Hằng Long Game",
-  "body": "Bản này đến từ bảng `pages` trong cơ sở dữ liệu — dùng để kiểm chứng rằng bản người vận hành đăng sẽ ĐÈ bản mặc định viết trong mã.\n\n## Cách hệ thống hoạt động\n- Một tài khoản dùng cho mọi game trên cổng.\n- Một ví Xu chung; nạp một lần, tiêu ở game nào tuỳ bạn.\n- Game chạy thẳng trong trình duyệt, không cần tải hay cài đặt.\n\n## Chỗ còn phải điền\n[Người vận hành điền: đơn vị phát hành và giấy phép.]",
-  "updated_at": "2026-09-06T09:30:00+07:00"
-}

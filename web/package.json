@@ -3,8 +3,6 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*",
-    "apps/*",
     "admin/packages/*",
     "admin/apps/*",
     "site/packages/*",
@@ -23,8 +21,6 @@
     "build:market": "npm run build -w @op/site-market",
     "build:haitac": "npm run build -w @op/site-haitac",
     "typecheck": "tsc -p admin/packages/ui --noEmit && tsc -p admin/apps/platform --noEmit && tsc -p admin/apps/gm --noEmit && tsc -p site/packages/ui --noEmit && tsc -p site/apps/portal --noEmit && tsc -p site/apps/market --noEmit && tsc -p site/apps/haitac --noEmit",
-    "old:typecheck": "tsc -p packages/ui --noEmit && tsc -p apps/ops --noEmit && tsc -p apps/portal --noEmit && tsc -p apps/game --noEmit",
-    "old:build": "npm run build -w @op/ops && npm run build -w @op/portal && npm run build -w @op/game",
     "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist','../platform/cmd/admin/dist-gm','../platform/cmd/id/dist','../platform/cmd/id/dist-market','../platform/cmd/adapter/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
   },
   "devDependencies": {
