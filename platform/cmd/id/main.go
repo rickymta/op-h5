@@ -1,5 +1,6 @@
 // Lenh id chay dich vu danh tinh cua nen tang (id.domain.com):
-// dang ky / dang nhap, OIDC provider, vi Xu, va trang chinh cua cong (web/apps/portal).
+// dang ky / dang nhap, OIDC provider, vi Xu, va hai giao dien cong khai:
+// web/site/apps/portal ("/") va web/site/apps/market ("/cho").
 package main
 
 import (
@@ -26,14 +27,28 @@ import (
 	"github.com/rickymta/op-h5/platform/internal/wallet"
 )
 
+// Template Go con lai DUY NHAT trang dang nhap OIDC (`login.html`): no la mot form POST
+// gui thang toi /oauth/authorize/login, nam trong luong uy quyen giua hai domain, nen
+// khong the la mot man hinh cua SPA. Cac trang HTML khac (trang chinh, dang ky, tai khoan,
+// quen/dat lai mat khau) da chuyen han sang web/site/apps/portal — chung von chi la form
+// goi API JSON, nen giu ban Go chi de lai hai cho phai sua moi lan doi.
+//
 //go:embed all:templates
 var templatesFS embed.FS
 
-// Giao dien React da build (web/apps/portal -> dist/). Thu muc luon ton tai nho dist/.gitkeep,
-// nen `go build` chay duoc ca khi chua `npm run build`; luc do spa.Handler tra trang huong dan.
+// Hai giao dien React da build, phuc vu tu CUNG mot tien trinh:
+//
+//	dist/         web/site/apps/portal -> "/"     cong chinh + tai khoan
+//	dist-market/  web/site/apps/market -> "/cho"  cho
+//
+// Ca hai thu muc luon ton tai nho .gitkeep, nen `go build` chay duoc ca khi chua
+// `npm run build`; luc do spa tra trang huong dan thay vi lam chet tien trinh.
 //
 //go:embed all:dist
 var distFS embed.FS
+
+//go:embed all:dist-market
+var distMarketFS embed.FS
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -100,10 +115,8 @@ func main() {
 		// So lieu song cua tung game: hoi Adapter, cache 30 s, timeout 3 s (hop dong 4.2).
 		live: newLiveStats(30*time.Second, 3*time.Second),
 	}
-	pages := &pageServer{api: api, tpl: tpl}
-
 	mux := http.NewServeMux()
-	// --- OIDC: giu nguyen ca khi bat SPA (trang dang nhap /oauth/authorize van la template Go) ---
+	// --- OIDC: pattern cu the hon "GET /" nen khong bao gio bi SPA nuot ---
 	mux.HandleFunc("GET /.well-known/openid-configuration", srv.Discovery)
 	mux.HandleFunc("GET /.well-known/jwks.json", srv.JWKS)
 	mux.HandleFunc("GET /oauth/authorize", srv.Authorize)
@@ -112,31 +125,16 @@ func main() {
 	mux.HandleFunc("GET /oauth/userinfo", srv.UserInfo)
 	mux.HandleFunc("GET /oauth/logout", srv.Logout)
 
-	// ID_SPA=1: giao dien React (web/apps/portal) phuc vu tu goc, trang Go cu lui ve tien to /cu/
-	// (giong ADMIN_SPA). /oauth/*, /.well-known/*, /internal/*, /api/*, /healthz la pattern cu the
-	// hon "GET /" nen khong doi. Hai ban dung chung API va chung phien, bat/tat khong mat gi.
-	goPage := func(path string, h http.HandlerFunc) {
-		if cfg.SPA {
-			mux.HandleFunc("GET /cu"+path, h)
-			return
-		}
-		mux.HandleFunc("GET "+path, h)
-	}
-	if cfg.SPA {
-		mux.Handle("GET /", spa.Handler(distFS, "dist"))
-		log.Info("giao dien React bat (ID_SPA=1); trang cu o /cu/")
-	}
+	// Hai SPA trong mot tien trinh. Pattern "GET /cho/" cu the hon "GET /" nen ServeMux luon
+	// chon dung ban, khong phu thuoc thu tu dang ky. Xem internal/spa.
+	spa.Mount(mux, "/", distFS, "dist")
+	spa.Mount(mux, "/cho", distMarketFS, "dist-market")
+
 	// Duong API khong ton tai phai tra 404 JSON, khong phai index.html cua SPA hay 404 HTML.
 	for _, p := range []string{"GET /api/", "POST /api/", "GET /internal/", "POST /internal/"} {
 		mux.HandleFunc(p, apiNotFound)
 	}
 
-	// --- trang Go (pages.go) ---
-	goPage("/{$}", pages.portal)
-	goPage("/dang-ky", pages.registerPage)
-	goPage("/tai-khoan", pages.accountPage)
-	goPage("/quen-mat-khau", pages.forgotPage)
-	goPage("/dat-lai-mat-khau", pages.resetPage)
 	// --- cong khai (catalog.go) ---
 	mux.HandleFunc("GET /api/site", api.apiSite)
 	mux.HandleFunc("GET /api/games", api.apiGames)
@@ -177,7 +175,7 @@ func main() {
 	go cleanupLoop(ctx, log, sessions, &oidc.Store{DB: db}, resets)
 
 	go func() {
-		log.Info("id server khoi dong", "addr", cfg.Addr, "issuer", cfg.Issuer, "kid", signer.Kid, "spa", cfg.SPA)
+		log.Info("id server khoi dong", "addr", cfg.Addr, "issuer", cfg.Issuer, "kid", signer.Kid)
 		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("http server dung", "err", err)
 			os.Exit(1)

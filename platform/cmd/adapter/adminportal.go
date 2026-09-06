@@ -217,6 +217,9 @@ func (s *adapterServer) mountAdminPortal(mux *http.ServeMux) {
 	mux.HandleFunc("GET "+admBase, func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, admBase+"/", http.StatusFound)
 	})
+	// Duong la duoi /admin-portal/ phai 404, khong roi vao SPA cong khai o "GET /" — go nham
+	// mot duong quan tri ma nhan trang chu cua game la mot bao cao loi kho hieu.
+	mux.HandleFunc("GET "+admBase+"/", http.NotFound)
 
 	mux.HandleFunc("GET "+admBase+"/api/meta", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		s.gm().Meta(w, r, a)

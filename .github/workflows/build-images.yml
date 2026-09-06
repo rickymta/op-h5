@@ -120,26 +120,30 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      - name: Build giao dien React
+      # 5 app: 2 quan tri (MUI) + 3 cong khai (Tailwind). `npm run build` cua web/ chay ca 5.
+      - name: Build giao dien React (5 app)
         working-directory: web
         run: |
           npm ci
           npm run typecheck
           npm run build
-          ls -la ../platform/cmd/admin/dist ../platform/cmd/id/dist ../platform/cmd/adapter/dist
+          ls -la ../platform/cmd/admin/dist ../platform/cmd/admin/dist-gm \
+                 ../platform/cmd/id/dist ../platform/cmd/id/dist-market \
+                 ../platform/cmd/adapter/dist
 
-      # Ba binary Go nhung dist bang go:embed. Thu muc chi co .gitkeep van build duoc, va
-      # binary do chay duoc — no chi tra mot trang 503 "Chua build giao dien" thay cho toan
-      # bo giao dien. Da dinh that ngay 2026-09-06: image day len GHCR nhung rong, server
-      # pull ve la ca ba trang trang. Nen chan o day thay vi phat hien ngoai san xuat.
-      - name: Chan image rong — dist phai co index.html
+      # Ba binary Go nhung NAM thu muc build bang go:embed (admin: dist + dist-gm; id: dist +
+      # dist-market; adapter: dist). Thu muc chi co .gitkeep van build duoc, va binary do chay
+      # duoc — no chi tra mot trang 503 "Chua build giao dien" thay cho toan bo giao dien. Da
+      # dinh that ngay 2026-09-06: image day len GHCR nhung rong, server pull ve la ca ba trang
+      # trang. Nen chan o day thay vi phat hien ngoai san xuat.
+      - name: Chan image rong — moi dist phai co index.html
         run: |
-          for d in admin id adapter; do
-            f="platform/cmd/$d/dist/index.html"
+          for d in admin/dist admin/dist-gm id/dist id/dist-market adapter/dist; do
+            f="platform/cmd/$d/index.html"
             test -s "$f" || { echo "::error::$f rong hoac khong co — buoc build React da that bai"; exit 1; }
             grep -q 'src="/' "$f" || { echo "::error::$f khong tro toi tai san nao"; exit 1; }
           done
-          echo "dist cua ca ba app deu co index.html"
+          echo "ca 5 app deu co index.html"
 
 
       # ---- nen tang (Go): context la platform/, mot Dockerfile, chon binary bang ARG CMD ----

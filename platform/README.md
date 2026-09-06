@@ -18,6 +18,26 @@ nguồn thật và có test.
 | `cmd/fakelogin` — login server giả, chỉ để phát triển | 9000 | ✅ |
 | Nhiều game trên cùng nền tảng | | ✅ kiểm chứng bằng game thứ hai |
 
+### Giao diện: 5 app React, 3 tiến trình
+
+Người vận hành tách giao diện thành 5 app riêng nhưng **giữ nguyên ba tiến trình Go**; hai tiến
+trình vì thế mang hai bundle, phục vụ dưới hai tiền tố khác nhau (`internal/spa`):
+
+| Tiến trình | Đường | Thư mục nhúng | Nguồn (`web/`) | Vite `base` |
+|---|---|---|---|---|
+| `admin` :8100 | `/` | `cmd/admin/dist` | `admin/apps/platform` (MUI) | `/` |
+| `admin` :8100 | `/gm` | `cmd/admin/dist-gm` | `admin/apps/gm` (MUI) | `/gm/` |
+| `id` :8080 | `/` | `cmd/id/dist` | `site/apps/portal` (Tailwind) | `/` |
+| `id` :8080 | `/cho` | `cmd/id/dist-market` | `site/apps/market` (Tailwind) | `/cho/` |
+| `adapter` :8090 | `/` | `cmd/adapter/dist` | `site/apps/haitac` (Tailwind) | `/` |
+
+**Không còn cờ `ADMIN_SPA` / `ID_SPA` / `ADAPTER_SPA` và tiền tố `/cu/`.** Bundle luôn được phục
+vụ; chưa chạy `npm run build` trong `web/` thì đường giao diện trả một trang 503 nói rõ cách sửa,
+còn API vẫn chạy bình thường (thư mục `dist*` tồn tại sẵn nhờ `.gitkeep` nên `go build` không hỏng).
+Bundle con là một pattern riêng của `ServeMux` (`GET /gm/`, `GET /cho/`) nên nó không nuốt đường của
+bundle ở gốc và ngược lại; `base` của Vite **phải** khớp tiền tố, sai là trình duyệt xin tài sản ở
+`/assets/…` rồi nhận `index.html`.
+
 ### Trang chính của cổng (`domain.com`, dịch vụ `id`)
 
 `id` phục vụ trang chính và trang tài khoản. API công khai (không cần đăng nhập): `GET /api/site`
@@ -37,16 +57,29 @@ Nội dung tĩnh sửa được ở trang quản trị: `GET /api/pages/{slug}` 
 (bảng `pages`, migration 0011; `body` là **văn bản thuần** — đoạn cách nhau bằng dòng trống, `## `
 tiêu đề phụ, `- ` gạch đầu dòng — không phải HTML, để tầng hiển thị không phải lọc XSS).
 
-`ID_SPA=1`: bundle React `web/apps/portal` (nhúng bằng `go:embed` từ `cmd/id/dist`) phục vụ mọi
-đường không phải `/api/*`, `/oauth/*`, `/.well-known/*`, `/internal/*`, `/healthz`; trang Go cũ
-lui về `/cu/`. Trang đăng nhập OIDC `/oauth/authorize` giữ template Go. CSP của `id`
-(`internal/httpx.SecurityHeaders`) đã thêm `'self'` cho script/style, `img-src 'self' data: https:`
-(ảnh game nằm ở host của game), `font-src 'self'`.
+**Hai giao diện trong một tiến trình.** `id` phục vụ hai bundle React nhúng bằng `go:embed`:
+
+| Đường | Thư mục nhúng | Nguồn |
+|---|---|---|
+| `/` | `cmd/id/dist` | `web/site/apps/portal` — cổng chính + tài khoản |
+| `/cho` | `cmd/id/dist-market` | `web/site/apps/market` — chợ (mới, chưa nối backend) |
+
+`/cho/` là một pattern riêng của `ServeMux` nên nó **không** rơi vào bundle ở gốc và ngược lại;
+`base` của Vite ở app chợ phải là `/cho/` để đường tài sản khớp. `/api/*`, `/oauth/*`,
+`/.well-known/*`, `/internal/*`, `/healthz` cụ thể hơn `GET /` nên không bị nuốt, và
+`GET|POST /api/` trả 404 **JSON** thay vì `index.html`. Không còn cờ bật/tắt: bundle luôn được
+phục vụ, chưa `npm run build` thì đường giao diện trả một trang 503 nói rõ cách sửa (API vẫn chạy).
+
+Template Go duy nhất còn lại là **trang đăng nhập OIDC** `login.html` — form POST tới
+`/oauth/authorize/login`, nằm giữa hai domain trong luồng uỷ quyền nên không thể là một màn hình
+của SPA. Các trang Go cũ (trang chính, đăng ký, tài khoản, quên/đặt lại mật khẩu) đã bị xoá: chúng
+vốn chỉ là form gọi API JSON. CSP của `id` (`internal/httpx.SecurityHeaders`) có `'self'` cho
+script/style, `img-src 'self' data: https:` (ảnh game nằm ở host của game), `font-src 'self'`.
 
 ### Trang của game (`haitac.domain.com`)
 
 Adapter phục vụ `/`, `/may-chu`, `/cua-hang`, `/tin-tuc`, `/tin-tuc/{id}`, `/choi-game`; nginx
-proxy các đường đó (cùng `/auth/`, `/api/game/`, `/app/`, `/cu/`) sang `:8090` và giữ nguyên phần
+proxy các đường đó (cùng `/auth/`, `/api/game/`, `/app/`) sang `:8090` và giữ nguyên phần
 còn lại cho tầng PHP cũ (xem `docker/nginx/game_site.conf`). Dùng `=` và `^~` để chúng thắng trước
 regex `\.php$` và `\.(js|css)$`, nên `/api/getSession.php` vẫn về PHP.
 
@@ -77,21 +110,47 @@ tìm kiếm và cả trang chi tiết (404 `package_unknown`).
 Trang tĩnh của game: `GET /api/game/pages/{slug}` — tra `(slug, game_code)` trước, không có thì lùi
 về bản chung, nên một game chỉ phải viết lại những trang nó muốn khác.
 
-`ADAPTER_SPA=1`: bundle React `web/apps/game` (assetsDir `app/`, vì `/assets/` trên host game đã
-thuộc client LayaAir) phục vụ `/`, `/may-chu`, `/cua-hang`, `/tin-tuc*`; trang Go cũ lui về `/cu/`;
-`/choi-game`, `/auth/*`, `/api/*`, `/srv/*`, `/quy-doi` và trang `full.html` giữ nguyên. **Một bundle
-chạy cho mọi game** — game mới chỉ cần dòng `games` + ảnh trong `brand/`, không build lại image.
-Đường SPA hiện có: `/`, `/may-chu`, `/cua-hang`, `/cua-hang/{id}`, `/tin-tuc`, `/tin-tuc/{id}`,
-`/gioi-thieu`, `/huong-dan`, `/faq`, `/app/` — thêm đường mới phải sửa **cả** danh sách này trong
-`cmd/adapter/main.go` **và** `docker/nginx/game_site.conf`, thiếu một bên là 404.
+Bundle React `web/site/apps/haitac` (nhúng từ `cmd/adapter/dist`, assetsDir `app/` vì `/assets/`
+trên host game đã thuộc client LayaAir) phục vụ **mọi** đường GET không khớp một pattern cụ thể hơn:
+`/`, `/may-chu`, `/cua-hang`, `/cua-hang/{id}`, `/tin-tuc`, `/tin-tuc/{id}`, `/gioi-thieu`,
+`/huong-dan`, `/faq` và tài sản `/app/*`. `/choi-game`, `/auth/*`, `/api/*`, `/srv/*`, `/quy-doi`,
+`/admin-portal*`, `/healthz` cụ thể hơn nên không bị nuốt; `GET|POST /api/` trả 404 JSON.
+**Một bundle chạy cho mọi game** — game mới chỉ cần dòng `games` + ảnh trong `brand/`, không build
+lại image. Thêm một đường mới cho trang thì **vẫn** phải thêm một `location` trong
+`docker/nginx/game_site.conf`: `location /` của host game đi về `play.php` của tầng PHP cũ, không
+về Adapter.
+
+Template Go còn lại ở Adapter: `full.html` (màn hình "máy chủ đang đầy", hiện **trong** luồng
+`/choi-game` trước khi trình duyệt kịp tải bundle nào) cùng `shell.html` mà nó dùng, và `gm.html` /
+`gmlogin.html` của cổng GM riêng của game ở `/admin-portal`.
 
 **Chưa làm:** tích hợp login server và console THẬT (cần dump DB từ server cũ).
 
 ### Trang quản trị (`cmd/admin`, :8100)
 
-Ngoài đội máy chủ / gói / đơn / game / nhân viên / tin tức, còn `GET /api/pages`, `POST /api/pages`
-(upsert theo `slug` + `game_code`), `POST /api/pages/{id}/delete` — vai trò `operator` trở lên, ghi
-`admin_audit`, thân request tối đa 256 KB.
+**Hai giao diện trong một tiến trình.** `admin` phục vụ hai bundle React nhúng bằng `go:embed`:
+
+| Đường | Thư mục nhúng | Nguồn |
+|---|---|---|
+| `/` | `cmd/admin/dist` | `web/admin/apps/platform` — quản trị nền tảng |
+| `/gm` | `cmd/admin/dist-gm` | `web/admin/apps/gm` — công cụ GM của game |
+
+Không tách tiến trình vì cả hai dùng chung bảng `admin_users`, chung phiên đăng nhập và chung
+`admin_audit`; tách ra chỉ để tách bundle, không tách quyền. `base` của Vite ở app GM phải là
+`/gm/`. **API GM vẫn nằm ở Adapter của từng game** (`haitac.<domain>/admin-portal/api/*`, xem
+`cmd/adapter/adminportal.go` + `internal/gmops`): mọi thao tác GM đi qua console của cụm game, thứ
+riêng của từng game. `admin` chỉ phục vụ *bundle* giao diện GM.
+
+Đăng nhập là JSON: `POST /api/login` (nhận cả JSON lẫn form; bí danh `POST /dang-nhap`) và
+`POST /api/logout` (bí danh `POST /dang-xuat`) — màn hình đăng nhập là một route của SPA, không còn
+template Go. Mọi endpoint bảo vệ trả **401 JSON** thay vì 302 sang trang đăng nhập: một chuyển
+hướng ở đây làm `fetch()` nhận về HTML kèm mã 200, lỗi khó lần ra nhất trong một SPA.
+
+Đường JSON: `GET /api/fleet`, `GET /api/audit` (200 dòng gần nhất), `GET /api/orders`,
+`GET /api/packages?game=&category=&status=&q=` (kèm `games`, `cats`), `GET /api/pages`,
+`POST /api/pages` (upsert theo `slug` + `game_code`), `POST /api/pages/{id}/delete` — vai trò
+`operator` trở lên, ghi `admin_audit`, thân request tối đa 256 KB. Toàn bộ trang Go cũ và tiền tố
+`/cu/` đã bị xoá; thư mục `cmd/admin/templates` không còn.
 
 **Mở ra Internet (`ADMIN_PUBLIC=1`).** Dịch vụ **vẫn bind `127.0.0.1:8100`** — nginx là thứ duy nhất
 nối ra ngoài; cờ này chỉ siết ba lớp ở tầng ứng dụng (`cmd/admin/login.go`):
@@ -192,9 +251,8 @@ docker run -d --network host \
 ```
 
 Tên/tagline/ảnh của game đó điền ở trang quản trị (Game) sau khi có dòng `games`; ảnh chép vào
-`ASSETS_DIR/brand/tamquoc/` rồi ghi URL `/brand/tamquoc/…`. Adapter còn nhận `ADAPTER_SPA`
-(`1` = giao diện React), `ADAPTER_GAME_NAME` (tên dự phòng khi chưa có dòng `games`) và
-`ID_BRAND_NAME` (thương hiệu ở chân trang).
+`ASSETS_DIR/brand/tamquoc/` rồi ghi URL `/brand/tamquoc/…`. Adapter còn nhận `ADAPTER_GAME_NAME`
+(tên dự phòng khi chưa có dòng `games`) và `ID_BRAND_NAME` (thương hiệu ở chân trang).
 
 **Mỗi game một `ADAPTER_SECRET_ENC_KEY` riêng.** Dùng chung một khoá nghĩa là lộ khoá
 của game này thì mở được tài khoản game kia.
@@ -259,7 +317,6 @@ mọi lần nạp đều vào nhật ký.
 | `ID_SMTP_HOST` / `ID_SMTP_PORT` | | — thiếu thì **tắt** khôi phục mật khẩu |
 | `ID_SMTP_USER` / `ID_SMTP_PASSWORD` | | để trống nếu SMTP nội bộ không cần xác thực |
 | `ID_SMTP_FROM` / `ID_SMTP_FROM_NAME` | | địa chỉ gửi; `FROM` bắt buộc để bật tính năng |
-| `ID_SPA` | | `0` — `1` = giao diện React `web/apps/portal` phục vụ từ gốc, trang Go cũ ở `/cu/` |
 | `ID_BRAND_NAME` | | `Cổng game` — thương hiệu, trả qua `GET /api/site` (cả adapter cũng đọc biến này) |
 | `ID_SUPPORT_URL` / `ID_FANPAGE_URL` / `ID_TOPUP_URL` / `ID_LEGAL_NOTE` | | rỗng — link hỗ trợ, fanpage, trang nạp Xu (rỗng = chưa có cổng nạp), dòng pháp lý ở chân trang |
 | `ADMIN_PUBLIC` | | `0` — `1` = trang quản trị được nginx cho vào từ Internet: cookie ép `Secure`, phiên còn 4 giờ, và **không khởi động** nếu `owner` còn mật khẩu mặc định. Không đổi địa chỉ bind |

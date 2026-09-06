@@ -138,12 +138,29 @@ hạn tải dùng nó làm tầng thứ hai.
 
 | Dịch vụ | Cổng | Việc |
 |---|---|---|
-| `id` | 8080 (công khai) | OIDC provider, danh tính, ví Xu — `ID_ISSUER` phải là URL trình duyệt tới được |
-| `adapter` | 127.0.0.1:8090 | Đổi token ID → tài khoản game, **cổng giới hạn tải**; nginx proxy `/`, `/may-chu`, `/quy-doi`, `/choi-game`, `/auth/`, `/api/game/` |
-| `admin` | 127.0.0.1:8100 | Trang quản trị nền tảng (đội server, ngưỡng, nạp tay); vào qua `ssh -L 8100:127.0.0.1:8100` |
+| `id` | 8080 (công khai) | OIDC provider, danh tính, ví Xu — `ID_ISSUER` phải là URL trình duyệt tới được. Phục vụ **hai** giao diện: `/` cổng chính, `/cho` chợ |
+| `adapter` | 127.0.0.1:8090 | Đổi token ID → tài khoản game, **cổng giới hạn tải**, trang của game; nginx proxy `/`, `/may-chu`, `/cua-hang`, `/tin-tuc`, `/quy-doi`, `/choi-game`, `/auth/`, `/api/game/`, `/app/` |
+| `admin` | 127.0.0.1:8100 | Phục vụ **hai** giao diện: `/` quản trị nền tảng (đội server, ngưỡng, nạp tay, CMS), `/gm` công cụ GM. Vào qua `ssh -L 8100:127.0.0.1:8100`, hoặc `admin.<domain>` khi `ADMIN_PUBLIC=1` |
 | `platform-seed` | — | One-shot (mysql:8.0 + `platform-seed.sh`): tạo DB `platform`, đợi `id` migrate, upsert `oauth_clients` (từ `ADAPTER_CLIENT_ID`/`ADAPTER_REDIRECT_URI`), `games`, `game_devices` + `game_servers` (từ `tcg.srv_game`, không có thì từ `GAME_SERVERS`), `game_packages` (`platform-seed/game_packages.haitac.sql`: 1962 gói do `tools/gen-game-packages.py` sinh từ `api/id.txt` + `recharge-item.xlsx`), và **mọi** `platform-seed/news.*.sql` theo thứ tự tên (bài viết; upsert theo `slug`, chạy lại là cập nhật chứ không nhân bản). Chạy lại vô hại, không ghi đè tên/ngưỡng admin đã sửa. |
 
 Tất cả đọc secret từ `.env` và **dừng ngay lúc khởi động** nếu thiếu biến bắt buộc. Adapter phát vật phẩm qua console `:9999` bằng `ADAPTER_CONSOLE_USER` (mặc định `admin`, bảng `tcg.staff`) với mật khẩu `CONSOLE_ADMIN_PASSWORD`. Tài khoản owner đầu tiên của `admin` tạo từ `ADMIN_BOOTSTRAP_USER/PASSWORD` khi `admin_users` còn trống. PHP nhận `ID_BASE_URL`/`ID_INTERNAL_SECRET`/`ID_WALLET_ENABLED` qua pool php-fpm do `web-entrypoint.sh` sinh (`clear_env` mặc định của php-fpm chặn `.env`).
+
+### Giao diện React nằm **trong** binary Go
+
+5 app React (`web/`) được nhúng bằng `go:embed` vào 3 binary — không có container riêng, không có
+thư mục tĩnh nào phải rsync:
+
+| Tiến trình | Đường | Nguồn `web/` |
+|---|---|---|
+| `admin` | `/` · `/gm` | `admin/apps/platform` · `admin/apps/gm` |
+| `id` | `/` · `/cho` | `site/apps/portal` · `site/apps/market` |
+| `adapter` | `/` | `site/apps/haitac` |
+
+Hệ quả khi build image: **phải chạy `npm ci && npm run build` trong `web/` TRƯỚC `docker build`**
+của ba image Go, nếu không binary nhúng thư mục rỗng và mọi trang là một trang 503 "Chưa build giao
+diện" (API vẫn chạy). CI đã chặn việc này (`.github/workflows/build-images.yml`, bước "Chan image
+rong"); build tay trên server thì `server-bootstrap.sh` lo. Không còn cờ `ADMIN_SPA` / `ID_SPA` /
+`ADAPTER_SPA` — trang Go cũ và tiền tố `/cu/` đã bị xoá hẳn.
 
 ## 6. Vận hành
 
@@ -195,16 +212,17 @@ Cập nhật sau này: sửa Excel/PHP → push → CI build → trên server `p
 
 ## 6c. Build thẳng trên server (không cần CI/GHCR)
 
-Dockerfile không compile gì — chỉ `COPY` JAR/Excel/PHP vào image (riêng `php` cài 2 extension, ~1 phút). Server 4 CPU / 8 GB build thoải mái; cần thêm ~2.5 GB đĩa (clone + image). `docker-compose.image.yml` có sẵn `build:` nên cùng một file dùng được cả `pull` lẫn `build`:
+Ba Dockerfile cũ không compile gì — chỉ `COPY` JAR/Excel/PHP vào image (riêng `php` cài 2 extension, ~1 phút); ba image Go thì compile (~2–4 phút). Server 4 CPU / 8 GB build thoải mái; cần thêm ~2.5 GB đĩa (clone + image). `docker-compose.image.yml` có sẵn `build:` nên cùng một file dùng được cả `pull` lẫn `build`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rickymta/op-h5/main/docker/server-bootstrap.sh | bash     # MODE=build mặc định
 ```
 
-Script cài Docker + git + git-lfs, clone repo vào `/opt/tcg/src` (kéo 8 JAR qua LFS — **611 MB trong quota 1 GB/tháng**, giống một lần CI), rồi `docker compose build console php nginx`. Cập nhật sau này:
+Script cài Docker + git + git-lfs, clone repo vào `/opt/tcg/src` (kéo 8 JAR qua LFS — **611 MB trong quota 1 GB/tháng**, giống một lần CI), **build 5 app React trong một container `node:22-alpine`**, rồi `docker compose build`. Bước React là bắt buộc: ba binary Go nhúng `platform/cmd/*/dist*` bằng `go:embed`, thư mục rỗng thì mọi trang là 503 "Chưa build giao diện". Cập nhật sau này:
 
 ```bash
 cd /opt/tcg/src && git pull && git lfs pull
+docker run --rm -v /opt/tcg/src:/repo -w /repo/web node:22-alpine sh -c 'npm ci && npm run build'
 cd docker && docker compose -f docker-compose.image.yml up -d --build
 ```
 

@@ -128,15 +128,6 @@ func groupCategories(pkgs []wallet.Package, only string) []catView {
 	return out
 }
 
-// groupedPackages xep goi dang mo theo tab (trang Go cu o /cu/cua-hang).
-func (s *adapterServer) groupedPackages(r *http.Request, only string) ([]catView, error) {
-	pkgs, err := s.wallet.Packages(r.Context(), s.cfg.GameCode)
-	if err != nil {
-		return nil, err
-	}
-	return groupCategories(pkgs, only), nil
-}
-
 // ---------------------------------------------------------------- tim, loc, phan trang
 
 // storeQuery la bo loc cua bang goi tren trang cua hang (hop dong dot 3 muc 3.1).
@@ -391,39 +382,6 @@ func toOrderViews(orders []wallet.Order) []orderView {
 		})
 	}
 	return out
-}
-
-// storePage la trang cua hang.
-func (s *adapterServer) storePage(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
-		"User": s.username(r), "Servers": s.visibleServers(),
-		"IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
-	}
-	uid, ok := s.currentUser(r)
-	if !ok {
-		s.render(w, "store.html", data)
-		return
-	}
-	ctx := r.Context()
-	bal, err := s.wallet.Balance(ctx, uid)
-	if err != nil {
-		s.log.Error("doc so du", "err", err, "user", uid)
-	}
-	data["Balance"] = bal
-	data["BalanceFmt"] = formatInt(bal)
-
-	cats, err := s.groupedPackages(r, "")
-	if err != nil {
-		s.log.Error("doc danh muc", "err", err)
-	}
-	data["Categories"] = cats
-
-	orders, err := s.wallet.Orders(ctx, uid, s.cfg.GameCode, 10)
-	if err != nil {
-		s.log.Error("doc don mua", "err", err, "user", uid)
-	}
-	data["Orders"] = toOrderViews(orders)
-	s.render(w, "store.html", data)
 }
 
 // quyDoiRedirect giu duong cu /quy-doi.

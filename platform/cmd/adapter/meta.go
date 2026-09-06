@@ -1,6 +1,6 @@
 package main
 
-// Trang cua game (web/apps/game) doc "bo mat" cua game tu day: /api/game/meta, /api/game/news,
+// Trang cua game (web/site/apps/haitac) doc "bo mat" cua game tu day: /api/game/meta, /api/game/news,
 // /api/game/news/{key}, /api/game/me. Ten, tagline, anh, mau nhan, lien ket nam trong bang games
 // (migration 0010, sua o trang quan tri) — khong con gan cung trong template, nen MOT bundle
 // chay cho moi game. Hop dong giai doan 3 muc 4.4.

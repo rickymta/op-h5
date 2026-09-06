@@ -103,7 +103,7 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
-		// 'self' cho script/style: giao dien React (web/apps/portal, ID_SPA=1) nap file JS/CSS
+		// 'self' cho script/style: giao dien React (web/site/apps/portal) nap file JS/CSS
 		// co bam cua Vite tu chinh host nay — CSP cu chi co 'unsafe-inline' nen chan het bundle.
 		// 'unsafe-inline' van giu vi cac trang Go cu (dang ky, tai khoan, /oauth/authorize) con
 		// script inline nho de goi API. img-src 'self' data: https:: anh bia/key visual/logo cua

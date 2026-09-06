@@ -89,8 +89,6 @@ type ID struct {
 	LoginMaxAttempt int // so lan sai toi da trong cua so
 	LoginWindow     time.Duration
 
-	// SPA (ID_SPA=1): giao dien React web/apps/portal phuc vu tu goc, trang Go cu lui ve /cu/.
-	SPA bool
 	// Thuong hieu cua cong, tra qua GET /api/site cho trang chinh va chan trang cac trang game.
 	BrandName  string
 	SupportURL string
@@ -119,7 +117,6 @@ func LoadID() (ID, error) {
 		CookieSecure:    l.opt("ID_COOKIE_SECURE", "true") == "true",
 		LoginMaxAttempt: l.optInt("ID_LOGIN_MAX_ATTEMPT", 10),
 		LoginWindow:     l.optDur("ID_LOGIN_WINDOW", 15*time.Minute),
-		SPA:             l.opt("ID_SPA", "0") == "1",
 		BrandName:       l.opt("ID_BRAND_NAME", "Cổng game"),
 		SupportURL:      l.opt("ID_SUPPORT_URL", ""),
 		FanpageURL:      l.opt("ID_FANPAGE_URL", ""),
@@ -165,9 +162,6 @@ type Adapter struct {
 	GameName string
 	// BrandName la thuong hieu cua nen tang (ID_BRAND_NAME), hien o chan trang cua game.
 	BrandName string
-	// SPA (ADAPTER_SPA=1): giao dien React web/apps/game phuc vu /, /may-chu, /cua-hang, /tin-tuc;
-	// trang Go cu lui ve /cu/.
-	SPA bool
 }
 
 func LoadAdapter() (Adapter, error) {
@@ -199,7 +193,6 @@ func LoadAdapter() (Adapter, error) {
 		TicketTTL:       l.optDur("ADAPTER_TICKET_TTL", 60*time.Second),
 		PollInterval:    l.optDur("ADAPTER_POLL_INTERVAL", 10*time.Second),
 		BrandName:       l.opt("ID_BRAND_NAME", "Cổng game"),
-		SPA:             l.opt("ADAPTER_SPA", "0") == "1",
 	}
 	c.GameName = l.opt("ADAPTER_GAME_NAME", c.GameCode)
 	return c, l.missing.Err()

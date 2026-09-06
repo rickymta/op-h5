@@ -9,11 +9,11 @@ import (
 	"github.com/rickymta/op-h5/platform/internal/capacity"
 )
 
-// Cac trang huong nguoi choi cua rieng game nay (haitac.domain.com).
+// Du lieu dung chung cho trang cua game (haitac.domain.com) va cho man hinh "may chu day".
 //
-// Chung do Adapter phuc vu chu khong phai nginx, vi so lieu tren do la SONG: dai trang
-// thai may chu den tu chinh bo dem tai ma cong gioi han dang dung. Dung nginx dung file
-// tinh thi trang se hien mot con so, con cong lai quyet dinh theo mot con so khac.
+// So lieu o day la SONG: dai trang thai may chu den tu chinh bo dem tai ma cong gioi han
+// dang dung. Phuc vu bang file tinh thi trang se hien mot con so, con cong lai quyet dinh
+// theo mot con so khac.
 
 // formatInt chen dau cham phan cach hang nghin: 1234567 -> "1.234.567".
 func formatInt(n int64) string {
@@ -83,34 +83,3 @@ func (s *adapterServer) render(w http.ResponseWriter, name string, data map[stri
 		s.log.Error("render", "tpl", name, "err", err)
 	}
 }
-
-// home la trang chu cua game.
-func (s *adapterServer) home(w http.ResponseWriter, r *http.Request) {
-	servers := s.visibleServers()
-	online, _ := s.tracker.Fleet().Utilization()
-
-	// Goi y mot may chu con nhieu cho cho nguoi moi.
-	var recommended string
-	if d := s.tracker.Fleet().AdmitNew(); d.Allowed {
-		for _, sv := range servers {
-			if sv.Code == d.SrvCode {
-				recommended = sv.Name
-				break
-			}
-		}
-	}
-	s.render(w, "home.html", map[string]any{
-		"User": s.username(r), "Servers": servers, "OpenCount": len(servers),
-		"OnlineFmt": formatInt(int64(online)), "Recommended": recommended,
-		"IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
-	})
-}
-
-func (s *adapterServer) serversPage(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "servers.html", map[string]any{
-		"User": s.username(r), "Servers": s.visibleServers(),
-		"IDBase": strings.TrimRight(s.cfg.Issuer, "/"),
-	})
-}
-
-// Trang cua hang (/cua-hang) nam o store.go.
