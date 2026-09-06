@@ -40,7 +40,8 @@ var storeCategories = []storeCategory{
 	{"privilege", "Đặc quyền", "Mở tính năng hoặc quyền lợi lâu dài."},
 	{"daily", "Gói ngày", "Giới hạn số lần mỗi ngày và theo ngày mở máy chủ."},
 	{"limited", "Gói giới hạn", "Số suất có hạn, mỗi người mua một lần."},
-	{"event", "Gói sự kiện", "Chỉ mua được khi sự kiện đang mở trong game. Game từ chối thì Xu được hoàn ngay."},
+	{"event", "Gói sự kiện", "Chỉ mua được khi sự kiện đang mở trong game; game từ chối thì Xu được hoàn ngay. " +
+		"Tên các gói này lấy nguyên từ bảng cấu hình của game nên nhiều gói trùng tên nhau — đối chiếu mã gói và giá trước khi mua."},
 	{"item", "Vật phẩm", "Gửi qua thư trong game, nhận ở hòm thư."},
 }
 

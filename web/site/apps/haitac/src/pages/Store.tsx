@@ -93,7 +93,11 @@ export function Store() {
               </span>
             ) : null}
           </a>
-          {p.description ? <span className="mt-0.5 block text-[13px] text-fg-muted">{p.description}</span> : null}
+          {p.description ? (
+            <span className="mt-0.5 block text-[13px] text-fg-muted">{p.description}</span>
+          ) : (
+            <span className="mt-0.5 block font-mono text-[12px] text-fg-faint">mã {p.id}</span>
+          )}
         </>
       ),
     },
