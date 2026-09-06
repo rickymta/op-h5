@@ -39,21 +39,28 @@ Vì client không có mẫu, `getTplInfo(tid)` trả `undefined` và mã gọi �
 → sập. Đã chặn bằng chốt null trong bundle (xem `tools/va-tui-do-crash.py`): vật phẩm không
 hiện, nhưng giao diện không sập nữa.
 
-## Vì sao chưa chèn định nghĩa vào templates.bin
+## Đã chèn được — sau khi đọc đúng parser của client (2026-09-06, tối)
 
-Đã mổ được khá sâu:
+Bản đầu tôi mổ file bằng suy luận và dừng ở "2 byte đầu dòng không hiểu". Cách đúng là giải
+mã bảng chuỗi obfuscate của bundle (chỉ số = mã + `0x8c`) rồi đọc thẳng `parseData`:
 
-* Chuỗi lưu kiểu Java `writeUTF`: 2 byte độ dài big-endian + UTF-8. **Kể cả số cũng là chuỗi.**
-* Mỗi bảng: `<tên bảng>` → `<số dòng, 4 byte BE>` → `<độ dài khối tên cột, 2 byte BE>` →
-  `<khối tên cột>` → các dòng. Đã kiểm: `基础物品` khai 1070 dòng, khối cột 220 byte, đọc ra
-  đúng 16 tên cột và 220 byte — khớp tuyệt đối.
-* Mỗi dòng có **2 byte đứng đầu**. Đây là chỗ **chưa hiểu**: giá trị gần bằng độ dài dòng
-  nhưng lệch ±1…3 tuỳ dòng (chỉ 58/1070 dòng khớp đúng). Bộ đọc "16 ô cố định" cho dữ liệu
-  đúng, nhưng bộ đọc theo tiền tố thì trôi khỏi bảng.
+    name = readUTFString(); count = readInt32();
+    rows = count × readArrayBuffer(readInt16());     // int16 = độ dài phần ĐI SAU nó
 
-Đọc thì đủ, **ghi thì chưa**. Ghi sai 2 byte đó là client không tải được — đổi lấy hai dòng
-trong túi là cái giá sai. Cần hiểu nốt ngữ nghĩa 2 byte này (hoặc có bộ đóng gói của nhà
-phát hành) rồi mới chèn.
+`count` gồm cả dòng tiêu đề; lớp bảng lấy ô theo **chỉ số cột** từ dòng 0. Công cụ mới
+`tools/templates-bin.py` đọc/ghi theo khung này và có cổng kiểm **mô phỏng Laya.Byte** —
+file gốc qua, file hỏng cũ rớt đúng chỗ, bản chèn qua. Hai tool cũ (`chuan-hoa-templates.py`,
+`chen-vat-pham-client.py`) sinh file hỏng và đã bị xoá.
+
+Hai vật phẩm đã có trong client: `501124` "Gói tự chọn Tướng hiếm 14 sao", `500198` "Coin Thưởng".
+
+## Bài học đắt nhất: `/res/` cache `immutable 30d`
+
+Ghi đè tài nguyên **tại chỗ** là vô hình với người chơi đã tải nó một lần. Suốt nhiều đợt,
+người vận hành vẫn chạy bản gốc (vẫn thấy "5 Tinh anh hùng", "VNĐ") trong khi tôi tưởng bản
+sửa đang chạy; tới khi một lần tải mới kéo về bản hỏng thì game treo 5-6%. Deploy đúng:
+`tools/phat-hanh-res.py <tên logic> <file>` → tên băm mới + manifest trỏ sang; manifest và
+loader nay `no-cache` và được bust bằng `opManifestV` (play.php → a3b31 → loader).
 
 ## Cần xin nhà phát hành
 
