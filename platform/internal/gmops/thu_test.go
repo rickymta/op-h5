@@ -42,6 +42,11 @@ func consoleGia(t *testing.T, tuChoi map[string]bool) (*console.Client, *int) {
 			})
 			_, _ = w.Write([]byte(`{"errorcode":0,"errormsg":"成功","data":null}`))
 		case "/gm/mail/x/list":
+			// Console that chi nhan GET (POST -> "Request method 'POST' not supported").
+			if r.Method != http.MethodGet || r.URL.Query().Get("status") != "1" {
+				_, _ = w.Write([]byte(`{"errorcode":1,"errormsg":"Request method 'POST' not supported"}`))
+				return
+			}
 			var out struct {
 				Records []console.MailWhole `json:"records"`
 				Total   int                 `json:"total"`

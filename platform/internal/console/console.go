@@ -425,13 +425,19 @@ type MailEntityRow struct {
 }
 
 // MailListPending doc mot trang phieu thu dang cho duyet (status=1), ke ca cua nguoi khac.
+//
+// GET voi tham so tren URL (GmMailFilter bind tu query) — POST bi "Request method 'POST'
+// not supported". Console tra PageResult {page, pageSize, total, records, attachment}; moi
+// record co gmMailEntity (id, status...) va gmMailTars (srvCode, masterIdHex) — do that
+// tren console 2026-09-06.
 func (c *Client) MailListPending(ctx context.Context, beginIndex int) ([]MailWhole, int64, error) {
 	var out struct {
 		Records []MailWhole `json:"records"`
 		Total   int64       `json:"total"`
 	}
-	q := map[string]any{"status": 1, "viewAll": true, "noReward": false, "beginIndex": beginIndex}
-	if err := c.callAuthed(ctx, "/gm/mail/x/list", q, &out); err != nil {
+	q := url.Values{"status": {"1"}, "viewAll": {"true"}, "noReward": {"false"},
+		"beginIndex": {strconv.Itoa(beginIndex)}}
+	if err := c.getAuthed(ctx, c.BaseURL, "/gm/mail/x/list", q, &out); err != nil {
 		return nil, 0, err
 	}
 	return out.Records, out.Total, nil
