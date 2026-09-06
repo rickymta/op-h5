@@ -30,6 +30,10 @@ NGUON — file may chu nap, TRU ten vat pham lay theo client (xem duoi):
     loai 7  Than khi     immortal-artifact.xlsx 仙器基础
     loai 8  Manh than khi immortal-artifact.xlsx 仙器碎片
     loai 13 Suu tap      collection.xlsx 藏品基础
+    loai 14 Than khi nghe class-immortal-artifact.xlsx 职业仙器基础
+    loai 16 Than trang   divine-equipment.xlsx 神装
+    loai 20 Than long    divine-dragon.xlsx 神龙基础
+    loai 0  Vi           theo client (toItemId -> 基础物品), xem VI_VAT_PHAM
 
 Loai 0 la VI, khong co bang cau hinh nao dat ten. Chi liet ke ba dong doc duoc tu chinh
 cau hinh phat thuong (recharge-benefit): 0 Kim te, 1 Nguyen bao, 4 Kinh nghiem tuong.
@@ -75,6 +79,9 @@ NHOM = [
     (7, "Thần khí"),
     (8, "Mảnh thần khí"),
     (13, "Sưu tập"),
+    (14, "Thần khí nghề"),   # JOBFAIRY  class-immortal-artifact.xlsx 职业仙器基础
+    (16, "Thần trang"),      # GOD_OUTFIT divine-equipment.xlsx 神装
+    (20, "Thần long"),       # LOONG      divine-dragon.xlsx 神龙基础
 ]
 
 # Ba dong nay doc tu server/excel-src/recharge-benefit: cot '备注（道具名称）' dat canh
@@ -83,6 +90,14 @@ NHOM = [
 #   09.json  '0:4:5000000' -> 'Tướng kinh nghiệm'
 #   21.json  '0:0:1000000' -> 金币, tieng Viet trong item-table la 'Kim tệ'
 VI_TIEN = {0: "Kim tệ", 1: "Nguyên bảo", 4: "Kinh nghiệm tướng"}
+
+# Ten VI theo CLIENT: client ve moi loai tien bang mot vat pham ao trong 基础物品 (ham
+# toItemId trong bundle: M0->200003 "Beri", M1->200004 "Kim cuong", ...). Ma loai tien (cot
+# trai) la GDObj$Num cua may chu; chi liet ke loai ma thu phat duoc (MixResItem.addDirect):
+# vi, kinh nghiem, diem hoat dong, diem VIP. 18-20 la diem xep hang, khong phat qua thu.
+VI_VAT_PHAM = {0: 200003, 1: 200004, 2: 200011, 3: 200001, 4: 200002, 5: 200007, 6: 200014,
+               8: 200017, 10: 200012, 11: 200008, 12: 200006, 13: 200013, 14: 200009,
+               15: 200005, 16: 200016, 17: 200021}
 
 
 def mo(ten):
@@ -299,6 +314,13 @@ def gom():
                     "item-table.xlsm, co the la ten cua ban game khac" % e)
 
     if ten_client:
+        vi = []
+        for k, tid in sorted(VI_VAT_PHAM.items()):
+            ten = ten_client.get(str(tid)) or VI_TIEN.get(k)
+            if ten:
+                vi.append((k, ten, ""))
+        muc[0] = vi
+
         def theo_client(ds):
             doi = thieu = 0
             ra = []
@@ -336,6 +358,18 @@ def gom():
 
     wb, _ = mo("collection.xlsx")
     muc[13] = doc_sheet(wb, "藏品基础", "藏品ID", "藏品名称", them=("品质",))
+    wb.close()
+
+    wb, _ = mo("class-immortal-artifact.xlsx")
+    muc[14] = doc_sheet(wb, "职业仙器基础", "仙器ID", "名称", them=("品质",))
+    wb.close()
+
+    wb, _ = mo("divine-equipment.xlsx")
+    muc[16] = doc_sheet(wb, "神装", "神装ID", "名称", them=("品质",))
+    wb.close()
+
+    wb, _ = mo("divine-dragon.xlsx")
+    muc[20] = doc_sheet(wb, "神龙基础", "神龙ID", "神龙名称", them=("神龙星级",))
     wb.close()
     return muc, canh
 
@@ -395,7 +429,7 @@ def main():
             "hero.xlsx", "text-localization.xlsx", "equipment-table.xlsx", "item-table.xlsm",
             "rune.xlsx", "destiny.xlsx", "immortal-artifact.xlsx", "collection.xlsx"})},
         "nhom": [{"loai": t, "nhan": n} for t, n in NHOM],
-        "vi": {str(k): v for k, v in sorted(VI_TIEN.items())},
+        "vi": {str(k): ten for k, ten, _ in muc.get(0, [])} or {str(k): v for k, v in sorted(VI_TIEN.items())},
         "muc": dong,
     }
     with open(OUT, "w", encoding="utf-8") as f:

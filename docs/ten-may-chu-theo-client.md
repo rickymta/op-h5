@@ -20,6 +20,9 @@ Hai bộ bảng tên thuộc hai bản game khác nhau:
 | `命格基础.名称` (hồn ngọc) | | "Thiếu Lâm" | 70/70 |
 | `仙器基础` / `仙器碎片.名称` (thần khí) | | "Bách Phát Bách Trúng" | 2410 / 256 |
 | `藏品基础.藏品名称` (sưu tập) | | "Ngọc Nữ Tâm Kinh" | 143/143 |
+| `职业仙器基础.名称` (thần khí nghề) | "Tank" | "Ngoại Công" | 200/200 |
+| `神装.名称` (thần trang) | "Fire · Taurus" | "Thanh Long · Kiếm" | 1440/1440 |
+| `神龙基础.神龙名称` (thần long) | "Hải Quái-Phá" | "Mai Siêu Phong" | 560/560 |
 
 Đã quyết: **client là đúng** (e41d043). Máy chủ phải theo.
 
@@ -33,10 +36,17 @@ Hán không đụng.
 ```bash
 python3 tools/dong-bo-ten-server.py --check
 python3 tools/dong-bo-ten-server.py
-python3 tools/json-to-excel.py text-localization equipment-table rune destiny immortal-artifact collection --out server/excel/release
+python3 tools/json-to-excel.py text-localization equipment-table rune destiny immortal-artifact collection class-immortal-artifact divine-equipment divine-dragon --out server/excel/release
 # kiểm bằng parser thật (JDK 8 trong Docker, không cần Java trên máy):
 docker run --rm -v "$PWD:/w" -w /w eclipse-temurin:8-jdk-jammy sh -c 'javac -proc:none -encoding UTF-8 -cp "server/game/tcg-game.jar:server/game/lib/*" -d build/probe tools/ExcelProbe.java && java -cp "server/game/tcg-game.jar:server/game/lib/*:build/probe" ExcelProbe server/excel/release/text-localization.xlsx com.ososx.tcg.game.config.i18n.LangExcel'
 python3 tools/gen-danh-muc-game.py     # danh mục cổng GM (đọc xlsx đã đồng bộ)
+```
+
+Danh mục cổng GM phủ mọi loại mà thư phát được (`GDObj$Type` trong `tcg-game.jar`): ví (16 loại
+tiền, tên theo client qua `toItemId`), tướng, trang bị, vật phẩm, mảnh, bí kíp, hồn ngọc, thần
+khí, mảnh thần khí, sưu tập, thần khí nghề (14), thần trang (16), thần long (20) — 8801 mục.
+
+```bash
 ```
 
 Excel nằm **trong image** `op-h5-server`, nên bản chính thức đi theo commit → CI → deploy

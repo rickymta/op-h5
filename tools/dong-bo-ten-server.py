@@ -19,6 +19,9 @@ NGUON -> DICH (chi id co o CA HAI ben, chi ghi khi khac, khong dong header/cot c
     templates.bin 仙器基础.名称        -> server/excel-src/immortal-artifact  仙器基础.名称
     templates.bin 仙器碎片.名称        -> server/excel-src/immortal-artifact  仙器碎片.名称
     templates.bin 藏品基础.藏品名称    -> server/excel-src/collection         藏品基础.藏品名称
+    templates.bin 职业仙器基础.名称    -> server/excel-src/class-immortal-artifact 职业仙器基础.名称
+    templates.bin 神装.名称            -> server/excel-src/divine-equipment   神装.名称
+    templates.bin 神龙基础.神龙名称    -> server/excel-src/divine-dragon      神龙基础.神龙名称
     templates.bin 基础物品.名称        -> server/excel/release/item-table.xlsm 基础物品.名称  (va XML, khong qua openpyxl)
     templates.bin 碎片.名称            -> server/excel/release/item-table.xlsm 碎片.名称
 
@@ -27,7 +30,7 @@ cua sheet: chi doi <v> cua dung o ten (shared string moi), moi thu khac giu nguy
 O co cong thuc thi bo qua va bao.
 
 SAU KHI CHAY
-    python3 tools/json-to-excel.py text-localization equipment-table rune destiny immortal-artifact collection --out server/excel/release
+    python3 tools/json-to-excel.py text-localization equipment-table rune destiny immortal-artifact collection class-immortal-artifact divine-equipment divine-dragon --out server/excel/release
     (kiem bang ExcelProbe)  ->  commit  ->  image server. Hieu luc ngay: docker cp vao container game
     roi RESTART container — DUNG goi excel/reload: heap game da cat, reload lam JVM chet OOM (2026-09-06).
     python3 tools/gen-danh-muc-game.py      # danh muc cong GM doc tu xlsx da dong bo
@@ -53,6 +56,9 @@ JSON_MAP = [
     ("仙器基础", "名称", "immortal-artifact", "仙器基础", "名称"),
     ("仙器碎片", "名称", "immortal-artifact", "仙器碎片", "名称"),
     ("藏品基础", "藏品名称", "collection", "藏品基础", "藏品名称"),
+    ("职业仙器基础", "名称", "class-immortal-artifact", "职业仙器基础", "名称"),   # loai 14 JOBFAIRY
+    ("神装", "名称", "divine-equipment", "神装", "名称"),                        # loai 16 GOD_OUTFIT
+    ("神龙基础", "神龙名称", "divine-dragon", "神龙基础", "神龙名称"),            # loai 20 LOONG
 ]
 XLSM_MAP = [("基础物品", "名称", "基础物品", "名称"), ("碎片", "名称", "碎片", "名称")]
 
