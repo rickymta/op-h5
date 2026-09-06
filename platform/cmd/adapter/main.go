@@ -169,7 +169,7 @@ func main() {
 	// Bo mat cua game cho trang React (meta.go).
 	mux.HandleFunc("GET /api/game/meta", srv.gameMeta)
 	mux.HandleFunc("GET /api/game/news", srv.gameNews)
-	mux.HandleFunc("GET /api/game/news/{id}", srv.gameNewsDetail)
+	mux.HandleFunc("GET /api/game/news/{key}", srv.gameNewsDetail)
 	mux.HandleFunc("GET /api/game/me", srv.gameMe)
 	mux.HandleFunc("GET /api/game/servers", srv.listServers)
 	mux.HandleFunc("POST /api/game/session", srv.createSession)

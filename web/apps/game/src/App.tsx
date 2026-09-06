@@ -123,7 +123,7 @@ export function App() {
         <Route path="/cua-hang" component={Store} />
         <Route path="/cua-hang/:id">{(p) => <Package id={p.id ?? ""} />}</Route>
         <Route path="/tin-tuc" component={News} />
-        <Route path="/tin-tuc/:id" component={NewsDetail} />
+        <Route path="/tin-tuc/:key" component={NewsDetail} />
         <Route path="/gioi-thieu" component={About} />
         <Route path="/huong-dan" component={Guide} />
         <Route path="/faq" component={Faq} />

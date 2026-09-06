@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
@@ -85,5 +88,52 @@ func TestNewsInputValidate(t *testing.T) {
 		if _, err := in.validate(); err == nil {
 			t.Errorf("truong hop %d phai bi tu choi: %+v", i, in)
 		}
+	}
+}
+
+// Slug: de trong thi sinh tu tieu de (bo dau), go tay thi ha chu thuong roi kiem khuon.
+func TestNewsInputSlug(t *testing.T) {
+	v, err := newsInput{Title: "Ví Xu dùng chung cho mọi game"}.validate()
+	if err != nil || v.Slug != "vi-xu-dung-chung-cho-moi-game" {
+		t.Errorf("slug sinh tu tieu de sai: %q %v", v.Slug, err)
+	}
+	v, err = newsInput{Title: "Tin", Slug: "  Vi-Xu-Chung  "}.validate()
+	if err != nil || v.Slug != "vi-xu-chung" {
+		t.Errorf("slug go tay phai duoc ha chu thuong va cat khoang trang: %q %v", v.Slug, err)
+	}
+	// Tieu de khong con ky tu latin nao van phai dang duoc: slug du phong theo moc thoi gian.
+	v, err = newsInput{Title: "新年快乐"}.validate()
+	if err != nil || !strings.HasPrefix(v.Slug, "tin-") {
+		t.Errorf("phai co slug du phong: %q %v", v.Slug, err)
+	}
+	for i, in := range []newsInput{
+		{Title: "x", Slug: "co dau cach"},
+		{Title: "x", Slug: "-dau-gach"},
+		{Title: "x", Slug: "tiếng-việt"},
+		{Title: "x", Slug: "2026"}, // toan chu so: bi tra cuu theo id che mat
+		{Title: "x", Slug: strings.Repeat("a", 97)},
+	} {
+		if _, err := in.validate(); err == nil {
+			t.Errorf("slug xau %d phai bi tu choi: %q", i, in.Slug)
+		}
+	}
+}
+
+// Trung slug: nhan ra loi 1062 tren uq_news_slug va tra 409 kem thong bao tieng Viet co ten
+// duong dan — nguoi truc phai biet doi cai gi, khong phai doan.
+func TestSlugConflict(t *testing.T) {
+	if !slugTaken(errors.New("Error 1062 (23000): Duplicate entry 'vi-xu' for key 'news.uq_news_slug'")) {
+		t.Error("phai nhan ra loi trung slug")
+	}
+	if slugTaken(errors.New("Error 1062 (23000): Duplicate entry 'x' for key 'games.PRIMARY'")) {
+		t.Error("trung khoa khac khong duoc bao la trung slug")
+	}
+	rec := httptest.NewRecorder()
+	slugConflict(rec, "vi-xu")
+	if rec.Code != http.StatusConflict {
+		t.Errorf("ma tra ve %d, muon 409", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "vi-xu") {
+		t.Errorf("than tra loi phai nhac slug bi trung: %s", rec.Body.String())
 	}
 }

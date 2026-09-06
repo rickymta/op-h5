@@ -12,8 +12,9 @@
 #        game_devices   <- tcg.srv_game.device_code (+ ten tu tcg.cloud_device), max_online 1600
 #        game_servers   <- tcg.srv_game (code, name, device_code, ws_port); khong co tcg -> GAME_SERVERS
 #        game_packages  <- /seed/data/game_packages.<game>.sql (sinh boi tools/gen-game-packages.py)
-#        news           <- /seed/data/news.<game>.sql — tin mau, file tu chan: chi chen khi
-#                          bang `news` con TRONG, nen chay lai khong nhan ban
+#        news           <- MOI /seed/data/news.*.sql theo thu tu ten. Cac file dung
+#                          `INSERT ... ON DUPLICATE KEY UPDATE` tren `slug` (UNIQUE tu migration
+#                          0012) nen chay lai la cap nhat, khong nhan ban bai
 #   Tai khoan quan tri dau tien do `admin` tu tao tu ADMIN_BOOTSTRAP_USER/PASSWORD (khi bang trong).
 #
 # Chay tay ngoai compose (may co client mysql):
@@ -156,24 +157,39 @@ else
   echo "[seed] khong co $PKG — bo qua game_packages (sinh bang tools/gen-game-packages.py)"
 fi
 
-# 3e) tin mau (bang news, migration 0010). File tu chan: chi chen khi bang con TRONG, nen chay
-#     lai seed khong nhan ban tin va khong ghi de tin nguoi van hanh da soan o trang quan tri.
-NEWS="$SEED_DIR/news.$GAME.sql"
-if [ -f "$NEWS" ]; then
-  has_news_tbl=1
-  if [ "$PRINT" = 0 ]; then
-    has_news_tbl=$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB' AND table_name='news';" 2>/dev/null || echo 0)
-  fi
-  if [ "${has_news_tbl:-0}" -ge 1 ]; then
+# 3e) bai viet (bang news, migration 0010 + 0012). Nap MOI file news.*.sql theo thu tu ten, khong
+#     chi news.<game>.sql: bai viet duoc chia thanh nhieu file (tin chung cua cong, tin cua tung
+#     game, tung dot noi dung) va them mot dot bai moi phai la them mot file, khong phai sua file
+#     cu. Thu tu ten quyet dinh thu tu nap, nen dat tien to so neu can ("news.01-chung.sql").
+#
+#     Cac file dung `INSERT ... ON DUPLICATE KEY UPDATE` tren cot `slug` (UNIQUE tu migration
+#     0012) nen chay lai seed la CAP NHAT dung bai do chu khong nhan ban. Doi lai: seed la nguon
+#     su that cua nhung bai nay — sua chung o trang quan tri thi lan seed sau se ghi de. Bai do
+#     nguoi van hanh tu soan (khong co trong file seed nao) thi khong bi dung toi.
+#
+#     Doi cot `slug` truoc khi nap: image `id` cu chua co migration 0012 thi ON DUPLICATE KEY
+#     khong co khoa nao de bam vao, va moi lan seed se chen them mot ban sao cua ca 50 bai.
+has_news_tbl=1
+if [ "$PRINT" = 0 ]; then
+  for ((t=0; t<60; t+=5)); do
+    has_news_tbl=$(sql "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$DB' AND table_name='news' AND column_name='slug';" 2>/dev/null || echo 0)
+    [ "${has_news_tbl:-0}" -ge 1 ] && break
+    sleep 5
+  done
+fi
+if [ "${has_news_tbl:-0}" -ge 1 ]; then
+  news_n=0
+  for NEWS in "$SEED_DIR"/news.*.sql; do
+    [ -f "$NEWS" ] || continue                      # glob khong khop -> giu nguyen chuoi, bo qua
+    news_n=$((news_n + 1))
     if [ "$PRINT" = 1 ]; then echo "-- [$DB] < $NEWS"; else
       mysql -h"$DB_HOST" -P"$DB_PORT" -uroot --default-character-set=utf8mb4 "$DB" < "$NEWS"
-      echo "[seed] news nap tu $NEWS (chi chen khi bang con trong)"
+      echo "[seed] bai viet nap tu $NEWS"
     fi
-  else
-    echo "[seed] CANH BAO: chua co bang 'news' (migration 0010) — bo qua tin mau; pull/build lai id" >&2
-  fi
+  done
+  [ "$news_n" -gt 0 ] || echo "[seed] khong co $SEED_DIR/news.*.sql — bo qua bai viet"
 else
-  echo "[seed] khong co $NEWS — bo qua tin mau"
+  echo "[seed] CANH BAO: bang 'news' chua co cot 'slug' (migration 0012) — bo qua bai viet; pull/build lai id" >&2
 fi
 
 [ "$PRINT" = 1 ] && exit 0

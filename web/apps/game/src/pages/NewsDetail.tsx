@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { Empty, LinkButton, formatDate } from "@op/ui/publisher";
 import { ApiError, api, type NewsDetail as NewsDetailT } from "../api";
 import { useMeta, useTitle } from "../queries";
@@ -8,16 +8,26 @@ import { Loading, Paragraphs, QueryError } from "../parts";
 
 const KIND_LABEL: Record<string, string> = { news: "Tin", event: "Sự kiện", notice: "Thông báo" };
 
-/** Một tin: eyebrow (thể loại · game · ngày), tiêu đề, ảnh, tóm tắt, thân theo đoạn, liên kết ngoài nếu có. */
+/**
+ * Một tin: eyebrow (thể loại · game · ngày), tiêu đề, ảnh, tóm tắt, thân theo đoạn, liên kết ngoài nếu có.
+ *
+ * `:key` là slug hoặc id — liên kết cũ `/tin-tuc/12` vẫn mở đúng bài. Vào bằng id mà bài có slug
+ * thì đổi đường dẫn tại chỗ (replace) sang slug, không đẩy thêm một mục vào lịch sử duyệt.
+ */
 export function NewsDetail() {
-  const { id = "" } = useParams<{ id: string }>();
+  const { key = "" } = useParams<{ key: string }>();
+  const [, navigate] = useLocation();
   const meta = useMeta();
   const q = useQuery({
-    queryKey: ["news-item", id],
-    queryFn: () => api.get<NewsDetailT>(`/api/game/news/${encodeURIComponent(id)}`),
-    enabled: id !== "",
+    queryKey: ["news-item", key],
+    queryFn: () => api.get<NewsDetailT>(`/api/game/news/${encodeURIComponent(key)}`),
+    enabled: key !== "",
     staleTime: 5 * 60_000,
   });
+  const canonical = q.data?.canonical_slug;
+  useEffect(() => {
+    if (canonical && canonical !== key) navigate(`/tin-tuc/${canonical}`, { replace: true });
+  }, [canonical, key, navigate]);
   const [imgBad, setImgBad] = useState(false);
   const name = meta.data?.name;
   const n = q.data;

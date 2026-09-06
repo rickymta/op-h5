@@ -53,7 +53,7 @@ export function errText(e: unknown): string {
 
 export interface Site {
   brand: string;
-  notice: { id: number; title: string; link_url: string } | null;
+  notice: { id: number; slug: string; title: string; link_url: string } | null;
   support_url: string;
   fanpage_url: string;
   topup_url: string;     // rỗng = chưa có cổng nạp
@@ -93,6 +93,7 @@ export type NewsKind = "news" | "event" | "notice";
 
 export interface NewsItem {
   id: number;
+  slug: string;          // đường dẫn chữ: /tin-tuc/<slug>
   game_code: string | null;
   game_name: string;
   kind: NewsKind;
@@ -106,6 +107,8 @@ export interface NewsItem {
 
 export interface NewsDetail extends NewsItem {
   body: string;          // văn bản thuần; đoạn cách nhau bằng dòng trống
+  /** Chỉ có khi vào bằng id mà bài đã có slug: trang tự đổi đường dẫn trên thanh địa chỉ. */
+  canonical_slug?: string;
 }
 
 export const NEWS_KIND_LABEL: Record<NewsKind, string> = { news: "Tin", event: "Sự kiện", notice: "Thông báo" };

@@ -25,7 +25,9 @@ nguồn thật và có test.
 + thông báo ghim), `GET /api/games` (game `active`, game `featured` lên đầu; `online`/`servers_open`
 hỏi `GET <adapter_url>/api/game/servers` với timeout 3 s, **cache 30 s mỗi Adapter**, chống dồn;
 Adapter chết thì `live:false`; URL ảnh tương đối được ghép với `site_url`), `GET /api/news`,
-`GET /api/news/{id}`. API có phiên: `POST /api/login`, `/api/logout`, `GET /api/me` (mở rộng),
+`GET /api/news/{key}` (`key` là **slug hoặc id**: toàn chữ số thì tra id trước rồi tới slug, nên
+liên kết cũ `/tin-tuc/12` vẫn mở được; vào bằng id mà bài có slug thì trả thêm `canonical_slug`
+để trang tự đổi đường dẫn — không chuyển hướng phía máy chủ vì trang là SPA). API có phiên: `POST /api/login`, `/api/logout`, `GET /api/me` (mở rộng),
 `POST /api/me/email`, `GET /api/me/games`, `GET /api/me/orders?limit=` (đơn mua ở **mọi** game),
 `GET /api/me/sessions` + `POST …/revoke-others`, `GET /api/wallet/history?kind=&page=&page_size=`,
 `GET /api/wallet/summary` (số dư + tổng đã nạp / đã đổi / đã hoàn + số đơn theo trạng thái, đọc
@@ -58,7 +60,8 @@ quản trị → Game) qua `GET /api/game/meta` — kèm `recommended` (máy ch�
 `AdmitNew` mà cổng dùng), `servers_open`, `online`, `brand`, `id_base`. Tiêu đề thư cửa hàng
 mặc định `"Cửa hàng " + tên game`. Ảnh thương hiệu đặt ở `ASSETS_DIR/brand/<game>/…`, nginx phục vụ
 `/brand/`; URL trong bảng có thể tương đối so với `site_url`. Tin của game + tin chung:
-`GET /api/game/news?limit=`, `GET /api/game/news/{id}`; trạng thái đăng nhập: `GET /api/game/me`.
+`GET /api/game/news?limit=`, `GET /api/game/news/{key}` (slug hoặc id, như bên `id`); trạng thái
+đăng nhập: `GET /api/game/me`.
 
 **Cửa hàng.** `GET /api/game/packages` giữ khuôn cũ (`{categories:[…]}`) và nhận thêm
 `?q=&cat=&sort=price_asc|price_desc|popular&page=&page_size=`; có bất kỳ tham số nào trong nhóm đó

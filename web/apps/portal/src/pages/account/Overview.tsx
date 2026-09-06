@@ -34,7 +34,7 @@ export function Overview() {
       {site.data?.notice && (
         <Msg tone="warn">
           <b>Thông báo:</b> {site.data.notice.title}{" "}
-          <a href={site.data.notice.link_url || `/tin-tuc/${site.data.notice.id}`}>Xem →</a>
+          <a href={site.data.notice.link_url || `/tin-tuc/${site.data.notice.slug || site.data.notice.id}`}>Xem →</a>
         </Msg>
       )}
 

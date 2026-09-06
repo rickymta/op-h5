@@ -141,7 +141,7 @@ func main() {
 	mux.HandleFunc("GET /api/site", api.apiSite)
 	mux.HandleFunc("GET /api/games", api.apiGames)
 	mux.HandleFunc("GET /api/news", api.apiNews)
-	mux.HandleFunc("GET /api/news/{id}", api.apiNewsDetail)
+	mux.HandleFunc("GET /api/news/{key}", api.apiNewsDetail)
 	mux.HandleFunc("GET /api/pages/{slug}", api.apiPage)
 	// --- tai khoan & vi (api.go, account.go, pages.go) ---
 	mux.HandleFunc("POST /api/register", api.register)

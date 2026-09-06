@@ -171,6 +171,7 @@ export type NewsKind = "news" | "event" | "notice";
 
 export interface News {
   id: number;
+  slug: string;             // đường dẫn chữ của bài: /tin-tuc/<slug>
   game_code: string | null; // null = tin chung của nền tảng
   game_name: string;
   kind: NewsKind;
@@ -196,6 +197,7 @@ export interface NewsResponse {
 /** Thân gửi lên POST /api/news và /api/news/{id}. `published_at` bỏ trống thì không gửi. */
 export interface NewsInput {
   game_code: string | null;
+  slug: string;             // để trống: máy chủ tự sinh từ tiêu đề (bỏ dấu tiếng Việt)
   kind: NewsKind;
   title: string;
   summary: string;

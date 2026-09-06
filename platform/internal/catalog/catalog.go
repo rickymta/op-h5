@@ -128,6 +128,7 @@ func ValidBadge(b string) bool {
 // NewsItem la mot tin da xuat ban theo khuon tra ve cho trang cong khai (hop dong 4.2 / 4.4).
 type NewsItem struct {
 	ID          int64  `json:"id"`
+	Slug        string `json:"slug"`      // duong dan chu; rong voi bai cu chua dat (migration 0012)
 	GameCode    string `json:"game_code"` // rong = tin chung cua nen tang
 	GameName    string `json:"game_name"`
 	Kind        string `json:"kind"`
@@ -145,6 +146,10 @@ type NewsItem struct {
 type NewsDetail struct {
 	NewsItem
 	Body string `json:"body"`
+	// CanonicalSlug chi co khi nguoi doc vao bang ID ma bai da co slug: bao trang web thay
+	// duong dan tren thanh dia chi. Khong chuyen huong o may chu vi trang la SPA — mot cai
+	// 301 se lam trinh duyet tai lai ca bundle chi de doi mot dong URL.
+	CanonicalSlug string `json:"canonical_slug,omitempty"`
 }
 
 // NewsFilter loc tin cong khai.
@@ -154,15 +159,21 @@ type NewsFilter struct {
 	Limit int    // <= 0 -> 10; toi da 50
 }
 
-const newsColumns = `n.id, COALESCE(n.game_code,''), COALESCE(g.name,''), n.kind, n.title, n.summary,
+const newsColumns = `n.id, n.slug, COALESCE(n.game_code,''), COALESCE(g.name,''), n.kind, n.title, n.summary,
 	n.image_url, n.link_url, n.pinned, n.published_at, COALESCE(g.site_url,'')`
+
+// gameScopeCond: tin cua game nay HOAC tin chung. Tin chung la game_code NULL (cach trang quan
+// tri ghi) HOAC chuoi rong (cach cac file seed ghi — mot cot NOT NULL trong file .sql de doc
+// hon mot cot NULL). COALESCE gom ca hai ve mot moi; bang news chi vai tram dong nen viec
+// khong dung duoc idx_news_game o day khong dang ke.
+const gameScopeCond = `COALESCE(n.game_code,'') IN (?, '')`
 
 // publishedCond: chi tin da xuat ban VA da toi gio — published_at o tuong lai la hen gio dang.
 const publishedCond = `n.status = 'published' AND n.published_at IS NOT NULL AND n.published_at <= NOW()`
 
 func scanNewsInto(row scanner, it *NewsItem, extra ...any) error {
 	var at sql.NullTime
-	dest := []any{&it.ID, &it.GameCode, &it.GameName, &it.Kind, &it.Title, &it.Summary,
+	dest := []any{&it.ID, &it.Slug, &it.GameCode, &it.GameName, &it.Kind, &it.Title, &it.Summary,
 		&it.ImageURL, &it.LinkURL, &it.Pinned, &at, &it.SiteURL}
 	dest = append(dest, extra...)
 	if err := row.Scan(dest...); err != nil {
@@ -179,7 +190,7 @@ func PublishedNews(ctx context.Context, q Querier, f NewsFilter) ([]NewsItem, er
 	where := `WHERE ` + publishedCond
 	var args []any
 	if f.Game != "" {
-		where += ` AND (n.game_code = ? OR n.game_code IS NULL)`
+		where += ` AND ` + gameScopeCond
 		args = append(args, f.Game)
 	}
 	if f.Kind != "" {
@@ -211,13 +222,14 @@ func PublishedNews(ctx context.Context, q Querier, f NewsFilter) ([]NewsItem, er
 	return out, rows.Err()
 }
 
-// PublishedNewsByID tra ve mot tin da xuat ban kem noi dung. game != "" thi tin phai thuoc game
-// do hoac la tin chung — trang cua game A khong hien tin rieng cua game B.
-func PublishedNewsByID(ctx context.Context, q Querier, id int64, game string) (NewsDetail, error) {
-	where := `WHERE n.id = ? AND ` + publishedCond
-	args := []any{id}
+// publishedNewsOne doc mot tin da xuat ban kem noi dung, loc theo `cond` (n.id = ? hoac
+// n.slug = ?). game != "" thi tin phai thuoc game do hoac la tin chung — trang cua game A
+// khong hien tin rieng cua game B.
+func publishedNewsOne(ctx context.Context, q Querier, cond string, key any, game string) (NewsDetail, error) {
+	where := `WHERE ` + cond + ` AND ` + publishedCond
+	args := []any{key}
 	if game != "" {
-		where += ` AND (n.game_code = ? OR n.game_code IS NULL)`
+		where += ` AND ` + gameScopeCond
 		args = append(args, game)
 	}
 	var d NewsDetail
@@ -228,6 +240,48 @@ func PublishedNewsByID(ctx context.Context, q Querier, id int64, game string) (N
 		return d, ErrNotFound
 	}
 	return d, err
+}
+
+// PublishedNewsByKey doc mot tin theo KHOA trong URL: slug ("vi-xu-dung-chung") hoac id ("12").
+//
+// Toan chu so thi tra ID TRUOC — moi lien ket cu /tin-tuc/12 con song phai tiep tuc mo dung
+// bai do, ke ca khi ve sau co ai dat slug "12" cho bai khac. Khong co id do thi moi thu nhu
+// slug, vi mot file seed hoan toan co the dat slug toan chu so.
+//
+// Vao bang id ma bai da co slug thi dat CanonicalSlug de trang web tu doi duong dan.
+func PublishedNewsByKey(ctx context.Context, q Querier, key, game string) (NewsDetail, error) {
+	id, slug := splitNewsKey(key)
+	if id > 0 {
+		d, err := publishedNewsOne(ctx, q, `n.id = ?`, id, game)
+		switch {
+		case err == nil:
+			d.CanonicalSlug = d.Slug
+			return d, nil
+		case !errors.Is(err, ErrNotFound):
+			return d, err
+		}
+	}
+	if slug == "" {
+		return NewsDetail{}, ErrNotFound
+	}
+	return publishedNewsOne(ctx, q, `n.slug = ?`, slug, game)
+}
+
+// splitNewsKey tach khoa trong URL thanh hai duong tra cuu: id (0 = khong phai so duong) va
+// slug ("" = khong dung hinh mot slug). Khoa toan chu so cho ra CA HAI — ben goi thu id truoc.
+func splitNewsKey(key string) (int64, string) {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return 0, ""
+	}
+	var id int64
+	if n, err := strconv.ParseInt(key, 10, 64); err == nil && n > 0 {
+		id = n
+	}
+	if !slugShape(key) {
+		return id, ""
+	}
+	return id, key
 }
 
 // LatestNotice: thong bao ghim moi nhat (kind='notice', pinned=1, da xuat ban) cho thanh thong bao

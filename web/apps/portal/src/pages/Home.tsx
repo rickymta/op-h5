@@ -6,9 +6,14 @@ import { useMe, useSite } from "../lib/session";
 import { RichText } from "../lib/content";
 import { FAQ_ITEMS, WHY_ITEMS } from "../content/home";
 
-/** Đường tới tin: có `link_url` thì ra ngoài, không thì trang chi tiết trong cổng. */
+/**
+ * Đường tới tin: có `link_url` thì ra ngoài, không thì trang chi tiết trong cổng.
+ *
+ * Ưu tiên slug — `/tin-tuc/vi-xu-dung-chung` nói cho người đọc biết bài viết gì, `/tin-tuc/12`
+ * thì không. Bài cũ chưa có slug vẫn đi theo id, và API nhận cả hai nên không có liên kết nào gãy.
+ */
 export function newsHref(n: NewsItem): string {
-  return n.link_url || `/tin-tuc/${n.id}`;
+  return n.link_url || `/tin-tuc/${n.slug || n.id}`;
 }
 
 /**
