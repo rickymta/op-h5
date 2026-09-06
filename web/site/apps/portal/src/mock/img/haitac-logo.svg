@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="140" viewBox="0 0 420 140">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6a8"/><stop offset="1" stop-color="#D9A945"/></linearGradient></defs>
+  <text x="210" y="70" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="58" font-weight="900" fill="url(#g)" stroke="#3a2a10" stroke-width="2" letter-spacing="2">ĐẠI HẢI TRÌNH</text>
+  <text x="210" y="112" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#F2F5F7" letter-spacing="8">ONE PIECE H5</text>
+</svg>

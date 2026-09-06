@@ -1,0 +1,45 @@
+{
+  "games": [
+    {
+      "code": "haitac",
+      "name": "Đại Hải Trình",
+      "tagline": "Ra khơi cùng băng hải tặc của riêng bạn",
+      "genre": "Đấu tướng · Idle",
+      "description": "Thu thập hơn 200 hải tặc, lập băng, chinh phục Grand Line. Chơi ngay trên trình duyệt, không cần tải.",
+      "cover_url": "/src/mock/img/haitac-cover.svg",
+      "banner_url": "/src/mock/img/haitac-banner.svg",
+      "logo_url": "/src/mock/img/haitac-logo.svg",
+      "accent": "#EE4623",
+      "badge": "hot",
+      "featured": true,
+      "site_url": "http://haitac.localhost",
+      "play_url": "http://haitac.localhost/choi-game",
+      "servers_url": "http://haitac.localhost/may-chu",
+      "online": 1284,
+      "servers_open": 5,
+      "live": true
+    },
+    {
+      "code": "tamquoc",
+      "name": "Tam Quốc Chí",
+      "tagline": "Mưu lược định thiên hạ",
+      "genre": "Chiến thuật · SLG",
+      "description": "",
+      "cover_url": "",
+      "banner_url": "",
+      "logo_url": "",
+      "accent": "",
+      "badge": "new",
+      "featured": false,
+      "site_url": "http://tamquoc.localhost",
+      "play_url": "http://tamquoc.localhost/choi-game",
+      "servers_url": "http://tamquoc.localhost/may-chu",
+      "online": 0,
+      "servers_open": 0,
+      "live": false
+    }
+  ],
+  "online_total": 1284,
+  "servers_open_total": 5,
+  "featured": "haitac"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@op/site-portal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5275",
+    "dev:mock": "VITE_MOCK=1 vite --port 5275",
+    "build": "node ../../../scripts/clean-dist.mjs ../../../../platform/cmd/id/dist && vite build",
+    "preview": "vite preview --port 5275"
+  },
+  "dependencies": {
+    "@op/site-ui": "^0.0.0",
+    "@tanstack/react-query": "^5.102.8",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "wouter": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.5.5",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.19"
+  }
+}

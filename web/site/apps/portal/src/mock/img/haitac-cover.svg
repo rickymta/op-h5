@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3a5c"/><stop offset="1" stop-color="#0B0F14"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e6b8f"/><stop offset="1" stop-color="#0b2a3f"/></linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg)"/>
+  <circle cx="440" cy="200" r="90" fill="#ffd27a" fill-opacity="0.35"/>
+  <path d="M0 520 Q 150 490 300 520 T 600 520 V800 H0Z" fill="url(#sea)"/>
+  <g transform="translate(150 330)">
+    <path d="M0 170 L300 170 L265 230 L35 230 Z" fill="#3b2415"/>
+    <rect x="140" y="-60" width="12" height="240" fill="#5a3a22"/>
+    <path d="M152 -50 L290 60 L152 110 Z" fill="#e8dcc4"/>
+    <path d="M138 -40 L20 70 L138 120 Z" fill="#d9c9a8"/>
+    <path d="M146 -85 L192 -70 L146 -55 Z" fill="#EE4623"/>
+  </g>
+  <text x="300" y="720" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="52" fill="#D9A945" stroke="#3a2a10" stroke-width="2">ĐẠI HẢI TRÌNH</text>
+</svg>
