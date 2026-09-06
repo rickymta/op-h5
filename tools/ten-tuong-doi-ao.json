@@ -1,0 +1,885 @@
+{
+ "_doc": [
+  "Bang doi ten tuong khi game bi thay ao: ten BAN GOC -> ten ban dang chay.",
+  "'han' tra theo chu Han trong bang cau hinh goc; 'viet_cu' tra theo ban dich",
+  "cu (cot *英雄名 cua hero.xlsx, va cac file chep tay tu ban do nhu pay.txt).",
+  "'bo_qua' la ten mot-nhieu — KHONG doi tu dong, phai xu ly tay.",
+  "Sinh boi tools/gen-danh-muc-game.py; dung sua tay."
+ ],
+ "han": {
+  "10星英雄": "10 Tinh tướng",
+  "10星英雄_人": "10 Tinh tướng _ Người",
+  "10星英雄_仙": "10 Tinh tướng _ Tiên",
+  "10星英雄_妖": "10 Tinh tướng _ Yêu",
+  "10星英雄_混沌": "10 Tinh tướng _ Hỗn độn",
+  "10星英雄_神": "10 Tinh tướng _ Thần",
+  "10星英雄_魔": "10 Tinh tướng _ Ma",
+  "3星英雄": "3 Tinh tướng",
+  "3星英雄_人": "3 Tinh tướng _ Người",
+  "3星英雄_仙": "3 Tinh tướng _ Tiên",
+  "3星英雄_妖": "3 Tinh tướng _ Yêu",
+  "3星英雄_混沌": "3 Tinh tướng _ Hỗn độn",
+  "3星英雄_神": "3 Tinh tướng _ Thần",
+  "3星英雄_魔": "3 Tinh tướng _ Ma",
+  "4星英雄": "4 Tinh tướng",
+  "4星英雄_人": "4 Tinh tướng _ Người",
+  "4星英雄_仙": "4 Tinh tướng _ Tiên",
+  "4星英雄_妖": "4 Tinh tướng _ Yêu",
+  "4星英雄_混沌": "4 Tinh tướng _ Hỗn độn",
+  "4星英雄_神": "4 Tinh tướng _ Thần",
+  "4星英雄_魔": "4 Tinh tướng _ Ma",
+  "5星英雄": "5 Tinh tướng",
+  "5星英雄_人": "5 Tinh tướng _ Người",
+  "5星英雄_仙": "5 Tinh tướng _ Tiên",
+  "5星英雄_妖": "5 Tinh tướng _ Yêu",
+  "5星英雄_混沌": "5 Tinh tướng _ Hỗn độn",
+  "5星英雄_神": "5 Tinh tướng _ Thần",
+  "5星英雄_魔": "5 Tinh tướng _ Ma",
+  "6星英雄": "6 Tinh tướng",
+  "6星英雄_人": "6 Tinh tướng _ Người",
+  "6星英雄_仙": "6 Tinh tướng _ Tiên",
+  "6星英雄_妖": "6 Tinh tướng _ Yêu",
+  "6星英雄_混沌": "6 Tinh tướng _ Hỗn độn",
+  "6星英雄_神": "6 Tinh tướng _ Thần",
+  "6星英雄_魔": "6 Tinh tướng _ Ma",
+  "7星英雄": "7 Tinh tướng",
+  "7星英雄_人": "7 Tinh tướng _ Người",
+  "7星英雄_仙": "7 Tinh tướng _ Tiên",
+  "7星英雄_妖": "7 Tinh tướng _ Yêu",
+  "7星英雄_混沌": "7 Tinh tướng _ Hỗn độn",
+  "7星英雄_神": "7 Tinh tướng _ Thần",
+  "7星英雄_魔": "7 Tinh tướng _ Ma",
+  "8星英雄": "8 Tinh tướng",
+  "8星英雄_人": "8 Tinh tướng _ Người",
+  "8星英雄_仙": "8 Tinh tướng _ Tiên",
+  "8星英雄_妖": "8 Tinh tướng _ Yêu",
+  "8星英雄_混沌": "8 Tinh tướng _ Hỗn độn",
+  "8星英雄_神": "8 Tinh tướng _ Thần",
+  "8星英雄_魔": "8 Tinh tướng _ Ma",
+  "9星英雄": "9 Tinh tướng",
+  "9星英雄_人": "9 Tinh tướng _ Người",
+  "9星英雄_仙": "9 Tinh tướng _ Tiên",
+  "9星英雄_妖": "9 Tinh tướng _ Yêu",
+  "9星英雄_混沌": "9 Tinh tướng _ Hỗn độn",
+  "9星英雄_神": "9 Tinh tướng _ Thần",
+  "9星英雄_魔": "9 Tinh tướng _ Ma",
+  "三圣母": "Anh Cô",
+  "东皇太一": "Kim Luân Pháp Vương",
+  "九天玄女": "Nhậm Doanh Doanh",
+  "云中子": "Triệu Mẫn",
+  "仙童": "Chu Tư Liễu",
+  "修罗": "Đạt Ma Tổ Sư",
+  "元始天尊": "Ân Ly",
+  "光": "Hoàng Sam Nữ Tử",
+  "共工": "Hoàng Dược Sư",
+  "冥河": "Cừu Thiên Nhận",
+  "刑天": "Trương Vô Kỵ",
+  "医师": "Y Sư",
+  "南极仙子": "Hồng Lăng Ba",
+  "卷帘大将": "Ân Dã Vương",
+  "后羿": "Triết Biệt",
+  "哪吒": "Kim Mao Sư Vương",
+  "土地": "Dương Bất Hối",
+  "夜叉": "Dạ Xoa",
+  "夜游神": "Dạ Du Thần",
+  "夜魅": "Nhạc Linh San",
+  "天蓬元帅": "Khúc Linh Phong",
+  "太乙真人": "Thái Ất Chân Nhân",
+  "太白金星": "Doãn Chí Bình",
+  "奔波儿灞": "Bôn Ba Nhi Bá",
+  "女娲": "Lam Phượng Hoàng",
+  "女魃": "Kỳ Hiểu Phù",
+  "妈祖": "Tiểu Long Nữ",
+  "妲己": "Chu Chỉ Nhược",
+  "姜子牙": "Võ Tu Văn",
+  "姬发": "Kha Trấn Ác",
+  "嫗姬": "Ẩu Cơ",
+  "嫦娥": "Công Tôn Lục Ngạc",
+  "孔宣": "Ân Tố Tố",
+  "孟婆": "Mai Siêu Phong",
+  "将臣": "Lỗ Hữu Cước",
+  "山鬼": "Sơn Quỷ",
+  "幽灵": "U Linh",
+  "影": "Chu Bá Thông",
+  "御": "Trương Tam Phong",
+  "擎苍": "Vương Xử Nhất",
+  "敖丙": "Lục Thừa Phong",
+  "斗战胜佛": "Nhất Đăng Đại Sư",
+  "方术士": "Trường A Sinh",
+  "无天": "Hoàng Thường",
+  "日游神": "Đạt Nhĩ Ba",
+  "曼珠": "Tử Sam Long Vương",
+  "月老": "Nguyệt Lão",
+  "木吒": "Hoàng Nhan Hồng Liệt",
+  "李靖": "Bạch Mi Ưng Vương",
+  "杨戬": "Lâm Bình Chi",
+  "梅柳真": "Mai Liễu Chân",
+  "武神": "Như Lai",
+  "殿前禁卫": "Chu Điên",
+  "沉香": "Trần Viên Viên",
+  "河伯": "Hà Bá",
+  "洛神": "Đinh Mẫn Quân",
+  "混天大圣": "Dương Đỉnh Thiên",
+  "灵媒魔女": "Lâm Triều Anh",
+  "炎": "Đông Phương Bất Bại",
+  "烛龙": "Quách Tĩnh",
+  "燕赤侠": "Yến Xích Hiệp",
+  "牛魔王": "Doãn Khắc Tây",
+  "玄奘": "Lộc Trượng Khách",
+  "玉兔": "Lục Vô Song",
+  "玉女": "Tống Thanh Thư",
+  "玉帝": "Khưu Xứ Cơ",
+  "珀龙": "Dương Quá",
+  "瑶姬": "Dao Cơ",
+  "申公豹": "Võ Đôn Nho",
+  "白无常": "Quách Phá Lỗ",
+  "白骨夫人": "Cừu Thiên Xích",
+  "白龙": "Trình Anh",
+  "监兵": "Ân Lê Đình",
+  "盘丝": "Hoàn Nhan Bình",
+  "盘古": "Phạm Dao",
+  "真·武神": "Như Lai",
+  "石矶": "Mục Niệm Từ",
+  "破军": "Bố Đại Hòa Thượng",
+  "祝融": "Hoàng Dung",
+  "神农": "Diệt Tuyệt Sư Thái",
+  "禄缘上仙": "Tiểu Chiêu",
+  "笛仙": "Âu Dương Khắc",
+  "精卫": "Triệu Chí Kính",
+  "红孩儿": "Âu Dương Phong",
+  "纣王": "Công Tôn Chỉ",
+  "织女": "Chu Cửu Chân",
+  "花妖": "Hồ Thanh Ngưu",
+  "花木兰": "Hồng Thất Công",
+  "虎豹骑": "Chu Điên",
+  "蚩尤": "Dương Tiêu",
+  "血": "Kiếm Ma",
+  "西王母": "Lệnh Hồ Xung",
+  "贪狼": "Tham Lang",
+  "通天教主": "Trần Huyền Phong",
+  "邓婵玉": "Hoa Tranh",
+  "采臣": "Hàn Tiểu Oanh",
+  "金乌": "Hoắc Đô",
+  "金吒": "Kim Trá",
+  "金吾卫": "Kim Ngô Vệ",
+  "金童": "Kim Đồng",
+  "金角大王": "Tống Viễn Kiều",
+  "银角大王": "Ngân Giác Đại Vương",
+  "长弓手": "Bành Liên Hổ",
+  "阎君": "Dương Khang",
+  "雨师": "Hạc Bút Ông",
+  "雷泽": "Lôi Trạch",
+  "雷震子": "Ni Ma Tinh",
+  "霸波尔奔": "Bá Ba Nhĩ Bôn",
+  "青宵": "Thanh Tiêu",
+  "鬼将": "Võ Tam Thông",
+  "魔·悟空": "Vương Trùng Dương",
+  "鲛姬": "Quách Phù",
+  "鲲": "Quách Tương",
+  "鸿钧": "Lý Mạc Sầu",
+  "黄泉": "Đoàn Dự",
+  "黄飞虎": "Dương Thiết Tâm",
+  "黑无常": "Gia Luật Tề",
+  "黑风": "Chu Thông",
+  "龙吉公主": "Long Cát Công Chủ"
+ },
+ "viet_cu": {
+  "10星英雄": "10 Tinh tướng",
+  "10星英雄_人": "10 Tinh tướng _ Người",
+  "10星英雄_仙": "10 Tinh tướng _ Tiên",
+  "10星英雄_妖": "10 Tinh tướng _ Yêu",
+  "10星英雄_混沌": "10 Tinh tướng _ Hỗn độn",
+  "10星英雄_神": "10 Tinh tướng _ Thần",
+  "10星英雄_魔": "10 Tinh tướng _ Ma",
+  "3星英雄": "3 Tinh tướng",
+  "3星英雄_人": "3 Tinh tướng _ Người",
+  "3星英雄_仙": "3 Tinh tướng _ Tiên",
+  "3星英雄_妖": "3 Tinh tướng _ Yêu",
+  "3星英雄_混沌": "3 Tinh tướng _ Hỗn độn",
+  "3星英雄_神": "3 Tinh tướng _ Thần",
+  "3星英雄_魔": "3 Tinh tướng _ Ma",
+  "4星英雄": "4 Tinh tướng",
+  "4星英雄_人": "4 Tinh tướng _ Người",
+  "4星英雄_仙": "4 Tinh tướng _ Tiên",
+  "4星英雄_妖": "4 Tinh tướng _ Yêu",
+  "4星英雄_混沌": "4 Tinh tướng _ Hỗn độn",
+  "4星英雄_神": "4 Tinh tướng _ Thần",
+  "4星英雄_魔": "4 Tinh tướng _ Ma",
+  "5星英雄": "5 Tinh tướng",
+  "5星英雄_人": "5 Tinh tướng _ Người",
+  "5星英雄_仙": "5 Tinh tướng _ Tiên",
+  "5星英雄_妖": "5 Tinh tướng _ Yêu",
+  "5星英雄_混沌": "5 Tinh tướng _ Hỗn độn",
+  "5星英雄_神": "5 Tinh tướng _ Thần",
+  "5星英雄_魔": "5 Tinh tướng _ Ma",
+  "6星英雄": "6 Tinh tướng",
+  "6星英雄_人": "6 Tinh tướng _ Người",
+  "6星英雄_仙": "6 Tinh tướng _ Tiên",
+  "6星英雄_妖": "6 Tinh tướng _ Yêu",
+  "6星英雄_混沌": "6 Tinh tướng _ Hỗn độn",
+  "6星英雄_神": "6 Tinh tướng _ Thần",
+  "6星英雄_魔": "6 Tinh tướng _ Ma",
+  "7星英雄": "7 Tinh tướng",
+  "7星英雄_人": "7 Tinh tướng _ Người",
+  "7星英雄_仙": "7 Tinh tướng _ Tiên",
+  "7星英雄_妖": "7 Tinh tướng _ Yêu",
+  "7星英雄_混沌": "7 Tinh tướng _ Hỗn độn",
+  "7星英雄_神": "7 Tinh tướng _ Thần",
+  "7星英雄_魔": "7 Tinh tướng _ Ma",
+  "8星英雄": "8 Tinh tướng",
+  "8星英雄_人": "8 Tinh tướng _ Người",
+  "8星英雄_仙": "8 Tinh tướng _ Tiên",
+  "8星英雄_妖": "8 Tinh tướng _ Yêu",
+  "8星英雄_混沌": "8 Tinh tướng _ Hỗn độn",
+  "8星英雄_神": "8 Tinh tướng _ Thần",
+  "8星英雄_魔": "8 Tinh tướng _ Ma",
+  "9星英雄": "9 Tinh tướng",
+  "9星英雄_人": "9 Tinh tướng _ Người",
+  "9星英雄_仙": "9 Tinh tướng _ Tiên",
+  "9星英雄_妖": "9 Tinh tướng _ Yêu",
+  "9星英雄_混沌": "9 Tinh tướng _ Hỗn độn",
+  "9星英雄_神": "9 Tinh tướng _ Thần",
+  "9星英雄_魔": "9 Tinh tướng _ Ma",
+  "Bàn Cổ": "Phạm Dao",
+  "Bàn Ti": "Hoàn Nhan Bình",
+  "Bạch Cốt Phu Nhân": "Cừu Thiên Xích",
+  "Bạch Long": "Trình Anh",
+  "Bạch Vô Thường": "Quách Phá Lỗ",
+  "Chúc Dung": "Hoàng Dung",
+  "Chúc Long": "Quách Tĩnh",
+  "Chức Nữ": "Chu Cửu Chân",
+  "Côn": "Quách Tương",
+  "Cơ Phát": "Kha Trấn Ác",
+  "Cộng Công": "Hoàng Dược Sư",
+  "Cửu Thiên Huyền Nữ": "Nhậm Doanh Doanh",
+  "Diêm Quân": "Dương Khang",
+  "Dương Tiển": "Lâm Bình Chi",
+  "Dạ Mị": "Nhạc Linh San",
+  "Gear 5": "Bạch Thiển",
+  "Giam Binh": "Ân Lê Đình",
+  "Giao Cơ": "Quách Phù",
+  "Hoa Mộc Lan": "Hồng Thất Công",
+  "Hoa Yêu": "Hồ Thanh Ngưu",
+  "Hoàng Phi Hổ": "Dương Thiết Tâm",
+  "Hoàng Tuyền": "Đoàn Dự",
+  "Huyết": "Kiếm Ma",
+  "Huyền Trang": "Lộc Trượng Khách",
+  "Hình Thiên": "Trương Vô Kỵ",
+  "Hậu Nghệ": "Triết Biệt",
+  "Hắc Phong": "Chu Thông",
+  "Hắc Vô Thường": "Gia Luật Tề",
+  "Hồng Hài Nhi": "Âu Dương Phong",
+  "Hồng Quân": "Lý Mạc Sầu",
+  "Hổ Báo Kỵ": "Chu Điên",
+  "Hỗn Thiên Đại Thánh": "Dương Đỉnh Thiên",
+  "Khí Dụng Hồng Quân Vật San": "Lý Mạc Sầu",
+  "Khương Tử Nha": "Võ Tu Văn",
+  "Khổng Tuyên": "Ân Tố Tố",
+  "Kim Giác Đại Vương": "Tống Viễn Kiều",
+  "Kim Ô": "Hoắc Đô",
+  "Kình Thương": "Vương Xử Nhất",
+  "Linh Môi Ma Nữ": "Lâm Triều Anh",
+  "Lôi Chấn Tử": "Ni Ma Tinh",
+  "Lý Tĩnh": "Bạch Mi Ưng Vương",
+  "Lạc Thần": "Đinh Mẫn Quân",
+  "Lộc Duyên Thượng Tiên": "Tiểu Chiêu",
+  "Ma · Ngộ Không": "Vương Trùng Dương",
+  "Minh Hà": "Cừu Thiên Nhận",
+  "Mạn Châu": "Tử Sam Long Vương",
+  "Mạnh Bà": "Mai Siêu Phong",
+  "Mộc Trá": "Hoàng Nhan Hồng Liệt",
+  "Mụ Tổ": "Tiểu Long Nữ",
+  "Na Trá": "Kim Mao Sư Vương",
+  "Nam Cực Tiên Tử": "Hồng Lăng Ba",
+  "Ngao Bính": "Lục Thừa Phong",
+  "Nguyên Thủy Thiên Tôn": "Ân Ly",
+  "Ngưu Ma Vương": "Doãn Khắc Tây",
+  "Ngọc Nữ": "Tống Thanh Thư",
+  "Ngọc Thỏ": "Lục Vô Song",
+  "Ngọc Đế": "Khưu Xứ Cơ",
+  "Ngự": "Trương Tam Phong",
+  "Nhật Du Thần": "Đạt Nhĩ Ba",
+  "Nữ Bạt": "Kỳ Hiểu Phù",
+  "Nữ Oa": "Lam Phượng Hoàng",
+  "Phá Quân": "Bố Đại Hòa Thượng",
+  "Phách Long": "Dương Quá",
+  "Phương Thuật Sĩ": "Trường A Sinh",
+  "Quang": "Hoàng Sam Nữ Tử",
+  "Quyển Liêm Đại Tương": "Ân Dã Vương",
+  "Quỷ Tương": "Võ Tam Thông",
+  "Tam Thánh Mẫu": "Anh Cô",
+  "Thiên Bồng Nguyên Soái": "Khúc Linh Phong",
+  "Thái Bạch Kim Tinh": "Doãn Chí Bình",
+  "Thân Công Báo": "Võ Đôn Nho",
+  "Thông Thiên Giáo Chủ": "Trần Huyền Phong",
+  "Thường Nga": "Công Tôn Lục Ngạc",
+  "Thạch Ki": "Mục Niệm Từ",
+  "Thải Thần": "Hàn Tiểu Oanh",
+  "Thần Nông": "Diệt Tuyệt Sư Thái",
+  "Thổ Địa": "Dương Bất Hối",
+  "Tinh Vệ": "Triệu Chí Kính",
+  "Tiên Đồng": "Chu Tư Liễu",
+  "Trường Cung Thủ": "Bành Liên Hổ",
+  "Trầm Hương": "Trần Viên Viên",
+  "Trụ Vương": "Công Tôn Chỉ",
+  "Tu La": "Đạt Ma Tổ Sư",
+  "Tây Vương Mẫu": "Lệnh Hồ Xung",
+  "Tương Thần": "Lỗ Hữu Cước",
+  "Vân Trung Tử": "Triệu Mẫn",
+  "Vô Thiên": "Hoàng Thường",
+  "Vũ Sư": "Hạc Bút Ông",
+  "Xi Vưu": "Dương Tiêu",
+  "Điện Tiền Cấm Vệ": "Chu Điên",
+  "Đát Kỷ": "Chu Chỉ Nhược",
+  "Đông Hoàng Thái Nhất": "Kim Luân Pháp Vương",
+  "Đấu Chiến Thắng Phật": "Nhất Đăng Đại Sư",
+  "Đặng Thiền Ngọc": "Hoa Tranh",
+  "Địch Tiên": "Âu Dương Khắc",
+  "Ảnh": "Chu Bá Thông",
+  "武神": "Như Lai",
+  "混沌冥河": "Cừu Thiên Nhận",
+  "混沌姜子牙": "Võ Tu Văn",
+  "混沌嫦娥": "Công Tôn Lục Ngạc",
+  "混沌李靖": "Bạch Mi Ưng Vương",
+  "混沌花木兰": "Hồng Thất Công",
+  "真·武神": "Như Lai",
+  "绝世·武神": "Như Lai"
+ },
+ "bo_qua": [
+  "Viêm"
+ ],
+ "han_viet_cu": {
+  "10星英雄": [
+   "10星英雄"
+  ],
+  "10星英雄_人": [
+   "10星英雄_人"
+  ],
+  "10星英雄_仙": [
+   "10星英雄_仙"
+  ],
+  "10星英雄_妖": [
+   "10星英雄_妖"
+  ],
+  "10星英雄_混沌": [
+   "10星英雄_混沌"
+  ],
+  "10星英雄_神": [
+   "10星英雄_神"
+  ],
+  "10星英雄_魔": [
+   "10星英雄_魔"
+  ],
+  "3星英雄": [
+   "3星英雄"
+  ],
+  "3星英雄_人": [
+   "3星英雄_人"
+  ],
+  "3星英雄_仙": [
+   "3星英雄_仙"
+  ],
+  "3星英雄_妖": [
+   "3星英雄_妖"
+  ],
+  "3星英雄_混沌": [
+   "3星英雄_混沌"
+  ],
+  "3星英雄_神": [
+   "3星英雄_神"
+  ],
+  "3星英雄_魔": [
+   "3星英雄_魔"
+  ],
+  "4星英雄": [
+   "4星英雄"
+  ],
+  "4星英雄_人": [
+   "4星英雄_人"
+  ],
+  "4星英雄_仙": [
+   "4星英雄_仙"
+  ],
+  "4星英雄_妖": [
+   "4星英雄_妖"
+  ],
+  "4星英雄_混沌": [
+   "4星英雄_混沌"
+  ],
+  "4星英雄_神": [
+   "4星英雄_神"
+  ],
+  "4星英雄_魔": [
+   "4星英雄_魔"
+  ],
+  "5星英雄": [
+   "5星英雄"
+  ],
+  "5星英雄_人": [
+   "5星英雄_人"
+  ],
+  "5星英雄_仙": [
+   "5星英雄_仙"
+  ],
+  "5星英雄_妖": [
+   "5星英雄_妖"
+  ],
+  "5星英雄_混沌": [
+   "5星英雄_混沌"
+  ],
+  "5星英雄_神": [
+   "5星英雄_神"
+  ],
+  "5星英雄_魔": [
+   "5星英雄_魔"
+  ],
+  "6星英雄": [
+   "6星英雄"
+  ],
+  "6星英雄_人": [
+   "6星英雄_人"
+  ],
+  "6星英雄_仙": [
+   "6星英雄_仙"
+  ],
+  "6星英雄_妖": [
+   "6星英雄_妖"
+  ],
+  "6星英雄_混沌": [
+   "6星英雄_混沌"
+  ],
+  "6星英雄_神": [
+   "6星英雄_神"
+  ],
+  "6星英雄_魔": [
+   "6星英雄_魔"
+  ],
+  "7星英雄": [
+   "7星英雄"
+  ],
+  "7星英雄_人": [
+   "7星英雄_人"
+  ],
+  "7星英雄_仙": [
+   "7星英雄_仙"
+  ],
+  "7星英雄_妖": [
+   "7星英雄_妖"
+  ],
+  "7星英雄_混沌": [
+   "7星英雄_混沌"
+  ],
+  "7星英雄_神": [
+   "7星英雄_神"
+  ],
+  "7星英雄_魔": [
+   "7星英雄_魔"
+  ],
+  "8星英雄": [
+   "8星英雄"
+  ],
+  "8星英雄_人": [
+   "8星英雄_人"
+  ],
+  "8星英雄_仙": [
+   "8星英雄_仙"
+  ],
+  "8星英雄_妖": [
+   "8星英雄_妖"
+  ],
+  "8星英雄_混沌": [
+   "8星英雄_混沌"
+  ],
+  "8星英雄_神": [
+   "8星英雄_神"
+  ],
+  "8星英雄_魔": [
+   "8星英雄_魔"
+  ],
+  "9星英雄": [
+   "9星英雄"
+  ],
+  "9星英雄_人": [
+   "9星英雄_人"
+  ],
+  "9星英雄_仙": [
+   "9星英雄_仙"
+  ],
+  "9星英雄_妖": [
+   "9星英雄_妖"
+  ],
+  "9星英雄_混沌": [
+   "9星英雄_混沌"
+  ],
+  "9星英雄_神": [
+   "9星英雄_神"
+  ],
+  "9星英雄_魔": [
+   "9星英雄_魔"
+  ],
+  "三圣母": [
+   "Tam Thánh Mẫu"
+  ],
+  "东皇太一": [
+   "Đông Hoàng Thái Nhất"
+  ],
+  "九天玄女": [
+   "Cửu Thiên Huyền Nữ"
+  ],
+  "云中子": [
+   "Vân Trung Tử"
+  ],
+  "仙童": [
+   "Tiên Đồng"
+  ],
+  "修罗": [
+   "Tu La"
+  ],
+  "元始天尊": [
+   "Nguyên Thủy Thiên Tôn"
+  ],
+  "光": [
+   "Quang"
+  ],
+  "共工": [
+   "Cộng Công"
+  ],
+  "冥河": [
+   "Minh Hà",
+   "混沌冥河"
+  ],
+  "刑天": [
+   "Hình Thiên"
+  ],
+  "医师": [
+   "Y Sư"
+  ],
+  "南极仙子": [
+   "Nam Cực Tiên Tử"
+  ],
+  "卷帘大将": [
+   "Quyển Liêm Đại Tương"
+  ],
+  "后羿": [
+   "Hậu Nghệ"
+  ],
+  "哪吒": [
+   "Na Trá"
+  ],
+  "土地": [
+   "Thổ Địa"
+  ],
+  "夜叉": [
+   "Dạ Xoa"
+  ],
+  "夜游神": [
+   "Dạ Du Thần"
+  ],
+  "夜魅": [
+   "Dạ Mị"
+  ],
+  "天蓬元帅": [
+   "Thiên Bồng Nguyên Soái"
+  ],
+  "太乙真人": [
+   "Thái Ất Chân Nhân"
+  ],
+  "太白金星": [
+   "Thái Bạch Kim Tinh"
+  ],
+  "奔波儿灞": [
+   "Bôn Ba Nhi Bá"
+  ],
+  "女娲": [
+   "Nữ Oa"
+  ],
+  "女魃": [
+   "Nữ Bạt"
+  ],
+  "妈祖": [
+   "Mụ Tổ"
+  ],
+  "妲己": [
+   "Đát Kỷ"
+  ],
+  "姜子牙": [
+   "Khương Tử Nha",
+   "混沌姜子牙"
+  ],
+  "姬发": [
+   "Cơ Phát"
+  ],
+  "嫗姬": [
+   "Ẩu Cơ"
+  ],
+  "嫦娥": [
+   "Thường Nga",
+   "混沌嫦娥"
+  ],
+  "孔宣": [
+   "Khổng Tuyên"
+  ],
+  "孟婆": [
+   "Mạnh Bà"
+  ],
+  "将臣": [
+   "Tương Thần"
+  ],
+  "山鬼": [
+   "Sơn Quỷ"
+  ],
+  "幽灵": [
+   "U Linh"
+  ],
+  "影": [
+   "Ảnh"
+  ],
+  "御": [
+   "Ngự"
+  ],
+  "擎苍": [
+   "Kình Thương"
+  ],
+  "敖丙": [
+   "Ngao Bính"
+  ],
+  "斗战胜佛": [
+   "Đấu Chiến Thắng Phật"
+  ],
+  "方术士": [
+   "Phương Thuật Sĩ"
+  ],
+  "无天": [
+   "Vô Thiên"
+  ],
+  "日游神": [
+   "Nhật Du Thần"
+  ],
+  "曼珠": [
+   "Mạn Châu"
+  ],
+  "月老": [
+   "Nguyệt Lão"
+  ],
+  "木吒": [
+   "Mộc Trá"
+  ],
+  "李靖": [
+   "Lý Tĩnh",
+   "混沌李靖"
+  ],
+  "杨戬": [
+   "Dương Tiển"
+  ],
+  "梅柳真": [
+   "Mai Liễu Chân"
+  ],
+  "武神": [
+   "武神",
+   "绝世·武神"
+  ],
+  "殿前禁卫": [
+   "Điện Tiền Cấm Vệ"
+  ],
+  "沉香": [
+   "Trầm Hương"
+  ],
+  "河伯": [
+   "Hà Bá"
+  ],
+  "洛神": [
+   "Lạc Thần"
+  ],
+  "混天大圣": [
+   "Hỗn Thiên Đại Thánh"
+  ],
+  "灵媒魔女": [
+   "Linh Môi Ma Nữ"
+  ],
+  "炎": [
+   "Viêm"
+  ],
+  "烛龙": [
+   "Chúc Long"
+  ],
+  "燕赤侠": [
+   "Yến Xích Hiệp"
+  ],
+  "牛魔王": [
+   "Ngưu Ma Vương"
+  ],
+  "玄奘": [
+   "Huyền Trang"
+  ],
+  "玉兔": [
+   "Ngọc Thỏ"
+  ],
+  "玉女": [
+   "Ngọc Nữ"
+  ],
+  "玉帝": [
+   "Ngọc Đế"
+  ],
+  "珀龙": [
+   "Phách Long"
+  ],
+  "瑶姬": [
+   "Dao Cơ"
+  ],
+  "申公豹": [
+   "Thân Công Báo"
+  ],
+  "白无常": [
+   "Bạch Vô Thường"
+  ],
+  "白骨夫人": [
+   "Bạch Cốt Phu Nhân"
+  ],
+  "白龙": [
+   "Bạch Long"
+  ],
+  "监兵": [
+   "Giam Binh"
+  ],
+  "盘丝": [
+   "Bàn Ti"
+  ],
+  "盘古": [
+   "Bàn Cổ"
+  ],
+  "真·武神": [
+   "真·武神"
+  ],
+  "石矶": [
+   "Thạch Ki"
+  ],
+  "破军": [
+   "Phá Quân"
+  ],
+  "祝融": [
+   "Chúc Dung"
+  ],
+  "神农": [
+   "Thần Nông"
+  ],
+  "禄缘上仙": [
+   "Lộc Duyên Thượng Tiên"
+  ],
+  "笛仙": [
+   "Địch Tiên"
+  ],
+  "精卫": [
+   "Tinh Vệ"
+  ],
+  "红孩儿": [
+   "Hồng Hài Nhi"
+  ],
+  "纣王": [
+   "Trụ Vương"
+  ],
+  "织女": [
+   "Chức Nữ"
+  ],
+  "花妖": [
+   "Hoa Yêu"
+  ],
+  "花木兰": [
+   "Hoa Mộc Lan",
+   "混沌花木兰"
+  ],
+  "虎豹骑": [
+   "Hổ Báo Kỵ"
+  ],
+  "蚩尤": [
+   "Xi Vưu"
+  ],
+  "血": [
+   "Huyết"
+  ],
+  "西王母": [
+   "Tây Vương Mẫu"
+  ],
+  "贪狼": [
+   "Tham Lang"
+  ],
+  "通天教主": [
+   "Thông Thiên Giáo Chủ"
+  ],
+  "邓婵玉": [
+   "Đặng Thiền Ngọc"
+  ],
+  "采臣": [
+   "Thải Thần"
+  ],
+  "金乌": [
+   "Kim Ô"
+  ],
+  "金吒": [
+   "Kim Trá"
+  ],
+  "金吾卫": [
+   "Kim Ngô Vệ"
+  ],
+  "金童": [
+   "Kim Đồng"
+  ],
+  "金角大王": [
+   "Kim Giác Đại Vương"
+  ],
+  "银角大王": [
+   "Ngân Giác Đại Vương"
+  ],
+  "长弓手": [
+   "Trường Cung Thủ"
+  ],
+  "阎君": [
+   "Diêm Quân"
+  ],
+  "雨师": [
+   "Vũ Sư"
+  ],
+  "雷泽": [
+   "Lôi Trạch"
+  ],
+  "雷震子": [
+   "Lôi Chấn Tử"
+  ],
+  "霸波尔奔": [
+   "Bá Ba Nhĩ Bôn"
+  ],
+  "青宵": [
+   "Thanh Tiêu"
+  ],
+  "鬼将": [
+   "Quỷ Tương"
+  ],
+  "魔·悟空": [
+   "Ma · Ngộ Không"
+  ],
+  "鲛姬": [
+   "Giao Cơ"
+  ],
+  "鲲": [
+   "Côn"
+  ],
+  "鸿钧": [
+   "Hồng Quân",
+   "Khí Dụng Hồng Quân Vật San"
+  ],
+  "黄泉": [
+   "Hoàng Tuyền"
+  ],
+  "黄飞虎": [
+   "Hoàng Phi Hổ"
+  ],
+  "黑无常": [
+   "Hắc Vô Thường"
+  ],
+  "黑风": [
+   "Hắc Phong"
+  ],
+  "龙吉公主": [
+   "Long Cát Công Chủ"
+  ]
+ }
+}

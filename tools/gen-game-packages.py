@@ -9,7 +9,8 @@ Nguon (tat ca nam trong git, chay duoc o bat ky may nao):
                                                        hien thi (付费充值, 月基金, 特权商城, 超级特权, 每日礼包,
                                                        全服限购商品, 成长基金, 爬塔基金, 种族塔基金).
   website/game/gmhanglong/gm/pay.txt                   payId,tenViet(may dich),giaNguyen — ten du phong.
-  website/game/gmhanglong/gm/item.txt                  type:id|tenViet — de dung mo ta tu chuoi qua.
+  platform/internal/gmops/danh-muc-haitac.json         loai:ma -> ten trong game (tools/gen-danh-muc-game.py)
+                                                       — dung dat ten mon trong mo ta goi.
   docker/initdb/mysql/seed/web.sql                     bang web.webshop cu -> goi vat pham web (grant_mode=mail).
 
 Quy tac:
@@ -64,9 +65,17 @@ def dao_trat_tu(t):
             # Dau cau con lai da la ten rieng thi giu hoa; con lai ha xuong thuong.
             return d[0].upper() + d[1:] + " " + (con if con[:1].isupper() and con[1:2].islower() else con[:1].lower() + con[1:])
     return t
+# Ten tuong trong ten goi la ten cua BAN GOC, khong phai ten game dang chay.
+#
+# Game da bi thay ao: ban goc dung tuong than thoai Trung Quoc, ban phat hanh doi sang tuong
+# Kim Dung. Chuoi `*名称` trong recharge-item van la chu Han cua ban goc ("鸿钧藏品礼包1"),
+# va pay.txt la ban dich may cua chinh chuoi do ("Hong Quan do cat giu goi qua 1") — nen ten
+# goi tren web dang goi ten mot loat tuong KHONG CO trong game. Bang doi ten sinh boi
+# tools/gen-danh-muc-game.py (hero.xlsx `英雄名YID` -> 文本库).
+DOI_TEN = os.path.join(ROOT, "tools", "ten-tuong-doi-ao.json")
+DANH_MUC = os.path.join(ROOT, "platform", "internal", "gmops", "danh-muc-haitac.json")
 ID_TXT = os.path.join(ROOT, "website", "game", "api", "id.txt")
 PAY_TXT = os.path.join(ROOT, "website", "game", "gmhanglong", "gm", "pay.txt")
-ITEM_TXT = os.path.join(ROOT, "website", "game", "gmhanglong", "gm", "item.txt")
 XLS_ITEM = os.path.join(ROOT, "server", "excel-src", "recharge-item")
 XLS_BENEFIT = os.path.join(ROOT, "server", "excel-src", "recharge-benefit")
 WEB_SQL = os.path.join(ROOT, "docker", "initdb", "mysql", "seed", "web.sql")
@@ -139,7 +148,14 @@ NAMES = {
     42215: "Cửa hàng Bấc Đèn 4 – ô 5",
 }
 HAN = re.compile(r"[一-鿿]")
-CURRENCY = {"0:0": "Kim tệ", "0:1": "Nguyên Bảo", "0:2": "Ngân lượng", "0:3": "EXP nhân vật", "0:4": "EXP anh hùng"}
+# Ba dong doc duoc tu chinh bang phat thuong cua game (recharge-benefit, cot 备注道具名称).
+# Cac id vi khac khong xuat hien trong bat ky chuoi qua nao cua bo goi VA khong co bang nao
+# dat ten cho chung, nen KHONG liet ke bua — thieu ten thi mo ta hien ma, khong doan.
+#
+# 'Nguyen Bao' viet hoa theo loi cua hang (ten goi la "10.000 Nguyen Bao"); bang cau hinh
+# game viet 'Nguyen bao'. Danh muc cua cong GM giu nguyen chu cua game vi no phai khop tung
+# chu voi thu console tra ve — cho nay la van ban ban hang, giu mot loi viet trong cua hang.
+CURRENCY = {"0:0": "Kim tệ", "0:1": "Nguyên Bảo", "0:4": "Kinh nghiệm tướng"}
 
 
 def fmt(n):
@@ -201,6 +217,42 @@ def as_int(v, default=None):
         return default
 
 
+def read_doi_ten():
+    """(han -> ten moi, han -> [ten Viet cu], ten cu -> ten moi, tap ten cu bo qua)."""
+    try:
+        with io.open(DOI_TEN, encoding="utf-8") as f:
+            d = json.load(f)
+    except OSError:
+        sys.stderr.write("canh bao: thieu %s — khong doi duoc ten tuong\n" % DOI_TEN)
+        return {}, {}, {}, set()
+    return d.get("han", {}), d.get("han_viet_cu", {}), d.get("viet_cu", {}), set(d.get("bo_qua", []))
+
+
+def doi_ten_tuong(ten, han_goc, han_moi, han_cu, cu_moi, bo_qua):
+    """Doi ten tuong cua ban goc trong `ten` (tieng Viet) sang ten game dang chay.
+
+    Doi theo CHUOI HAN GOC chu khong quet bua: chi khi `*名称` cua chinh goi do goi ten mot
+    tuong thi moi thay ten do trong ban dich. Quet bua se dam vao cac tu trung ten khong lien
+    quan — nhieu ten tuong la tu thuong ("Tu La", "Bach Long").
+
+    Tra ve (ten_moi, con_sot): `con_sot` la cac ten cu VAN CON trong chuoi sau khi doi — de
+    goi bao ra thay vi im lang.
+    """
+    if not isinstance(ten, str) or not ten:
+        return ten, []
+    ra = ten
+    if isinstance(han_goc, str) and han_goc:
+        # Ten dai truoc: '东皇太一' phai duoc xet truoc '东皇' neu ca hai co trong bang.
+        for zh in sorted((z for z in han_moi if z in han_goc), key=len, reverse=True):
+            moi = han_moi[zh]
+            for cu in sorted(han_cu.get(zh, []), key=len, reverse=True):
+                if cu and cu != moi and cu in ra:
+                    ra = ra.replace(cu, moi)
+    con_sot = [c for c in cu_moi if len(c) >= 4 and c in ra and cu_moi[c] != c]
+    con_sot += [c for c in bo_qua if len(c) >= 4 and c in ra]
+    return ra, con_sot
+
+
 def read_pay_txt():
     names = {}
     with io.open(PAY_TXT, encoding="utf-8") as f:
@@ -212,15 +264,21 @@ def read_pay_txt():
     return names
 
 
-def read_item_txt():
-    names = {}
-    with io.open(ITEM_TXT, encoding="utf-8") as f:
-        for line in f:
-            if "|" not in line:
-                continue
-            k, v = line.rstrip("\n").split("|", 1)
-            names[k.strip()] = v.strip()
-    return names
+def read_danh_muc():
+    """'loai:ma' -> ten trong game, doc tu danh muc da doi chieu voi may chu dang chay.
+
+    THAY CHO `gmhanglong/gm/item.txt`. File do la bang chep tay cua MOT BAN KHAC cua game:
+    3:100001 no goi la "Tien giai thach" trong khi game that goi la "Dan tien giai", 5:5 no
+    ghi "Bach Trach an" trong khi game that la "Cuu Duong Cong". Mo ta goi tren cua hang dung
+    ten do la noi voi nguoi mua ve mot mon khong ton tai.
+    """
+    try:
+        with io.open(DANH_MUC, encoding="utf-8") as f:
+            d = json.load(f)
+    except OSError:
+        sys.stderr.write("canh bao: thieu %s — chay tools/gen-danh-muc-game.py truoc\n" % DANH_MUC)
+        return {}
+    return {"%d:%d" % (m[0], m[1]): m[2] for m in d.get("muc", [])}
 
 
 def read_webshop():
@@ -251,7 +309,8 @@ def describe_reward(reward, items):
             continue
         key = f"{seg[0]}:{seg[1]}"
         count = seg[2] if len(seg) > 2 else "1"
-        name = CURRENCY.get(key) or items.get(key) or items.get(seg[1]) or f"vật phẩm {seg[1]}"
+        # Khong tra duoc thi hien MA, khong doan: mo ta sai mon con te hon mo ta thieu.
+        name = CURRENCY.get(key) or items.get(key) or f"vật phẩm {key}"
         parts.append(f"{name} ×{fmt(count)}")
     return " · ".join(parts)
 
@@ -275,7 +334,9 @@ def clip(s, n=500):
 def build(game):
     prices, order = read_id_txt()
     pay_names = read_pay_txt()
-    items = read_item_txt()
+    han_moi, han_cu, cu_moi, bo_qua_ten = read_doi_ten()
+    con_sot_ten = Counter()
+    items = read_danh_muc()
 
     excel = {}
     for d in read_sheet(XLS_ITEM, "充值项"):
@@ -388,6 +449,10 @@ def build(game):
         det = detail.get(pid, {})
         name = NAMES.get(pid) or det.get("name") or pay_names.get(pid) or (ex["name"] if ex else "") or f"Gói {pid}"
         name = dao_trat_tu(chuan_ten(name))
+        if pid not in NAMES:  # ten dat tay trong NAMES da dung roi, khong dung vao
+            name, sot = doi_ten_tuong(name, ex["name"], han_moi, han_cu, cu_moi, bo_qua_ten)
+            for c in sot:
+                con_sot_ten[c] += 1
         if cat == "card" and not det:
             det = dict(description="Thẻ tuần: nhận thưởng mỗi ngày trong 7 ngày.")
         rows.append(OrderedDict(
@@ -416,6 +481,12 @@ def build(game):
     rows.sort(key=lambda r: (CATEGORY_ORDER.index(r["category"]), r["price_xu"], r["package_id"]))
     for i, r in enumerate(rows):
         r["sort_order"] = i
+    if con_sot_ten:
+        # Con ten tuong cua ban goc trong ten goi: hoac chuoi Han khong goi ten tuong do (dich
+        # may them vao), hoac ten do nam trong 'bo_qua'. Phai dat tay o NAMES, dung de lot.
+        stats["_con_ten_ban_goc"] = sum(con_sot_ten.values())
+        sys.stderr.write("CON TEN TUONG BAN GOC trong ten goi: %s\n"
+                         % ", ".join("%s×%d" % (k, v) for k, v in con_sot_ten.most_common(20)))
     return rows, stats
 
 

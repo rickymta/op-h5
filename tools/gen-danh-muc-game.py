@@ -53,6 +53,7 @@ except ImportError:
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 XLS = os.path.join(ROOT, "server", "excel", "release")
 OUT = os.path.join(ROOT, "platform", "internal", "gmops", "danh-muc-haitac.json")
+OUT_TEN = os.path.join(ROOT, "tools", "ten-tuong-doi-ao.json")
 
 # Nhan nhom. Moi nhan deu doc duoc tu chinh van ban tieng Viet cua game, khong phai tu dich
 # nghia chu Han: 'Hon ngoc' (104 lan trong item-table), 'Than khi' (cum "nghe nghiep Than
@@ -91,6 +92,16 @@ def bam(ten):
     return h.hexdigest()
 
 
+def du(r, n):
+    """Bu o trong cho du n cot.
+
+    openpyxl doc read-only tra ve dong NGAN dan neu cac o cuoi bo trong — dong 45 cot co the
+    ve chi 6 phan tu. Bo qua dong ngan (nhu ban dau) la lam mat du lieu am tham: bang doi ten
+    tuong tung thieu mot nhanh vi the, va thieu thi khong ai thay.
+    """
+    return list(r) + [None] * (n - len(r)) if len(r) < n else list(r)
+
+
 def cot(hdr, *ten):
     """Chi so cot theo TEN header — thu tu cot doi thi tool van dung, giong cach may chu doc."""
     for t in ten:
@@ -107,17 +118,17 @@ def doc_sheet(wb, sheet, cot_id, cot_ten, them=None, loc=None):
     if i_id < 0 or i_ten < 0:
         raise SystemExit("thieu cot %s/%s trong %s" % (cot_id, cot_ten, sheet))
     i_them = cot(hdr, *them) if them else -1
+    n = max(i_id, i_ten, i_them) + 1
     out = []
     for r in it:
-        if len(r) <= max(i_id, i_ten):
-            continue
+        r = du(r, n)
         rid, ten = r[i_id], r[i_ten]
         if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
             continue
         if loc and not loc(hdr, r):
             continue
         phu = ""
-        if 0 <= i_them < len(r) and r[i_them] not in (None, ""):
+        if i_them >= 0 and r[i_them] not in (None, ""):
             phu = str(r[i_them]).strip()
         out.append((int(rid), ten.strip(), phu))
     return out
@@ -143,10 +154,10 @@ def bang_ten_tuong():
     it = ws.iter_rows(values_only=True)
     hdr = list(next(it))
     i_id, i_yid, i_sao = cot(hdr, "英雄ID"), cot(hdr, "英雄名YID"), cot(hdr, "星级")
+    n = max(i_id, i_yid, i_sao) + 1
     ra, thieu = [], 0
     for r in it:
-        if len(r) <= i_yid:
-            continue
+        r = du(r, n)
         rid, yid = r[i_id], r[i_yid]
         if not isinstance(rid, (int, float)) or yid in (None, ""):
             continue
@@ -157,10 +168,80 @@ def bang_ten_tuong():
         if not ten:
             thieu += 1
             continue
-        sao = r[i_sao] if 0 <= i_sao < len(r) else None
+        sao = r[i_sao] if i_sao >= 0 else None
         ra.append((int(rid), ten, ("%d★" % sao) if isinstance(sao, (int, float)) else ""))
     wb.close()
     return ra, thieu, len(lut)
+
+
+def bang_doi_ao():
+    """Bang doi ten tuong: ten cua BAN GOC -> ten cua ban dang chay.
+
+    Game da bi thay ao. Ban goc dung tuong than thoai Trung Quoc, ban phat hanh doi sang
+    tuong Kim Dung. hero.xlsx con giu ca hai: `*英雄名` la ten goc (cot ghi chu, may chu
+    khong doc), `英雄名YID` -> 文本库 la ten that. Bang nay ghep hai cot do lai.
+
+    Dung de sua nhung cho DA TRO LO ten goc — ro nhat la ten goi nap, vi ten goi duoc dich
+    may tu chuoi Han `*名称` trong recharge-item ("鸿钧藏品礼包" -> "Hong Quan ...").
+
+    Tra ve (theo_han, theo_viet_cu, bo_qua): 'bo_qua' la cac ten mot-nhieu, KHONG doi tu dong
+    vi doi mo se sai; de nguyen roi bao ra.
+    """
+    # Hai bang RIENG: khong phai dong nao trong 文本库 cung con cot chu Han. Gop chung lai
+    # roi doi "co ca hai" se lang le bo mat mot nhanh — va bo dung nhanh lam lo ra cho mot
+    # ten cu tro toi HAI tuong khac nhau (vi du 'Viem' -> Dong Phuong Bat Bai / Kieu Phong).
+    # Mat nhanh do thi tool tuong minh khong nhap nhang va doi bua mot ben.
+    wb2, _ = mo("text-localization.xlsx")
+    lut_vi, lut_zh = {}, {}
+    for r in wb2["文本库"].iter_rows(min_row=2, max_col=3, values_only=True):
+        if r[0] is None:
+            continue
+        try:
+            k = int(str(r[0]).strip())
+        except ValueError:
+            continue
+        zh = r[1].strip() if isinstance(r[1], str) else ""
+        vi = r[2].strip() if isinstance(r[2], str) else ""
+        if not vi:
+            continue
+        lut_vi[k] = vi
+        if zh:
+            lut_zh[k] = zh
+    wb2.close()
+
+    wb, _ = mo("hero.xlsx")
+    ws = wb["英雄基础"]
+    it = ws.iter_rows(values_only=True)
+    hdr = list(next(it))
+    i_cu, i_yid = cot(hdr, "*英雄名"), cot(hdr, "英雄名YID")
+    n = max(i_cu, i_yid) + 1
+    theo_han, theo_cu, han_cu = {}, {}, {}
+    for r in it:
+        r = du(r, n)
+        cu, yid = r[i_cu], r[i_yid]
+        if yid in (None, ""):
+            continue
+        try:
+            k = int(str(yid).strip())
+        except ValueError:
+            continue
+        moi = lut_vi.get(k)
+        if not moi:
+            continue
+        if k in lut_zh:
+            theo_han.setdefault(lut_zh[k], set()).add(moi)
+            if isinstance(cu, str) and cu.strip():
+                han_cu.setdefault(lut_zh[k], set()).add(cu.strip())
+        if isinstance(cu, str) and cu.strip():
+            theo_cu.setdefault(cu.strip(), set()).add(moi)
+    wb.close()
+
+    bo_qua = sorted(k for k, v in list(theo_han.items()) + list(theo_cu.items()) if len(v) > 1)
+    han = {k: next(iter(v)) for k, v in theo_han.items() if len(v) == 1}
+    viet = {k: next(iter(v)) for k, v in theo_cu.items() if len(v) == 1 and next(iter(v)) != k}
+    # zh -> ten Viet CU: de sua mot chuoi da dich may, phai biet ban dich cu goi tuong do la gi.
+    han_viet_cu = {k: sorted(v) for k, v in han_cu.items() if k in han}
+    return han, viet, bo_qua, han_viet_cu
 
 
 def gom():
@@ -273,6 +354,25 @@ def main():
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
         f.write("\n")
     print("  đã ghi %s (%.0f KB)" % (os.path.relpath(OUT, ROOT), os.path.getsize(OUT) / 1024))
+
+    han, viet, bo_qua, han_viet_cu = bang_doi_ao()
+    with open(OUT_TEN, "w", encoding="utf-8") as f:
+        json.dump({
+            "_doc": [
+                "Bang doi ten tuong khi game bi thay ao: ten BAN GOC -> ten ban dang chay.",
+                "'han' tra theo chu Han trong bang cau hinh goc; 'viet_cu' tra theo ban dich",
+                "cu (cot *英雄名 cua hero.xlsx, va cac file chep tay tu ban do nhu pay.txt).",
+                "'bo_qua' la ten mot-nhieu — KHONG doi tu dong, phai xu ly tay.",
+                "Sinh boi tools/gen-danh-muc-game.py; dung sua tay.",
+            ],
+            "han": dict(sorted(han.items())),
+            "viet_cu": dict(sorted(viet.items())),
+            "bo_qua": bo_qua,
+            "han_viet_cu": dict(sorted(han_viet_cu.items())),
+        }, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    print("  đã ghi %s (%d tên Hán, %d tên Việt cũ, %d bỏ qua)"
+          % (os.path.relpath(OUT_TEN, ROOT), len(han), len(viet), len(bo_qua)))
     return 0
 
 

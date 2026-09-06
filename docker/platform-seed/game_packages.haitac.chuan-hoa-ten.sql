@@ -2,9 +2,13 @@
 -- SINH TU DONG boi tools/gen-doi-ten-goi.py — dung sua tay, sua nguon roi chay lai.
 --
 -- Vi sao phai co file rieng: `game_packages.haitac.sql` chi ghi de cot `name` khi ten dang
--- luu CON CHU HAN. 108 goi duoi day da mang ten tieng Viet nhung dich chua chuan
--- (con "anh hung" thay vi "tuong", "500 van KNB" thay vi "5M KNB", trat tu kieu Trung
--- "tinh anh goi qua"), nen upsert kia khong bao gio cham toi.
+-- luu CON CHU HAN. 228 goi duoi day da mang ten tieng Viet nen upsert kia khong bao
+-- gio cham toi, trong khi ten van sai o hai kieu:
+--   * dich chua chuan: con "anh hung" thay vi "tuong", "500 van KNB" thay vi "5M KNB",
+--     trat tu kieu Trung "tinh anh goi qua";
+--   * goi ten tuong cua BAN GOC: game da bi thay ao (tuong than thoai -> tuong Kim Dung)
+--     nhung ten goi dich tu chuoi Han cu, nen dang goi ten tuong khong co trong game
+--     ("Hong Quan do cat giu goi qua" trong khi tuong do ten la Ly Mac Sau).
 --
 -- Dieu kien `AND (name=<ten cu>...)` liet ke cac ten tung duoc sinh ra truoc day. Nguoi van
 -- hanh da tu dat ten khac -> khong khop -> giu nguyen. Chay lai vo hai.
@@ -26,6 +30,7 @@ UPDATE game_packages SET name='Gói quà 13 Tinh' WHERE game_code='haitac' AND p
 UPDATE game_packages SET name='Gói quà 13 Tinh' WHERE game_code='haitac' AND package_id='22014' AND (name='13 Tinh gói quà');
 UPDATE game_packages SET name='Gói quà 14 Tinh' WHERE game_code='haitac' AND package_id='22015' AND (name='14 Tinh gói quà');
 UPDATE game_packages SET name='Gói quà 14 Tinh phá cảnh' WHERE game_code='haitac' AND package_id='22016' AND (name='14 Tinh phá cảnh gói quà');
+UPDATE game_packages SET name='tiến giai lễ vật - Đạt Ma Tổ Sư' WHERE game_code='haitac' AND package_id='221071' AND (name='tiến giai lễ vật - Tu La');
 UPDATE game_packages SET name='Gói quà tâm nguyện' WHERE game_code='haitac' AND package_id='223001' AND (name='tâm nguyện gói quà');
 UPDATE game_packages SET name='Gói quà cầu nguyện' WHERE game_code='haitac' AND package_id='223002' AND (name='cầu nguyện gói quà');
 UPDATE game_packages SET name='Gói quà hồng nguyện' WHERE game_code='haitac' AND package_id='223003' AND (name='hồng nguyện gói quà');
@@ -49,6 +54,55 @@ UPDATE game_packages SET name='Cửa hàng hạn lúc lui trở về' WHERE game
 UPDATE game_packages SET name='Cửa hàng hạn lúc lui trở về' WHERE game_code='haitac' AND package_id='38002' AND (name='hạn lúc lui trở về cửa hàng');
 UPDATE game_packages SET name='Cửa hàng hạn lúc lui trở về' WHERE game_code='haitac' AND package_id='38003' AND (name='hạn lúc lui trở về cửa hàng');
 UPDATE game_packages SET name='Cửa hàng hạn lúc lui trở về' WHERE game_code='haitac' AND package_id='38004' AND (name='hạn lúc lui trở về cửa hàng');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Vô Kỵ đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41003' AND (name='bồi dưỡng cửa hàng - Hình Thiên đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Vô Kỵ thứ hai ngăn' WHERE game_code='haitac' AND package_id='41004' AND (name='bồi dưỡng cửa hàng - Hình Thiên thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Khưu Xứ Cơ đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41005' AND (name='bồi dưỡng cửa hàng - Ngọc Đế đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Khưu Xứ Cơ thứ hai ngăn' WHERE game_code='haitac' AND package_id='41006' AND (name='bồi dưỡng cửa hàng - Ngọc Đế thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Khưu Xứ Cơ thứ ba ngăn' WHERE game_code='haitac' AND package_id='41007' AND (name='bồi dưỡng cửa hàng - Ngọc Đế thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Quách Tĩnh đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41021' AND (name='bồi dưỡng cửa hàng - Chúc Long đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Quách Tĩnh thứ hai ngăn' WHERE game_code='haitac' AND package_id='41022' AND (name='bồi dưỡng cửa hàng - Chúc Long thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Quách Tĩnh thứ ba ngăn' WHERE game_code='haitac' AND package_id='41023' AND (name='bồi dưỡng cửa hàng - Chúc Long thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Quách Tĩnh thứ tư ngăn' WHERE game_code='haitac' AND package_id='41024' AND (name='bồi dưỡng cửa hàng - Chúc Long thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Chúc Long thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Hồng Thất Công đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41031' AND (name='bồi dưỡng cửa hàng - Hoa Mộc Lan đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Hồng Thất Công thứ hai ngăn' WHERE game_code='haitac' AND package_id='41032' AND (name='bồi dưỡng cửa hàng - Hoa Mộc Lan thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Hồng Thất Công thứ ba ngăn' WHERE game_code='haitac' AND package_id='41033' AND (name='bồi dưỡng cửa hàng - Hoa Mộc Lan thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Hồng Thất Công thứ tư ngăn' WHERE game_code='haitac' AND package_id='41034' AND (name='bồi dưỡng cửa hàng - Hoa Mộc Lan thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Hoa Mộc Lan thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Nhạc Linh San đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41041' AND (name='bồi dưỡng cửa hàng - Dạ Mị đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Nhạc Linh San thứ hai ngăn' WHERE game_code='haitac' AND package_id='41042' AND (name='bồi dưỡng cửa hàng - Dạ Mị thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Nhạc Linh San thứ ba ngăn' WHERE game_code='haitac' AND package_id='41043' AND (name='bồi dưỡng cửa hàng - Dạ Mị thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Nhạc Linh San thứ tư ngăn' WHERE game_code='haitac' AND package_id='41044' AND (name='bồi dưỡng cửa hàng - Dạ Mị thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Dạ Mị thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Ân Tố Tố đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41051' AND (name='bồi dưỡng cửa hàng - Khổng Tuyên đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Ân Tố Tố thứ hai ngăn' WHERE game_code='haitac' AND package_id='41052' AND (name='bồi dưỡng cửa hàng - Khổng Tuyên thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Ân Tố Tố thứ ba ngăn' WHERE game_code='haitac' AND package_id='41053' AND (name='bồi dưỡng cửa hàng - Khổng Tuyên thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Ân Tố Tố thứ tư ngăn' WHERE game_code='haitac' AND package_id='41054' AND (name='bồi dưỡng cửa hàng - Khổng Tuyên thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Khổng Tuyên thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Cừu Thiên Nhận đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41071' AND (name='bồi dưỡng cửa hàng - Minh Hà đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Cừu Thiên Nhận thứ hai ngăn' WHERE game_code='haitac' AND package_id='41072' AND (name='bồi dưỡng cửa hàng - Minh Hà thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Cừu Thiên Nhận thứ ba ngăn' WHERE game_code='haitac' AND package_id='41073' AND (name='bồi dưỡng cửa hàng - Minh Hà thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Cừu Thiên Nhận thứ tư ngăn' WHERE game_code='haitac' AND package_id='41074' AND (name='bồi dưỡng cửa hàng - Minh Hà thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Minh Hà thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Lệnh Hồ Xung đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41301' AND (name='bồi dưỡng cửa hàng - Tây Vương Mẫu đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Lệnh Hồ Xung thứ hai ngăn' WHERE game_code='haitac' AND package_id='41302' AND (name='bồi dưỡng cửa hàng - Tây Vương Mẫu thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Lệnh Hồ Xung thứ ba ngăn' WHERE game_code='haitac' AND package_id='41303' AND (name='bồi dưỡng cửa hàng - Tây Vương Mẫu thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Lệnh Hồ Xung thứ tư ngăn' WHERE game_code='haitac' AND package_id='41304' AND (name='bồi dưỡng cửa hàng - Tây Vương Mẫu thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Tây Vương Mẫu thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Chu Bá Thông đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41311' AND (name='bồi dưỡng cửa hàng - Ảnh đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Chu Bá Thông thứ hai ngăn' WHERE game_code='haitac' AND package_id='41312' AND (name='bồi dưỡng cửa hàng - Ảnh thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Chu Bá Thông thứ ba ngăn' WHERE game_code='haitac' AND package_id='41313' AND (name='bồi dưỡng cửa hàng - Ảnh thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Chu Bá Thông thứ tư ngăn' WHERE game_code='haitac' AND package_id='41314' AND (name='bồi dưỡng cửa hàng - Ảnh thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Ảnh thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại đệ nhất ngăn' WHERE game_code='haitac' AND package_id='41331' AND (name='bồi dưỡng cửa hàng - Viêm đệ nhất ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại thứ hai ngăn' WHERE game_code='haitac' AND package_id='41332' AND (name='bồi dưỡng cửa hàng - Viêm thứ hai ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại thứ ba ngăn' WHERE game_code='haitac' AND package_id='41333' AND (name='bồi dưỡng cửa hàng - Viêm thứ ba ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại thứ tư ngăn' WHERE game_code='haitac' AND package_id='41334' AND (name='bồi dưỡng cửa hàng - Viêm thứ tư ngăn' OR name='bồi dưỡng cửa hàng - Viêm thứ tư ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại thứ năm ngăn' WHERE game_code='haitac' AND package_id='41335' AND (name='bồi dưỡng cửa hàng - Viêm thứ năm ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đông Phương Bất Bại thứ sáu ngăn' WHERE game_code='haitac' AND package_id='41336' AND (name='bồi dưỡng cửa hàng - Viêm thứ sáu ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đạt Ma Tổ Sư thứ 1 Ngăn' WHERE game_code='haitac' AND package_id='41341' AND (name='bồi dưỡng cửa hàng - Tu La thứ 1 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đạt Ma Tổ Sư thứ 2 Ngăn' WHERE game_code='haitac' AND package_id='41342' AND (name='bồi dưỡng cửa hàng - Tu La thứ 2 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đạt Ma Tổ Sư thứ 3 Ngăn' WHERE game_code='haitac' AND package_id='41343' AND (name='bồi dưỡng cửa hàng - Tu La thứ 3 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Đạt Ma Tổ Sư thứ 4 Ngăn' WHERE game_code='haitac' AND package_id='41344' AND (name='bồi dưỡng cửa hàng - Tu La thứ 4 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 1 Ngăn' WHERE game_code='haitac' AND package_id='41351' AND (name='bồi dưỡng cửa hàng - Ngự thứ 1 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 2 Ngăn' WHERE game_code='haitac' AND package_id='41352' AND (name='bồi dưỡng cửa hàng - Ngự thứ 2 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 3 Ngăn' WHERE game_code='haitac' AND package_id='41353' AND (name='bồi dưỡng cửa hàng - Ngự thứ 3 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 4 Ngăn' WHERE game_code='haitac' AND package_id='41354' AND (name='bồi dưỡng cửa hàng - Ngự thứ 4 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 5 Ngăn' WHERE game_code='haitac' AND package_id='41355' AND (name='bồi dưỡng cửa hàng - Ngự thứ 5 Ngăn');
+UPDATE game_packages SET name='bồi dưỡng cửa hàng - Trương Tam Phong thứ 6 Ngăn' WHERE game_code='haitac' AND package_id='41356' AND (name='bồi dưỡng cửa hàng - Ngự thứ 6 Ngăn');
 UPDATE game_packages SET name='Cửa hàng Bấc Đèn 2 – ô 1' WHERE game_code='haitac' AND package_id='42201' AND (name='bấc đèn cửa hàng 2 - Thứ 1 Ngăn');
 UPDATE game_packages SET name='Cửa hàng Bấc Đèn 2 – ô 2' WHERE game_code='haitac' AND package_id='42202' AND (name='bấc đèn cửa hàng 2 - Thứ 2 Ngăn');
 UPDATE game_packages SET name='Cửa hàng Bấc Đèn 2 – ô 3' WHERE game_code='haitac' AND package_id='42203' AND (name='bấc đèn cửa hàng 2 - Thứ 3 Ngăn');
@@ -73,6 +127,64 @@ UPDATE game_packages SET name='cấp gói quà 6' WHERE game_code='haitac' AND p
 UPDATE game_packages SET name='cấp gói quà 7' WHERE game_code='haitac' AND package_id='46007' AND (name='đẳng cấp gói quà 7');
 UPDATE game_packages SET name='cấp gói quà 8' WHERE game_code='haitac' AND package_id='46008' AND (name='đẳng cấp gói quà 8');
 UPDATE game_packages SET name='Gói quà treo máy thưởng' WHERE game_code='haitac' AND package_id='46101' AND (name='treo máy ban thưởng gói quà');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Võ Tu Văn' WHERE game_code='haitac' AND package_id='46201' AND (name='chuyên môn Tiên Khí gói quà - Khương Tử Nha');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Phạm Dao' WHERE game_code='haitac' AND package_id='46204' AND (name='chuyên môn Tiên Khí gói quà - Bàn Cổ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Kim Luân Pháp Vương' WHERE game_code='haitac' AND package_id='46205' AND (name='chuyên môn Tiên Khí gói quà - Đông Hoàng Thái Nhất');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Triết Biệt' WHERE game_code='haitac' AND package_id='46206' AND (name='chuyên môn Tiên Khí gói quà - Hậu Nghệ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Diệt Tuyệt Sư Thái' WHERE game_code='haitac' AND package_id='46209' AND (name='chuyên môn Tiên Khí gói quà - Thần Nông');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hoàng Dược Sư' WHERE game_code='haitac' AND package_id='46212' AND (name='chuyên môn Tiên Khí gói quà - Cộng Công');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Dương Tiêu' WHERE game_code='haitac' AND package_id='46214' AND (name='chuyên môn Tiên Khí gói quà - Xi Vưu');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Quách Tương' WHERE game_code='haitac' AND package_id='46215' AND (name='chuyên môn Tiên Khí gói quà - Côn');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lục Thừa Phong' WHERE game_code='haitac' AND package_id='46216' AND (name='chuyên môn Tiên Khí gói quà - Ngao Bính');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhất Đăng Đại Sư' WHERE game_code='haitac' AND package_id='46219' AND (name='chuyên môn Tiên Khí gói quà - Đấu Chiến Thắng Phật');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Quách Tĩnh' WHERE game_code='haitac' AND package_id='46220' AND (name='chuyên môn Tiên Khí gói quà - Chúc Long');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhậm Doanh Doanh' WHERE game_code='haitac' AND package_id='46221' AND (name='chuyên môn Tiên Khí gói quà - Cửu Thiên Huyền Nữ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hồng Thất Công' WHERE game_code='haitac' AND package_id='46222' AND (name='chuyên môn Tiên Khí gói quà - Hoa Mộc Lan');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Đoàn Dự' WHERE game_code='haitac' AND package_id='46223' AND (name='chuyên môn Tiên Khí gói quà - Hoàng Tuyền');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Khưu Xứ Cơ' WHERE game_code='haitac' AND package_id='46224' AND (name='chuyên môn Tiên Khí gói quà - Ngọc Đế');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lam Phượng Hoàng' WHERE game_code='haitac' AND package_id='46225' AND (name='chuyên môn Tiên Khí gói quà - Nữ Oa');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hoàng Dung' WHERE game_code='haitac' AND package_id='46226' AND (name='chuyên môn Tiên Khí gói quà - Chúc Dung');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Trương Vô Kỵ' WHERE game_code='haitac' AND package_id='46227' AND (name='chuyên môn Tiên Khí gói quà - Hình Thiên');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhạc Linh San' WHERE game_code='haitac' AND package_id='46228' AND (name='chuyên môn Tiên Khí gói quà - Dạ Mị');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Dương Đỉnh Thiên' WHERE game_code='haitac' AND package_id='46229' AND (name='chuyên môn Tiên Khí gói quà - Hỗn Thiên Đại Thánh');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Bạch Mi Ưng Vương' WHERE game_code='haitac' AND package_id='46233' AND (name='chuyên môn Tiên Khí gói quà - Lý Tĩnh');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lộc Trượng Khách' WHERE game_code='haitac' AND package_id='46234' AND (name='chuyên môn Tiên Khí gói quà - Huyền Trang');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Ân Tố Tố' WHERE game_code='haitac' AND package_id='46236' AND (name='chuyên môn Tiên Khí gói quà - Khổng Tuyên');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Ân Ly' WHERE game_code='haitac' AND package_id='46237' AND (name='chuyên môn Tiên Khí gói quà - Nguyên Thủy Thiên Tôn');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Kha Trấn Ác' WHERE game_code='haitac' AND package_id='46238' AND (name='chuyên môn Tiên Khí gói quà - Cơ Phát');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Doãn Khắc Tây' WHERE game_code='haitac' AND package_id='46239' AND (name='chuyên môn Tiên Khí gói quà - Ngưu Ma Vương');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Cừu Thiên Nhận' WHERE game_code='haitac' AND package_id='46241' AND (name='chuyên môn Tiên Khí gói quà - Minh Hà');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lệnh Hồ Xung' WHERE game_code='haitac' AND package_id='46247' AND (name='chuyên môn Tiên Khí gói quà - Tây Vương Mẫu');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Chu Bá Thông' WHERE game_code='haitac' AND package_id='46248' AND (name='chuyên môn Tiên Khí gói quà - Ảnh');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Võ Tu Văn' WHERE game_code='haitac' AND package_id='46501' AND (name='chuyên môn Tiên Khí gói quà - Khương Tử Nha');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Phạm Dao' WHERE game_code='haitac' AND package_id='46504' AND (name='chuyên môn Tiên Khí gói quà - Bàn Cổ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Kim Luân Pháp Vương' WHERE game_code='haitac' AND package_id='46505' AND (name='chuyên môn Tiên Khí gói quà - Đông Hoàng Thái Nhất');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Triết Biệt' WHERE game_code='haitac' AND package_id='46506' AND (name='chuyên môn Tiên Khí gói quà - Hậu Nghệ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Diệt Tuyệt Sư Thái' WHERE game_code='haitac' AND package_id='46509' AND (name='chuyên môn Tiên Khí gói quà - Thần Nông');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hoàng Dược Sư' WHERE game_code='haitac' AND package_id='46512' AND (name='chuyên môn Tiên Khí gói quà - Cộng Công');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Dương Tiêu' WHERE game_code='haitac' AND package_id='46514' AND (name='chuyên môn Tiên Khí gói quà - Xi Vưu');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Quách Tương' WHERE game_code='haitac' AND package_id='46515' AND (name='chuyên môn Tiên Khí gói quà - Côn');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lục Thừa Phong' WHERE game_code='haitac' AND package_id='46516' AND (name='chuyên môn Tiên Khí gói quà - Ngao Bính');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhất Đăng Đại Sư' WHERE game_code='haitac' AND package_id='46519' AND (name='chuyên môn Tiên Khí gói quà - Đấu Chiến Thắng Phật');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Quách Tĩnh' WHERE game_code='haitac' AND package_id='46520' AND (name='chuyên môn Tiên Khí gói quà - Chúc Long');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhậm Doanh Doanh' WHERE game_code='haitac' AND package_id='46521' AND (name='chuyên môn Tiên Khí gói quà - Cửu Thiên Huyền Nữ');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hồng Thất Công' WHERE game_code='haitac' AND package_id='46522' AND (name='chuyên môn Tiên Khí gói quà - Hoa Mộc Lan');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Đoàn Dự' WHERE game_code='haitac' AND package_id='46523' AND (name='chuyên môn Tiên Khí gói quà - Hoàng Tuyền');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Khưu Xứ Cơ' WHERE game_code='haitac' AND package_id='46524' AND (name='chuyên môn Tiên Khí gói quà - Ngọc Đế');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lam Phượng Hoàng' WHERE game_code='haitac' AND package_id='46525' AND (name='chuyên môn Tiên Khí gói quà - Nữ Oa');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Hoàng Dung' WHERE game_code='haitac' AND package_id='46526' AND (name='chuyên môn Tiên Khí gói quà - Chúc Dung');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Trương Vô Kỵ' WHERE game_code='haitac' AND package_id='46527' AND (name='chuyên môn Tiên Khí gói quà - Hình Thiên');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Nhạc Linh San' WHERE game_code='haitac' AND package_id='46528' AND (name='chuyên môn Tiên Khí gói quà - Dạ Mị');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Dương Đỉnh Thiên' WHERE game_code='haitac' AND package_id='46529' AND (name='chuyên môn Tiên Khí gói quà - Hỗn Thiên Đại Thánh');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Bạch Mi Ưng Vương' WHERE game_code='haitac' AND package_id='46533' AND (name='chuyên môn Tiên Khí gói quà - Lý Tĩnh');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lộc Trượng Khách' WHERE game_code='haitac' AND package_id='46534' AND (name='chuyên môn Tiên Khí gói quà - Huyền Trang');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Ân Tố Tố' WHERE game_code='haitac' AND package_id='46536' AND (name='chuyên môn Tiên Khí gói quà - Khổng Tuyên');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Ân Ly' WHERE game_code='haitac' AND package_id='46537' AND (name='chuyên môn Tiên Khí gói quà - Nguyên Thủy Thiên Tôn');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Kha Trấn Ác' WHERE game_code='haitac' AND package_id='46538' AND (name='chuyên môn Tiên Khí gói quà - Cơ Phát');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Doãn Khắc Tây' WHERE game_code='haitac' AND package_id='46539' AND (name='chuyên môn Tiên Khí gói quà - Ngưu Ma Vương');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Cừu Thiên Nhận' WHERE game_code='haitac' AND package_id='46541' AND (name='chuyên môn Tiên Khí gói quà - Minh Hà');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Lệnh Hồ Xung' WHERE game_code='haitac' AND package_id='46547' AND (name='chuyên môn Tiên Khí gói quà - Tây Vương Mẫu');
+UPDATE game_packages SET name='chuyên môn Tiên Khí gói quà - Chu Bá Thông' WHERE game_code='haitac' AND package_id='46548' AND (name='chuyên môn Tiên Khí gói quà - Ảnh');
 UPDATE game_packages SET name='Gói quà tỉ ấn đột phá' WHERE game_code='haitac' AND package_id='46901' AND (name='tỉ ấn đột phá gói quà');
 UPDATE game_packages SET name='Gói quà tỉ ấn thăng cấp' WHERE game_code='haitac' AND package_id='46902' AND (name='tỉ ấn thăng cấp gói quà');
 UPDATE game_packages SET name='Cửa hàng hạn lúc đổi thành' WHERE game_code='haitac' AND package_id='47001' AND (name='hạn lúc đổi thành cửa hàng');
@@ -81,6 +193,8 @@ UPDATE game_packages SET name='Cửa hàng hạn lúc đổi thành' WHERE game_
 UPDATE game_packages SET name='Cửa hàng hạn lúc đổi thành' WHERE game_code='haitac' AND package_id='47004' AND (name='hạn lúc đổi thành cửa hàng');
 UPDATE game_packages SET name='Cửa hàng hạn lúc đổi thành' WHERE game_code='haitac' AND package_id='47005' AND (name='hạn lúc đổi thành cửa hàng');
 UPDATE game_packages SET name='Cửa hàng hạn lúc đổi thành' WHERE game_code='haitac' AND package_id='47007' AND (name='hạn lúc đổi thành cửa hàng');
+UPDATE game_packages SET name='đêm thất tịch hạn định - Cừu Thiên Nhận' WHERE game_code='haitac' AND package_id='53024' AND (name='đêm thất tịch hạn định - Minh Hà');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư Tiên Khí' WHERE game_code='haitac' AND package_id='58003' AND (name='Tu La Tiên Khí');
 UPDATE game_packages SET name='Gói quà biết võ tâm nguyện tướng' WHERE game_code='haitac' AND package_id='73104' AND (name='biết võ tâm nguyện anh hùng gói quà');
 UPDATE game_packages SET name='Gói quà biết võ đội hình điều chỉnh' WHERE game_code='haitac' AND package_id='73105' AND (name='biết võ đội hình điều chỉnh gói quà');
 UPDATE game_packages SET name='Gói quà sẽ Vũ Tàng phẩm tăng lên' WHERE game_code='haitac' AND package_id='73106' AND (name='sẽ Vũ Tàng phẩm tăng lên gói quà');
@@ -97,6 +211,16 @@ UPDATE game_packages SET name='cấp gói quà thứ năm ngăn' WHERE game_code
 UPDATE game_packages SET name='trợ lực tướng vượt phục thứ 1 Ngăn' WHERE game_code='haitac' AND package_id='91009' AND (name='trợ lực anh hùng vượt phục thứ 1 Ngăn');
 UPDATE game_packages SET name='trợ lực tướng vượt phục thứ 2 Ngăn' WHERE game_code='haitac' AND package_id='91010' AND (name='trợ lực anh hùng vượt phục thứ 2 Ngăn');
 UPDATE game_packages SET name='trợ lực tướng vượt phục thứ 3 Ngăn' WHERE game_code='haitac' AND package_id='91011' AND (name='trợ lực anh hùng vượt phục thứ 3 Ngăn');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư đồ cất giữ gói quà 1' WHERE game_code='haitac' AND package_id='92211' AND (name='Tu La đồ cất giữ gói quà 1');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư đồ cất giữ gói quà 2' WHERE game_code='haitac' AND package_id='92212' AND (name='Tu La đồ cất giữ gói quà 2');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư đồ cất giữ gói quà 3' WHERE game_code='haitac' AND package_id='92213' AND (name='Tu La đồ cất giữ gói quà 3');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư đồ cất giữ gói quà 4' WHERE game_code='haitac' AND package_id='92214' AND (name='Tu La đồ cất giữ gói quà 4');
+UPDATE game_packages SET name='Đạt Ma Tổ Sư đồ cất giữ gói quà 5' WHERE game_code='haitac' AND package_id='92215' AND (name='Tu La đồ cất giữ gói quà 5');
+UPDATE game_packages SET name='Lý Mạc Sầu đồ cất giữ gói quà 1' WHERE game_code='haitac' AND package_id='92226' AND (name='Hồng Quân đồ cất giữ gói quà 1');
+UPDATE game_packages SET name='Lý Mạc Sầu đồ cất giữ gói quà 2' WHERE game_code='haitac' AND package_id='92227' AND (name='Hồng Quân đồ cất giữ gói quà 2');
+UPDATE game_packages SET name='Lý Mạc Sầu đồ cất giữ gói quà 3' WHERE game_code='haitac' AND package_id='92228' AND (name='Hồng Quân đồ cất giữ gói quà 3');
+UPDATE game_packages SET name='Lý Mạc Sầu đồ cất giữ gói quà 4' WHERE game_code='haitac' AND package_id='92229' AND (name='Hồng Quân đồ cất giữ gói quà 4');
+UPDATE game_packages SET name='Lý Mạc Sầu đồ cất giữ gói quà 5' WHERE game_code='haitac' AND package_id='92230' AND (name='Hồng Quân đồ cất giữ gói quà 5');
 UPDATE game_packages SET name='Gói quà trở về một Nguyên' WHERE game_code='haitac' AND package_id='94001' AND (name='trở về một Nguyên Lễ bao');
 UPDATE game_packages SET name='tướng kế thừa tam hệ 2 Ngăn' WHERE game_code='haitac' AND package_id='96002' AND (name='anh hùng kế thừa tam hệ 2 Ngăn');
 UPDATE game_packages SET name='tướng kế thừa Thần Ma 1 Ngăn' WHERE game_code='haitac' AND package_id='96003' AND (name='anh hùng kế thừa Thần Ma 1 Ngăn');
