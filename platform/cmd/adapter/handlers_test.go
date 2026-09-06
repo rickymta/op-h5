@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -42,5 +44,29 @@ func TestRedactLoginDataPassesThroughUnknownShapes(t *testing.T) {
 		if got != in {
 			t.Fatalf("dau vao %q bi doi thanh %q", in, got)
 		}
+	}
+}
+
+// Duoi /admin-portal/api/ chi co API: duong la phai 404 JSON, con duong trang cua SPA
+// (/admin-portal/gui-thu) van ra index.html. Truoc day ca hai deu ra index.html.
+func TestAdminPortalAPIKhongCoTra404JSON(t *testing.T) {
+	s := &adapterServer{log: testLogger(), gmDist: distGMFS}
+	mux := http.NewServeMux()
+	s.mountAdminPortal(mux)
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/admin-portal/api/khong-co", nil))
+	if rec.Code != http.StatusNotFound || !strings.Contains(rec.Header().Get("Content-Type"), "json") {
+		t.Fatalf("API la: muon 404 JSON, duoc %d %s", rec.Code, rec.Header().Get("Content-Type"))
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("POST", "/admin-portal/api/meta", nil))
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("sai method tren API co that: muon 404, duoc %d", rec.Code)
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/admin-portal/gui-thu", nil))
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Header().Get("Content-Type"), "html") {
+		t.Fatalf("duong trang SPA: muon 200 html, duoc %d %s", rec.Code, rec.Header().Get("Content-Type"))
 	}
 }

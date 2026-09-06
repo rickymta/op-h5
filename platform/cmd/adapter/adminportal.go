@@ -220,10 +220,20 @@ func (s *adapterServer) mountAdminPortal(mux *http.ServeMux) {
 
 	// Giao dien la SPA rieng (web/admin/apps/gm, base "/admin-portal/"), nhung trong binary
 	// nay va phuc vu tu day — cung origin va cung cookie voi cac API ben duoi. spa.Mount lo
-	// index.html cho moi duong con, cache cho tai san co bam, va 404 cho duong la duoi
-	// /admin-portal/api/ (khong de roi vao SPA cong khai o "GET /": go nham mot duong quan
-	// tri ma nhan trang chu cua game la mot bao cao loi kho hieu).
+	// index.html cho moi duong con va cache cho tai san co bam.
 	spa.Mount(mux, admBase, s.gmDist, "dist-gm")
+	// Duong API KHONG ton tai phai ra 404 JSON, khong phai index.html cua SPA. spa.Mount
+	// khong biet dau la API, nen khong co dong nay thi `fetch('/admin-portal/api/go-nham')`
+	// nhan 200 kem HTML — trang bao "JSON khong doc duoc" thay vi "khong co API nay", va mot
+	// giao dien cu goi API da bo se trong nhu chay duoc. Dang ky THEO TUNG METHOD: pattern
+	// khong method ("/admin-portal/api/") bi ServeMux tu choi vi mo ho voi "GET /admin-portal/"
+	// cua SPA (duong cu the hon nhung method rong hon) — va do la panic luc khoi dong, khong
+	// phai luc goi. Cac dong API o tren cu the hon nen van thang.
+	for _, m := range []string{"GET", "POST", "PUT", "DELETE", "PATCH"} {
+		mux.HandleFunc(m+" "+admBase+"/api/", func(w http.ResponseWriter, r *http.Request) {
+			httpx.Error(w, http.StatusNotFound, "not_found", "Không có API "+r.Method+" "+r.URL.Path+".")
+		})
+	}
 
 	mux.HandleFunc("GET "+admBase+"/api/me", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		httpx.JSON(w, http.StatusOK, map[string]any{"username": a.Username, "role": a.Role, "game": s.cfg.GameCode})
