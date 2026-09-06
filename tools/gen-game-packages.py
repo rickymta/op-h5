@@ -31,6 +31,39 @@ import sys
 from collections import Counter, OrderedDict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Ten goi hien tren web PHAI dich giong het van ban trong game: nguoi choi thay
+# "Tuong" trong game roi thay "Anh hung" ngoai cua hang la tuong hai thu khac nhau.
+# Dung chung mot bang thuat ngu thay vi chep lai.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from importlib import util as _u
+    _sp = _u.spec_from_file_location("_chuanhoa", os.path.join(os.path.dirname(os.path.abspath(__file__)), "chuan-hoa-dich.py"))
+    _ch = _u.module_from_spec(_sp); _sp.loader.exec_module(_ch)
+    def chuan_ten(t):
+        """NFC + thuat ngu + doi 'van' sang K/M/B, giong het van ban trong game."""
+        return _ch.doi_don_vi(_ch.thay_thuat_ngu(_ch.chuan(t))) if isinstance(t, str) else t
+except Exception as e:            # thieu file thi van sinh duoc, chi la khong chuan hoa
+    sys.stderr.write("canh bao: khong nap duoc chuan-hoa-dich.py (%s)\n" % e)
+    def chuan_ten(t): return t
+
+# Tieng Trung dat bo nghia TRUOC danh tu chinh (精英礼包), tieng Viet dat SAU
+# ("goi qua tinh anh"). Dich may giu nguyen trat tu Trung nen ra "tinh anh goi qua".
+# Chi dao khi ten KET THUC bang dung mot trong cac danh tu chinh nay.
+DAU_TU = ("gói quà", "cửa hàng")
+
+def dao_trat_tu(t):
+    if not isinstance(t, str):
+        return t
+    low = t.lower().strip()
+    for d in DAU_TU:
+        if low.endswith(d) and low != d:
+            con = t.strip()[: -len(d)].strip(" -–—")
+            if not con:
+                break
+            # Dau cau con lai da la ten rieng thi giu hoa; con lai ha xuong thuong.
+            return d[0].upper() + d[1:] + " " + (con if con[:1].isupper() and con[1:2].islower() else con[:1].lower() + con[1:])
+    return t
 ID_TXT = os.path.join(ROOT, "website", "game", "api", "id.txt")
 PAY_TXT = os.path.join(ROOT, "website", "game", "gmhanglong", "gm", "pay.txt")
 ITEM_TXT = os.path.join(ROOT, "website", "game", "gmhanglong", "gm", "item.txt")
@@ -60,23 +93,35 @@ NAMES = {
     31002: "Thẻ tuần Phù Văn đúc lại", 31003: "Thẻ tuần Thú Hồn bạc", 31004: "Thẻ tuần Đồ Đằng Thánh Điện",
     31005: "Thẻ tuần Tỉ Ấn đúc lại bạc", 31006: "Thẻ tuần Thú Hồn vàng", 31007: "Thẻ tuần Tỉ Ấn đúc lại vàng",
     31008: "Thẻ tuần Trang bị bạc", 31009: "Thẻ tuần Trang bị vàng",
-    19001: "Gói quà hàng ngày", 19002: "Gói quà Quý 1", 19003: "Gói quà Quý 2",
-    19004: "Gói quà hàng ngày", 19005: "Gói quà Quý 1", 19006: "Gói quà Quý 2",
-    19007: "Gói quà hàng ngày", 19008: "Gói quà Quý 1", 19009: "Gói quà Quý 2",
+    # 每日礼包 co 9 o (*商品ID 1-9) chia 3 moc gia. Ba o cung moc truoc day cung TEN, nen
+    # tren web hien ba dong y het nhau — them so o de phan biet.
+    19001: "Gói quà hàng ngày #1", 19002: "Gói quà Quý 1 #1", 19003: "Gói quà Quý 2 #1",
+    19004: "Gói quà hàng ngày #2", 19005: "Gói quà Quý 1 #2", 19006: "Gói quà Quý 2 #2",
+    19007: "Gói quà hàng ngày #3", 19008: "Gói quà Quý 1 #3", 19009: "Gói quà Quý 2 #3",
     19101: "Mua một lượt (ngày 1–14)",
     27001: "Quà rút tướng", 27002: "Quà rút tướng sa hoa", 27003: "Quà lực chiến",
+    # 全服限购 (han mua toan server) cac dot sau. pay.txt dich may thanh "toan bo server han
+    # mua 1" va "... thu tu ky -1" (第四期 = dot 4) — doc khong ra nghia. Ten dat theo dot +
+    # moc, dung thu tu *商品ID.
+    27011: "Hạn mua toàn server – đợt 2, mốc 1", 27012: "Hạn mua toàn server – đợt 2, mốc 2",
+    27013: "Hạn mua toàn server – đợt 2, mốc 3",
+    27021: "Hạn mua toàn server – đợt 3, mốc 1", 27022: "Hạn mua toàn server – đợt 3, mốc 2",
+    27023: "Hạn mua toàn server – đợt 3, mốc 3", 27024: "Hạn mua toàn server – đợt 3, mốc 4",
+    27025: "Hạn mua toàn server – đợt 3, mốc 5",
+    27031: "Hạn mua toàn server – đợt 4, mốc 1", 27032: "Hạn mua toàn server – đợt 4, mốc 2",
+    27033: "Hạn mua toàn server – đợt 4, mốc 3", 27034: "Hạn mua toàn server – đợt 4, mốc 4",
     # 42201-42215: bon khoi "灯芯商店" (bac den) tier 1-5 giong het nhau trong 充值项; pay.txt chi
     # dich toi 42200 nen 15 muc nay tung roi ve ten Han va HIEN RA cua hang. So thu tu khoi lay
     # theo *商品ID (10186-10190 la khoi 1 = 42196-42200, roi 10191/10196/10201).
-    42201: "bấc đèn cửa hàng 2 - Thứ 1 Ngăn", 42202: "bấc đèn cửa hàng 2 - Thứ 2 Ngăn",
-    42203: "bấc đèn cửa hàng 2 - Thứ 3 Ngăn", 42204: "bấc đèn cửa hàng 2 - Thứ 4 Ngăn",
-    42205: "bấc đèn cửa hàng 2 - Thứ 5 Ngăn",
-    42206: "bấc đèn cửa hàng 3 - Thứ 1 Ngăn", 42207: "bấc đèn cửa hàng 3 - Thứ 2 Ngăn",
-    42208: "bấc đèn cửa hàng 3 - Thứ 3 Ngăn", 42209: "bấc đèn cửa hàng 3 - Thứ 4 Ngăn",
-    42210: "bấc đèn cửa hàng 3 - Thứ 5 Ngăn",
-    42211: "bấc đèn cửa hàng 4 - Thứ 1 Ngăn", 42212: "bấc đèn cửa hàng 4 - Thứ 2 Ngăn",
-    42213: "bấc đèn cửa hàng 4 - Thứ 3 Ngăn", 42214: "bấc đèn cửa hàng 4 - Thứ 4 Ngăn",
-    42215: "bấc đèn cửa hàng 4 - Thứ 5 Ngăn",
+    42201: "Cửa hàng Bấc Đèn 2 – ô 1", 42202: "Cửa hàng Bấc Đèn 2 – ô 2",
+    42203: "Cửa hàng Bấc Đèn 2 – ô 3", 42204: "Cửa hàng Bấc Đèn 2 – ô 4",
+    42205: "Cửa hàng Bấc Đèn 2 – ô 5",
+    42206: "Cửa hàng Bấc Đèn 3 – ô 1", 42207: "Cửa hàng Bấc Đèn 3 – ô 2",
+    42208: "Cửa hàng Bấc Đèn 3 – ô 3", 42209: "Cửa hàng Bấc Đèn 3 – ô 4",
+    42210: "Cửa hàng Bấc Đèn 3 – ô 5",
+    42211: "Cửa hàng Bấc Đèn 4 – ô 1", 42212: "Cửa hàng Bấc Đèn 4 – ô 2",
+    42213: "Cửa hàng Bấc Đèn 4 – ô 3", 42214: "Cửa hàng Bấc Đèn 4 – ô 4",
+    42215: "Cửa hàng Bấc Đèn 4 – ô 5",
 }
 HAN = re.compile(r"[一-鿿]")
 CURRENCY = {"0:0": "Kim tệ", "0:1": "Nguyên Bảo", "0:2": "Ngân lượng", "0:3": "EXP nhân vật", "0:4": "EXP anh hùng"}
@@ -306,8 +351,17 @@ def build(game):
     if mismatch:
         # id.txt la gia nguoi choi da tra tren web cu; 额度 la gia game tu tinh (VIP, moc nap).
         # Giu id.txt, nhung in ra de nguoi van hanh biet — 31004 la mot ca dang ngo (100k vs 1tr).
-        print(f"lech gia id.txt / 额度: {len(mismatch)} muc, giu id.txt — vd " +
-              ", ".join(f"{p}: {a} vs {b}" for p, a, b in mismatch[:6]), file=sys.stderr)
+        # Gom theo cap gia: lech thanh CUM la dau hieu mot ben bi ghi de hang loat,
+        # lech le te la sai sot tung dong. Hai kieu do xu ly khac nhau, nen in tach ra.
+        cum = Counter((a, b) for _, a, b in mismatch)
+        print(f"\n!! LECH GIA giua id.txt va 充值项.额度: {len(mismatch)} muc "
+              f"({len(cum)} kieu). Dang giu id.txt — CAN NGUOI QUYET DINH:", file=sys.stderr)
+        for (a, b), n in cum.most_common():
+            vd = [p for p, x, y in mismatch if (x, y) == (a, b)]
+            ten = (excel.get(vd[0], {}) or {}).get("name") or ""
+            print(f"   id.txt {a:>9,} | excel {b:>9,} | {n:>3} muc | vd {','.join(str(v) for v in vd[:4])}"
+                  f"{'  ' + str(ten)[:26] if ten else ''}", file=sys.stderr)
+        print("   (cum lon = mot ben bi ghi de hang loat; muc le = sua tung dong)\n", file=sys.stderr)
     for pid in order:
         ex = excel.get(pid)
         if not ex:
@@ -318,6 +372,7 @@ def build(game):
         cat = FUNC_CATEGORY.get(func, "event")
         det = detail.get(pid, {})
         name = NAMES.get(pid) or det.get("name") or pay_names.get(pid) or (ex["name"] if ex else "") or f"Gói {pid}"
+        name = dao_trat_tu(chuan_ten(name))
         if cat == "card" and not det:
             det = dict(description="Thẻ tuần: nhận thưởng mỗi ngày trong 7 ngày.")
         rows.append(OrderedDict(
@@ -332,6 +387,7 @@ def build(game):
         stats[cat] += 1
 
     for wid, name, item, price in read_webshop():
+        name = dao_trat_tu(chuan_ten(name))
         reward = item if item.count(":") == 2 else item + ":1"
         rows.append(OrderedDict(
             game_code=game, package_id=f"web-{wid}", name=name, category="item", grant_mode="mail",

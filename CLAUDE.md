@@ -371,6 +371,17 @@ Khi sửa file trong khu vực này: **không log, không copy, không đưa cre
 ## 13. Quy ước khi làm việc trong repo này
 
 - **Đừng đổi tên file Excel bằng tay.** Tên file là khoá tra cứu hardcode trong bytecode. Đã có bộ vá đồng bộ (mục 14) — muốn đổi thêm thì sửa `tools/excel-name-map.json` rồi chạy lại tool, không rename thủ công.
+- **Sửa chữ hiển thị thì sửa bảng thuật ngữ, đừng sửa từng chỗ.** Văn bản người chơi nhìn thấy
+  nằm ở **hai** nguồn: `website/game/res/d6519-958fd-b2f8f` (= `ui/ui.json`, nhãn giao diện) và
+  `server/excel-src/**` (mô tả nhiệm vụ/vật phẩm/hoạt động). Bản gốc là dịch máy nên cùng một từ
+  nguồn ra nhiều từ Việt khác nhau. `tools/chuan-hoa-dich.py` giữ **một** bảng thuật ngữ áp cho cả
+  hai, `tools/gen-game-packages.py` dùng lại chính bảng đó cho tên gói nạp — nên tên trong game và
+  tên ngoài cửa hàng luôn khớp. Sửa bảng rồi chạy lại, đừng sửa tay từng chuỗi.
+  Ba điều dễ vấp: (1) hai nguồn trộn **NFC và NFD** — hai dạng nhìn giống hệt nhưng khác byte, nên
+  chuẩn hoá NFC trước mọi phép tìm/thay; (2) trong `excel-src` **không được đụng dòng header và ô
+  chữ Hán** — đó là khoá tra cứu server đọc theo tên, công cụ đã chặn sẵn; (3) `<số> Vạn` trong
+  `ui.json` là **chỗ trống** (nhãn nào cũng có `var`/`name`, game ghi số thật đè lên lúc chạy) nên
+  đổi ở đó vô nghĩa — chỉ đổi trong `excel-src`.
 - **Đừng đổi tên sheet.** Tên sheet (824 sheet) vẫn là tiếng Trung và cũng hardcode trong bytecode; bộ vá hiện tại **không** xử lý tên sheet.
 - **Đừng đổi thứ tự trong `start.sh`/`stop.sh`** trừ khi hiểu rõ phụ thuộc ở mục 2.
 - **Sửa cấu hình runtime qua Console/MySQL, không qua `env.yml`** (mục 4).
