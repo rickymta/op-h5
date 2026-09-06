@@ -74,7 +74,7 @@ export function Packages() {
 
   const cot: AdminColDef[] = [
     {
-      field: "package_id",
+      field: "id",
       headerName: "Mã gói",
       minWidth: 140,
       flex: 0.9,
@@ -83,7 +83,7 @@ export function Packages() {
         return (
           <Box sx={{ lineHeight: 1.3, py: 0.5, minWidth: 0 }}>
             <Box component="code" sx={{ fontSize: "0.78rem" }}>
-              {r.package_id}
+              {r.id}
             </Box>
             {r.item_tid > 0 && (
               <Typography variant="caption" color="text.secondary" display="block">
@@ -295,7 +295,7 @@ export function Packages() {
       <Grid
         columns={cot}
         rows={rows}
-        rowId={(r) => r.package_id}
+        rowId={(r) => r.id}
         loading={list.isLoading}
         empty={thieu ? "Chưa đọc được danh mục gói." : "Không có gói nào khớp bộ lọc."}
         pageSize={50}
@@ -309,12 +309,12 @@ export function Packages() {
 
       {sua && (
         <SuaGoi
-          key={sua.package_id}
+          key={sua.id}
           game={gameHienTai}
           row={sua}
           onClose={() => setSua(null)}
           onDone={() => {
-            show(`Đã lưu ${sua.package_id}`);
+            show(`Đã lưu ${sua.id}`);
             setSua(null);
             lamMoi();
           }}
@@ -362,7 +362,7 @@ function SuaGoi({
   const luu = useMutation({
     mutationFn: () =>
       api.post<{ ok: boolean }>(
-        `/api/packages/${encodeURIComponent(game)}/${encodeURIComponent(row.package_id)}`,
+        `/api/packages/${encodeURIComponent(game)}/${encodeURIComponent(row.id)}`,
         {
           name: f.name.trim(),
           description: f.description,
@@ -393,7 +393,7 @@ function SuaGoi({
     <FormDialog
       open
       maxWidth="md"
-      title={`Sửa gói ${row.package_id}`}
+      title={`Sửa gói ${row.id}`}
       onClose={onClose}
       onSubmit={() => !loi && luu.mutate()}
       busy={luu.isPending}

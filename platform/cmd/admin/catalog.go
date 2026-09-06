@@ -111,7 +111,11 @@ func (s *server) apiPackages(w http.ResponseWriter, r *http.Request, _ *admin) {
 		       COALESCE(badge,''), status, price_xu, item_tid, sort_order
 		  FROM game_packages `+where+` ORDER BY sort_order, price_xu, package_id LIMIT 400`, args...)
 	if err != nil {
+		// Truoc day chi ghi log roi tra 200 kem danh sach rong: nguoi truc thay "chua co goi
+		// nao" trong khi that ra la DB hong — hai trang thai rat khac nhau.
 		s.log.Error("doc danh muc goi", "err", err)
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được danh mục gói.")
+		return
 	}
 	list := []pkgRow{}
 	if rows != nil {
