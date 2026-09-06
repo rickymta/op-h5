@@ -240,14 +240,66 @@ def _sheet_server(ten):
 
 
 # ---------- thay ca bang theo server ----------
-# Cho cac bang ma SERVER quyet dinh toan bo (cua hang VIP, moc VIP...): client chi dung de ve
+# Cho cac bang ma SERVER quyet dinh (cua hang, hoat dong, moc, drop...): client chi dung de ve
 # va sap xep, ma may chu gui id nao client khong co thi sap (vip商城商品: client 870 dong,
 # server 2646 -> "Cannot read properties of undefined (reading 'sort')" o VIP SHOP).
-# Dong = dong server, o = cot cua client (thieu -> ""), giu tieu de client.
+#
+# Quy tac cho tung dong:
+#   - dong co o ca hai ben: cot LUAT lay server, cot TRINH BAY (ten, icon, mo ta, YID, hieu
+#     ung...) giu client — chu la cua client (e41d043);
+#   - dong chi server co: lay het tu server (khong co gi tot hon);
+#   - dong chi client co: giu nguyen, xep cuoi (server khong bao gio tro toi, nhung client co
+#     the tu tham chieu).
+# Bang nao client tu quan (huong dan tan thu, UI) thi KHONG cho vao day.
 BANG_THEO_SERVER = {
     "vip商城商品": ("vip-shop", "vip商城商品"),
     "vip等级": ("main-character", "vip等级"),
+    "兽灵培养": ("beast-spirit", "兽灵培养"),
+    "精英召唤活动": ("cyclic-event", "精英召唤活动"),
+    "任务比拼活动": ("cyclic-event", "任务比拼活动"),
+    "锦鲤活动": ("cyclic-event-2", "锦鲤活动"),
+    "砸金蛋活动": ("cyclic-event-2", "砸金蛋活动"),
+    "地区": ("province-city-region", "地区"),
+    "通天塔关卡": ("tower-of-heaven", "通天塔关卡"),
+    "通天塔通关奖励": ("tower-of-heaven", "通天塔通关奖励"),
+    "充值项": ("recharge-item", "充值项"),
+    "任务库": ("quest", "任务库"),
+    "商城商品": ("shop", "商城商品"),
+    "buff": ("combat", "buff"),
+    "英雄技能": ("hero", "英雄技能"),
+    "仙器基础": ("immortal-artifact", "仙器基础"),
+    "种族竞技基础配置": ("race-arena", "种族竞技基础配置"),
+    "限定英雄商品": ("limited-hero-summon", "限定英雄商品"),
+    "限定英雄召唤奖励": ("limited-hero-summon", "限定英雄召唤奖励"),
+    "限定英雄培养商店": ("limited-hero-summon", "限定英雄培养商店"),
+    "头像": ("personal-space", "头像"),
+    "冒险形象": ("personal-space", "冒险形象"),
+    "三十六重天关卡": ("thirty-six-heavens", "三十六重天关卡"),
+    "跨服BOSS排行奖励": ("cross-boss", "跨服BOSS排行奖励"),
+    "公会BOSS关卡": ("guild-boss", "公会BOSS关卡"),
+    "每日签到": ("checkin", "每日签到"),
+    "重置基础": ("reset", "重置基础"),
+    "月基金奖励": ("recharge-benefit", "月基金奖励"),
+    "神龙强化": ("divine-dragon", "神龙强化"),
+    "装备进阶": ("equipment-table", "装备进阶"),
+    "消耗组": ("realm", "消耗组"),
+    "兽魂祈祷UP基础": ("beast-soul-prayer-rateup", "兽魂祈祷UP基础"),
+    "先知圣殿召唤分组": ("prophet-sanctuary", "先知圣殿召唤分组"),
+    "暑期大促销": ("summer-carnival", "暑期大促销"),
+    "连线英雄怪物": ("linked-hero", "连线英雄怪物"),
+    "多多益善基础": ("more-the-better", "多多益善基础"),
+    "功能开启": ("common", "功能开启"),
+    "原型对应羁绊组": ("bond", "原型对应羁绊组"),
+    "宝青坊召唤分组": ("baoqing-workshop", "宝青坊召唤分组"),
 }
+# Cot trinh bay: ten cot chua mot trong cac manh nay thi giu client o dong chung.
+COT_TRINH_BAY = ("名称", "名字", "图标", "描述", "说明", "YID", "模型", "立绘", "肖像", "语音", "头像",
+                 "背景", "特效", "图片", "形象", "音效", "动作", "飘字", "颜色", "故事", "光效", "横幅",
+                 "卡片", "卡牌", "缩放", "延迟", "偏移", "层级", "挂载", "显示", "表现", "修饰", "提醒")
+
+
+def la_trinh_bay(cot):
+    return any(m in cot for m in COT_TRINH_BAY)
 
 
 def thay_bang(d, ten_bang):
@@ -256,74 +308,32 @@ def thay_bang(d, ten_bang):
         if ten in ten_bang:
             wb, sh = BANG_THEO_SERVER[ten]
             keys = [c.decode("utf-8") for c in o_cua(rows[0])]
+            luat = [k for k in keys[1:] if not la_trinh_bay(k)]
             sv = _sheet_server_wb(wb, sh)
-            moi = [rows[0]]
+            cu = {}
+            for pl in rows[1:]:
+                c = o_cua(pl)
+                if c: cu[c[0].decode("utf-8", "replace").strip()] = [x.decode("utf-8", "replace") for x in c]
+            moi, doi, them = [rows[0]], 0, 0
             for id_, r in sv.items():
-                cells = [r.get(k, "") for k in keys]; cells[0] = id_
+                if id_ in cu:
+                    cells = list(cu[id_]) + [""] * (len(keys) - len(cu[id_]))
+                    for k in luat:
+                        if k in r and cells[keys.index(k)] != r[k]:
+                            cells[keys.index(k)] = r[k]; doi += 1
+                else:
+                    cells = [r.get(k, "") for k in keys]; cells[0] = id_; them += 1
                 moi.append(dong_tu_o([x.encode("utf-8") for x in cells]))
-            thieu = [k for k in keys if k not in next(iter(sv.values()), {})]
-            tk[ten] = (len(rows) - 1, len(moi) - 1, thieu)
+            chi_client = [k for k in cu if k not in sv and k != ""]   # id rong = dong rac, bo
+            for k in chi_client:
+                moi.append(dong_tu_o([x.encode("utf-8") for x in cu[k]]))
+            tk[ten] = {"cu": len(rows) - 1, "moi": len(moi) - 1, "them": them, "o_doi": doi,
+                       "chi_client": len(chi_client), "cot_luat": len(luat), "cot_trinh_bay": len(keys) - 1 - len(luat)}
             rows = moi
         ra.append((ten, rows))
     for t in ten_bang:
         if t not in tk: sys.exit(f"!! templates.bin khong co bang {t}")
     return ghi(ra), tk
-
-
-def _dong_bo_bang(rows, sv, cot_luat, them_dong, tham_chieu=None):
-    keys = [c.decode("utf-8") for c in o_cua(rows[0])]
-    cl = []   # [id, cells(str)] giu thu tu
-    for pl in rows[1:]:
-        c = o_cua(pl)
-        cl.append([c[0].decode("utf-8", "replace") if c else "", [x.decode("utf-8", "replace") for x in (c or [])]])
-    co = {i for i, _ in cl}
-    se_them = [k for k in sorted(sv, key=int) if k not in co and int(k) < 900000] if them_dong else []
-    dich_hop_le = (co | set(se_them)) if tham_chieu is None else tham_chieu
-    doi, giu_tc = {}, []
-    for id_, cells in cl:
-        if id_ not in sv: continue
-        for k in cot_luat:
-            if k not in keys or k not in sv[id_]: continue
-            i = keys.index(k); moi = sv[id_][k]
-            if i >= len(cells): continue
-            if k in COT_THAM_CHIEU and moi not in ("", "0") and moi not in dich_hop_le:
-                giu_tc.append((id_, k, moi)); continue
-            if cells[i] != moi:
-                doi[k] = doi.get(k, 0) + 1; cells[i] = moi
-    them = []
-    for id_ in se_them:
-        proto = sv[id_].get("原型ID", "")
-        # lay dong trinh bay tu cung nguyen mau, sao cao nhat nho hon dong moi
-        ung = [(int(c[keys.index("星级")] or 0), c) for i, c in cl
-               if i in sv and sv[i].get("原型ID") == proto and c[keys.index("星级")].isdigit()]
-        if not ung: giu_tc.append((id_, "them", "khong co nguyen mau tren client")); continue
-        sao_moi = int(sv[id_].get("星级") or 0)
-        thap = [u for u in ung if u[0] <= sao_moi] or ung
-        cells = list(max(thap, key=lambda u: u[0])[1])
-        cells[0] = id_
-        for k in cot_luat:
-            if k in keys and k in sv[id_] and keys.index(k) < len(cells):
-                moi = sv[id_][k]
-                if k in COT_THAM_CHIEU and moi not in ("", "0") and moi not in dich_hop_le: continue
-                cells[keys.index(k)] = moi
-        cl.append([id_, cells]); them.append(id_)
-    ra = [rows[0]] + [dong_tu_o([x.encode("utf-8") for x in cells]) for _, cells in cl]
-    return ra, {"doi": doi, "them": them, "giu_tham_chieu": giu_tc, "chi_client": len(co - set(sv))}
-
-
-def dong_bo_tuong(d):
-    sv, sv_cao = _sheet_server("英雄基础"), _sheet_server("英雄高阶升星")
-    tabs, ra, tk = doc(d), [], {}
-    for ten, rows in tabs:
-        if ten == "英雄基础":
-            rows, tk[ten] = _dong_bo_bang(rows, sv, COT_LUAT, True)
-            id_tuong = {o_cua(pl)[0].decode("utf-8", "replace") for pl in rows[1:] if o_cua(pl)}
-        elif ten == "英雄高阶升星":   # 下一星英雄ID o day tro sang 英雄基础
-            rows, tk[ten] = _dong_bo_bang(rows, sv_cao, COT_LUAT_CAO, False, id_tuong)
-        ra.append((ten, rows))
-    if len(tk) != 2: sys.exit("!! templates.bin thieu 英雄基础 / 英雄高阶升星")
-    return ghi(ra), tk
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -342,8 +352,9 @@ def main():
     elif a.lenh == "bang":
         ten_bang = a.them or list(BANG_THEO_SERVER)
         moi, tk = thay_bang(d, ten_bang)
-        for ten, (cu, m, thieu) in tk.items():
-            print(f"  {ten}: {cu} dong -> {m} dong theo server{'; cot client khong co o server: ' + str(thieu) if thieu else ''}")
+        for ten, t in tk.items():
+            print(f"  {ten:14s} {t['cu']:5d} -> {t['moi']:5d} dong | them {t['them']:4d}, o luat doi {t['o_doi']:5d}, "
+                  f"chi client giu {t['chi_client']:4d} | cot luat {t['cot_luat']}, trinh bay {t['cot_trinh_bay']}")
     elif a.lenh == "tuong":
         moi, tk = dong_bo_tuong(d)
         for ten, t in tk.items():
