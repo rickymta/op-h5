@@ -38,6 +38,7 @@ import (
 
 	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
+	"github.com/rickymta/op-h5/platform/internal/textnorm"
 )
 
 // Actor la nguoi dang thao tac. Chi can dung ba truong nay; dich vu goi tu quyet dinh
@@ -74,18 +75,22 @@ var rewardRe = regexp.MustCompile(`^\d+:\d+:\d+(#\d+:\d+:\d+)*$`)
 
 // BagKinds la cac loai kho do cong cu cho phep dung toi, kem ten tieng Viet.
 // Thu tu quyet dinh thu tu hien tren trang.
+// Nhan lay tu chinh van ban tieng Viet cua game, khong dich tu chu Han: 'Hon ngoc' (104 lan
+// trong item-table.xlsm), 'Than khi' (cum "nghe nghiep Than Khi" = 职业仙器), 'Bi kip' (ten
+// mon trong shop.xlsx). Nhan cu ("Mac an", "Thu hon", "Tien khi") la dich nghia tu ban goc
+// truoc khi thay ao — nguoi truc mo tab ra thay mot loat ten khong lien quan den nhan.
 var BagKinds = []struct {
 	Type  console.BagType `json:"type"`
 	Label string          `json:"label"`
 	Note  string          `json:"note"`
 }{
-	{console.BagItem, "Đạo cụ", "vật phẩm thường"},
+	{console.BagItem, "Vật phẩm", ""},
 	{console.BagEquipment, "Trang bị", ""},
-	{console.BagFragment, "Mảnh tướng", ""},
-	{console.BagSeal, "Mặc ấn", ""},
-	{console.BagBeastSoul, "Thú hồn", ""},
-	{console.BagArtifact, "Tiên khí", ""},
-	{console.BagArtifactFrag, "Mảnh tiên khí", ""},
+	{console.BagFragment, "Mảnh", ""},
+	{console.BagRune, "Bí kíp", ""},
+	{console.BagDestiny, "Hồn ngọc", ""},
+	{console.BagArtifact, "Thần khí", ""},
+	{console.BagArtifactFrag, "Mảnh thần khí", ""},
 	{console.BagCollection, "Sưu tập", ""},
 	{console.BagHero, "Tướng", "xoá tướng là thao tác không lùi được"},
 }
@@ -205,7 +210,129 @@ func (s *Service) Meta(w http.ResponseWriter, r *http.Request, _ Actor) {
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
 		"games": games, "game": s.GameCode, "servers": servers, "bags": BagKinds,
+		// Nhom cua danh muc qua: de o day vi trang tai meta mot lan roi dung lai cho moi o tim.
+		"nhom_qua": NhomKhoDo(),
 	})
+}
+
+// Catalog tim trong danh muc vat pham/tuong cua game (xem danhmuc.go).
+//
+// Chi doc, khong cham vao nhan vat — nhung van di qua admAPI nhu moi duong khac: danh muc
+// day du la thong tin van hanh, khong phai thu de mo cho ai cung xem.
+func (s *Service) Catalog(w http.ResponseWriter, r *http.Request, _ Actor) {
+	q := r.URL.Query()
+	loai, _ := strconv.Atoi(q.Get("loai"))
+	gioiHan, _ := strconv.Atoi(q.Get("limit"))
+	muc := TimDanhMuc(q.Get("q"), loai, gioiHan)
+	if muc == nil {
+		muc = []MucDanhMuc{}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"muc": muc})
+}
+
+// MonQua la mot mon trong chuoi qua, da tra ra ten trong game.
+type MonQua struct {
+	Raw   string `json:"raw"`
+	Loai  int    `json:"loai"`
+	Ma    int64  `json:"ma"`
+	SoLuo int64  `json:"so_luong"`
+	Ten   string `json:"ten"`  // ten trong game; rong khi khong tra duoc
+	Nhan  string `json:"nhan"` // nhan cua loai kho do
+}
+
+// DocQua tach chuoi `type:id:count` va tra ten trong game cho tung mon.
+//
+// Lam o may chu chu khong o trinh duyet: danh muc 6.500 dong, gui het xuong de tra ten la
+// 255 KB cho moi lan mo trang. Va quan trong hon — ten phai la MOT nguon: neu trang tu tra
+// bang mot ban sao, den luc Excel doi thi hai ben noi hai thu khac nhau.
+func (s *Service) DocQua(w http.ResponseWriter, r *http.Request, _ Actor) {
+	ma := strings.TrimSpace(r.URL.Query().Get("ma"))
+	if ma == "" {
+		httpx.JSON(w, http.StatusOK, map[string]any{"mon": []MonQua{}})
+		return
+	}
+	if !rewardRe.MatchString(ma) {
+		httpx.Error(w, http.StatusBadRequest, "invalid_reward",
+			"Chuỗi quà sai định dạng. Phải là type:id:count, nhiều món nối bằng #.")
+		return
+	}
+	nhan := map[int]string{}
+	for _, k := range BagKinds {
+		nhan[int(k.Type)] = k.Label
+	}
+	mon := []MonQua{}
+	for _, phan := range strings.Split(ma, "#") {
+		p := strings.SplitN(phan, ":", 3)
+		if len(p) != 3 {
+			continue
+		}
+		loai, _ := strconv.Atoi(p[0])
+		id, _ := strconv.ParseInt(p[1], 10, 64)
+		sl, _ := strconv.ParseInt(p[2], 10, 64)
+		m := MonQua{Raw: phan, Loai: loai, Ma: id, SoLuo: sl, Ten: TenMuc(loai, id)}
+		if loai == 0 {
+			m.Nhan = "Ví"
+		} else {
+			m.Nhan = nhan[loai]
+		}
+		mon = append(mon, m)
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"mon": mon})
+}
+
+// GoiNap la mot muc nap tay chon duoc.
+type GoiNap struct {
+	Ma        string `json:"ma"`
+	Ten       string `json:"ten"`
+	GiaXu     int64  `json:"gia_xu"`
+	Nhom      string `json:"nhom"`
+	MoTa      string `json:"mo_ta,omitempty"`
+	AnTrenWeb bool   `json:"an_tren_web"`
+}
+
+// Packages tim goi nap theo ten hoac ma, doc tu bang `game_packages` cua chinh he thong.
+//
+// CO Y liet ke ca goi dang an tren web (`status='hidden'` va nhom 'event'): an la quyet dinh
+// BAN HANG cho nguoi choi tu mua, khong phai lenh cam nguoi truc phat tay khi co phieu ho tro.
+// Nhung phai hien ro goi nao dang an de nguoi truc biet minh dang phat mot thu khong ban.
+func (s *Service) Packages(w http.ResponseWriter, r *http.Request, _ Actor) {
+	if s.DB == nil {
+		httpx.JSON(w, http.StatusOK, map[string]any{"goi": []GoiNap{}})
+		return
+	}
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	rows, err := s.DB.QueryContext(r.Context(), `
+		SELECT package_id, name, price_xu, category, COALESCE(description,''), status
+		  FROM game_packages
+		 WHERE game_code = ? AND grant_mode = 'pay'
+		 ORDER BY CAST(package_id AS UNSIGNED)`, s.GameCode)
+	if err != nil {
+		if s.Log != nil {
+			s.Log.Error("doc danh sach goi nap", "err", err)
+		}
+		httpx.Error(w, http.StatusBadGateway, "db_error", "Không đọc được danh sách gói.")
+		return
+	}
+	defer rows.Close()
+
+	tk := textnorm.Fold(q)
+	goi := []GoiNap{}
+	for rows.Next() {
+		var g GoiNap
+		var status string
+		if rows.Scan(&g.Ma, &g.Ten, &g.GiaXu, &g.Nhom, &g.MoTa, &status) != nil {
+			continue
+		}
+		g.AnTrenWeb = status != "active"
+		if tk != "" && !strings.HasPrefix(g.Ma, q) && !strings.Contains(textnorm.Fold(g.Ten), tk) {
+			continue
+		}
+		goi = append(goi, g)
+		if len(goi) >= 60 {
+			break
+		}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"goi": goi})
 }
 
 // Roles tim nhan vat theo ten.

@@ -143,7 +143,7 @@ export function TraNhanVat() {
             label="Tên nhân vật"
             value={ten}
             onChange={(e) => setTen(e.target.value)}
-            placeholder="ví dụ: Râu Trắng"
+            placeholder="tên hiển thị trong game"
             autoComplete="off"
             autoFocus
             fullWidth

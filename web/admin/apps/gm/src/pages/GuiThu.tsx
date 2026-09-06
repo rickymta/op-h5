@@ -3,11 +3,11 @@
 // Cố ý không có "gửi toàn máy chủ" ở đây, y như phía Go: gửi nhầm một người thì thu hồi được
 // bằng tay, gửi nhầm cả máy chủ thì không.
 //
-// Quà là chuỗi `type:id:count` nối bằng `#` — thứ người trực chép từ bảng cấu hình, rất dễ
-// lệch một dấu hai chấm. Nên trang tách chuỗi ra thành từng dòng ĐỌC ĐƯỢC trước khi gửi:
-// nhìn "Nguyên Bảo × 5.000" thì phát hiện thừa một số 0 ngay, nhìn `0:1:50000` thì không.
+// Phần quà chọn bằng ô tìm (ChonQua) thay vì gõ chuỗi `type:id:count`. Danh mục do máy chủ
+// phát ra từ chính bảng cấu hình game đang chạy, nên tên ở đây đúng thứ người chơi thấy —
+// khác với bảng tra của bản PHP cũ, vốn là của một bản game khác.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Alert from "@mui/material/Alert";
@@ -18,35 +18,30 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { ConfirmDialog, Page, formatInt, useToast } from "@op/admin-ui";
-import { api, canGM, loiConsole, type BagKind, type Me, type MessageResult } from "../api";
+import { api, canGM, loiConsole, type Me, type MessageResult, type NhomQua } from "../api";
 import { useChon } from "../chon";
-import { docReward, rewardHopLe } from "../reward";
+import { ChonQua, ghepQua, type DongQua } from "../ChonQua";
 import { ThieuNhanVat } from "./ThieuNhanVat";
 
-const MAU = "0:1:5000#3:100022:10";
-
-function XemQua({ reward, bags }: { reward: string; bags: BagKind[] }) {
-  const mon = docReward(reward, bags);
-  if (mon.length === 0) return null;
+function XemQua({ dong }: { dong: DongQua[] }) {
+  if (dong.length === 0) return null;
   return (
     <Box component="ul" sx={{ m: 0, pl: 2.5, display: "grid", gap: 0.5 }}>
-      {mon.map((m, i) => (
-        <Box component="li" key={`${m.raw}-${i}`}>
+      {dong.map((d) => (
+        <Box component="li" key={`${d.loai}:${d.ma}`}>
           <Typography variant="body2" component="span">
-            <b>{m.label}</b> × {formatInt(m.count)}
+            <b>{d.ten || `Chưa tra được tên · mã ${d.loai}:${d.ma}`}</b> × {formatInt(d.soLuong)}
           </Typography>
-          {m.mo && (
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              (<code>{m.raw}</code> — tên món tra ở bảng cấu hình)
-            </Typography>
-          )}
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+            {d.nhan}
+          </Typography>
         </Box>
       ))}
     </Box>
   );
 }
 
-export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
+export function GuiThu({ me, nhomQua }: { me: Me; nhomQua: NhomQua[] }) {
   const [, go] = useLocation();
   const { show } = useToast();
   const { role } = useChon();
@@ -54,11 +49,12 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
 
   const [tieuDe, setTieuDe] = useState("Thư từ quản trị");
   const [noiDung, setNoiDung] = useState("");
-  const [qua, setQua] = useState("");
+  const [dong, setDong] = useState<DongQua[]>([]);
   const [hoi, setHoi] = useState(false);
 
-  const quaOK = rewardHopLe(qua);
-  const hopLe = quaOK && tieuDe.trim().length <= 120 && noiDung.length <= 1000;
+  const qua = useMemo(() => ghepQua(dong), [dong]);
+  const thieuSo = dong.some((d) => d.soLuong <= 0);
+  const hopLe = qua !== "" && !thieuSo && tieuDe.trim().length <= 120 && noiDung.length <= 1000;
 
   const gui = useMutation({
     mutationFn: () =>
@@ -68,12 +64,12 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
         role_name: role!.roleName,
         title: tieuDe.trim(),
         content: noiDung,
-        reward: qua.trim(),
+        reward: qua,
       }),
     onSuccess: (d) => {
       show(d.message, "success");
       setHoi(false);
-      setQua("");
+      setDong([]);
       setNoiDung("");
     },
     onError: (e) => {
@@ -100,7 +96,7 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
       <Paper
         variant="outlined"
         component="form"
-        sx={{ p: 2, maxWidth: 720 }}
+        sx={{ p: 2, maxWidth: 760 }}
         onSubmit={(e) => {
           e.preventDefault();
           if (hopLe && duocGhi) setHoi(true);
@@ -126,32 +122,16 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
             helperText={`${noiDung.length}/1000`}
             fullWidth
           />
-          <TextField
-            size="small"
-            label="Quà"
-            value={qua}
-            onChange={(e) => setQua(e.target.value)}
-            placeholder={MAU}
-            error={qua.trim() !== "" && !quaOK}
-            helperText={
-              qua.trim() !== "" && !quaOK
-                ? "Sai định dạng. Phải là type:id:count, nhiều món nối bằng #."
-                : "0:1:N Nguyên Bảo · 0:0:N Kim tệ · 0:4:N EXP anh hùng · 3:id:N vật phẩm"
-            }
-            slotProps={{ input: { sx: { fontFamily: "ui-monospace, monospace" } } }}
-            fullWidth
-          />
 
-          <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: "action.hover", border: 1, borderColor: "divider" }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-              Xem trước phần quà
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Quà đính kèm
             </Typography>
-            {quaOK ? (
-              <XemQua reward={qua} bags={bags} />
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                Nhập chuỗi quà đúng định dạng để xem nó thành cái gì trong game.
-              </Typography>
+            <ChonQua nhom={nhomQua} dong={dong} datDong={setDong} />
+            {thieuSo && (
+              <Alert severity="warning" sx={{ mt: 1.5 }}>
+                Có món đang để số lượng 0 — điền số hoặc bỏ món đó ra.
+              </Alert>
             )}
           </Box>
 
@@ -179,13 +159,21 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
         message={
           <Stack spacing={1.5}>
             <Typography variant="body2">
-              Gửi cho <b>{role.roleName}</b> — {role.srvCode}. Tiêu đề: <b>{tieuDe.trim() || "Thư từ quản trị"}</b>
+              Gửi cho <b>{role.roleName}</b> — {role.srvCode}. Tiêu đề:{" "}
+              <b>{tieuDe.trim() || "Thư từ quản trị"}</b>
             </Typography>
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
                 Quà đính kèm
               </Typography>
-              <XemQua reward={qua} bags={bags} />
+              <XemQua dong={dong} />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mt: 0.75, fontFamily: "ui-monospace, monospace" }}
+              >
+                {qua}
+              </Typography>
             </Box>
             <Alert severity="warning" sx={{ py: 0.5 }}>
               Thư vào hòm thư của người chơi ngay. Nhật ký ghi tên tài khoản của bạn.

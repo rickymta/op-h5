@@ -234,6 +234,17 @@ func (s *adapterServer) mountAdminPortal(mux *http.ServeMux) {
 	mux.HandleFunc("GET "+admBase+"/api/roles", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		s.gm().Roles(w, r, a)
 	}))
+	// Ba duong tra cuu duoi day thay cho viec nguoi truc phai mo mot bang khac roi chep ma
+	// sang. Chung chi doc, nhung van nam sau admAPI nhu moi duong khac.
+	mux.HandleFunc("GET "+admBase+"/api/catalog", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
+		s.gm().Catalog(w, r, a)
+	}))
+	mux.HandleFunc("GET "+admBase+"/api/reward", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
+		s.gm().DocQua(w, r, a)
+	}))
+	mux.HandleFunc("GET "+admBase+"/api/packages", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
+		s.gm().Packages(w, r, a)
+	}))
 	mux.HandleFunc("GET "+admBase+"/api/bag", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		s.gm().Bag(w, r, a)
 	}))

@@ -66,3 +66,53 @@ func TestRewardPattern(t *testing.T) {
 		}
 	}
 }
+
+// Danh muc phai nap duoc va tra dung ten cua game DANG CHAY. Ba mau duoi day lay tu kho do
+// that tren may chu (console /role/bag/query, nhan vat s1/Duyen): neu ai do sinh lai danh
+// muc tu cot `*英雄名` cua hero.xlsx thi 1:401301 se thanh "Chuc Dung" va test nay do.
+func TestDanhMucKhopGameDangChay(t *testing.T) {
+	mau := []struct {
+		loai int
+		ma   int64
+		ten  string
+	}{
+		{0, 1, "Nguyên bảo"},
+		{1, 401301, "Hoàng Dung"},
+		{1, 500801, "Trương Vô Kỵ"},
+		{2, 19000100, "Thô Chế"},
+		{3, 100001, "Đan tiến giai"},
+		{3, 100022, "Lệnh tướng cao cấp"},
+		{4, 606001, "4 sao ngẫu nhiên mảnh vỡ"},
+		{5, 5, "Cửu Dương Công"},
+		{6, 30001, "Hồn ngọc ( Tiểu )"},
+		{7, 55000101, "Cửu Âm Nội Lực"},
+	}
+	for _, m := range mau {
+		if got := TenMuc(m.loai, m.ma); got != m.ten {
+			t.Errorf("TenMuc(%d, %d) = %q, muon %q", m.loai, m.ma, got, m.ten)
+		}
+	}
+}
+
+func TestTimDanhMuc(t *testing.T) {
+	// Tim theo ten khong dau — nguoi truc go nhanh thi khong bo dau.
+	ra := TimDanhMuc("nguyen bao", 0, 10)
+	if len(ra) == 0 || ra[0].Ten != "Nguyên bảo" {
+		t.Fatalf("tim 'nguyen bao' ra %+v", ra)
+	}
+	// Tim theo ma: dong dau phai la dung ma do, khong phai mot ma bat dau bang no.
+	ra = TimDanhMuc("100022", 0, 10)
+	if len(ra) == 0 || ra[0].Ma != 100022 {
+		t.Fatalf("tim '100022' ra %+v", ra)
+	}
+	// Loc theo nhom: chi tra ve dung loai duoc hoi.
+	for _, m := range TimDanhMuc("a", 3, 20) {
+		if m.Loai != 3 {
+			t.Fatalf("loc loai=3 nhung tra ve loai %d", m.Loai)
+		}
+	}
+	// Tu khoa rong khong duoc lam sap: tra ve mot trang dau de nguoi truc duyet.
+	if len(TimDanhMuc("", 1, 5)) != 5 {
+		t.Errorf("tu khoa rong phai tra du gioi han")
+	}
+}

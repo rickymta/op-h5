@@ -118,7 +118,7 @@ export function App() {
           {(p) => (role?.roleId === p.id ? <TrangNhanVat me={nguoi} bags={meta.data?.bags ?? []} /> : <Redirect to="/nhan-vat" />)}
         </Route>
         <Route path="/nap-tay">{() => <NapTay me={nguoi} />}</Route>
-        <Route path="/gui-thu">{() => <GuiThu me={nguoi} bags={meta.data?.bags ?? []} />}</Route>
+        <Route path="/gui-thu">{() => <GuiThu me={nguoi} nhomQua={meta.data?.nhom_qua ?? []} />}</Route>
         <Route>{() => <Redirect to="/" />}</Route>
       </Switch>
     </Shell>
