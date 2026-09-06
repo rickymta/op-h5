@@ -544,3 +544,17 @@ Ba quyết định của người vận hành: **chỉ tách giao diện** (gi�
 
 **Chợ còn thiếu để mở thật**: migration bảng tin rao và sự kiện, thử `numType=1` khi ký gửi Nguyên Bảo trên máy dev, giao dịch mua khoá dòng, bảy endpoint, và trang theo dõi tin ký gửi treo. Mọi nút tiền trong bản xem trước đều đã khoá.
 
+### 15.12 Kiểm thử toàn hệ trên máy chủ — 2026-09-06
+
+Ba agent kiểm 43 route trên năm giao diện, không đăng nhập (nên phần sau đăng nhập chưa có bằng chứng chạy thật).
+
+**Ba lỗi chặn**: trang Gói đọc sai tên trường nên hỏng hoàn toàn; cột Điều kiện để trống 1.923/1.933 dòng trong khi phần hỏi đáp khẳng định ngược lại; và **1.870 gói nhóm sự kiện mang tên dịch máy trùng nhau theo cụm** — 53 dòng cùng tên trải giá 3.000 đến 500.000 Xu. Hai lỗi đầu đã sửa. Lỗi thứ ba: người vận hành quyết định **ẩn hẳn nhóm sự kiện khỏi cửa hàng web**; các gói vẫn nằm trong bảng và vẫn mua được trong game. Cửa hàng còn 63 gói ở bảy nhóm.
+
+**Hai lỗi nặng**: bundle React đi nguyên không nén vì nginx khai nén cho `application/javascript` còn Go trả `text/javascript` (314 KB → 105 KB sau khi sửa); cổng GM nhúng khung được vì header nginx không kế thừa giữa các khối server.
+
+**Vá thêm**: giới hạn tần suất 12r/m áp cho cả trang khiến người trực bị chặn khi làm việc bình thường (tách riêng đường đăng nhập, duyệt trang 240r/m); 429 trả HTML trong khi giao diện chờ JSON; nhật ký quản trị bỏ qua tham số trang; danh mục gói nuốt lỗi cơ sở dữ liệu rồi trả danh sách rỗng; chợ ẩn cột số Xu thực nhận trên điện thoại; chip lọc dẫn tới bảng trống; ba trang công khai thiếu mô tả và thẻ xem trước.
+
+**Còn lại, cần người vận hành**: bốn trang tĩnh đang công khai bảy đoạn `[Người vận hành điền: …]` vì bảng `pages` trống, trong đó Điều khoản thiếu pháp nhân và giấy phép; `ID_SUPPORT_URL` và `ID_FANPAGE_URL` rỗng nên chân trang không có mục liên hệ; và bí mật dùng chung của cụm game đã nằm trong nhật ký truy cập nhiều ngày nên nên xoay.
+
+Trong 63 gói còn lại vẫn có sáu cụm trùng tên nhưng phần lớn cùng giá, và dòng nào thiếu mô tả thì hiện mã gói, nên rủi ro mua nhầm đã nhỏ hơn nhiều.
+
