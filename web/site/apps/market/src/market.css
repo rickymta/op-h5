@@ -1,0 +1,20 @@
+/* Riêng của app chợ. Nền, thẻ, bảng, nút đều nằm trong @op/site-ui/base.css và trong class
+   Tailwind của từng thành phần — ở đây chỉ giữ thứ không thuộc về gói dùng chung.
+
+   Danh sách quy tắc ở trang đăng bán bỏ marker mặc định (nó ăn lề và không đổi màu được), vẽ
+   lại dấu đầu dòng bằng ::before. Màu ghi thẳng thay vì theme(): file này không có chỉ thị
+   @tailwind nên đừng phụ thuộc vào việc plugin có ghé qua hay không. */
+.mk-bullets > li {
+  position: relative;
+  padding-left: 14px;
+}
+.mk-bullets > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #ee4623;
+}
