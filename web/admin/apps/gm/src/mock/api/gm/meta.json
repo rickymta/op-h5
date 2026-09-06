@@ -1,0 +1,20 @@
+{
+  "games": [{ "code": "haitac", "name": "Đại Hải Trình" }],
+  "game": "haitac",
+  "servers": [
+    { "code": "s1", "name": "S1 · Tân Thế Giới" },
+    { "code": "s2", "name": "S2 · Grand Line" },
+    { "code": "s3", "name": "S3 · Thất Vũ Hải" }
+  ],
+  "bags": [
+    { "type": 3, "label": "Đạo cụ", "note": "vật phẩm thường" },
+    { "type": 2, "label": "Trang bị", "note": "" },
+    { "type": 4, "label": "Mảnh tướng", "note": "" },
+    { "type": 5, "label": "Mặc ấn", "note": "" },
+    { "type": 6, "label": "Thú hồn", "note": "" },
+    { "type": 7, "label": "Tiên khí", "note": "" },
+    { "type": 8, "label": "Mảnh tiên khí", "note": "" },
+    { "type": 13, "label": "Sưu tập", "note": "" },
+    { "type": 1, "label": "Tướng", "note": "xoá tướng là thao tác không lùi được" }
+  ]
+}

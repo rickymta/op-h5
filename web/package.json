@@ -3,19 +3,25 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "admin/packages/*",
+    "admin/apps/*",
+    "site/packages/*",
+    "site/apps/*"
   ],
   "scripts": {
-    "dev:ops": "npm run dev -w @op/ops",
-    "dev:portal": "npm run dev -w @op/portal",
-    "dev:game": "npm run dev -w @op/game",
-    "build": "npm run build -w @op/ops && npm run build -w @op/portal && npm run build -w @op/game",
-    "build:ops": "npm run build -w @op/ops",
-    "build:portal": "npm run build -w @op/portal",
-    "build:game": "npm run build -w @op/game",
-    "typecheck": "tsc -p packages/ui --noEmit && tsc -p apps/ops --noEmit && tsc -p apps/portal --noEmit && tsc -p apps/game --noEmit",
-    "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist','../platform/cmd/id/dist','../platform/cmd/adapter/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
+    "dev:admin": "npm run dev -w @op/admin-platform",
+    "dev:gm": "npm run dev -w @op/admin-gm",
+    "dev:portal": "npm run dev -w @op/site-portal",
+    "dev:market": "npm run dev -w @op/site-market",
+    "dev:haitac": "npm run dev -w @op/site-haitac",
+    "build": "npm run build -w @op/admin-platform && npm run build -w @op/admin-gm && npm run build -w @op/site-portal && npm run build -w @op/site-market && npm run build -w @op/site-haitac",
+    "build:admin": "npm run build -w @op/admin-platform",
+    "build:gm": "npm run build -w @op/admin-gm",
+    "build:portal": "npm run build -w @op/site-portal",
+    "build:market": "npm run build -w @op/site-market",
+    "build:haitac": "npm run build -w @op/site-haitac",
+    "typecheck": "tsc -p admin/packages/ui --noEmit && tsc -p admin/apps/platform --noEmit && tsc -p admin/apps/gm --noEmit && tsc -p site/packages/ui --noEmit && tsc -p site/apps/portal --noEmit && tsc -p site/apps/market --noEmit && tsc -p site/apps/haitac --noEmit",
+    "clean": "node -e \"for (const p of ['../platform/cmd/admin/dist','../platform/cmd/admin/dist-gm','../platform/cmd/id/dist','../platform/cmd/id/dist-market','../platform/cmd/adapter/dist']) require('fs').rmSync(p,{recursive:true,force:true})\""
   },
   "devDependencies": {
     "typescript": "~5.7.2",

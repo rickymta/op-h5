@@ -1,0 +1,19 @@
+{
+  "pages": [
+    { "id": 1, "slug": "gioi-thieu", "game_code": "", "game_name": "", "title": "Giới thiệu",
+      "body": "Antfarms là cổng phát hành game của người Việt.\n\nMột tài khoản, một ví Xu, chơi mọi game trong hệ thống.",
+      "updated_by": 1, "updated_by_name": "admin", "updated_at": "2026-09-05T22:10:00+07:00" },
+    { "id": 2, "slug": "dieu-khoan", "game_code": "", "game_name": "", "title": "Điều khoản sử dụng",
+      "body": "Điều 1. Phạm vi áp dụng.\n\nĐiều 2. Tài khoản và bảo mật.",
+      "updated_by": 2, "updated_by_name": "an.nguyen", "updated_at": "2026-09-02T09:00:00+07:00" },
+    { "id": 3, "slug": "chinh-sach", "game_code": "", "game_name": "", "title": "Chính sách bảo mật",
+      "body": "Chúng tôi thu thập tối thiểu thông tin cần cho việc vận hành tài khoản.",
+      "updated_by": 1, "updated_by_name": "admin", "updated_at": "2026-08-28T16:40:00+07:00" },
+    { "id": 4, "slug": "huong-dan", "game_code": "haitac", "game_name": "Đại Hải Trình", "title": "Hướng dẫn chơi",
+      "body": "Bước 1. Đăng ký tài khoản.\n\nBước 2. Chọn máy chủ.\n\nBước 3. Ra khơi.",
+      "updated_by": 2, "updated_by_name": "an.nguyen", "updated_at": "2026-09-04T13:05:00+07:00" },
+    { "id": 5, "slug": "faq", "game_code": "haitac", "game_name": "Đại Hải Trình", "title": "Câu hỏi thường gặp",
+      "body": "Nạp Xu bao lâu thì nhận được?\n\nThường dưới một phút.",
+      "updated_by": 1, "updated_by_name": "admin", "updated_at": "2026-09-01T10:30:00+07:00" }
+  ]
+}

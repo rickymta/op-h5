@@ -1,0 +1,7 @@
+/* Ba dòng riêng của cổng tài khoản. Mọi thứ khác nằm ở @op/site-ui/base.css. */
+
+/* Liên kết "Game" trên thanh trên nhảy tới `#game`: chừa chỗ cho thanh trên dính (60 px),
+   không thì tiêu đề khối bị thanh che mất. */
+section[id] {
+  scroll-margin-top: 68px;
+}

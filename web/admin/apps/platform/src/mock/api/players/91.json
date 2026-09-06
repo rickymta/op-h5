@@ -1,0 +1,7 @@
+{
+  "player": { "id": 91, "username": "minh.tran", "email": "", "phone": "", "status": "active",
+    "balance": 0, "last_login_at": "2026-09-06 09:10", "created_at": "2026-08-30 11:02" },
+  "identities": [],
+  "history": [],
+  "orders": []
+}

@@ -10,7 +10,6 @@ import (
 	"database/sql"
 	"embed"
 	"errors"
-	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -27,11 +26,15 @@ import (
 	"github.com/rickymta/op-h5/platform/internal/store"
 )
 
-//go:embed all:templates
-var templatesFS embed.FS
-
-// Giao dien React da build (web/apps/ops -> dist/). Thu muc luon ton tai nho dist/.gitkeep,
-// nen `go build` chay duoc ca khi chua `npm run build`; luc do spa.Handler tra trang huong dan.
+// Hai giao dien React da build, phuc vu tu CUNG mot tien trinh:
+//
+//	dist/     web/admin/apps/platform -> "/"    quan tri nen tang
+//
+// Khong tach tien trinh vi ca hai dung chung bang `admin_users`, chung phien dang nhap va
+// chung nhat ky thao tac — tach ra chi de tach mot bo bundle, khong tach quyen.
+//
+// Ca hai thu muc luon ton tai nho .gitkeep, nen `go build` chay duoc ca khi chua
+// `npm run build`; luc do spa tra trang huong dan thay vi lam chet tien trinh.
 //
 //go:embed all:dist
 var distFS embed.FS
@@ -68,12 +71,6 @@ func main() {
 	// Chi chay khi CHUA co tai khoan nao — khong bao gio ghi de tai khoan san co.
 	if err := seedOwner(ctx, db, log); err != nil {
 		log.Error("tao tai khoan quan tri dau tien", "err", err)
-		os.Exit(1)
-	}
-
-	tpl, err := template.New("").Funcs(tplFuncs()).ParseFS(templatesFS, "templates/*.html")
-	if err != nil {
-		log.Error("doc template", "err", err)
 		os.Exit(1)
 	}
 
@@ -118,7 +115,7 @@ func main() {
 	}
 
 	s := &server{
-		db: db, log: log, tpl: tpl,
+		db: db, log: log,
 		secure:     secure,
 		fetcher:    newFleetFetcher(),
 		console:    consoleClient,
@@ -135,38 +132,31 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// ADMIN_SPA=1: giao dien React phuc vu tu goc, trang Go cu lui ve tien to /cu/.
-	// Hai ban dung chung API va chung phien dang nhap, nen bat/tat khong mat gi —
-	// day la cach chuyen dan tung trang ma van lui duoc trong mot lan restart.
-	useSPA := os.Getenv("ADMIN_SPA") == "1"
-	goPage := func(path string, h http.HandlerFunc) {
-		if useSPA {
-			mux.HandleFunc("GET /cu"+path, h)
-			return
-		}
-		mux.HandleFunc("GET "+path, h)
-	}
-	if useSPA {
-		spaHandler := spa.Handler(distFS, "dist")
-		mux.Handle("GET /", spaHandler)
-		log.Info("giao dien React bat (ADMIN_SPA=1); trang cu o /cu/")
+	// Hai SPA trong mot tien trinh. Pattern "GET /gm/" cu the hon "GET /" nen ServeMux luon
+	// chon dung ban, khong phu thuoc thu tu dang ky. Xem internal/spa.
+	spa.Mount(mux, "/", distFS, "dist")
+
+	// Duong API khong ton tai phai tra 404 JSON, khong phai index.html cua SPA: mot API go
+	// nham ten se bao "khong doc duoc JSON" o tan trinh duyet, rat kho lan ra.
+	for _, p := range []string{"GET /api/", "POST /api/"} {
+		mux.HandleFunc(p, apiNotFound)
 	}
 
-	goPage("/{$}", s.requireAdmin(s.dashboard))
-	mux.HandleFunc("GET /dang-nhap", s.loginPage)
+	// Dang nhap: JSON, vi trang dang nhap la mot man hinh cua SPA (/dang-nhap). Giu them
+	// bi danh POST /dang-nhap, /dang-xuat cho dung duong dan giong duong tren thanh dia chi.
+	mux.HandleFunc("POST /api/login", s.doLogin)
+	mux.HandleFunc("POST /api/logout", s.doLogout)
 	mux.HandleFunc("POST /dang-nhap", s.doLogin)
 	mux.HandleFunc("POST /dang-xuat", s.doLogout)
-	goPage("/nhat-ky", s.requireAdmin(s.auditPage))
-	goPage("/nap-tay", s.requireAdmin(s.walletPage))
 	// API: trang dung fetch, va cong cu ngoai cung goi duoc.
 	mux.HandleFunc("GET /api/fleet", s.requireAdminAPI(s.apiFleet))
+	mux.HandleFunc("GET /api/audit", s.requireAdminAPI(s.apiAudit))
 	mux.HandleFunc("GET /api/orders", s.requireAdminAPI(s.apiOrders))
 	mux.HandleFunc("POST /api/servers/{game}/{srv}", s.requireWrite(s.apiUpdateServer))
 	mux.HandleFunc("POST /api/devices/{game}/{device}", s.requireWrite(s.apiUpdateDevice))
 	mux.HandleFunc("POST /api/wallet/topup", s.requireWrite(s.apiTopup))
 	// Cua hang: danh muc goi va don mua (catalog.go)
-	goPage("/goi", s.requireAdmin(s.packagesPage))
-	goPage("/don-mua", s.requireAdmin(s.ordersPage))
+	mux.HandleFunc("GET /api/packages", s.requireAdminAPI(s.apiPackages))
 	mux.HandleFunc("POST /api/packages/{game}", s.requireWrite(s.apiCreatePackage))
 	mux.HandleFunc("POST /api/packages/{game}/{id}", s.requireWrite(s.apiUpdatePackage))
 	mux.HandleFunc("POST /api/orders/{id}/retry", s.requireWrite(s.apiOrderRetry))
@@ -196,12 +186,12 @@ func main() {
 	mux.HandleFunc("GET /api/players", s.requireGMRole(s.apiPlayerList))
 	mux.HandleFunc("GET /api/players/{id}", s.requireGMRole(s.apiPlayerDetail))
 	mux.HandleFunc("POST /api/players/{id}", s.requireWrite(s.apiPlayerUpdate))
-	// GM DA CHUYEN sang cong cua tung game: haitac.<domain>/admin-portal (Adapter phuc vu,
-	// xem platform/cmd/adapter/adminportal.go va internal/gmops).
-	//
-	// Ly do: moi thao tac GM di qua CONSOLE cua cum game — thu rieng cua tung game; game
-	// them vao sau se co backend khac han. Trang quan tri nay lo phan CHUNG cua he thong:
-	// CMS, nap tien cho he thong ID, tai khoan chung, cau hinh cua hang.
+	// API cua cong cu GM (/gm) VAN nam o Adapter cua tung game:
+	// haitac.<domain>/admin-portal/api/* — xem platform/cmd/adapter/adminportal.go va
+	// internal/gmops. Ly do: moi thao tac GM di qua CONSOLE cua cum game, thu rieng cua
+	// tung game; game them vao sau se co backend khac han. Tien trinh nay chi phuc vu
+	// BUNDLE cua giao dien GM, phan CHUNG cua he thong (CMS, nap tien cho he thong ID,
+	// tai khoan chung, cau hinh cua hang) va phien dang nhap dung chung.
 	mux.HandleFunc("GET /healthz", s.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))
@@ -263,25 +253,8 @@ func envDur(key string, def time.Duration) time.Duration {
 	return def
 }
 
-func tplFuncs() template.FuncMap {
-	return template.FuncMap{
-		"pct": func(a, b int) int {
-			if b <= 0 {
-				return 0
-			}
-			return a * 100 / b
-		},
-		"bandClass": func(b string) string {
-			switch b {
-			case "smooth":
-				return "ok"
-			case "busy":
-				return "warn"
-			default:
-				return "crit"
-			}
-		},
-	}
+func apiNotFound(w http.ResponseWriter, _ *http.Request) {
+	httpx.Error(w, http.StatusNotFound, "not_found", "Không có API này.")
 }
 
 // Tai khoan quan tri mac dinh, dung khi .env khong dat ADMIN_BOOTSTRAP_*.

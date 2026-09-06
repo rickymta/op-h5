@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"html/template"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,33 +12,6 @@ import (
 )
 
 func testLogger() *slog.Logger { return slog.New(slog.NewTextHandler(io.Discard, nil)) }
-
-// Template phai parse duoc va render duoc voi du lieu that; loi template chi lo luc chay
-// (ExecuteTemplate) nen phai co test, khong thi trang trang khong bao gi.
-func TestStoreTemplateRenders(t *testing.T) {
-	tpl, err := template.ParseFS(templatesFS, "templates/*.html")
-	if err != nil {
-		t.Fatalf("parse templates: %v", err)
-	}
-	cats := []catView{{Key: "diamond", Title: "Nguyên Bảo", Hint: "x2", Packages: []pkgView{
-		{ID: "18001", Name: "10.000 Nguyên Bảo", Category: "diamond", GrantMode: "pay", PriceXu: 10000, PriceFmt: "10.000",
-			Badge: "x2 lần đầu", Description: "Nhận 10.000", Cond: "3 lần/ngày"},
-	}}}
-	orders := []orderView{{ID: 1, Name: "10.000 Nguyên Bảo", SrvCode: "s1", AmountFmt: "10.000", Status: "pending", StatusVi: "Đang phát…"}}
-	for _, data := range []map[string]any{
-		{"User": "", "Servers": []srvView{}, "IDBase": "http://id"},
-		{"User": "an", "Servers": []srvView{{Code: "s1", Name: "S1"}}, "IDBase": "http://id",
-			"Balance": int64(12345), "BalanceFmt": "12.345", "Categories": cats, "Orders": orders},
-	} {
-		var buf bytes.Buffer
-		if err := tpl.ExecuteTemplate(&buf, "store.html", data); err != nil {
-			t.Fatalf("render store.html (user=%q): %v", data["User"], err)
-		}
-		if data["User"] != "" && !strings.Contains(buf.String(), "10.000 Nguyên Bảo") {
-			t.Errorf("trang dang nhap phai hien goi")
-		}
-	}
-}
 
 func TestCondText(t *testing.T) {
 	cases := []struct {

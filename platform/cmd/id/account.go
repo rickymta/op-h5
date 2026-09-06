@@ -1,6 +1,6 @@
 package main
 
-// Trang tai khoan cua cong (web/apps/portal, /tai-khoan/*): dang nhap/dang xuat bang JSON,
+// Trang tai khoan cua cong (web/site/apps/portal, /tai-khoan/*): dang nhap/dang xuat bang JSON,
 // ho so, email khoi phuc, game da choi, phien dang mo, lich su vi co loc. Hop dong 4.3.
 //
 // Dang nhap o day dung DUNG duong cua /oauth/authorize/login (Repo.Authenticate + Sessions.Create

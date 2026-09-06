@@ -1,0 +1,25 @@
+{
+  "name": "@op/admin-gm",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5274",
+    "dev:mock": "VITE_MOCK=1 vite --port 5274",
+    "build": "node ../../../scripts/clean-dist.mjs ../../../../platform/cmd/adapter/dist-gm && vite build",
+    "preview": "vite preview --port 5274"
+  },
+  "dependencies": {
+    "@mui/icons-material": "^6.5.0",
+    "@mui/material": "^6.5.0",
+    "@op/admin-ui": "^0.0.0",
+    "@tanstack/react-query": "^5.102.8",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "wouter": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  }
+}

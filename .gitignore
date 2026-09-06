@@ -56,6 +56,13 @@ docker/.dev-macos/
 *.jar.bak
 
 # ---- giao dien React: chi commit ma nguon, khong commit ban build
+# 5 app -> 5 thu muc nhung: admin/{dist,dist-gm}, id/{dist,dist-market}, adapter/dist.
+# .gitkeep PHAI nam trong git: `//go:embed all:dist-gm` khong bien dich duoc neu thu muc
+# khong ton tai sau `git clone`.
 web/node_modules/
 platform/cmd/*/dist/*
 !platform/cmd/*/dist/.gitkeep
+platform/cmd/*/dist-gm/*
+!platform/cmd/*/dist-gm/.gitkeep
+platform/cmd/*/dist-market/*
+!platform/cmd/*/dist-market/.gitkeep

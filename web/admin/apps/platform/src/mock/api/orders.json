@@ -1,0 +1,24 @@
+{
+  "game": "haitac",
+  "games": [{ "code": "haitac", "name": "Đại Hải Trình" }, { "code": "tienhiep", "name": "Tiên Hiệp Ký" }],
+  "counts": { "pending": 2, "granted": 41, "failed": 3, "refunded": 1 },
+  "orders": [
+    { "id": 1207, "user_id": 88, "username": "quanh.le", "package_id": "web-knb-500k", "name": "500 vạn Nguyên Bảo",
+      "srv_code": "s2", "amount_xu": 500000, "status": "pending", "grant_mode": "mail", "last_error": "", "attempts": 1,
+      "created_at": "2026-09-06 09:41", "granted_at": "" },
+    { "id": 1206, "user_id": 91, "username": "minh.tran", "package_id": "web-thang-vip", "name": "Thẻ tháng VIP",
+      "srv_code": "s1", "amount_xu": 250000, "status": "failed", "grant_mode": "mail",
+      "last_error": "console tra ve: role khong ton tai tren s1", "attempts": 3,
+      "created_at": "2026-09-06 09:12", "granted_at": "" },
+    { "id": 1205, "user_id": 12, "username": "an.nguyen", "package_id": "web-knb-100k", "name": "100 vạn Nguyên Bảo",
+      "srv_code": "s1", "amount_xu": 100000, "status": "granted", "grant_mode": "pay", "last_error": "", "attempts": 1,
+      "created_at": "2026-09-06 08:55", "granted_at": "2026-09-06 08:55" },
+    { "id": 1204, "user_id": 45, "username": "hoa.pham", "package_id": "ingame-goi-ngay", "name": "Gói ngày trong game",
+      "srv_code": "s3", "amount_xu": 30000, "status": "granted", "grant_mode": "ingame", "last_error": "", "attempts": 1,
+      "created_at": "2026-09-06 07:20", "granted_at": "2026-09-06 07:20" },
+    { "id": 1203, "user_id": 77, "username": "tuan.vo", "package_id": "web-quy-tien", "name": "Quỹ tiên khí",
+      "srv_code": "s2", "amount_xu": 800000, "status": "refunded", "grant_mode": "mail",
+      "last_error": "het lan thu, da hoan Xu", "attempts": 5,
+      "created_at": "2026-09-05 21:03", "granted_at": "" }
+  ]
+}

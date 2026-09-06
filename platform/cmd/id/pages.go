@@ -5,134 +5,19 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
 )
 
-// Cac trang huong nguoi choi. Chung dung chung tien trinh voi OIDC provider vi he
-// thong con nho; nginx dinh tuyen domain.com va id.domain.com ve cung dich vu nay.
-// Tach thanh tien trinh rieng luc nao cung duoc, khong doi gi ben trong.
+// Doi mat khau va khoi phuc mat khau.
+//
+// Giao dien la SPA (web/site/apps/portal) nen o day chi con API JSON; cac trang HTML do Go
+// dung truoc kia da bi thay han. Chung dung chung tien trinh voi OIDC provider vi he thong
+// con nho; nginx dinh tuyen domain.com va id.domain.com ve cung dich vu nay.
 
-type gameCard struct {
-	Code    string
-	Name    string
-	SiteURL string
-}
-
-type histRow struct {
-	At        string
-	KindLabel string
-	Memo      string
-	Amount    int64
-	AmountFmt string
-}
-
-// formatXu chen dau cham phan cach hang nghin: 1234567 -> "1.234.567".
-func formatXu(n int64) string {
-	neg := n < 0
-	if neg {
-		n = -n
-	}
-	s := strconv.FormatInt(n, 10)
-	var b strings.Builder
-	for i, c := range s {
-		if i > 0 && (len(s)-i)%3 == 0 {
-			b.WriteByte('.')
-		}
-		b.WriteRune(c)
-	}
-	if neg {
-		return "-" + b.String()
-	}
-	return b.String()
-}
-
-func kindLabel(k string) string {
-	switch k {
-	case "topup":
-		return "Nạp tiền"
-	case "convert":
-		return "Quy đổi"
-	case "refund":
-		return "Hoàn tiền"
-	default:
-		return "Điều chỉnh"
-	}
-}
-
-// userForPage tra ve nguoi dung hien tai (nil neu chua dang nhap) de template dung.
-func (a *apiServer) userForPage(r *http.Request) *identity.User {
-	uid, ok := a.currentUser(r)
-	if !ok {
-		return nil
-	}
-	u, err := a.users.ByID(r.Context(), uid)
-	if err != nil {
-		return nil
-	}
-	return u
-}
-
-// portal la trang chu (ban Go cu): danh sach game dang mo. Dang ky voi pattern "/{$}" (hoac
-// "/cu/{$}" khi ID_SPA=1) nen chi khop dung duong dan goc; duong khac do mux tra 404.
-func (s *pageServer) portal(w http.ResponseWriter, r *http.Request) {
-	var games []gameCard
-	rows, err := s.api.db.QueryContext(r.Context(),
-		`SELECT code, name, COALESCE(site_url,'') FROM games WHERE status='active' ORDER BY sort_order, code`)
-	if err == nil {
-		defer func() { _ = rows.Close() }()
-		for rows.Next() {
-			var g gameCard
-			if err := rows.Scan(&g.Code, &g.Name, &g.SiteURL); err == nil {
-				games = append(games, g)
-			}
-		}
-	} else {
-		s.api.log.Error("doc danh sach game", "err", err)
-	}
-	s.render(w, "portal.html", map[string]any{
-		"User": s.api.userForPage(r), "Games": games,
-	})
-}
-
-func (s *pageServer) registerPage(w http.ResponseWriter, r *http.Request) {
-	if u := s.api.userForPage(r); u != nil {
-		http.Redirect(w, r, "/tai-khoan", http.StatusFound)
-		return
-	}
-	s.render(w, "register.html", map[string]any{"User": nil})
-}
-
-func (s *pageServer) accountPage(w http.ResponseWriter, r *http.Request) {
-	u := s.api.userForPage(r)
-	if u == nil {
-		http.Redirect(w, r, "/dang-ky", http.StatusFound)
-		return
-	}
-	ctx := r.Context()
-	bal, err := s.api.wallet.Balance(ctx, u.ID)
-	if err != nil {
-		s.api.log.Error("doc so du", "err", err)
-	}
-	items, err := s.api.wallet.History(ctx, u.ID, 30)
-	if err != nil {
-		s.api.log.Error("doc lich su", "err", err)
-	}
-	rows := make([]histRow, 0, len(items))
-	for _, e := range items {
-		rows = append(rows, histRow{
-			At: e.At, KindLabel: kindLabel(e.Kind), Memo: e.Memo.String,
-			Amount: e.Amount, AmountFmt: formatXu(e.Amount),
-		})
-	}
-	s.render(w, "account.html", map[string]any{
-		"User": u, "BalanceFmt": formatXu(bal), "History": rows,
-		"JoinedAt": u.CreatedAt.Format("02/01/2006"),
-	})
-}
+// ---------------------------------------------------------------- doi mat khau
 
 // changePassword doi mat khau roi thu hoi moi phien khac.
 //
@@ -172,19 +57,6 @@ func (a *apiServer) changePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // ---------------------------------------------------------------- quen mat khau
-
-func (s *pageServer) forgotPage(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "forgot.html", map[string]any{
-		"User": nil, "Enabled": s.api.mail.Enabled(),
-	})
-}
-
-func (s *pageServer) resetPage(w http.ResponseWriter, r *http.Request) {
-	tok := r.URL.Query().Get("token")
-	s.render(w, "reset.html", map[string]any{
-		"User": nil, "Token": tok, "Valid": s.api.resets.Valid(r.Context(), tok),
-	})
-}
 
 // forgotPassword nhan email va gui lien ket dat lai.
 //

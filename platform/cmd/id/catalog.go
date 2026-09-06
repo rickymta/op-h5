@@ -1,6 +1,6 @@
 package main
 
-// Trang chinh cua cong (web/apps/portal): /api/site, /api/games, /api/news, /api/news/{key}.
+// Trang chinh cua cong (web/site/apps/portal): /api/site, /api/games, /api/news, /api/news/{key}.
 // Khong can dang nhap. Khuon JSON: hop dong giai doan 3 muc 4.2 (docs/plan-go-react.md muc 15).
 
 import (

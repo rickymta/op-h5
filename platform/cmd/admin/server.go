@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log/slog"
 	"net/http"
 	"sort"
@@ -26,7 +25,6 @@ const adminCookie = "op_admin"
 type server struct {
 	db      *sql.DB
 	log     *slog.Logger
-	tpl     *template.Template
 	secure  bool
 	fetcher *fleetFetcher
 	// console la duong toi game (phat vat pham, gui thu, kho do). nil khi chua cau hinh:
@@ -71,19 +69,11 @@ func (s *server) current(r *http.Request) (*admin, bool) {
 	return &a, true
 }
 
-// requireAdmin bao ve trang HTML: chua dang nhap thi chuyen sang form.
-func (s *server) requireAdmin(h func(http.ResponseWriter, *http.Request, *admin)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		a, ok := s.current(r)
-		if !ok {
-			http.Redirect(w, r, "/dang-nhap", http.StatusFound)
-			return
-		}
-		h(w, r, a)
-	}
-}
-
 // requireAdminAPI bao ve endpoint JSON: tra 401 thay vi chuyen huong.
+//
+// Giao dien la SPA, nen 401 la cau tra loi dung: trang tu chuyen sang /dang-nhap va giu
+// lai duong dan dang xem. Chuyen huong 302 o day se lam fetch() nhan ve HTML cua trang
+// dang nhap kem ma 200 — loi kho lan ra nhat trong mot SPA.
 func (s *server) requireAdminAPI(h func(http.ResponseWriter, *http.Request, *admin)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		a, ok := s.current(r)
@@ -140,29 +130,30 @@ var loginErrors = map[string]string{
 	"nhieu": "Sai quá nhiều lần. Vui lòng thử lại sau ít phút.",
 }
 
-func (s *server) loginPage(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "login.html", map[string]any{"Error": loginErrors[r.URL.Query().Get("loi")]})
-}
-
-// loginFailed tra ve form kem thong bao. status != 200 duoc dat TRUOC khi render vi sau
-// WriteHeader thi khong doi duoc ma trang thai nua.
+// loginFailed tra ve loi JSON. Ma loi giu nguyen ten cu ("1", "nhieu") de cau chu chi nam
+// o mot cho — trang dang nhap la SPA nen chinh no hien cau nay.
 func (s *server) loginFailed(w http.ResponseWriter, status int, code string) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(status)
-	s.render(w, "login.html", map[string]any{"Error": loginErrors[code]})
+	kind := "invalid_credentials"
+	if code == "nhieu" {
+		kind = "too_many_attempts"
+	}
+	httpx.Error(w, status, kind, loginErrors[code])
 }
 
-// doLogin xu ly form dang nhap quan tri.
+// doLogin xu ly dang nhap quan tri (POST /api/login).
+//
+// Nhan CA JSON lan form-urlencoded: giao dien gui JSON, con `curl -d user=...` khi truc
+// tiep tren may chu van dung duoc ma khong phai dung ten mot trang HTML da bi xoa.
 //
 // Ghi log MOI luot, ca thanh cong lan that bai, kem IP: khi trang mo ra Internet thi day la
 // nguon duy nhat de nhin thay mot dot do mat khau dang dien ra.
 func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	user, pass, err := loginCredentials(r)
+	if err != nil {
 		s.loginFailed(w, http.StatusBadRequest, "1")
 		return
 	}
 	ctx := r.Context()
-	user, pass := r.FormValue("username"), r.FormValue("password")
 	// nginx dat X-Forwarded-For; ClientIP chi tin header do khi request den tu proxy noi bo.
 	ip := httpx.ClientIP(r)
 
@@ -177,7 +168,7 @@ func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
 		hash   string
 		status string
 	)
-	err := s.db.QueryRowContext(ctx,
+	err = s.db.QueryRowContext(ctx,
 		`SELECT id, password_hash, status FROM admin_users WHERE username = ?`,
 		user).Scan(&id, &hash, &status)
 	if err != nil || status != "active" {
@@ -221,7 +212,25 @@ func (s *server) doLogin(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("dang nhap quan tri", "user", user, "id", id, "ip", ip, "phien_gio", int(ttl.Hours()))
 	detail, _ := json.Marshal(map[string]any{"ip": ip, "public": s.public})
 	s.audit(ctx, id, "login", user, string(detail))
-	http.Redirect(w, r, "/", http.StatusFound)
+	httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+// loginCredentials doc ten dang nhap va mat khau tu JSON hoac tu form.
+func loginCredentials(r *http.Request) (user, pass string, err error) {
+	if ct := r.Header.Get("Content-Type"); strings.HasPrefix(ct, "application/json") {
+		var in struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(http.MaxBytesReader(nil, r.Body, 4<<10)).Decode(&in); err != nil {
+			return "", "", err
+		}
+		return in.Username, in.Password, nil
+	}
+	if err := r.ParseForm(); err != nil {
+		return "", "", err
+	}
+	return r.FormValue("username"), r.FormValue("password"), nil
 }
 
 func (s *server) doLogout(w http.ResponseWriter, r *http.Request) {
@@ -233,27 +242,13 @@ func (s *server) doLogout(w http.ResponseWriter, r *http.Request) {
 		Name: adminCookie, Value: "", Path: "/", HttpOnly: true,
 		Secure: s.secure, SameSite: http.SameSiteStrictMode, MaxAge: -1,
 	})
-	http.Redirect(w, r, "/dang-nhap", http.StatusFound)
+	httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-// ---------------------------------------------------------------- trang
+// ---------------------------------------------------------------- API
 
-func (s *server) render(w http.ResponseWriter, name string, data any) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.tpl.ExecuteTemplate(w, name, data); err != nil {
-		s.log.Error("render", "tpl", name, "err", err)
-	}
-}
-
-func (s *server) dashboard(w http.ResponseWriter, r *http.Request, a *admin) {
-	games, err := s.fleetView(r.Context())
-	if err != nil {
-		s.log.Error("doc doi server", "err", err)
-	}
-	s.render(w, "dashboard.html", map[string]any{"Admin": a, "Games": games})
-}
-
-func (s *server) auditPage(w http.ResponseWriter, r *http.Request, a *admin) {
+// apiAudit tra 200 dong nhat ky gan nhat. Truoc day day la trang Go /nhat-ky.
+func (s *server) apiAudit(w http.ResponseWriter, r *http.Request, _ *admin) {
 	rows, err := s.db.QueryContext(r.Context(), `
 		SELECT COALESCE(u.username,'-'), t.action, t.target, COALESCE(t.detail,''),
 		       DATE_FORMAT(t.created_at,'%Y-%m-%d %H:%i')
@@ -261,27 +256,27 @@ func (s *server) auditPage(w http.ResponseWriter, r *http.Request, a *admin) {
 		 ORDER BY t.id DESC LIMIT 200`)
 	if err != nil {
 		s.log.Error("doc nhat ky", "err", err)
-		s.render(w, "audit.html", map[string]any{"Admin": a})
+		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được nhật ký.")
 		return
 	}
 	defer func() { _ = rows.Close() }()
 
-	type entry struct{ Who, Action, Target, Detail, At string }
-	var items []entry
+	type entry struct {
+		Who    string `json:"who"`
+		Action string `json:"action"`
+		Target string `json:"target"`
+		Detail string `json:"detail"`
+		At     string `json:"at"`
+	}
+	items := []entry{}
 	for rows.Next() {
 		var e entry
 		if err := rows.Scan(&e.Who, &e.Action, &e.Target, &e.Detail, &e.At); err == nil {
 			items = append(items, e)
 		}
 	}
-	s.render(w, "audit.html", map[string]any{"Admin": a, "Items": items})
+	httpx.JSON(w, http.StatusOK, map[string]any{"items": items})
 }
-
-func (s *server) walletPage(w http.ResponseWriter, r *http.Request, a *admin) {
-	s.render(w, "wallet.html", map[string]any{"Admin": a})
-}
-
-// ---------------------------------------------------------------- API
 
 func (s *server) apiFleet(w http.ResponseWriter, r *http.Request, _ *admin) {
 	games, err := s.fleetView(r.Context())

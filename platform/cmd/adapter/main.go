@@ -46,15 +46,33 @@ func (l loginSource) Online(ctx context.Context) (map[string]int, error) {
 	return out, nil
 }
 
+// Template Go con lai:
+//
+//	full.html   man hinh "may chu dang day", hien TRONG luong /choi-game — truoc khi trinh
+//	            duyet kip tai bundle nao, nen khong the la mot man hinh cua SPA
+//	shell.html  cac khoi head/nav/foot ma full.html dung
+//	gm*.html    cong GM cua rieng game (/admin-portal, xem adminportal.go)
+//
+// Cac trang huong nguoi choi (trang chu, may chu, cua hang) da chuyen han sang
+// web/site/apps/haitac.
+//
 //go:embed all:templates
 var templatesFS embed.FS
 
-// Giao dien React da build (web/apps/game -> dist/, assetsDir "app"). Thu muc luon ton tai nho
-// dist/.gitkeep, nen `go build` chay duoc ca khi chua `npm run build`; luc do spa.Handler tra
-// trang huong dan.
+// Giao dien React da build (web/site/apps/haitac -> dist/, assetsDir "app" vi tren host game
+// nginx da danh /assets/ cho client LayaAir). Thu muc luon ton tai nho dist/.gitkeep, nen
+// `go build` chay duoc ca khi chua `npm run build`; luc do spa tra trang huong dan.
 //
 //go:embed all:dist
 var distFS embed.FS
+
+// Giao dien cong cu GM cua RIENG game nay (web/admin/apps/gm -> dist-gm/, base "/admin-portal/").
+// Vi sao nam o day chu khong o tien trinh admin: moi thao tac GM di qua console cua cum game
+// nay, API tuong ung o adminportal.go, va phien dung cookie rieng `haitac_adm`. Dat bundle o
+// admin:8100 thi trinh duyet phai goi API khac origin va khac cookie.
+//
+//go:embed all:dist-gm
+var distGMFS embed.FS
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -127,6 +145,7 @@ func main() {
 		db:      db,
 		log:     log,
 		tpl:     tpl,
+		gmDist:  distGMFS,
 		// Host cong khai dien vao URL WebSocket tra cho client: login server chi biet
 		// dia chi noi bo (127.0.0.1).
 		publicHost: envOr("ADAPTER_PUBLIC_HOST", ""),
@@ -139,29 +158,18 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	// ADAPTER_SPA=1: giao dien React (web/apps/game) phuc vu /, /may-chu, /cua-hang, /tin-tuc,
-	// /tin-tuc/{id} va tai san /app/* (Vite assetsDir "app" — tren host game nginx da danh
-	// /assets/ va regex \.(js|css)$ cho client LayaAir); trang Go cu lui ve /cu/. /choi-game,
-	// /auth/*, /api/*, /srv/*, /quy-doi, /healthz va trang full.html (trong luong /choi-game)
-	// khong doi. nginx phai proxy them /tin-tuc, /tin-tuc/, /app/, /cu/ (docker/nginx/game_site.conf).
-	goPage := func(pattern string, h http.HandlerFunc) {
-		if cfg.SPA {
-			mux.HandleFunc("GET /cu"+pattern, h)
-			return
-		}
-		mux.HandleFunc("GET "+pattern, h)
+	// Giao dien React (web/site/apps/haitac) phuc vu MOI duong GET khong khop pattern cu the
+	// hon: /, /may-chu, /cua-hang, /cua-hang/{id}, /tin-tuc, /tin-tuc/{id}, /gioi-thieu,
+	// /huong-dan, /faq va tai san /app/*. /choi-game, /auth/*, /api/*, /srv/*, /quy-doi,
+	// /admin-portal*, /healthz la pattern cu the hon nen khong bi nuot.
+	//
+	// nginx VAN phai co mot `location` cho tung duong cua trang (docker/nginx/game_site.conf):
+	// host game dung chung voi tang PHP cu, `location /` o do di ve play.php.
+	spa.Mount(mux, "/", distFS, "dist")
+	// Duong API khong ton tai phai tra 404 JSON, khong phai index.html cua SPA.
+	for _, p := range []string{"GET /api/", "POST /api/"} {
+		mux.HandleFunc(p, apiNotFound)
 	}
-	if cfg.SPA {
-		spaHandler := spa.Handler(distFS, "dist")
-		for _, p := range []string{"/{$}", "/may-chu", "/cua-hang", "/cua-hang/{id}",
-			"/tin-tuc", "/tin-tuc/{id}", "/gioi-thieu", "/huong-dan", "/faq", "/app/"} {
-			mux.Handle("GET "+p, spaHandler)
-		}
-		log.Info("giao dien React bat (ADAPTER_SPA=1); trang cu o /cu/")
-	}
-	goPage("/{$}", srv.home)
-	goPage("/may-chu", srv.serversPage)
-	goPage("/cua-hang", srv.storePage)
 	mux.HandleFunc("GET /quy-doi", srv.quyDoiRedirect) // duong cu, chuyen ve /cua-hang
 	mux.HandleFunc("GET /choi-game", srv.playGame)
 	mux.HandleFunc("GET /auth/callback", srv.authCallback)
@@ -205,7 +213,7 @@ func main() {
 
 	go func() {
 		log.Info("adapter khoi dong",
-			"addr", cfg.Addr, "game", cfg.GameCode, "name", gameName, "spa", cfg.SPA,
+			"addr", cfg.Addr, "game", cfg.GameCode, "name", gameName,
 			"issuer", cfg.Issuer, "login", cfg.LoginBaseURL)
 		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("http server dung", "err", err)
@@ -227,4 +235,8 @@ func envOr(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func apiNotFound(w http.ResponseWriter, _ *http.Request) {
+	httpx.Error(w, http.StatusNotFound, "not_found", "Không có API này.")
 }

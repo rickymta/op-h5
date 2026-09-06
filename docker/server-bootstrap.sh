@@ -66,7 +66,17 @@ if [ "$MODE" = "build" ]; then
   else git clone --branch "$BRANCH" "https://github.com/$REPO.git" "$BASE/src"; fi
   ls -la "$BASE/src/server/statistic/"*.jar | awk '{print "  JAR:", $5, "bytes", $9}'   # phai ~104 MB, khong phai 130 byte (LFS pointer)
   DOCKER_DIR="$BASE/src/docker"
-  echo "== 5/7 .env + build image tren server (server/php/nginx chi COPY ~3-5 phut; id/adapter/admin compile Go ~2-4 phut)"
+  # Giao dien React (5 app) phai duoc build TRUOC ba image Go: chung nhung platform/cmd/*/dist*
+  # bang go:embed, nen thu muc rong -> binary chay duoc nhung moi trang la 503 "Chua build giao
+  # dien". Chay trong container node de khong phai cai Node len server.
+  echo "== 5/7a Build giao dien React (5 app) trong container node:22"
+  docker run --rm -v "$BASE/src":/repo -w /repo/web node:22-alpine \
+    sh -c 'npm ci --no-audit --no-fund && npm run build'
+  for d in admin/dist admin/dist-gm id/dist id/dist-market adapter/dist; do
+    [ -s "$BASE/src/platform/cmd/$d/index.html" ] || { echo "  !! $d/index.html rong — build React that bai"; exit 1; }
+  done
+  echo "  5 bundle da co index.html"
+  echo "== 5/7b .env + build image tren server (server/php/nginx chi COPY ~3-5 phut; id/adapter/admin compile Go ~2-4 phut)"
   ensure_env "$DOCKER_DIR"
   ( cd "$DOCKER_DIR" && $COMPOSE -f docker-compose.platform.yml build console php nginx id adapter admin )
   docker images | grep -E 'op-h5-(server|php|nginx|id|adapter|admin)' | awk '{print "  image:", $1":"$2, $NF}'

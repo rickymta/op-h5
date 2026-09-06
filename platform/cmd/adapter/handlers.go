@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -45,6 +46,9 @@ type adapterServer struct {
 	brand    string
 	// sessionLimit chan bam lien tuc vao /api/game/session, khoa theo nguoi dung.
 	sessionLimit *httpx.Limiter
+	// gmDist: bundle giao dien cong cu GM (web/admin/apps/gm), phuc vu tai /admin-portal —
+	// cung tien trinh voi API GM va cung cookie `haitac_adm`.
+	gmDist fs.FS
 }
 
 const (

@@ -202,7 +202,7 @@ docker run -d --name op-id --network "$NET" \
   -e ID_SIGNING_KEY_PEM="$(cat "$STATE/id-signing.pem")" -e ID_COOKIE_SECURE=false \
   -e ID_INTERNAL_SECRET="$INT_SECRET" \
   -e ID_SMTP_HOST=127.0.0.1 -e ID_SMTP_PORT=1025 -e ID_SMTP_FROM="no-reply@conggame.test" \
-  -e ID_SPA="${ID_SPA:-1}" -e ID_BRAND_NAME="${ID_BRAND_NAME:-Cổng game}" \
+  -e ID_BRAND_NAME="${ID_BRAND_NAME:-Cổng game}" \
   -e ID_SUPPORT_URL="${ID_SUPPORT_URL:-}" -e ID_FANPAGE_URL="${ID_FANPAGE_URL:-}" \
   -e ID_TOPUP_URL="${ID_TOPUP_URL:-}" -e ID_LEGAL_NOTE="${ID_LEGAL_NOTE:-}" \
   op-h5-id >/dev/null
@@ -230,9 +230,10 @@ docker run --rm --network "$NET" \
 #   ADAPTER_PUBLIC_PORT=8080       may dev phuc vu o 8080 chu khong phai 80. Adapter phai
 #                                  cong bo dung cong do trong /srv/game/connect/target,
 #                                  neu khong client noi WebSocket vao ws://host:80/game.
-#   ID_SPA / ADAPTER_SPA=1         dev mac dinh BAT giao dien React (web/apps/portal, web/apps/game
-#                                  — build truoc bang `npm run build` trong web/ roi --build lai
-#                                  image). Dat =0 truoc khi chay de xem trang Go cu.
+#
+# Giao dien: ca ba dich vu LUON phuc vu bundle React nhung trong image (khong con co bat/tat).
+# Phai chay `npm run build` trong web/ TRUOC khi build image, neu khong moi trang deu la
+# mot trang 503 "chua build giao dien".
 docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_ADDR=":8090" -e ADAPTER_GAME_CODE=haitac \
   -e ID_DB_PASSWORD="$MYSQL_PW" -e ID_DB_NAME=platform \
@@ -245,7 +246,7 @@ docker run -d --name op-adapter --network "$NET" \
   -e ADAPTER_PLATFORM_CODE=develop -e ADAPTER_CHANNEL_CODE=0 \
   -e ADAPTER_PUBLIC_PORT=8080 \
   -e ADAPTER_PUBLIC_HOST="127.0.0.1" -e ADAPTER_POLL_INTERVAL=3s -e ADAPTER_GRANT_INTERVAL=5s \
-  -e ADAPTER_SPA="${ADAPTER_SPA:-1}" -e ID_BRAND_NAME="${ID_BRAND_NAME:-Cổng game}" \
+  -e ID_BRAND_NAME="${ID_BRAND_NAME:-Cổng game}" \
   op-h5-adapter >/dev/null
 
 docker run -d --name op-admin --network "$NET" \
@@ -253,7 +254,6 @@ docker run -d --name op-admin --network "$NET" \
   -e ADMIN_COOKIE_SECURE=false \
   -e ADMIN_BOOTSTRAP_USER=admin -e ADMIN_BOOTSTRAP_EMAIL=admin@antfarms.xyz \
   -e ADMIN_BOOTSTRAP_PASSWORD="$ADMIN_PW" \
-  -e ADMIN_SPA="${ADMIN_SPA:-0}" \
   -e CONSOLE_BASE_URL="http://127.0.0.1:9999" -e STAT_BASE_URL="http://127.0.0.1:7788" \
   -e CONSOLE_USER=admin -e CONSOLE_ADMIN_PASSWORD="$CONSOLE_PW" -e TCG_SECRET="$TCG_SECRET" \
   op-h5-admin >/dev/null
@@ -289,10 +289,12 @@ done
 
 echo
 echo "==================== TRUY CAP ====================="
-printf "  %-32s %s\n" "http://127.0.0.1:8080"          "Trang game haitac (/may-chu, /cua-hang, /tin-tuc, /choi-game; Go cu o /cu/)"
+printf "  %-32s %s\n" "http://127.0.0.1:8080"          "Trang game haitac (/may-chu, /cua-hang, /tin-tuc, /choi-game)"
 printf "  %-32s %s\n" "http://127.0.0.1:8080/play.php" "Client game (may chu s1, WebSocket :8001)"
-printf "  %-32s %s\n" "http://127.0.0.1:8081"          "Cong game — trang chinh, dang ky / tai khoan (Go cu o /cu/)"
-printf "  %-32s %s\n" "http://127.0.0.1:8100"          "Trang quan tri"
+printf "  %-32s %s\n" "http://127.0.0.1:8081"          "Cong game — trang chinh, dang ky / tai khoan"
+printf "  %-32s %s\n" "http://127.0.0.1:8081/cho"      "Chợ (giao diện, chưa nối backend)"
+printf "  %-32s %s\n" "http://127.0.0.1:8100"          "Trang quan tri nen tang"
+printf "  %-32s %s\n" "http://127.0.0.1:8100/gm"       "Cong cu GM (giao dien; API o /admin-portal cua Adapter)"
 printf "  %-32s %s\n" "http://127.0.0.1:8025"          "Hop thu (email dat lai mat khau)"
 echo
 echo "  Quan tri: admin / $ADMIN_PW  (mat khau mac dinh — doi o /tai-khoan)"

@@ -66,17 +66,28 @@ func pickGame(r *http.Request, games []gameOpt) string {
 // ---------------------------------------------------------------- goi
 
 type pkgRow struct {
-	ID, Name, Category, GrantMode, Reward, Description, Badge, Status string
-	PriceXu                                                           int64
-	ItemTid, SortOrder                                                int
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Category    string `json:"category"`
+	GrantMode   string `json:"grant_mode"`
+	Reward      string `json:"reward"`
+	Description string `json:"description"`
+	Badge       string `json:"badge"`
+	Status      string `json:"status"`
+	PriceXu     int64  `json:"price_xu"`
+	ItemTid     int    `json:"item_tid"`
+	SortOrder   int    `json:"sort_order"`
 }
 
 type catCount struct {
-	Category      string
-	Active, Total int
+	Category string `json:"category"`
+	Active   int    `json:"active"`
+	Total    int    `json:"total"`
 }
 
-func (s *server) packagesPage(w http.ResponseWriter, r *http.Request, a *admin) {
+// apiPackages tra danh muc goi cua mot game kem so dem theo nhom. Truoc day day la trang
+// Go /goi; tra kem `games` va `cats` de giao dien khong phai goi ba lan (giong apiOrders).
+func (s *server) apiPackages(w http.ResponseWriter, r *http.Request, _ *admin) {
 	ctx := r.Context()
 	games := s.games(ctx)
 	game := pickGame(r, games)
@@ -102,7 +113,7 @@ func (s *server) packagesPage(w http.ResponseWriter, r *http.Request, a *admin) 
 	if err != nil {
 		s.log.Error("doc danh muc goi", "err", err)
 	}
-	var list []pkgRow
+	list := []pkgRow{}
 	if rows != nil {
 		for rows.Next() {
 			var p pkgRow
@@ -138,14 +149,14 @@ func (s *server) packagesPage(w http.ResponseWriter, r *http.Request, a *admin) 
 		}
 		_ = crows.Close()
 	}
-	var cats []catCount
+	cats := []catCount{}
 	for _, c := range catalogCategories {
 		cats = append(cats, *counts[c])
 	}
 
-	s.render(w, "packages.html", map[string]any{
-		"Admin": a, "Games": games, "Game": game, "Category": cat, "Status": status, "Q": q,
-		"Rows": list, "Cats": cats, "Categories": catalogCategories,
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"games": games, "game": game, "category": cat, "status": status, "q": q,
+		"packages": list, "cats": cats, "categories": catalogCategories,
 	})
 }
 
@@ -306,39 +317,7 @@ func nullIfBlank(s string, max int) any {
 
 // ---------------------------------------------------------------- don mua
 
-func (s *server) ordersPage(w http.ResponseWriter, r *http.Request, a *admin) {
-	ctx := r.Context()
-	games := s.games(ctx)
-	game := pickGame(r, games)
-	status := r.URL.Query().Get("status")
-	switch status {
-	case "pending", "granted", "failed", "refunded":
-	default:
-		status = ""
-	}
-	wal := &wallet.Service{DB: s.db}
-	orders, err := wal.RecentOrders(ctx, game, status, 200)
-	if err != nil {
-		s.log.Error("doc don mua", "err", err)
-	}
-	counts := map[string]int{}
-	crows, err := s.db.QueryContext(ctx, `SELECT status, COUNT(*) FROM game_grants WHERE game_code = ? GROUP BY status`, game)
-	if err == nil {
-		for crows.Next() {
-			var st string
-			var n int
-			if crows.Scan(&st, &n) == nil {
-				counts[st] = n
-			}
-		}
-		_ = crows.Close()
-	}
-	s.render(w, "orders.html", map[string]any{
-		"Admin": a, "Games": games, "Game": game, "Status": status, "Orders": orders, "Counts": counts,
-	})
-}
-
-// apiOrders la ban JSON cua ordersPage, cho giao dien React (web/apps/ops).
+// apiOrders liet ke don mua gan nhat cho giao dien React (web/admin/apps/platform).
 // Tra kem danh sach game va so dem de trang khong phai goi ba lan.
 func (s *server) apiOrders(w http.ResponseWriter, r *http.Request, _ *admin) {
 	ctx := r.Context()

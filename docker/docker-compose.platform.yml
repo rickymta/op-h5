@@ -65,8 +65,6 @@ services:
       ID_SMTP_PASSWORD: ${ID_SMTP_PASSWORD:-}
       ID_SMTP_FROM: ${ID_SMTP_FROM:-}
       ID_SMTP_FROM_NAME: ${ID_SMTP_FROM_NAME:-Cổng game}
-      # 1 = giao dien React (web/apps/portal, nhung san trong image): trang chinh + tai khoan; trang Go cu o /cu/
-      ID_SPA: ${ID_SPA:-0}
       # Thuong hieu cua cong — GET /api/site (trang chinh, chan trang moi trang game)
       ID_BRAND_NAME: ${ID_BRAND_NAME:-Cổng game}
       ID_SUPPORT_URL: ${ID_SUPPORT_URL:-}
@@ -96,7 +94,7 @@ services:
     environment:
       TZ: Asia/Ho_Chi_Minh
       # Chi nghe loopback: nginx proxy /, /may-chu, /cua-hang, /tin-tuc, /quy-doi, /choi-game, /auth/,
-      # /api/game/, /app/, /cu/ vao day.
+      # /api/game/, /app/ vao day.
       ADAPTER_ADDR: "127.0.0.1:${ADAPTER_PORT:-8090}"
       ADAPTER_GAME_CODE: ${ADAPTER_GAME_CODE:-haitac}
       ADAPTER_GAME_ID: ${ADAPTER_GAME_ID:-10091}
@@ -129,8 +127,6 @@ services:
       ADAPTER_GAME_NAME: ${ADAPTER_GAME_NAME:-}
       ADAPTER_MAIL_TITLE: ${ADAPTER_MAIL_TITLE:-}
       ADAPTER_MAIL_CONTENT: ${ADAPTER_MAIL_CONTENT:-}
-      # 1 = giao dien React (web/apps/game): /, /may-chu, /cua-hang, /tin-tuc, /app/*; trang Go cu o /cu/
-      ADAPTER_SPA: ${ADAPTER_SPA:-0}
       ID_BRAND_NAME: ${ID_BRAND_NAME:-Cổng game}
     depends_on:
       id: { condition: service_healthy }
@@ -166,8 +162,6 @@ services:
       ADMIN_BOOTSTRAP_USER: ${ADMIN_BOOTSTRAP_USER:-}
       ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
-      # 1 = giao dien React (nhung san trong image), trang Go cu lui ve /cu/
-      ADMIN_SPA: ${ADMIN_SPA:-0}
       # 1 = trang quan tri mo ra Internet qua nginx (https://admin.<domain> va
       # https://haitac.<domain>/admin-portal). Dich vu VAN bind 127.0.0.1:8100; co nay bat
       # cac lop bao ve bat buoc khi mo cua: dem so lan dang nhap sai theo tai khoan va theo
