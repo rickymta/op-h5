@@ -106,7 +106,7 @@ Xem trạng thái đơn ở Cửa hàng trước. "Đã gửi thư" nghĩa là q
 
 ## Vì sao có gói bấm mua không được?
 
-Nhiều gói có điều kiện của game: giới hạn lượt mỗi ngày, yêu cầu cấp VIP, hoặc chỉ mở trong một khoảng ngày mở máy chủ. Điều kiện ghi ngay trên dòng của gói. Nếu điều kiện không thoả, game sẽ từ chối và Xu được hoàn lại ví tự động.
+Nhiều gói có điều kiện của game: giới hạn lượt mỗi ngày, yêu cầu cấp VIP, hoặc chỉ mở trong một khoảng ngày mở máy chủ. Cột Điều kiện chỉ ghi những gì cổng đọc được từ bảng cấu hình; phần lớn gói sự kiện không khai ở đó nên cột để trống, và game mới là nơi quyết định cuối cùng. Nếu điều kiện không thoả, game sẽ từ chối và Xu được hoàn lại ví tự động.
 
 ## Chọn nhầm nhân vật hoặc máy chủ nhận thì sao?
 
