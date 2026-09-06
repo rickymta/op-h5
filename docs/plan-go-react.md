@@ -509,3 +509,12 @@ Năm agent song song, mỗi phần một commit: `b4f2545` (UI) · `9780bfb` (Go
 
 **Còn lại**: ảnh thương hiệu vẫn là của client cũ (logo ghi "TÂN THẾ GIỚI AFK" trong khi tên game là Đại Hải Trình) — chép ảnh vào `ASSETS_DIR/brand/haitac/` rồi sửa URL ở trang quản trị; `<title>` và thẻ meta theo route cho bộ máy tìm kiếm; luồng đã đăng nhập và luồng mua chưa được kiểm trên máy chủ thật vì không tự tạo tài khoản.
 
+### 15.10 Đợt 4 — 2026-09-06: 50 bài viết, đường dẫn chữ, rà soát tiếng Trung
+
+- **Nội dung**: 25 bài cho cổng chính (hướng dẫn, an toàn tài khoản, giải thích hệ thống, giới thiệu) và 25 bài cho Đại Hải Trình (nhập môn, đội hình, nội dung trong game, tiền tệ, vận hành). Bài của game tra từ dữ liệu cấu hình thật (`server/excel-src/`: mốc mở chức năng, số lượt mỗi ngày, phó bản 5 loại 9 bậc, thể thức giải vô địch, công hội, các tháp); chủ đề nào không tra được nguồn thì bỏ, ví dụ BOSS thế giới vì dữ liệu chỉ có các đợt đã hết hạn. Không bài nào hứa quà, nêu sự kiện đang diễn ra, hay đưa kênh hỗ trợ mà hệ thống chưa công bố.
+- **Đường dẫn chữ cho bài viết** (migration 0012): `news.slug` UNIQUE, API đọc theo cả chữ lẫn số, trang quản trị sinh slug từ tiêu đề. Seed nạp mọi tệp `news.*.sql` và chạy lại được.
+- **Rà soát tiếng Trung ba website**: chỉ còn một chỗ thật, 15 gói cửa hàng mang tên gốc `灯芯商店-第N档` mà người chơi thấy ở danh sách, trang chi tiết và cả tiêu đề tab. Nguyên nhân là bảng dịch chỉ tới mã 42200; sửa ở nguồn (`tools/gen-game-packages.py`) kèm cảnh báo khi còn tên chứa chữ Hán. Đo lại: 98 cột văn bản của 25 bảng, 12 endpoint công khai, 94 trang cửa hàng, văn bản của 17 trang đều về 0. Những chỗ giữ tiếng Trung đều là khoá kỹ thuật (nhận biết thông báo console Java, vế nguồn bảng dịch, chú thích lược đồ gốc, mẫu tìm log).
+- **Một lỗ hổng đóng thêm**: `/adminphp@2024/` vẫn mở ra Internet trong khi công cụ GM đã bị chặn, mà trang đó kiểm đăng nhập bằng `rowCount() < 0` — biểu thức không bao giờ đúng — nên ai mở cũng vào được bảng doanh thu. Nay chỉ loopback, cùng với `/new/`.
+- **Hai lỗi tự phát hiện khi kiểm bản triển khai**: image nginx thiếu `admin_access.conf` vì tệp mới không được khai trong Dockerfile (cả hai tệp cấu hình đều nạp nó, nên image thiếu là nginx không khởi động được); và trang chi tiết bài viết in nguyên dấu `##` thay vì dựng tiêu đề phụ, do dùng bộ tách đoạn thay vì bộ dựng đã có.
+- **Trên server**: 50 bài đã nạp, 6 bài của bản seed đầu bị xoá vì trùng chủ đề. Nạp lại tệp seed không sinh bản trùng.
+
