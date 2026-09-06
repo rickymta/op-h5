@@ -275,5 +275,9 @@ function openNapTien(){
         echo @filemtime(__DIR__ . '/op-autologin.js') ?: '1'; ?>"></script>
     <script type="text/javascript" src="op-dialog-close.js?v=<?php
         echo @filemtime(__DIR__ . '/op-dialog-close.js') ?: '1'; ?>"></script>
+    <script type="text/javascript" src="op-tu-di-ai.js?v=<?php
+        // Tu bam "Xac dinh" o man hinh thang tran de sang ai tiep, thay vi doi dem nguoc
+        // roi dong. Tat bang localStorage.setItem('opTuDiAi','0') — xem dau file do.
+        echo @filemtime(__DIR__ . '/op-tu-di-ai.js') ?: '1'; ?>"></script>
 </body>
 </html>
