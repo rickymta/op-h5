@@ -1,0 +1,168 @@
+/* Lớp nền của ba app công khai. App nạp đúng một lần trong `main.tsx`:
+ *
+ *     import "@op/site-ui/base.css";
+ *
+ * Ở đây chỉ có ba thứ: (1) ba chỉ thị của Tailwind, (2) kiểu dáng cho THẺ HTML thô — vì app
+ * tự viết `<input>`, `<form>`, `<a>` trong trang của mình và chúng phải cao 44 px, chữ 16 px
+ * mà không cần nhớ dán class; (3) đúng bốn lớp bố cục lặp ở cả ba app. Mọi thứ còn lại nằm
+ * trong các thành phần React dưới dạng class Tailwind.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink-900 font-sans text-fg antialiased;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  img,
+  svg,
+  video {
+    @apply block h-auto max-w-full;
+  }
+
+  /* Liên kết trong văn xuôi màu vàng đồng; liên kết-nút (`.btn`) tự đặt màu riêng. */
+  a {
+    @apply text-gold-400 no-underline;
+  }
+  a:hover {
+    @apply underline;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply m-0 text-fg;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.06;
+  }
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  p {
+    margin: 0 0 1em;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Viền focus phải thấy rõ trên nền gần đen: vàng đồng, dày 2 px, cách 2 px.
+     Đây là thứ duy nhất giúp người dùng bàn phím biết mình đang ở đâu. */
+  :focus-visible {
+    outline: 2px solid theme(colors.gold.400);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Ô nhập: 16 px để iOS không tự phóng to trang khi bấm vào; cao 44 px để bấm trúng
+     bằng ngón tay. Đặt ở tầng thẻ (không phải class) vì form nằm trong mã của app. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    @apply w-full min-h-touch rounded-md border border-line bg-ink-900 px-3 py-2.5 text-fg;
+    font: inherit;
+    font-size: 16px;
+  }
+  textarea {
+    @apply min-h-24 resize-y;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid theme(colors.brand.500);
+    outline-offset: 0;
+    @apply border-brand-500;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-fg-muted opacity-80;
+  }
+}
+
+@layer components {
+  /* Khung nội dung của mọi trang: `<main class="site-main">`. */
+  .site-main {
+    @apply mx-auto w-full max-w-content px-4 pb-14 tb:px-6 tb:pb-[72px];
+  }
+
+  /* Lưới thẻ game: đúng 2 cột ở điện thoại (một cột dài thì phải cuộn mãi),
+     tự giãn từ 180 px trở lên ở màn rộng. */
+  .site-game-grid {
+    @apply grid grid-cols-2 gap-2.5;
+  }
+
+  /* Dải ô số liệu (StatCard): 2 cột ở điện thoại — số tiền dài không bị cắt. */
+  .site-stat-grid {
+    @apply grid grid-cols-2 gap-2;
+  }
+
+  /* Cột trái + nội dung (trang tài khoản). Dưới 720 px xếp thành một cột. */
+  .site-layout {
+    @apply grid items-start gap-4;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 561 px = điểm ngắt `xs`, 721 px = `tb`. Viết thẳng số vì @media không đọc được theme(). */
+  @media (min-width: 561px) {
+    .site-game-grid {
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    .site-stat-grid {
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+  }
+  @media (min-width: 721px) {
+    .site-layout {
+      gap: 1.75rem;
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+  }
+}
+
+/* Người dùng đã bảo hệ điều hành "bớt chuyển động" thì tắt hẳn, kể cả cuộn mượt. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
