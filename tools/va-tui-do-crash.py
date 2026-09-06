@@ -139,6 +139,49 @@ def va_getCanSelectProp(src):
     return src, tong_ham, tong_chot
 
 
+def va_propSort_2(src):
+    """Ham so sanh THU HAI cua tui do — cai that su lam sap.
+
+    Ban truoc toi chi va ham viet literal `['propSort']`. Nhung con MOT ham nua cung ten
+    (Chrome hien ten tinh duoc nen vet loi trong ca hai truong hop deu ghi `propSort`), viet
+    bang khoa obfuscate `[_0x645b1d(0xdd5)]`, va chinh no moi nam tren duong tui do:
+
+        propSort <- freshPropList <- freshType <- switchType <- typeSelect
+
+    No doc `baseTpl` TAM lan trong mot chuoi ternary (canUse, type, quality, id) — khong
+    cho nao kiem tra mau co ton tai khong.
+
+    Cach va: nang `baseTpl` cua hai tham so len bien cuc bo, mac dinh `{}`. Giu NGUYEN moi
+    bieu thuc khoa (ke ca 0x5604 khong ro nghia) — chi doi cho lay doi tuong, khong doi
+    logic so sanh. Cac phep tru them `||0` de mau thieu khong tao ra NaN.
+    """
+    khuon = re.compile(
+        r"\[(?P<k>_0x[0-9a-f]+)\((?P<kid>0x[0-9a-f]+)\)\]"
+        r"\((?P<a>_0x[0-9a-f]+),(?P<b>_0x[0-9a-f]+)\)\{"
+        r"const (?P<c>_0x[0-9a-f]+)=(?P=k);"
+        r"return (?P<than>[^{}]*?'canUse'[^{}]*?);\}"
+    )
+    ms = [m for m in khuon.finditer(src) if "baseTpl" in m.group("than")]
+    if len(ms) != 1:
+        sys.exit(f"propSort#2: khop {len(ms)} cho, phai dung 1")
+    m = ms[0]
+    a, bb, c = m.group("a"), m.group("b"), m.group("c")
+    than = m.group("than")
+    # Hai dang truy cap cung tro toi 'baseTpl': X['baseTpl'] va X[c(0x2093)].
+    for bien, cuc in ((a, "_opA"), (bb, "_opB")):
+        than = than.replace(f"{bien}['baseTpl']", cuc)
+        than = re.sub(re.escape(bien) + r"\[" + re.escape(c) + r"\(0x2093\)\]", cuc, than)
+    if "_opA" not in than or "_opB" not in than:
+        sys.exit("propSort#2: khong thay the duoc bieu thuc baseTpl")
+    # Mau thieu -> tranh NaN o cac phep tru.
+    than = re.sub(r"(_op[AB]\[[^\]]+\])-(_op[AB]\[[^\]]+\])", r"(\1||0)-(\2||0)", than)
+    moi = (f"[{m.group('k')}({m.group('kid')})]({a},{bb}){{"
+           f"const {c}={m.group('k')};"
+           f"var _opA={a}[{c}(0x2093)]||{{}},_opB={bb}[{c}(0x2093)]||{{}};"
+           f"return {than};}}")
+    return src[:m.start()] + moi + src[m.end():], 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
@@ -161,6 +204,8 @@ def main():
     print(f"propSort         : {n1} cho")
     src, nh, nc = va_getCanSelectProp(src)
     print(f"getCanSelectProp : {nh} dinh nghia, {nc} chot")
+    src, n2 = va_propSort_2(src)
+    print(f"propSort#2       : {n2} cho (ham that su lam sap tui do)")
 
     if a.apply:
         if not os.path.exists(sao):
