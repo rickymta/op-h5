@@ -50,11 +50,13 @@ export const useCategories = () =>
  * Trước đây lấy từ khối `categories` bằng cách duyệt toàn bộ 1.933 gói tìm cái có `badge`;
  * từ khi khối đó chỉ còn tên nhóm (`cats_only=1`) thì phải hỏi riêng. Chọn nhóm `diamond`
  * (mốc Nguyên Bảo) vì đó là hàng chính của cửa hàng và mọi mốc đều có nhãn "x2 lần đầu".
+ * `category=diamond` giới hạn khối `categories` server đính kèm về đúng một nhóm; thiếu nó
+ * thì mỗi lượt gọi vẫn là 526 KB (đo trên máy chủ thật).
  */
 export const useFeatured = () =>
   useQuery({
     queryKey: ["featured"],
-    queryFn: () => api.get<PackagesResponse>("/api/game/packages?cat=diamond&sort=price_asc&page=1&page_size=6"),
+    queryFn: () => api.get<PackagesResponse>("/api/game/packages?category=diamond&cat=diamond&sort=price_asc&page=1&page_size=6"),
     staleTime: 5 * 60_000,
   });
 
