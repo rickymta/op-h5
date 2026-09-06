@@ -188,6 +188,9 @@ func main() {
 	// Duong cua LOGIN SERVER ma nginx tro vao Adapter, de che dia chi cong khai
 	// (server chi mo 80/443). Xem ghi chu o connectTarget.
 	mux.HandleFunc("GET /srv/game/connect/target", srv.connectTarget)
+	// Cong GM cua rieng game nay (xem adminportal.go). Dat truoc /healthz cho de doc.
+	srv.mountAdminPortal(mux)
+
 	mux.HandleFunc("GET /healthz", srv.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

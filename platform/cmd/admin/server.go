@@ -95,6 +95,21 @@ func (s *server) requireAdminAPI(h func(http.ResponseWriter, *http.Request, *adm
 	}
 }
 
+// requireGMRole doi vai tro tu 'gm' tro len. viewer chi duoc xem.
+//
+// Truoc day ham nay nam trong gm.go; cong cu GM da chuyen sang cong cua tung game, nhung
+// trang Nguoi choi cua he thong van can dung nguong vai tro nay.
+func (s *server) requireGMRole(h func(http.ResponseWriter, *http.Request, *admin)) http.HandlerFunc {
+	return s.requireAdminAPI(func(w http.ResponseWriter, r *http.Request, a *admin) {
+		switch a.Role {
+		case "gm", "operator", "owner":
+			h(w, r, a)
+		default:
+			httpx.Error(w, http.StatusForbidden, "forbidden", "Tài khoản này chỉ có quyền xem.")
+		}
+	})
+}
+
 // requireWrite doi quyen ghi. viewer chi duoc xem — de nguoi truc co the theo doi tai
 // ma khong sua duoc nguong.
 func (s *server) requireWrite(h func(http.ResponseWriter, *http.Request, *admin)) http.HandlerFunc {

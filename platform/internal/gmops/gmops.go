@@ -1,36 +1,80 @@
-package main
-
-// Cong cu GM: thao tac tren nhan vat trong game qua console.
+// Package gmops la cong cu GM cua MOT game: tra nhan vat, xem/xoa kho do, nap tay, gui thu.
 //
-// Thay gmhanglong/gm/*.php (docs/plan-go-react.md giai đoạn 1). Sau lam duoc bang PHP cu,
-// giu nguyen ngu nghia:
-//   tra nhan vat  -> statistic /role/record/list   (noi duy nhat doi TEN ra roleId)
-//   nap tay       -> console  /gm/pay/manual       (PHP dung pay_approval + completeApproval;
-//                                                   mot buoc it hon, cung ket qua, da chay o cua hang)
-//   gui thu       -> console  /gm/mail/x/create + /complete
-//   xem/xoa kho do-> console  /role/bag/query + /role/bag/reduce (cmdMode=uid)
+// VI SAO LA PACKAGE RIENG, KHONG NAM TRONG DICH VU QUAN TRI
+// ---------------------------------------------------------
+// Moi thao tac o day deu di qua CONSOLE cua cum game — thu rieng cua tung game. Game khac
+// se co backend khac han, nen GM thuoc ve stack cua game chu khong phai trang quan tri
+// chung cua he thong:
+//
+//	admin.<domain>            quan tri TOAN HE THONG: CMS, nap tien cho he thong ID,
+//	                          tai khoan chung, cau hinh cua hang
+//	haitac.<domain>/admin-portal   GM cua RIENG game haitac (Adapter phuc vu)
+//
+// Ngu nghia giu nguyen tu ban PHP cu (gmhanglong/gm/*.php):
+//
+//	tra nhan vat   -> statistic /role/record/list   (noi duy nhat doi TEN ra roleId)
+//	nap tay        -> console  /gm/pay/manual
+//	gui thu        -> console  /gm/mail/x/create + /complete
+//	xem/xoa kho do -> console  /role/bag/query + /role/bag/reduce
 //
 // Khac PHP o ba cho, deu co chu y:
-//   1. Xac thuc bang tai khoan admin_users vai tro >= gm, khong phai ma tinh + "mat khau SDK".
-//   2. Xoa kho do phai gui dung so o da xem (`expect`), nen khong xoa nham thu vua rot vao tui
-//      giua luc nguoi truc doc va luc bam.
-//   3. Moi thao tac ghi admin_audit KEM ket qua, ke ca khi that bai.
+//  1. Xac thuc bang tai khoan admin_users vai tro >= gm, khong phai ma tinh.
+//  2. Xoa kho do phai gui dung so o da xem (`expect`), nen khong xoa nham thu vua rot vao
+//     tui giua luc nguoi truc doc va luc bam.
+//  3. Moi thao tac ghi admin_audit KEM ket qua, ke ca khi that bai.
+package gmops
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rickymta/op-h5/platform/internal/console"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 )
 
-// bagKinds la cac loai kho do cong cu cho phep dung toi, kem ten tieng Viet.
+// Actor la nguoi dang thao tac. Chi can dung ba truong nay; dich vu goi tu quyet dinh
+// lay chung tu dau (phien cua trang quan tri, hay phien rieng cua cong game).
+type Actor struct {
+	ID       int64
+	Username string
+	Role     string
+}
+
+// CanGM cho biet vai tro nay co duoc cham vao nhan vat khong. `viewer` chi duoc xem.
+func (a Actor) CanGM() bool {
+	switch a.Role {
+	case "gm", "operator", "owner":
+		return true
+	}
+	return false
+}
+
+// Service gan cong cu GM vao mot game cu the.
+type Service struct {
+	Console  *console.Client
+	DB       *sql.DB
+	Log      *slog.Logger
+	GameCode string // 'haitac' — dung de doc danh sach may chu
+
+	// Platform/Channel/Currency di kem ban ghi nap va thu; de trong thi dung mac dinh.
+	PlatformCode string
+	ChannelCode  string
+	CurrencyCode string
+}
+
+var rewardRe = regexp.MustCompile(`^\d+:\d+:\d+(#\d+:\d+:\d+)*$`)
+
+// BagKinds la cac loai kho do cong cu cho phep dung toi, kem ten tieng Viet.
 // Thu tu quyet dinh thu tu hien tren trang.
-var bagKinds = []struct {
+var BagKinds = []struct {
 	Type  console.BagType `json:"type"`
 	Label string          `json:"label"`
 	Note  string          `json:"note"`
@@ -47,7 +91,7 @@ var bagKinds = []struct {
 }
 
 func validBag(t int) bool {
-	for _, k := range bagKinds {
+	for _, k := range BagKinds {
 		if int(k.Type) == t {
 			return true
 		}
@@ -55,43 +99,38 @@ func validBag(t int) bool {
 	return false
 }
 
-// requireGM doi vai tro tu 'gm' tro len. viewer chi duoc xem, khong duoc cham vao nhan vat.
-func (s *server) requireGM(h func(http.ResponseWriter, *http.Request, *admin)) http.HandlerFunc {
-	return s.requireAdminAPI(func(w http.ResponseWriter, r *http.Request, a *admin) {
-		switch a.Role {
-		case "gm", "operator", "owner":
-			h(w, r, a)
-		default:
-			httpx.Error(w, http.StatusForbidden, "forbidden", "Tài khoản này chỉ có quyền xem.")
-		}
-	})
+func (s *Service) or(v, def string) string {
+	if v == "" {
+		return def
+	}
+	return v
 }
 
-// gmConsole tra ve client console, hoac loi de tra ve cho nguoi dung.
-func (s *server) gmConsole(w http.ResponseWriter) (*console.Client, bool) {
-	if s.console == nil {
+// client tra ve console, hoac loi de tra ve cho nguoi dung.
+func (s *Service) client(w http.ResponseWriter) (*console.Client, bool) {
+	if s.Console == nil {
 		httpx.Error(w, http.StatusServiceUnavailable, "console_unconfigured",
-			"Chưa cấu hình console: đặt CONSOLE_BASE_URL, CONSOLE_USER, CONSOLE_ADMIN_PASSWORD và TCG_SECRET.")
+			"Chưa cấu hình console: đặt ADAPTER_CONSOLE_BASE_URL, ADAPTER_CONSOLE_USER, "+
+				"ADAPTER_CONSOLE_PASSWORD và TCG_SECRET.")
 		return nil, false
 	}
-	return s.console, true
+	return s.Console, true
 }
 
-// gmError doi loi cua console thanh phan hoi cho nguoi truc.
+// fail doi loi cua console thanh phan hoi cho nguoi truc.
 //
 // Console TU CHOI (het luot, khong tim thay nhan vat...) khac han console CHET: cai dau
 // nguoi truc sua duoc bang cach doi tham so, cai sau thi khong.
-func gmError(w http.ResponseWriter, err error) {
+func fail(w http.ResponseWriter, err error) {
 	if console.IsRejected(err) {
 		httpx.Error(w, http.StatusConflict, "console_rejected", err.Error())
 		return
 	}
-	httpx.Error(w, http.StatusBadGateway, "console_unavailable",
-		"Không gọi được console: "+err.Error())
+	httpx.Error(w, http.StatusBadGateway, "console_unavailable", "Không gọi được console: "+err.Error())
 }
 
-// auditGM ghi nhat ky kem ket qua. Ghi ca khi that bai: "ai da THU lam gi" cung la thong tin.
-func (s *server) auditGM(ctx context.Context, a *admin, action, target string, detail map[string]any, err error) {
+// audit ghi nhat ky kem ket qua. Ghi ca khi that bai: "ai da THU lam gi" cung la thong tin.
+func (s *Service) audit(ctx context.Context, a Actor, action, target string, detail map[string]any, err error) {
 	if detail == nil {
 		detail = map[string]any{}
 	}
@@ -101,45 +140,48 @@ func (s *server) auditGM(ctx context.Context, a *admin, action, target string, d
 		detail["ok"] = true
 	}
 	blob, _ := json.Marshal(detail)
-	s.audit(ctx, a.ID, action, target, string(blob))
+	if s.DB == nil {
+		return
+	}
+	if _, e := s.DB.ExecContext(ctx,
+		`INSERT INTO admin_audit (admin_id, action, target, detail) VALUES (?,?,?,?)`,
+		a.ID, action, target, string(blob)); e != nil && s.Log != nil {
+		s.Log.Error("ghi admin_audit", "err", e, "action", action)
+	}
 }
 
 // ---------------------------------------------------------------- tra cuu
 
-// gmMeta tra ve thu muc de trang dung: may chu va cac loai kho do.
-func (s *server) apiGMMeta(w http.ResponseWriter, r *http.Request, _ *admin) {
-	ctx := r.Context()
-	games := s.games(ctx)
-	game := pickGame(r, games)
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT srv_code, name FROM game_servers WHERE game_code = ? ORDER BY srv_code`, game)
+// Meta tra ve thu muc de trang dung: may chu cua game nay va cac loai kho do.
+func (s *Service) Meta(w http.ResponseWriter, r *http.Request, _ Actor) {
 	type srvOpt struct {
 		Code string `json:"code"`
 		Name string `json:"name"`
 	}
 	servers := []srvOpt{}
-	if err == nil {
-		for rows.Next() {
-			var o srvOpt
-			if rows.Scan(&o.Code, &o.Name) == nil {
-				servers = append(servers, o)
+	if s.DB != nil {
+		rows, err := s.DB.QueryContext(r.Context(),
+			`SELECT srv_code, name FROM game_servers WHERE game_code = ? ORDER BY srv_code`, s.GameCode)
+		if err == nil {
+			for rows.Next() {
+				var o srvOpt
+				if rows.Scan(&o.Code, &o.Name) == nil {
+					servers = append(servers, o)
+				}
 			}
+			_ = rows.Close()
+		} else if s.Log != nil {
+			s.Log.Error("doc danh sach may chu", "err", err)
 		}
-		_ = rows.Close()
-	} else {
-		s.log.Error("doc danh sach may chu", "err", err)
-	}
-	if games == nil {
-		games = []gameOpt{}
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
-		"games": games, "game": game, "servers": servers, "bags": bagKinds,
+		"game": s.GameCode, "servers": servers, "bags": BagKinds,
 	})
 }
 
-// apiGMRoles tim nhan vat theo ten.
-func (s *server) apiGMRoles(w http.ResponseWriter, r *http.Request, _ *admin) {
-	c, ok := s.gmConsole(w)
+// Roles tim nhan vat theo ten.
+func (s *Service) Roles(w http.ResponseWriter, r *http.Request, _ Actor) {
+	c, ok := s.client(w)
 	if !ok {
 		return
 	}
@@ -151,7 +193,7 @@ func (s *server) apiGMRoles(w http.ResponseWriter, r *http.Request, _ *admin) {
 	}
 	roles, err := c.FindRoles(r.Context(), srv, name, 20)
 	if err != nil {
-		gmError(w, err)
+		fail(w, err)
 		return
 	}
 	if roles == nil {
@@ -160,9 +202,9 @@ func (s *server) apiGMRoles(w http.ResponseWriter, r *http.Request, _ *admin) {
 	httpx.JSON(w, http.StatusOK, map[string]any{"roles": roles})
 }
 
-// apiGMBag doc mot loai kho do cua nhan vat.
-func (s *server) apiGMBag(w http.ResponseWriter, r *http.Request, _ *admin) {
-	c, ok := s.gmConsole(w)
+// Bag doc mot loai kho do cua nhan vat.
+func (s *Service) Bag(w http.ResponseWriter, r *http.Request, _ Actor) {
+	c, ok := s.client(w)
 	if !ok {
 		return
 	}
@@ -175,7 +217,7 @@ func (s *server) apiGMBag(w http.ResponseWriter, r *http.Request, _ *admin) {
 	}
 	slots, err := c.BagQuery(r.Context(), srv, role, console.BagType(bag))
 	if err != nil {
-		gmError(w, err)
+		fail(w, err)
 		return
 	}
 	if slots == nil {
@@ -194,13 +236,13 @@ type clearRequest struct {
 	Note   string `json:"note"`
 }
 
-// apiGMBagClear xoa toan bo mot loai kho do.
+// BagClear xoa toan bo mot loai kho do.
 //
 // `expect` la so o ma trang vua hien. Doc lai truoc khi xoa va so khop: giua luc nguoi truc
 // doc va luc bam, nguoi choi van dang choi va tui co the doi. Lech thi dung lai va bao doc
 // lai — khong tu quyet dinh xoa nhieu hon hay it hon nguoi truc dinh xoa.
-func (s *server) apiGMBagClear(w http.ResponseWriter, r *http.Request, a *admin) {
-	c, ok := s.gmConsole(w)
+func (s *Service) BagClear(w http.ResponseWriter, r *http.Request, a Actor) {
+	c, ok := s.client(w)
 	if !ok {
 		return
 	}
@@ -216,12 +258,13 @@ func (s *server) apiGMBagClear(w http.ResponseWriter, r *http.Request, a *admin)
 	ctx := r.Context()
 	slots, err := c.BagQuery(ctx, in.Srv, in.Role, console.BagType(in.Type))
 	if err != nil {
-		gmError(w, err)
+		fail(w, err)
 		return
 	}
 	if len(slots) != in.Expect {
 		httpx.Error(w, http.StatusConflict, "changed",
-			fmt.Sprintf("Kho đồ vừa thay đổi: bạn thấy %d ô, hiện có %d. Hãy xem lại rồi bấm lại.", in.Expect, len(slots)))
+			fmt.Sprintf("Kho đồ vừa thay đổi: bạn thấy %d ô, hiện có %d. Hãy xem lại rồi bấm lại.",
+				in.Expect, len(slots)))
 		return
 	}
 	if len(slots) == 0 {
@@ -242,7 +285,7 @@ func (s *server) apiGMBagClear(w http.ResponseWriter, r *http.Request, a *admin)
 		}
 		cleared++
 	}
-	s.auditGM(ctx, a, "gm_bag_clear", in.Srv+"/"+in.Role,
+	s.audit(ctx, a, "gm_bag_clear", in.Srv+"/"+in.Role,
 		map[string]any{"bag": in.Type, "cleared": cleared, "failed": failed}, lastErr)
 	if failed > 0 {
 		httpx.JSON(w, http.StatusOK, map[string]any{
@@ -267,9 +310,9 @@ type payRequest struct {
 	Note    string `json:"note"`
 }
 
-// apiGMPay nap tay mot muc nap cho nhan vat: game xu ly nhu mot lan nap that.
-func (s *server) apiGMPay(w http.ResponseWriter, r *http.Request, a *admin) {
-	c, ok := s.gmConsole(w)
+// Pay nap tay mot muc nap cho nhan vat: game xu ly nhu mot lan nap that.
+func (s *Service) Pay(w http.ResponseWriter, r *http.Request, a Actor) {
+	c, ok := s.client(w)
 	if !ok {
 		return
 	}
@@ -292,31 +335,32 @@ func (s *server) apiGMPay(w http.ResponseWriter, r *http.Request, a *admin) {
 	ctx := r.Context()
 	// Ten goi va gia lay tu game_packages neu co, de nhat ky va thu trong game doc duoc.
 	name, price := fmt.Sprintf("Gói %d", in.PayID), int64(0)
-	_ = s.db.QueryRowContext(ctx,
-		`SELECT name, price_xu FROM game_packages WHERE package_id = ? LIMIT 1`,
-		strconv.Itoa(in.PayID)).Scan(&name, &price)
-
+	if s.DB != nil {
+		_ = s.DB.QueryRowContext(ctx,
+			`SELECT name, price_xu FROM game_packages WHERE package_id = ? LIMIT 1`,
+			strconv.Itoa(in.PayID)).Scan(&name, &price)
+	}
 	rec := console.PayRecord{
 		OrderType:       0,
-		PlatformOrderID: fmt.Sprintf("gm-%d-%d", a.ID, nowUnix()),
+		PlatformOrderID: fmt.Sprintf("gm-%d-%d", a.ID, time.Now().Unix()),
 		ItemTid:         in.PayID,
 		ItemCount:       in.Count,
 		ItemName:        name,
 		PayAmount:       float64(price) * float64(in.Count),
 		SrvCode:         in.Srv,
-		PlatformCode:    envOr("ADAPTER_PLATFORM_CODE", "develop"),
-		ChannelCode:     envOr("ADAPTER_CHANNEL_CODE", "0"),
+		PlatformCode:    s.or(s.PlatformCode, "develop"),
+		ChannelCode:     s.or(s.ChannelCode, "0"),
 		AccountUID:      in.Account,
 		MasterIDHex:     in.Role,
 		MasterName:      in.Name,
-		CurrencyCode:    envOr("ADAPTER_CURRENCY_CODE", "VND"),
+		CurrencyCode:    s.or(s.CurrencyCode, "VND"),
 		Note:            "GM " + a.Username + ": " + strings.TrimSpace(in.Note),
 	}
 	err := c.PayManual(ctx, rec)
-	s.auditGM(ctx, a, "gm_pay", in.Srv+"/"+in.Role,
+	s.audit(ctx, a, "gm_pay", in.Srv+"/"+in.Role,
 		map[string]any{"pay_id": in.PayID, "count": in.Count, "name": name, "note": in.Note}, err)
 	if err != nil {
-		gmError(w, err)
+		fail(w, err)
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
@@ -333,12 +377,12 @@ type mailRequest struct {
 	Reward  string `json:"reward"`
 }
 
-// apiGMMail gui mot thu kem qua cho MOT nhan vat.
+// Mail gui mot thu kem qua cho MOT nhan vat.
 //
 // Co y khong ho tro gui toan may chu o day: gui nham mot nguoi thi thu hoi duoc bang tay,
 // gui nham ca may chu thi khong. Khi nao can thi lam mot duong rieng co buoc xac nhan hai lop.
-func (s *server) apiGMMail(w http.ResponseWriter, r *http.Request, a *admin) {
-	c, ok := s.gmConsole(w)
+func (s *Service) Mail(w http.ResponseWriter, r *http.Request, a Actor) {
+	c, ok := s.client(w)
 	if !ok {
 		return
 	}
@@ -367,16 +411,18 @@ func (s *server) apiGMMail(w http.ResponseWriter, r *http.Request, a *admin) {
 	}
 	ctx := r.Context()
 	req := console.NewItemMail(in.Srv, in.Role, in.Name,
-		envOr("ADAPTER_PLATFORM_CODE", "develop"), in.Title, in.Content, in.Reward)
+		s.or(s.PlatformCode, "develop"), in.Title, in.Content, in.Reward)
 	id, err := c.MailCreate(ctx, req)
 	if err == nil {
 		err = c.MailComplete(ctx, id)
 	}
-	s.auditGM(ctx, a, "gm_mail", in.Srv+"/"+in.Role,
+	s.audit(ctx, a, "gm_mail", in.Srv+"/"+in.Role,
 		map[string]any{"reward": in.Reward, "title": in.Title, "mail_id": id}, err)
 	if err != nil {
-		gmError(w, err)
+		fail(w, err)
 		return
 	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"message": "Đã gửi thư (phiếu #" + strconv.FormatInt(id, 10) + ")."})
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"message": "Đã gửi thư (phiếu #" + strconv.FormatInt(id, 10) + ").",
+	})
 }

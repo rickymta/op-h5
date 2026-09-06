@@ -3,7 +3,6 @@ import { Link, Route, Switch, useLocation } from "wouter";
 import { api, type Me } from "./api";
 import { Account } from "./pages/Account";
 import { Games } from "./pages/Games";
-import { GM } from "./pages/GM";
 import { News } from "./pages/News";
 import { Orders } from "./pages/Orders";
 import { Players } from "./pages/Players";
@@ -22,7 +21,6 @@ function Nav({ me }: { me?: Me }) {
       <h1>Quản trị nền tảng</h1>
       <nav>
         {item("/", "Đội máy chủ")}
-        {item("/gm", "Công cụ GM")}
         {item("/nguoi-choi", "Người chơi")}
         {item("/game", "Game")}
         {item("/tin-tuc", "Tin tức")}
@@ -67,7 +65,6 @@ export function App() {
         </div>
       )}
       <Switch>
-        <Route path="/gm" component={GM} />
         <Route path="/nguoi-choi" component={Players} />
         <Route path="/game" component={Games} />
         <Route path="/tin-tuc" component={News} />

@@ -193,16 +193,15 @@ func main() {
 	mux.HandleFunc("POST /api/pages", s.requireWrite(s.apiPageSave))
 	mux.HandleFunc("POST /api/pages/{id}/delete", s.requireWrite(s.apiPageDelete))
 	// Nguoi choi (players.go): xem thi can vai tro gm, khoa/mo thi can operator.
-	mux.HandleFunc("GET /api/players", s.requireGM(s.apiPlayerList))
-	mux.HandleFunc("GET /api/players/{id}", s.requireGM(s.apiPlayerDetail))
+	mux.HandleFunc("GET /api/players", s.requireGMRole(s.apiPlayerList))
+	mux.HandleFunc("GET /api/players/{id}", s.requireGMRole(s.apiPlayerDetail))
 	mux.HandleFunc("POST /api/players/{id}", s.requireWrite(s.apiPlayerUpdate))
-	// Cong cu GM (gm.go): thao tac tren nhan vat qua console.
-	mux.HandleFunc("GET /api/gm/meta", s.requireAdminAPI(s.apiGMMeta))
-	mux.HandleFunc("GET /api/gm/roles", s.requireGM(s.apiGMRoles))
-	mux.HandleFunc("GET /api/gm/bag", s.requireGM(s.apiGMBag))
-	mux.HandleFunc("POST /api/gm/bag/clear", s.requireGM(s.apiGMBagClear))
-	mux.HandleFunc("POST /api/gm/pay", s.requireGM(s.apiGMPay))
-	mux.HandleFunc("POST /api/gm/mail", s.requireGM(s.apiGMMail))
+	// GM DA CHUYEN sang cong cua tung game: haitac.<domain>/admin-portal (Adapter phuc vu,
+	// xem platform/cmd/adapter/adminportal.go va internal/gmops).
+	//
+	// Ly do: moi thao tac GM di qua CONSOLE cua cum game — thu rieng cua tung game; game
+	// them vao sau se co backend khac han. Trang quan tri nay lo phan CHUNG cua he thong:
+	// CMS, nap tien cho he thong ID, tai khoan chung, cau hinh cua hang.
 	mux.HandleFunc("GET /healthz", s.health)
 
 	handler := httpx.Recover(log, httpx.Logging(log, mux))

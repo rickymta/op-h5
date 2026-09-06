@@ -1,4 +1,4 @@
-package main
+package gmops
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 // Chi cho phep cac loai kho do co trong danh sach: `bagType` di thang sang console, nen mot
 // so la lot qua day la mot lenh xoa tren loai khong ai kiem tra.
 func TestValidBagOnlyAcceptsKnownTypes(t *testing.T) {
-	for _, k := range bagKinds {
+	for _, k := range BagKinds {
 		if !validBag(int(k.Type)) {
 			t.Errorf("loai %d (%s) phai hop le", k.Type, k.Label)
 		}
@@ -28,23 +28,22 @@ func TestValidBagOnlyAcceptsKnownTypes(t *testing.T) {
 // truc sua duoc bang cach doi tham so, cai sau thi khong.
 func TestGMErrorSeparatesRejectionFromOutage(t *testing.T) {
 	rec := httptest.NewRecorder()
-	gmError(rec, &console.RejectedError{Code: 1, Msg: "khong tim thay nhan vat"})
+	fail(rec, &console.RejectedError{Code: 1, Msg: "khong tim thay nhan vat"})
 	if rec.Code != http.StatusConflict {
 		t.Errorf("console tu choi -> muon 409, duoc %d", rec.Code)
 	}
 
 	rec = httptest.NewRecorder()
-	gmError(rec, errors.New("dial tcp 127.0.0.1:9999: connect: connection refused"))
+	fail(rec, errors.New("dial tcp 127.0.0.1:9999: connect: connection refused"))
 	if rec.Code != http.StatusBadGateway {
 		t.Errorf("console chet -> muon 502, duoc %d", rec.Code)
 	}
 }
 
 // Chua cau hinh console thi bao ro chu khong panic vi con tro nil.
-func TestGMConsoleUnconfiguredIsExplained(t *testing.T) {
-	s := &server{}
+func TestConsoleUnconfiguredIsExplained(t *testing.T) {
 	rec := httptest.NewRecorder()
-	if _, ok := s.gmConsole(rec); ok {
+	if _, ok := (&Service{}).client(rec); ok {
 		t.Fatal("khong duoc bao la co console khi chua cau hinh")
 	}
 	if rec.Code != http.StatusServiceUnavailable {

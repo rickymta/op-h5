@@ -1,0 +1,224 @@
+{{define "gm.html"}}<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Công cụ GM — {{.Game}}</title>
+<style>
+ :root{--nen:#0C1D2B;--the:#122636;--vien:#22394D;--chu:#E4EDF3;--mo:#9CB0C0;--nhan:#EE4623;--ok:#2E7D5B}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--nen);color:var(--chu);font:15px/1.55 ui-sans-serif,system-ui,sans-serif}
+ header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--vien);
+        background:#0e2130;flex-wrap:wrap}
+ header h1{font-size:17px;margin:0;flex:1}
+ header .ai{color:var(--mo);font-size:13.5px}
+ main{max-width:1000px;margin:0 auto;padding:18px}
+ section{background:var(--the);border:1px solid var(--vien);border-radius:6px;padding:18px;margin-bottom:18px}
+ h2{font-size:15px;margin:0 0 12px;color:var(--mo);text-transform:uppercase;letter-spacing:.04em}
+ label{display:block;font-size:13px;color:var(--mo);margin:10px 0 5px}
+ input,select,textarea{width:100%;padding:9px 10px;font-size:15px;border-radius:4px;
+   border:1px solid var(--vien);background:#0d1f2e;color:var(--chu);font-family:inherit}
+ textarea{min-height:70px;resize:vertical}
+ input:focus,select:focus,textarea:focus{outline:2px solid var(--nhan);outline-offset:-1px}
+ button{padding:9px 16px;font-size:14.5px;font-weight:600;cursor:pointer;border:0;border-radius:4px;
+        background:var(--nhan);color:#fff}
+ button.phu{background:transparent;border:1px solid var(--vien);color:var(--mo)}
+ button:disabled{opacity:.5;cursor:not-allowed}
+ .hang{display:flex;gap:12px;flex-wrap:wrap} .hang>*{flex:1;min-width:160px}
+ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+ th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--vien)}
+ th{color:var(--mo);font-weight:600}
+ tr.chon{background:#183247;cursor:pointer} tbody tr{cursor:pointer}
+ .bao{margin-top:12px;padding:10px 12px;border-radius:4px;font-size:14px;white-space:pre-wrap}
+ .bao.ok{background:#12301F;color:#7BD6A6} .bao.loi{background:#3A1E1A;color:#E0685A}
+ .mo{color:var(--mo);font-size:13px}
+ .canh{background:#3A2E1A;color:#E0C05A;padding:10px 12px;border-radius:4px;font-size:13.5px;margin-bottom:12px}
+ fieldset{border:0;padding:0;margin:0}
+ fieldset[disabled]{opacity:.55}
+</style></head>
+<body>
+<header>
+  <h1>Công cụ GM · <span class="mo">{{.Game}}</span></h1>
+  <span class="ai">{{.User}} ({{.Role}})</span>
+  <form method="post" action="{{.Base}}/dang-xuat" style="margin:0">
+    <button class="phu" type="submit">Thoát</button>
+  </form>
+</header>
+<main>
+  {{if not .CanGM}}<div class="canh">Tài khoản này chỉ có quyền xem — mọi thao tác sẽ bị từ chối.</div>{{end}}
+
+  <section>
+    <h2>1. Tìm nhân vật</h2>
+    <div class="hang">
+      <div><label for="srv">Máy chủ</label><select id="srv"></select></div>
+      <div><label for="ten">Tên nhân vật</label><input id="ten" placeholder="ví dụ: Duyen"></div>
+      <div style="flex:0 0 auto;align-self:flex-end"><button id="btnTim">Tìm</button></div>
+    </div>
+    <div id="dsNv"></div>
+    <div id="baoTim"></div>
+  </section>
+
+  <fieldset id="khoi" disabled>
+  <section>
+    <h2>2. Kho đồ</h2>
+    <div class="hang">
+      <div><label for="bag">Loại</label><select id="bag"></select></div>
+      <div style="flex:0 0 auto;align-self:flex-end"><button id="btnXem" class="phu">Xem</button></div>
+      <div style="flex:0 0 auto;align-self:flex-end"><button id="btnXoa">Xoá toàn bộ loại này</button></div>
+    </div>
+    <div id="dsKho"></div>
+    <div id="baoKho"></div>
+  </section>
+
+  <section>
+    <h2>3. Nạp tay</h2>
+    <p class="mo">Game xử lý như một lần nạp thật — nhận đủ quà và mốc tích luỹ của gói.</p>
+    <div class="hang">
+      <div><label for="payid">Mã gói</label><input id="payid" type="number" min="1"></div>
+      <div><label for="soluot">Số lần</label><input id="soluot" type="number" min="1" max="100" value="1"></div>
+      <div><label for="ghichu">Ghi chú</label><input id="ghichu" placeholder="lý do"></div>
+    </div>
+    <div style="margin-top:12px"><button id="btnNap">Nạp</button></div>
+    <div id="baoNap"></div>
+  </section>
+
+  <section>
+    <h2>4. Gửi thư kèm quà</h2>
+    <p class="mo">Chỉ gửi cho <strong>một</strong> nhân vật. Gửi nhầm một người còn thu hồi tay được; gửi nhầm cả máy chủ thì không.</p>
+    <label for="tieude">Tiêu đề</label><input id="tieude" maxlength="120" placeholder="Thư từ quản trị">
+    <label for="noidung">Nội dung</label><textarea id="noidung" maxlength="1000"></textarea>
+    <label for="qua">Quà — dạng <code>type:id:count</code>, nhiều món nối bằng <code>#</code></label>
+    <input id="qua" placeholder="0:1:5000  (5.000 Nguyên Bảo)">
+    <div style="margin-top:12px"><button id="btnThu">Gửi thư</button></div>
+    <div id="baoThu"></div>
+  </section>
+  </fieldset>
+</main>
+<script>
+(function(){
+  'use strict';
+  var BASE = {{.Base}};
+  var nv = null;                      // nhan vat dang chon
+  var oDaXem = null;                  // so o kho do vua hien — gui kem khi xoa
+
+  function $(id){ return document.getElementById(id); }
+  function bao(el, text, ok){ el.innerHTML = '<div class="bao ' + (ok?'ok':'loi') + '"></div>';
+                              el.firstChild.textContent = text; }
+  function xoaBao(el){ el.innerHTML = ''; }
+
+  async function goi(duong, opt){
+    var res = await fetch(BASE + duong, Object.assign({credentials:'same-origin'}, opt||{}));
+    var d = null;
+    try { d = await res.json(); } catch(e){}
+    if (!res.ok) {
+      // Chua dang nhap thi dua thang ve form, dung de nguoi truc doan.
+      if (res.status === 401) { location.href = BASE + '/dang-nhap'; return null; }
+      throw new Error((d && (d.error_description || d.message)) || ('Lỗi ' + res.status));
+    }
+    return d;
+  }
+  function json(body){ return {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}; }
+
+  // ---- nap thu muc ----
+  goi('/api/meta').then(function(m){
+    if (!m) return;
+    $('srv').innerHTML = m.servers.map(function(s){
+      return '<option value="'+s.code+'">'+s.code+' — '+s.name+'</option>'; }).join('');
+    $('bag').innerHTML = m.bags.map(function(b){
+      return '<option value="'+b.type+'">'+b.label+(b.note?' ('+b.note+')':'')+'</option>'; }).join('');
+  }).catch(function(e){ bao($('baoTim'), e.message, false); });
+
+  // ---- tim nhan vat ----
+  $('btnTim').onclick = async function(){
+    xoaBao($('baoTim')); $('dsNv').innerHTML = ''; chon(null);
+    var ten = $('ten').value.trim();
+    if (!ten) { bao($('baoTim'), 'Nhập tên nhân vật.', false); return; }
+    try {
+      var d = await goi('/api/roles?srv=' + encodeURIComponent($('srv').value) + '&name=' + encodeURIComponent(ten));
+      if (!d) return;
+      if (!d.roles.length) { bao($('baoTim'), 'Không tìm thấy nhân vật nào.', false); return; }
+      var h = '<table><thead><tr><th>Tên</th><th>Máy chủ</th><th>Cấp</th><th>roleId</th></tr></thead><tbody>';
+      d.roles.forEach(function(r, i){
+        h += '<tr data-i="'+i+'"><td>'+(r.roleName||'')+'</td><td>'+(r.srvCode||'')+'</td><td>'
+           + (r.level!=null?r.level:'') + '</td><td class="mo">'+(r.roleId||'')+'</td></tr>';
+      });
+      $('dsNv').innerHTML = h + '</tbody></table>';
+      Array.prototype.forEach.call($('dsNv').querySelectorAll('tbody tr'), function(tr){
+        tr.onclick = function(){
+          Array.prototype.forEach.call($('dsNv').querySelectorAll('tr'), function(x){ x.classList.remove('chon'); });
+          tr.classList.add('chon');
+          chon(d.roles[+tr.dataset.i]);
+        };
+      });
+      if (d.roles.length === 1) { $('dsNv').querySelector('tbody tr').click(); }
+    } catch(e){ bao($('baoTim'), e.message, false); }
+  };
+
+  function chon(r){
+    nv = r; oDaXem = null; $('dsKho').innerHTML = '';
+    $('khoi').disabled = !r {{if not .CanGM}} || true {{end}};
+    if (r) bao($('baoTim'), 'Đang thao tác với: ' + r.roleName + ' (' + r.srvCode + ')', true);
+  }
+
+  // ---- kho do ----
+  $('btnXem').onclick = async function(){
+    if (!nv) return;
+    xoaBao($('baoKho'));
+    try {
+      var d = await goi('/api/bag?srv=' + encodeURIComponent(nv.srvCode) + '&role=' + encodeURIComponent(nv.roleId)
+                        + '&type=' + $('bag').value);
+      if (!d) return;
+      oDaXem = d.slots.length;
+      if (!d.slots.length) { $('dsKho').innerHTML = '<p class="mo">Kho đồ loại này đang trống.</p>'; return; }
+      var h = '<table><thead><tr><th>ID</th><th>Số lượng</th></tr></thead><tbody>';
+      d.slots.forEach(function(s){ h += '<tr><td>'+s.id+'</td><td>'+s.num+'</td></tr>'; });
+      $('dsKho').innerHTML = h + '</tbody></table><p class="mo">' + d.slots.length + ' ô.</p>';
+    } catch(e){ bao($('baoKho'), e.message, false); }
+  };
+
+  $('btnXoa').onclick = async function(){
+    if (!nv) return;
+    if (oDaXem === null) { bao($('baoKho'), 'Bấm Xem trước đã — cần biết đang xoá bao nhiêu ô.', false); return; }
+    var ten = $('bag').options[$('bag').selectedIndex].text;
+    if (!confirm('Xoá toàn bộ "' + ten + '" (' + oDaXem + ' ô) của ' + nv.roleName + '?\nKhông lùi lại được.')) return;
+    try {
+      var d = await goi('/api/bag/clear', json({srv:nv.srvCode, role:nv.roleId, type:+$('bag').value,
+                                                expect:oDaXem, note:'GM don kho do'}));
+      if (!d) return;
+      bao($('baoKho'), d.message || ('Đã xoá ' + d.cleared + ' ô.'), d.failed === 0);
+      oDaXem = null; $('btnXem').click();
+    } catch(e){ bao($('baoKho'), e.message, false); }
+  };
+
+  // ---- nap tay ----
+  $('btnNap').onclick = async function(){
+    if (!nv) return;
+    xoaBao($('baoNap'));
+    var pid = parseInt($('payid').value, 10);
+    if (!(pid > 0)) { bao($('baoNap'), 'Nhập mã gói.', false); return; }
+    if (!confirm('Nạp gói ' + pid + ' ×' + ($('soluot').value||1) + ' cho ' + nv.roleName + '?')) return;
+    try {
+      var d = await goi('/api/pay', json({srv:nv.srvCode, role:nv.roleId, account_uid:nv.accountUid,
+                                          role_name:nv.roleName, pay_id:pid,
+                                          count:parseInt($('soluot').value,10)||1, note:$('ghichu').value}));
+      if (!d) return;
+      bao($('baoNap'), d.message, true);
+    } catch(e){ bao($('baoNap'), e.message, false); }
+  };
+
+  // ---- gui thu ----
+  $('btnThu').onclick = async function(){
+    if (!nv) return;
+    xoaBao($('baoThu'));
+    var qua = $('qua').value.trim();
+    if (!qua) { bao($('baoThu'), 'Nhập quà, ví dụ 0:1:5000.', false); return; }
+    if (!confirm('Gửi thư kèm "' + qua + '" cho ' + nv.roleName + '?')) return;
+    try {
+      var d = await goi('/api/mail', json({srv:nv.srvCode, role:nv.roleId, role_name:nv.roleName,
+                                           title:$('tieude').value, content:$('noidung').value, reward:qua}));
+      if (!d) return;
+      bao($('baoThu'), d.message, true);
+    } catch(e){ bao($('baoThu'), e.message, false); }
+  };
+})();
+</script>
+</body></html>{{end}}
