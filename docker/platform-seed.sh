@@ -157,6 +157,18 @@ else
   echo "[seed] khong co $PKG — bo qua game_packages (sinh bang tools/gen-game-packages.py)"
 fi
 
+# 3d-bis) Cac file va ten goi: game_packages.<game>.*.sql, nap SAU file chinh theo thu tu ten.
+#         File chinh chi ghi de cot `name` khi ten con chu Han, nen goi da mang ten tieng Viet
+#         nhung dat sai hoac trung nhau thi phai co lenh UPDATE rieng. Moi file tu lo dieu kien
+#         de chay lai vo hai va khong dap len ten nguoi van hanh sua tay.
+for PKGFIX in "$SEED_DIR"/game_packages."$GAME".*.sql; do
+  [ -f "$PKGFIX" ] || continue
+  if [ "$PRINT" = 1 ]; then echo "-- [$DB] < $PKGFIX"; else
+    mysql -h"$DB_HOST" -P"$DB_PORT" -uroot --default-character-set=utf8mb4 "$DB" < "$PKGFIX"
+    echo "[seed] va ten goi tu $(basename "$PKGFIX")"
+  fi
+done
+
 # 3e) bai viet (bang news, migration 0010 + 0012). Nap MOI file news.*.sql theo thu tu ten, khong
 #     chi news.<game>.sql: bai viet duoc chia thanh nhieu file (tin chung cua cong, tin cua tung
 #     game, tung dot noi dung) va them mot dot bai moi phai la them mot file, khong phai sua file
