@@ -237,7 +237,9 @@ export const NHOM_GOI = [
 export type PackageCategory = (typeof NHOM_GOI)[number];
 
 export interface PackageRow {
-  package_id: string;
+  /** Ma goi. May chu tra o khoa `id` (cmd/admin/catalog.go), khong phai `package_id` —
+   *  `package_id` la khoa cua ban ghi don mua, thu khac. */
+  id: string;
   name: string;
   category: string;
   grant_mode: "pay" | "mail" | "ingame";

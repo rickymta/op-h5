@@ -247,13 +247,19 @@ func (s *server) doLogout(w http.ResponseWriter, r *http.Request) {
 
 // ---------------------------------------------------------------- API
 
-// apiAudit tra 200 dong nhat ky gan nhat. Truoc day day la trang Go /nhat-ky.
+// apiAudit tra mot trang nhat ky. Truoc day day la trang Go /nhat-ky.
+//
+// Co phan trang that: ban dau ham nay luon tra 200 dong moi nhat va bo qua `page`, nen
+// trang quan tri co nut sang trang ma bam vao khong doi gi — nguoi truc khong bao gio doc
+// duoc nhat ky cu hon 200 dong.
 func (s *server) apiAudit(w http.ResponseWriter, r *http.Request, _ *admin) {
+	page, size := pageParams(r, 50, 200)
+	// Lay du mot dong de biet con trang sau hay khong, roi bo dong do khi tra ve.
 	rows, err := s.db.QueryContext(r.Context(), `
 		SELECT COALESCE(u.username,'-'), t.action, t.target, COALESCE(t.detail,''),
 		       DATE_FORMAT(t.created_at,'%Y-%m-%d %H:%i')
 		  FROM admin_audit t LEFT JOIN admin_users u ON u.id = t.admin_id
-		 ORDER BY t.id DESC LIMIT 200`)
+		 ORDER BY t.id DESC LIMIT ? OFFSET ?`, size+1, (page-1)*size)
 	if err != nil {
 		s.log.Error("doc nhat ky", "err", err)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được nhật ký.")
@@ -275,7 +281,28 @@ func (s *server) apiAudit(w http.ResponseWriter, r *http.Request, _ *admin) {
 			items = append(items, e)
 		}
 	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"items": items})
+	hasMore := len(items) > size
+	if hasMore {
+		items = items[:size]
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{
+		"items": items, "page": page, "page_size": size, "has_more": hasMore,
+	})
+}
+
+// pageParams doc `page` va `page_size` tu query, kep vao khoang hop le.
+func pageParams(r *http.Request, def, max int) (page, size int) {
+	page, size = 1, def
+	if v, err := strconv.Atoi(r.URL.Query().Get("page")); err == nil && v > 1 {
+		page = v
+	}
+	if v, err := strconv.Atoi(r.URL.Query().Get("page_size")); err == nil && v > 0 {
+		size = v
+		if size > max {
+			size = max
+		}
+	}
+	return page, size
 }
 
 func (s *server) apiFleet(w http.ResponseWriter, r *http.Request, _ *admin) {

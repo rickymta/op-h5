@@ -149,7 +149,7 @@ export function Home() {
           </div>
         </Section>
 
-        <Section eyebrow="Game" title="Game trong chợ" sub="Mỗi game có bảng tin rao riêng theo máy chủ.">
+        <Section eyebrow="Game" title="Game trong chợ" sub="Dữ liệu mẫu. Mỗi game sẽ có bảng tin rao riêng theo máy chủ.">
           <div className="grid gap-3 xs:grid-cols-2">
             {DEMO_GAMES.map((g) => (
               <Card key={g.code} className="flex items-start justify-between gap-3">

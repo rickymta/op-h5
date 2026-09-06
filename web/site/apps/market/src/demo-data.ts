@@ -73,7 +73,7 @@ export const DEMO_GAMES: DemoGame[] = [
     name: "Đại Hải Trình",
     genre: "Đấu tướng · Idle",
     open: true,
-    note: "5 máy chủ đang mở",
+    note: "nhiều máy chủ",
     servers: [
       { code: "s1", name: "S1 · Đông Hải" },
       { code: "s2", name: "S2 · Nam Hải" },

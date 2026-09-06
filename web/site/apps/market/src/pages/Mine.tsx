@@ -75,7 +75,6 @@ export function Mine() {
               title: "Nhận được",
               align: "right",
               width: "140px",
-              hideOnMobile: true,
               render: (r) => <Xu n={quote(r.amount, r.price).net} tone="gold" />,
             },
             {
@@ -138,7 +137,7 @@ export function Mine() {
                 </div>
               ),
             },
-            { key: "price", title: "Đơn giá", align: "right", width: "150px", hideOnMobile: true, render: (r) => <UnitPrice n={r.price} /> },
+            { key: "price", title: "Đơn giá", align: "right", width: "150px", render: (r) => <UnitPrice n={r.price} /> },
             { key: "xu", title: "Xu", align: "right", width: "140px", render: (r) => <Xu n={r.xu} tone="gold" /> },
             {
               key: "who",

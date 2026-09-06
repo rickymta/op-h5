@@ -21,7 +21,9 @@ export function NewsDetailPage() {
     queryFn: () => api.get<NewsDetail>(`/api/news/${encodeURIComponent(key ?? "")}`),
     enabled: !!key,
   });
-  useTitle(q.data?.title ?? "Tin tức");
+  // Bai khong ton tai thi doi tieu de tab luon: giu "Tin tuc" lam nguoi doc tuong trang
+  // van dung, chi la chua tai xong.
+  useTitle(q.data?.title ?? (q.isError ? "Không tìm thấy bài viết" : "Tin tức"));
 
   const canonical = q.data?.canonical_slug;
   useEffect(() => {

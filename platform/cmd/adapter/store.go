@@ -40,10 +40,22 @@ var storeCategories = []storeCategory{
 	{"privilege", "Đặc quyền", "Mở tính năng hoặc quyền lợi lâu dài."},
 	{"daily", "Gói ngày", "Giới hạn số lần mỗi ngày và theo ngày mở máy chủ."},
 	{"limited", "Gói giới hạn", "Số suất có hạn, mỗi người mua một lần."},
-	{"event", "Gói sự kiện", "Chỉ mua được khi sự kiện đang mở trong game. Game từ chối thì Xu được hoàn ngay."},
 	{"item", "Vật phẩm", "Gửi qua thư trong game, nhận ở hòm thư."},
 }
 
+// Nhom 'event' (1.870 goi) CO Y khong co trong danh sach tren.
+//
+// Quyet dinh cua nguoi van hanh 2026-09-06: an han khoi cua hang web. Ly do do duoc tu
+// kiem thu tren may chu that: ten cua chung lay nguyen tu bang cau hinh cua game, la ban
+// dich may, va trung nhau theo cum — 53 dong cung ten "moi tuan han mua" trai gia 3.000
+// den 500.000 Xu, 41 dong "moi thang han mua", 26 dong "moi ngay han mua". 1.884 goi khong
+// co mo ta, 1.870 goi khong khai dieu kien. Nguoi mua nhin bang khong biet dong nao voi
+// dong nao, ma moi dong deu tru tien that.
+//
+// Chung KHONG bi xoa: van nam trong game_packages va van mua duoc TRONG GAME (duong
+// /api/game/legacy/check + legacy/charge tra gia theo package_id, khong qua danh sach nay).
+// Muon mo lai tren web thi dich lai ten roi them mot dong vao storeCategories.
+//
 // isStoreCategory: chi cac nhom co trong storeCategories moi hien tren web.
 //
 // Bang game_packages con nhom 'ingame' (1.870 muc nap chi de tra gia khi nguoi choi bam mua

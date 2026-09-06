@@ -83,15 +83,21 @@ export function Store() {
       width: "34%",
       render: (p) => (
         <>
-          <span className="block font-medium text-fg">
+          {/* Ca o ten la lien ket: truoc day chi sau the "goi noi bat" moi mo duoc trang chi
+              tiet, nen 1.927/1.933 goi khong co duong vao nao. */}
+          <a href={`/cua-hang/${encodeURIComponent(p.id)}`} className="block font-medium text-fg hover:text-gold-400">
             {p.name}
             {p.badge ? (
               <span className="ml-2 inline-block whitespace-nowrap rounded bg-brand-500 px-[7px] py-0.5 align-[1px] font-mono text-[10.5px] uppercase tracking-[0.06em] text-white">
                 {p.badge}
               </span>
             ) : null}
-          </span>
-          {p.description ? <span className="mt-0.5 block text-[13px] text-fg-muted">{p.description}</span> : null}
+          </a>
+          {p.description ? (
+            <span className="mt-0.5 block text-[13px] text-fg-muted">{p.description}</span>
+          ) : (
+            <span className="mt-0.5 block font-mono text-[12px] text-fg-faint">mã {p.id}</span>
+          )}
         </>
       ),
     },

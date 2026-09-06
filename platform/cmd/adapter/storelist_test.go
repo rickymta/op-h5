@@ -211,12 +211,15 @@ func TestToPkgDetail(t *testing.T) {
 }
 
 func TestIsStoreCategory(t *testing.T) {
-	for _, k := range []string{"diamond", "card", "fund", "privilege", "daily", "limited", "event", "item"} {
+	for _, k := range []string{"diamond", "card", "fund", "privilege", "daily", "limited", "item"} {
 		if !isStoreCategory(k) {
 			t.Errorf("%q phai la nhom ban tren web", k)
 		}
 	}
-	for _, k := range []string{"", "ingame", "khac"} {
+	// 'event' bi an khoi cua hang web tu 2026-09-06 (xem chu thich o storeCategories): ten
+	// cua 1.870 goi do la ban dich may va trung nhau theo cum, nguoi mua khong phan biet
+	// duoc. Chung van mua duoc trong game. Giu phep kiem nay de khong ai mo lai nham.
+	for _, k := range []string{"", "ingame", "event", "khac"} {
 		if isStoreCategory(k) {
 			t.Errorf("%q khong duoc ban tren web", k)
 		}
