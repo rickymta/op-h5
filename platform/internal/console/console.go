@@ -406,11 +406,45 @@ func NewItemMail(srvCode, masterIDHex, masterName, platformCode, title, content,
 	}
 }
 
+// MailWhole la mot dong cua /gm/mail/x/list (GmMailWhole phia console): phieu + nguoi nhan.
+type MailWhole struct {
+	GmMailEntity MailEntityRow `json:"gmMailEntity"`
+	GmMailTars   []MailTarget  `json:"gmMailTars"`
+}
+
+// MailEntityRow la GmMailEntity nhu console tra ve (co id, status). Bo cac moc thoi gian vi
+// console tra chung luc la so mili-giay, luc la chuoi — khong can toi.
+type MailEntityRow struct {
+	ID             int64  `json:"id"`
+	Type           int    `json:"type"`
+	Title          string `json:"title"`
+	Content        string `json:"content"`
+	Reward         string `json:"reward"`
+	Status         int    `json:"status"`
+	SubmitUsername string `json:"submitUsername"`
+}
+
+// MailListPending doc mot trang phieu thu dang cho duyet (status=1), ke ca cua nguoi khac.
+func (c *Client) MailListPending(ctx context.Context, beginIndex int) ([]MailWhole, int64, error) {
+	var out struct {
+		Records []MailWhole `json:"records"`
+		Total   int64       `json:"total"`
+	}
+	q := map[string]any{"status": 1, "viewAll": true, "noReward": false, "beginIndex": beginIndex}
+	if err := c.callAuthed(ctx, "/gm/mail/x/list", q, &out); err != nil {
+		return nil, 0, err
+	}
+	return out.Records, out.Total, nil
+}
+
 // MailCreate tao phieu thu cho duyet va tra ve id phieu (tcg.gm_mail_approval.id).
 //
-// CHUA KIEM CHUNG khuon phan hoi cua console: gm/api.php khong doc data ma quet bang
-// gm_mail_approval status=1 trong MySQL tcg. O day thu doc `data` la so hoac {"id":..};
-// khong doc duoc thi tra loi de worker thu lai va nguoi truc thay trong Don mua.
+// Console (GmMailController.x_create) tra `void`: no chen gm_mail_approval + gm_mail_tar
+// roi tra data=null, KHONG tra id — doc tu bytecode 2026-09-06 sau khi moi lan gui deu
+// bao "khong tra id phieu thu" du phieu da nam trong bang. Ban PHP cu tranh chuyen nay bang
+// cach tu INSERT vao MySQL tcg roi goi complete; o day khong co quyen vao tcg nen sau khi
+// tao xong doc lai danh sach cho duyet va nhan dung phieu vua tao: cung tieu de, noi dung,
+// qua, nguoi nhan — lay id lon nhat (moi nhat). Van doc `data` truoc, phong console doi.
 func (c *Client) MailCreate(ctx context.Context, req MailCreateReq) (int64, error) {
 	var raw json.RawMessage
 	if err := c.callAuthed(ctx, "/gm/mail/x/create", req, &raw); err != nil {
@@ -419,7 +453,61 @@ func (c *Client) MailCreate(ctx context.Context, req MailCreateReq) (int64, erro
 	if id, ok := mailID(raw); ok {
 		return id, nil
 	}
-	return 0, fmt.Errorf("console khong tra id phieu thu (data=%.120s) — xem console.MailCreate", raw)
+	id, err := c.timPhieuVuaTao(ctx, req)
+	if err != nil {
+		return 0, fmt.Errorf("console da nhan phieu nhung khong tim lai duoc trong danh sach cho duyet: %w", err)
+	}
+	return id, nil
+}
+
+// timPhieuVuaTao quet toi da 5 trang phieu cho duyet, tra ve id lon nhat khop voi req.
+func (c *Client) timPhieuVuaTao(ctx context.Context, req MailCreateReq) (int64, error) {
+	muon := map[string]bool{}
+	for _, t := range req.GmMailTars {
+		muon[t.SrvCode+"/"+t.MasterIDHex] = true
+	}
+	var best int64
+	begin := 0
+	for trang := 0; trang < 5; trang++ {
+		recs, total, err := c.MailListPending(ctx, begin)
+		if err != nil {
+			return 0, err
+		}
+		for _, r := range recs {
+			e := r.GmMailEntity
+			if e.Status != 1 || e.Type != req.GmMailEntity.Type || e.Title != req.GmMailEntity.Title ||
+				e.Content != req.GmMailEntity.Content || e.Reward != req.GmMailEntity.Reward {
+				continue
+			}
+			// Console co the khong kem nguoi nhan trong danh sach; khi co thi phai khop het.
+			if len(r.GmMailTars) > 0 {
+				if len(r.GmMailTars) != len(muon) {
+					continue
+				}
+				khop := true
+				for _, t := range r.GmMailTars {
+					if !muon[t.SrvCode+"/"+t.MasterIDHex] {
+						khop = false
+						break
+					}
+				}
+				if !khop {
+					continue
+				}
+			}
+			if e.ID > best {
+				best = e.ID
+			}
+		}
+		begin += len(recs)
+		if len(recs) == 0 || int64(begin) >= total {
+			break
+		}
+	}
+	if best == 0 {
+		return 0, errors.New("khong co phieu nao khop tieu de/noi dung/qua/nguoi nhan")
+	}
+	return best, nil
 }
 
 func mailID(raw json.RawMessage) (int64, bool) {

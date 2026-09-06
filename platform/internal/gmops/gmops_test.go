@@ -75,20 +75,23 @@ func TestRewardPattern(t *testing.T) {
 // va khong con chu Han, khong ghim chuoi — ten vat pham lay theo client (e41d043) va con
 // duoc chuan hoa lai theo bang thuat ngu, ghim chuoi la test do moi lan doi loi dich.
 func TestDanhMucKhopGameDangChay(t *testing.T) {
-	tuong := map[int64]string{401301: "Hoàng Dung", 500801: "Trương Vô Kỵ", 401601: "Tiểu Long Nữ"}
+	// Ten One Piece cua client (tu 2026-09-06 may chu cung da dong bo theo client): ra
+	// "Hoang Dung"/"Truong Vo Ky" la con doc bang cua ban kiem hiep.
+	tuong := map[int64]string{401301: "Aokiji", 500801: "Mihawk", 401601: "Sengoku"}
 	for ma, muon := range tuong {
 		if got := TenMuc(1, ma); got != muon {
 			t.Errorf("TenMuc(1, %d) = %q, muon %q", ma, got, muon)
 		}
 	}
-	for _, sai := range []string{"Chúc Dung", "Hình Thiên", "Mụ Tổ"} {
+	for _, sai := range []string{"Chúc Dung", "Hình Thiên", "Mụ Tổ", "Hoàng Dung", "Trương Vô Kỵ"} {
 		for _, m := range TimDanhMuc(sai, 1, 5) {
 			if m.Ten == sai {
 				t.Errorf("danh muc con ten ban goc %q (ma %d) — doc nham cot *英雄名", sai, m.Ma)
 			}
 		}
 	}
-	co := [][2]int64{{0, 1}, {2, 19000100}, {3, 100001}, {3, 100022}, {4, 606001}, {5, 5}, {6, 30001}, {7, 55000101}, {13, 30101}}
+	co := [][2]int64{{0, 1}, {0, 16}, {2, 19000100}, {3, 100001}, {3, 100022}, {4, 606001}, {5, 5}, {6, 30001}, {7, 55000101},
+		{13, 30101}, {14, 300101}, {16, 101101}, {20, 10001}}
 	for _, c := range co {
 		ten := TenMuc(int(c[0]), c[1])
 		if ten == "" {
@@ -105,9 +108,9 @@ func TestDanhMucKhopGameDangChay(t *testing.T) {
 
 func TestTimDanhMuc(t *testing.T) {
 	// Tim theo ten khong dau — nguoi truc go nhanh thi khong bo dau.
-	ra := TimDanhMuc("nguyen bao", 0, 10)
-	if len(ra) == 0 || ra[0].Ten != "Nguyên bảo" {
-		t.Fatalf("tim 'nguyen bao' ra %+v", ra)
+	ra := TimDanhMuc("kim cuong", 0, 10)
+	if len(ra) == 0 || ra[0].Ten != "Kim cương" {
+		t.Fatalf("tim 'kim cuong' ra %+v", ra)
 	}
 	// Tim theo ma: dong dau phai la dung ma do, khong phai mot ma bat dau bang no.
 	ra = TimDanhMuc("100022", 0, 10)
@@ -132,7 +135,7 @@ func TestCatalogVaDocQuaQuaHTTP(t *testing.T) {
 	s := &Service{GameCode: "haitac"}
 
 	rec := httptest.NewRecorder()
-	s.Catalog(rec, httptest.NewRequest("GET", "/api/catalog?q=nguyen+bao&limit=5", nil), Actor{})
+	s.Catalog(rec, httptest.NewRequest("GET", "/api/catalog?q=kim+cuong&limit=5", nil), Actor{})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("catalog -> %d", rec.Code)
 	}
@@ -142,7 +145,7 @@ func TestCatalogVaDocQuaQuaHTTP(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &ra); err != nil {
 		t.Fatalf("doc JSON catalog: %v", err)
 	}
-	if len(ra.Muc) == 0 || ra.Muc[0].Ten != "Nguyên bảo" {
+	if len(ra.Muc) == 0 || ra.Muc[0].Ten != "Kim cương" {
 		t.Errorf("catalog tra ve %+v", ra.Muc)
 	}
 
@@ -154,7 +157,7 @@ func TestCatalogVaDocQuaQuaHTTP(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &rb); err != nil {
 		t.Fatalf("doc JSON reward: %v", err)
 	}
-	if len(rb.Mon) != 2 || rb.Mon[0].Ten != "Nguyên bảo" || rb.Mon[1].Ten == "" || rb.Mon[1].Ten != TenMuc(3, 100022) {
+	if len(rb.Mon) != 2 || rb.Mon[0].Ten != "Kim cương" || rb.Mon[1].Ten == "" || rb.Mon[1].Ten != TenMuc(3, 100022) {
 		t.Fatalf("reward tra ve %+v", rb.Mon)
 	}
 	if rb.Mon[1].SoLuo != 10 || rb.Mon[1].Nhan != "Vật phẩm" {

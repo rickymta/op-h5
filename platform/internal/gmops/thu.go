@@ -53,8 +53,8 @@ type NguongQua struct {
 // Nguyen bao, nen 100.000 Nguyen bao ~ 200K xu — mot khoan den bu phai co nguoi thu hai
 // nhin qua. Kim te va kinh nghiem re hon nhieu (goi 300K xu cho 20M), nguong dat 50M.
 var NguongVi = []NguongQua{
-	{Loai: 0, Ma: 1, ToiDa: 100_000, Ten: "Nguyên bảo"},
-	{Loai: 0, Ma: 0, ToiDa: 50_000_000, Ten: "Kim tệ"},
+	{Loai: 0, Ma: 1, ToiDa: 100_000, Ten: "Kim cương"}, // ten theo client (danh-muc: vi 1)
+	{Loai: 0, Ma: 0, ToiDa: 50_000_000, Ten: "Beri"},   // vi 0
 	{Loai: 0, Ma: 4, ToiDa: 50_000_000, Ten: "Kinh nghiệm tướng"},
 }
 

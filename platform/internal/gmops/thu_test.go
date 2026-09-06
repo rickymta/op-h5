@@ -12,9 +12,13 @@ import (
 
 // consoleGia dung mot console gia: dang nhap, tao thu, duyet thu. `tuChoi` la cac roleId
 // ma console se tu choi (errorcode=1) — de thu duong "mot nguoi hong, nguoi khac van di".
+//
+// Giong console that: x/create KHONG tra id (data=null), chi chen phieu; adapter phai doc
+// lai x/list (status=1) de tim phieu vua tao roi moi complete duoc.
 func consoleGia(t *testing.T, tuChoi map[string]bool) (*console.Client, *int) {
 	t.Helper()
 	var soThu int
+	var choDuyet []console.MailWhole
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
@@ -28,8 +32,38 @@ func consoleGia(t *testing.T, tuChoi map[string]bool) (*console.Client, *int) {
 				return
 			}
 			soThu++
-			_, _ = w.Write([]byte(`{"errorcode":0,"data":` + jsonInt(100+soThu) + `}`))
+			choDuyet = append(choDuyet, console.MailWhole{
+				GmMailEntity: console.MailEntityRow{
+					ID: int64(100 + soThu), Type: req.GmMailEntity.Type, Title: req.GmMailEntity.Title,
+					Content: req.GmMailEntity.Content, Reward: req.GmMailEntity.Reward, Status: 1,
+					SubmitUsername: "admin",
+				},
+				GmMailTars: req.GmMailTars,
+			})
+			_, _ = w.Write([]byte(`{"errorcode":0,"errormsg":"成功","data":null}`))
+		case "/gm/mail/x/list":
+			var out struct {
+				Records []console.MailWhole `json:"records"`
+				Total   int                 `json:"total"`
+			}
+			for _, m := range choDuyet {
+				if m.GmMailEntity.Status == 1 {
+					out.Records = append(out.Records, m)
+				}
+			}
+			out.Total = len(out.Records)
+			b, _ := json.Marshal(out)
+			_, _ = w.Write([]byte(`{"errorcode":0,"data":` + string(b) + `}`))
 		case "/gm/mail/x/complete":
+			var req struct {
+				ID int64 `json:"id"`
+			}
+			_ = json.NewDecoder(r.Body).Decode(&req)
+			for i := range choDuyet {
+				if choDuyet[i].GmMailEntity.ID == req.ID {
+					choDuyet[i].GmMailEntity.Status = 2
+				}
+			}
 			_, _ = w.Write([]byte(`{"errorcode":0}`))
 		default:
 			http.NotFound(w, r)
@@ -67,7 +101,7 @@ func TestQuaLon(t *testing.T) {
 		t.Errorf("dung nguong khong duoc bao: %v", lon)
 	}
 	lon := quaLon("0:1:100001#3:100022:1000#0:0:1")
-	if len(lon) != 2 || !strings.Contains(lon[0], "Nguyên bảo") || !strings.Contains(lon[1], TenMuc(3, 100022)) {
+	if len(lon) != 2 || !strings.Contains(lon[0], "Kim cương") || !strings.Contains(lon[1], TenMuc(3, 100022)) {
 		t.Errorf("quaLon = %v", lon)
 	}
 }

@@ -498,8 +498,10 @@ func (s *Service) Pay(w http.ResponseWriter, r *http.Request, a Actor) {
 			`SELECT name, price_xu FROM game_packages WHERE package_id = ? LIMIT 1`,
 			strconv.Itoa(in.PayID)).Scan(&name, &price)
 	}
+	// orderType: console (GmPayService.manual/createApproval) chi nhan SUPPLEMENT=2 (补单) hoac
+	// INTERNAL=3; 0 bi tu choi "手工支付不支持orderType=0". gmhanglong cu ghi 2.
 	rec := console.PayRecord{
-		OrderType:       0,
+		OrderType:       2,
 		PlatformOrderID: fmt.Sprintf("gm-%d-%d", a.ID, time.Now().Unix()),
 		ItemTid:         in.PayID,
 		ItemCount:       in.Count,
