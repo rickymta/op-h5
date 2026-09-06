@@ -165,6 +165,37 @@ export interface PlayerDetail {
   orders: Order[];
 }
 
+// ---------------------------------------------------------------- trang nội dung
+
+/** Trang nội dung tĩnh: giới thiệu, hướng dẫn, điều khoản, chính sách, FAQ, hỗ trợ.
+ *
+ * `game_code` rỗng = bản CHUNG của nền tảng; có mã = bản riêng của một game. Trang của
+ * game tra bản riêng trước rồi lui về bản chung, nên cùng một `slug` tồn tại được ở cả
+ * hai mức — khoá duy nhất là cặp (slug, game_code). */
+export interface Page {
+  id: number;
+  slug: string;
+  game_code: string; // rỗng = trang chung
+  game_name: string;
+  title: string;
+  body: string;
+  updated_by: number;
+  updated_by_name: string;
+  updated_at: string; // RFC 3339
+}
+
+export interface PagesResponse {
+  pages: Page[];
+}
+
+/** Thân gửi lên POST /api/pages. Ghi đè theo cặp (slug, game_code). */
+export interface PageInput {
+  slug: string;
+  game_code: string;
+  title: string;
+  body: string;
+}
+
 // ---------------------------------------------------------------- tin tức
 
 export type NewsKind = "news" | "event" | "notice";

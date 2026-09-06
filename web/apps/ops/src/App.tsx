@@ -5,6 +5,7 @@ import { Account } from "./pages/Account";
 import { Games } from "./pages/Games";
 import { News } from "./pages/News";
 import { Orders } from "./pages/Orders";
+import { Pages } from "./pages/Pages";
 import { Players } from "./pages/Players";
 import { Staff } from "./pages/Staff";
 
@@ -24,6 +25,7 @@ function Nav({ me }: { me?: Me }) {
         {item("/nguoi-choi", "Người chơi")}
         {item("/game", "Game")}
         {item("/tin-tuc", "Tin tức")}
+        {item("/trang", "Trang nội dung")}
         {item("/nap-tay", "Nạp tay")}
         {item("/goi", "Gói")}
         {item("/don-mua", "Đơn mua")}
@@ -68,6 +70,7 @@ export function App() {
         <Route path="/nguoi-choi" component={Players} />
         <Route path="/game" component={Games} />
         <Route path="/tin-tuc" component={News} />
+        <Route path="/trang" component={Pages} />
         <Route path="/nhan-vien" component={Staff} />
         <Route path="/tai-khoan" component={Account} />
         <Route path="/don-mua" component={Orders} />
