@@ -386,7 +386,7 @@ Khi sửa file trong khu vực này: **không log, không copy, không đưa cre
 - **Đừng đổi tên sheet.** Tên sheet (824 sheet) vẫn là tiếng Trung và cũng hardcode trong bytecode; bộ vá hiện tại **không** xử lý tên sheet.
 - **Đừng đổi thứ tự trong `start.sh`/`stop.sh`** trừ khi hiểu rõ phụ thuộc ở mục 2.
 - **Sửa cấu hình runtime qua Console/MySQL, không qua `env.yml`** (mục 4).
-- Sau khi sửa Excel: gọi `/srv/game/cmd/excel/reload` thay vì restart server.
+- Sau khi sửa Excel: **trên cụm Docker này đừng gọi `/srv/game/cmd/excel/reload`** — heap game đã cắt, reload nạp bộ Excel thứ hai và JVM chết vì OOM (2026-09-06). Restart container `game` (hoặc deploy image mới). Tên tướng/vật phẩm/bí kíp… của máy chủ phải theo client: `tools/dong-bo-ten-server.py`, xem [docs/ten-may-chu-theo-client.md](docs/ten-may-chu-theo-client.md).
 - Encoding: mọi file text (PHP, YAML, Excel) là UTF-8. Trên Windows, đọc/ghi phải chỉ định UTF-8 rõ ràng, nếu không sẽ tạo thêm mojibake như mục 11.1.
 - File PHP trong `website/` dùng tab để thụt đầu dòng và trộn lẫn comment tiếng Việt/tiếng Trung — giữ nguyên phong cách của file đang sửa.
 - Log không được lưu trữ lâu; `stop.sh` sẽ xoá sạch.

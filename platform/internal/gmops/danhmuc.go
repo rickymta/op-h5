@@ -12,13 +12,11 @@ package gmops
 // than thoai (Hinh Thien, Chuc Dung) trong khi game dang chay dung tuong Kim Dung (Truong
 // Vo Ky, Hoang Dung). Cho nguoi truc mot danh muc SAI con nguy hiem hon khong cho gi.
 //
-// NGUON: sinh boi tools/gen-danh-muc-game.py. Tuong, trang bi, bi kip, hon ngoc, than khi
-// doc tu chinh Excel may chu nap — doi chieu voi kho do that qua console: khop het. Rieng
-// VAT PHAM thi lay ten theo templates.bin cua client (e41d043): bang vat pham cua may chu
-// la cua ban game khac, 678/1066 mon khac ten voi thu nguoi choi nhin thay, va nguoi truc
-// can ten nguoi choi doc duoc trong phieu ho tro. He qua: ten vat pham o day KHAC ten trong
-// cot "Ten" cua kho do (console tra ten may chu) — do la co y, khong phai loi.
-// Doi Excel hay client thi chay lai tool, dung sua tay file JSON.
+// NGUON: sinh boi tools/gen-danh-muc-game.py tu Excel may chu nap. Tu 2026-09-06 ten trong
+// Excel may chu (tuong, vat pham, trang bi, bi kip, hon ngoc, than khi, suu tap) da duoc
+// dong bo theo templates.bin cua client bang tools/dong-bo-ten-server.py (client la dung,
+// e41d043), nen ten o day = ten nguoi choi nhin thay = ten console tra trong kho do.
+// Doi Excel hay client thi chay lai hai tool do, dung sua tay file JSON.
 
 import (
 	_ "embed"
