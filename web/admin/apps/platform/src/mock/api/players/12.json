@@ -1,0 +1,7 @@
+{
+  "player": { "id": 12, "username": "an.nguyen", "email": "an@example.com", "phone": "0987654321", "status": "active",
+    "balance": 3400000, "last_login_at": "2026-09-06 08:50", "created_at": "2025-11-20 14:25" },
+  "identities": [{ "game_code": "haitac", "game_username": "an.nguyen", "account_uid": "10091_12", "created_at": "2025-11-20 14:31" }],
+  "history": [{ "txn_id": 90405, "kind": "purchase", "amount": -100000, "memo": "web-knb-100k", "at": "2026-09-06 08:55" }],
+  "orders": []
+}

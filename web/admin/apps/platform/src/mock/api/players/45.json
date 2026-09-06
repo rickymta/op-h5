@@ -1,0 +1,7 @@
+{
+  "player": { "id": 45, "username": "hoa.pham", "email": "hoa@example.com", "phone": "", "status": "locked",
+    "balance": 42000, "last_login_at": "2026-09-01 18:33", "created_at": "2026-02-01 08:00" },
+  "identities": [{ "game_code": "haitac", "game_username": "hoa.pham", "account_uid": "10091_45", "created_at": "2026-02-01 08:05" }],
+  "history": [{ "txn_id": 88001, "kind": "topup", "amount": 42000, "memo": "den bu su co 01/09", "at": "2026-09-01 19:00" }],
+  "orders": []
+}

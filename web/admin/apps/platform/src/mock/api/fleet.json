@@ -1,0 +1,32 @@
+{
+  "games": [
+    {
+      "code": "haitac", "name": "Đại Hải Trình", "reachable": true,
+      "online": 4120, "soft_total": 6000, "utilization": 68,
+      "servers": [
+        { "srv_code": "s1", "name": "Đông Hải", "device_code": "d1", "status": "running", "recommend": true,
+          "soft_limit": 2000, "overflow_pct": 20, "hard_limit": 2400, "online": 1180, "band": "smooth", "label": "Mượt" },
+        { "srv_code": "s2", "name": "Nam Hải", "device_code": "d1", "status": "running", "recommend": true,
+          "soft_limit": 2000, "overflow_pct": 20, "hard_limit": 2400, "online": 1760, "band": "busy", "label": "Đông" },
+        { "srv_code": "s3", "name": "Hắc Long", "device_code": "d2", "status": "running", "recommend": false,
+          "soft_limit": 2000, "overflow_pct": 10, "hard_limit": 2200, "online": 1180, "band": "smooth", "label": "Mượt" },
+        { "srv_code": "s4", "name": "Bạch Ngân", "device_code": "d2", "status": "maintain", "recommend": false,
+          "soft_limit": 1500, "overflow_pct": 0, "hard_limit": 1500, "online": 0, "band": "unknown", "label": "—" }
+      ],
+      "devices": [
+        { "device_code": "d1", "name": "máy 1 · 8 vCPU", "max_online": 4000, "online": 2940 },
+        { "device_code": "d2", "name": "máy 2 · 4 vCPU", "max_online": 2500, "online": 1180 }
+      ]
+    },
+    {
+      "code": "tienhiep", "name": "Tiên Hiệp Ký", "reachable": false,
+      "error": "Get \"http://127.0.0.1:8091/api/capacity\": dial tcp 127.0.0.1:8091: connect: connection refused",
+      "online": 0, "soft_total": 0, "utilization": 0,
+      "servers": [
+        { "srv_code": "s1", "name": "Thanh Vân", "device_code": "d1", "status": "closed", "recommend": false,
+          "soft_limit": 1000, "overflow_pct": 10, "hard_limit": 1100, "online": 0, "band": "unknown", "label": "—" }
+      ],
+      "devices": [{ "device_code": "d1", "name": "máy dùng chung", "max_online": 2000, "online": 0 }]
+    }
+  ]
+}

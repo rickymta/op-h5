@@ -1,0 +1,9 @@
+{
+  "roles": ["viewer", "gm", "operator", "owner"],
+  "staff": [
+    { "id": 1, "username": "admin", "role": "owner", "status": "active", "last_login_at": "2026-09-06 09:00", "created_at": "2025-10-01 00:00" },
+    { "id": 2, "username": "an.nguyen", "role": "operator", "status": "active", "last_login_at": "2026-09-05 21:14", "created_at": "2026-01-08 10:20" },
+    { "id": 3, "username": "gm.hoa", "role": "gm", "status": "active", "last_login_at": "2026-09-04 08:02", "created_at": "2026-03-15 09:00" },
+    { "id": 4, "username": "ke.toan", "role": "viewer", "status": "disabled", "last_login_at": "", "created_at": "2026-06-01 11:11" }
+  ]
+}

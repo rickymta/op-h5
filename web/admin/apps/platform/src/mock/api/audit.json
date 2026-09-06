@@ -1,0 +1,53 @@
+{
+  "has_more": false,
+  "items": [
+    {
+      "id": 512,
+      "who": "admin",
+      "action": "login",
+      "target": "admin",
+      "detail": "{\"ip\":\"113.161.0.7\",\"public\":true}",
+      "at": "2026-09-06 09:00"
+    },
+    {
+      "id": 511,
+      "who": "an.nguyen",
+      "action": "package_update",
+      "target": "haitac/web-knb-500k",
+      "detail": "{\"price_xu\":500000,\"status\":\"active\"}",
+      "at": "2026-09-05 21:20"
+    },
+    {
+      "id": 510,
+      "who": "an.nguyen",
+      "action": "wallet_topup",
+      "target": "hoa.pham",
+      "detail": "{\"amount\":42000,\"reason\":\"đền bù sự cố 01/09\",\"txn\":88001}",
+      "at": "2026-09-05 21:14"
+    },
+    {
+      "id": 509,
+      "who": "admin",
+      "action": "update_server",
+      "target": "haitac/s2",
+      "detail": "{\"soft_limit\":2000,\"overflow_pct\":20,\"recommend\":true,\"status\":\"running\"}",
+      "at": "2026-09-05 18:02"
+    },
+    {
+      "id": 508,
+      "who": "admin",
+      "action": "grant_refund",
+      "target": "1203",
+      "detail": "{\"refund_txn\":90390,\"reason\":\"hết lần thử\"}",
+      "at": "2026-09-05 21:05"
+    },
+    {
+      "id": 507,
+      "who": "gm.hoa",
+      "action": "login",
+      "target": "gm.hoa",
+      "detail": "{\"ip\":\"171.224.9.3\",\"public\":true}",
+      "at": "2026-09-04 08:02"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "player": { "id": 88, "username": "quanh.le", "email": "quanh@example.com", "phone": "0901234567", "status": "active",
+    "balance": 1250000, "last_login_at": "2026-09-06 09:40", "created_at": "2026-05-12 20:11" },
+  "identities": [
+    { "game_code": "haitac", "game_username": "quanh.le", "account_uid": "10091_88", "created_at": "2026-05-12 20:14" },
+    { "game_code": "tienhiep", "game_username": "quanh.le", "account_uid": "", "created_at": "2026-09-01 10:00" }
+  ],
+  "history": [
+    { "txn_id": 90410, "kind": "topup", "amount": 500000, "memo": "nap the 500k", "at": "2026-09-06 09:38" },
+    { "txn_id": 90409, "kind": "purchase", "amount": -250000, "memo": "web-thang-vip", "at": "2026-09-05 20:02" },
+    { "txn_id": 90311, "kind": "refund", "amount": 250000, "memo": "hoan don #1180", "at": "2026-09-04 11:20" }
+  ],
+  "orders": []
+}
