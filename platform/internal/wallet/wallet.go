@@ -448,6 +448,93 @@ func (s *Service) Orders(ctx context.Context, userID int64, gameCode string, lim
 	return scanOrders(rows)
 }
 
+// Summary la tong hop vi cua mot nguoi cho trang Vi (hop dong dot 3 muc 3.2).
+//
+// Moi so deu doc tu so cai va bang lenh phat hang, khong co bo dem rieng nao — nen chung
+// khong bao gio lech voi so du.
+type Summary struct {
+	Balance       int64
+	TopupTotal    int64 // tong da nap vao vi
+	ConvertTotal  int64 // tong da tieu de doi vat pham (so duong)
+	RefundedTotal int64 // tong da duoc hoan lai
+	OrdersTotal   int
+	OrdersPending int
+	OrdersGranted int
+}
+
+// Summary tong hop vi va don mua cua mot nguoi. Nguoi chua giao dich gi thi moi so la 0
+// (khong phai loi): tai khoan moi cung phai xem duoc trang Vi.
+func (s *Service) Summary(ctx context.Context, userID int64) (Summary, error) {
+	var sum Summary
+	// Loc theo dau cua so tien thay vi chi theo kind: mot giao dich 'adjust' co the vua
+	// cong vua tru, va o day chi quan tam tong tien VAO va tong tien RA cua nguoi nay.
+	if err := s.DB.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(e.amount), 0),
+		       COALESCE(SUM(CASE WHEN t.kind = 'topup'   AND e.amount > 0 THEN  e.amount ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN t.kind = 'convert' AND e.amount < 0 THEN -e.amount ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN t.kind = 'refund'  AND e.amount > 0 THEN  e.amount ELSE 0 END), 0)
+		  FROM ledger_entries e
+		  JOIN wallet_accounts a ON a.id = e.account_id
+		  JOIN ledger_txns t ON t.id = e.txn_id
+		 WHERE a.kind = 'user' AND a.user_id = ? AND a.currency = 'XU'`, userID).
+		Scan(&sum.Balance, &sum.TopupTotal, &sum.ConvertTotal, &sum.RefundedTotal); err != nil {
+		return sum, err
+	}
+	// CAST ... AS SIGNED: SUM() tra ve DECIMAL, va DECIMAL quet vao *int chi nho mot buoc
+	// doi chuoi cua database/sql. Ep kieu o day cho khoi phu thuoc vao buoc do.
+	if err := s.DB.QueryRowContext(ctx, `
+		SELECT COUNT(*),
+		       CAST(COALESCE(SUM(status = 'pending'), 0) AS SIGNED),
+		       CAST(COALESCE(SUM(status = 'granted'), 0) AS SIGNED)
+		  FROM game_grants WHERE user_id = ?`, userID).
+		Scan(&sum.OrdersTotal, &sum.OrdersPending, &sum.OrdersGranted); err != nil {
+		return sum, err
+	}
+	return sum, nil
+}
+
+// UserOrder la mot don mua kem ten game, dung o trang tai khoan cua cong (nguoi choi co the
+// choi nhieu game nen chi mot ma game la khong du de hien).
+type UserOrder struct {
+	Order
+	GameCode string `json:"game_code"`
+	GameName string `json:"game_name"`
+}
+
+// AllOrders liet ke don mua cua mot nguoi o MOI game, moi nhat truoc.
+func (s *Service) AllOrders(ctx context.Context, userID int64, limit int) ([]UserOrder, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	rows, err := s.DB.QueryContext(ctx, `
+		SELECT g.id, g.user_id, COALESCE(u.username,''), g.package_id,
+		       COALESCE(p.name, g.item_name, g.package_id), g.srv_code, g.amount_xu, g.status,
+		       g.grant_mode, COALESCE(g.last_error,''), g.attempts,
+		       DATE_FORMAT(g.created_at, '%Y-%m-%d %H:%i'),
+		       COALESCE(DATE_FORMAT(g.granted_at, '%Y-%m-%d %H:%i'), ''),
+		       g.game_code, COALESCE(gm.name, g.game_code)
+		  FROM game_grants g
+		  LEFT JOIN game_packages p ON p.game_code = g.game_code AND p.package_id = g.package_id
+		  LEFT JOIN users u ON u.id = g.user_id
+		  LEFT JOIN games gm ON gm.code = g.game_code
+		 WHERE g.user_id = ? ORDER BY g.id DESC LIMIT ?`, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := []UserOrder{}
+	for rows.Next() {
+		var o UserOrder
+		if err := rows.Scan(&o.ID, &o.UserID, &o.Username, &o.PackageID, &o.Name, &o.SrvCode, &o.AmountXu,
+			&o.Status, &o.GrantMode, &o.LastError, &o.Attempts, &o.CreatedAt, &o.GrantedAt,
+			&o.GameCode, &o.GameName); err != nil {
+			return nil, err
+		}
+		out = append(out, o)
+	}
+	return out, rows.Err()
+}
+
 // RecentOrders liet ke lenh mua cua moi nguoi (trang quan tri); status rong = tat ca.
 func (s *Service) RecentOrders(ctx context.Context, gameCode, status string, limit int) ([]Order, error) {
 	if limit <= 0 || limit > 500 {

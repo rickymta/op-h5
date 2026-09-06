@@ -17,7 +17,7 @@ Quy tac:
   * category theo *功能ID (bang FUNC_CATEGORY); phan con lai la 'event' (van hien tren web, theo
     quyet dinh 2026-09-05), tru muc khong co gia trong id.txt.
   * ON DUPLICATE KEY UPDATE: gia, nhom, cach phat, noi dung, dieu kien, thu tu duoc ghi de (tool so huu);
-    `name` va `status` KHONG ghi de (quan tri sua tay tren trang admin).
+    `status` KHONG ghi de; `name` chi ghi de khi ten dang luu con chu Han (vet ban seed cu).
 
   python tools/gen-game-packages.py                 # ghi docker/platform-seed/game_packages.haitac.sql
   python tools/gen-game-packages.py --check         # chi doi chieu va thong ke, khong ghi
@@ -360,13 +360,20 @@ def main():
         f"-- {len(rows)} goi cho game '{a.game}': " + ", ".join(f"{k}={v}" for k, v in sorted(stats.items())) + ".",
         "-- Gia tu website/game/api/id.txt; nhom/noi dung/dieu kien tu recharge-item + recharge-benefit; ten Viet tu",
         "-- recharge-benefit / NAMES / gm/pay.txt. Goi 'item' (grant_mode=mail) tu bang web.webshop cu.",
-        "-- Chay lai: ghi de gia/nhom/noi dung/dieu kien; KHONG ghi de `name` va `status` (sua tay tren trang quan tri).",
+        "-- Chay lai: ghi de gia/nhom/noi dung/dieu kien; KHONG ghi de `status`.",
+        "-- `name`: chi ghi de khi ten dang luu CON CHU HAN (vet cua ban seed dau tien, truoc khi co ten Viet);",
+        "-- ten da Viet hoa hoac quan tri sua tay tren trang admin thi giu nguyen.",
         "SET NAMES utf8mb4;",
         f"INSERT INTO game_packages ({', '.join(cols)}) VALUES",
     ]
     vals = ["(" + ",".join(sql_val(r[c]) for c in cols) + ")" for r in rows]
     lines.append(",\n".join(vals))
-    lines.append("ON DUPLICATE KEY UPDATE " + ", ".join(f"{c}=VALUES({c})" for c in owned) + ";")
+    # `name`: chi ghi de khi ten dang luu CON CHU HAN. Ban seed dau tien chay truoc khi tool
+    # co ten Viet, nen tren server that 1.924/1.933 dong van la '充值-6元'; bo han `name` khoi
+    # upsert thi khong bao gio va duoc. Dieu kien [一-龥] giu nguyen ten quan tri da sua tay.
+    sets = ["name=IF(`name` REGEXP '[一-龥]', VALUES(name), `name`)"]
+    sets += [f"{c}=VALUES({c})" for c in owned]
+    lines.append("ON DUPLICATE KEY UPDATE " + ", ".join(sets) + ";")
     with io.open(out, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines) + "\n")
     print(f"da ghi {os.path.relpath(out, ROOT)}")

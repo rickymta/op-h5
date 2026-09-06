@@ -4,7 +4,7 @@
 #   ./enable-domain.sh antfarms.xyz [email-nhan-thong-bao-letsencrypt]
 #
 # Lam gi (moi buoc chay lai duoc, khong lam hai khi lap):
-#   1. DNS: 4 ten (D, www.D, id.D, haitac.D) phai giai ve IP cua may nay (SKIP_DNS_CHECK=1 de bo qua).
+#   1. DNS: 5 ten (D, www.D, id.D, haitac.D, admin.D) phai giai ve IP cua may nay (SKIP_DNS_CHECK=1 de bo qua).
 #   2. certbot: cai neu thieu; xin MOT chung chi SAN cho 4 ten bang webroot qua nginx dang chay
 #      (game.conf che do IP phuc vu /.well-known/acme-challenge/ tu ACME_DIR, mac dinh /var/www/acme).
 #      Khong tat nginx, khong can mo cong nao khac ngoai 80.
@@ -32,7 +32,7 @@ case "$D" in *://*|*/*|www.*|id.*|haitac.*) echo "chi dua ten goc, vd antfarms.x
 [ -f .env ] || { echo "chua co .env — chay server-bootstrap.sh (hoac gen-env.sh) truoc" >&2; exit 1; }
 [ -f nginx/domains.conf ] && [ -f nginx/tls.conf ] || { echo "thieu nginx/domains.conf hoac nginx/tls.conf" >&2; exit 1; }
 
-NAMES="$D www.$D id.$D haitac.$D"
+NAMES="$D www.$D id.$D haitac.$D admin.$D"
 # Doc mot khoa trong .env. Dung `sed -n ...p` chu khong phai `grep`: voi `set -o pipefail`,
 # grep khong khop tra ve 1 -> ca pipeline tra 1 -> `V=$(envget X)` lam `set -e` thoat NGAY,
 # khong in gi. Da dinh that: ACME_DIR khong co trong .env.example nen script chet o dong
@@ -68,10 +68,11 @@ if ! curl -fsS -m 5 "http://127.0.0.1/.well-known/acme-challenge/tcg-ping" 2>/de
     || { echo "!! nginx van khong phuc vu /.well-known/acme-challenge/ — image nginx cu? pull lai: $C pull nginx && $C up -d nginx" >&2; exit 1; }
 fi
 rm -f "$ACME_DIR/.well-known/acme-challenge/tcg-ping"
-if [ -f "/etc/letsencrypt/live/$D/fullchain.pem" ]; then
-  echo "  da co chung chi $D — bo qua (certbot renew lo gia han)"
+if [ -f "/etc/letsencrypt/live/$D/fullchain.pem" ] && openssl x509 -noout -text -in "/etc/letsencrypt/live/$D/fullchain.pem" 2>/dev/null | grep -q "DNS:admin.$D"; then
+  echo "  da co chung chi $D phu du 5 ten — bo qua (certbot renew lo gia han)"
 else
-  args=(certonly --webroot -w "$ACME_DIR" --non-interactive --agree-tos --cert-name "$D")
+  # --expand: chung chi cu chi phu 4 ten, them admin.$D phai xin lai cung --cert-name.
+  args=(certonly --webroot -w "$ACME_DIR" --non-interactive --agree-tos --expand --cert-name "$D")
   for n in $NAMES; do args+=(-d "$n"); done
   if [ -n "$EMAIL" ]; then args+=(-m "$EMAIL"); else args+=(--register-unsafely-without-email); fi
   certbot "${args[@]}"

@@ -1,29 +1,130 @@
-import { useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Empty, LinkButton, Modal, Msg, formatInt } from "@op/ui/publisher";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  api,
-  errText,
-  type ConvertResponse,
-  type Me,
-  type OrdersResponse,
-  type Pkg,
-  type RolesResponse,
-} from "../api";
-import { useMe, useMeta, usePackages, useServers, useTitle } from "../queries";
+  Button,
+  Card,
+  DataTable,
+  FilterBar,
+  LinkButton,
+  Pagination,
+  SearchField,
+  Section,
+  SelectField,
+  TrustRow,
+  formatInt,
+  type Column,
+} from "@op/ui/publisher";
+import { api, type OrdersResponse, type Pkg } from "../api";
+import { useCategories, useFeatured, useMe, useMeta, usePkgList, useStoreStats, useTitle } from "../queries";
 import { Loading, PageHead, PkgCard, QueryError } from "../parts";
 
+const PAGE_SIZE = 20;
+const SORTS = [
+  { value: "popular", label: "Mặc định" },
+  { value: "price_asc", label: "Giá thấp → cao" },
+  { value: "price_desc", label: "Giá cao → thấp" },
+];
+
 /**
- * Cửa hàng: chuyển nguyên hành vi của platform/cmd/adapter/templates/store.html sang React —
- * tab thể loại, chọn nhân vật/máy chủ nhận, hộp xác nhận, khoá chống trùng theo phút, hỏi lại
- * đơn 3 s (tối đa 8 lần) khi còn `pending`, và đổi số dư khi Xu được hoàn tự động.
+ * Cửa hàng — bảng gói theo bố cục mockup người vận hành gửi (hợp đồng đợt 3 mục 1 và 5.1).
+ *
+ * Hai khác biệt lớn so với bản trước:
+ *
+ *  1. **Khách chưa đăng nhập vẫn xem được bảng và giá.** Trước đây cả trang chỉ có một dòng
+ *     "Đăng nhập để xem…", nên người mới không biết ở đây bán gì (QA đợt 3, V3).
+ *  2. **Phân trang phía máy chủ.** Trước đây trang tải cả 1.900 gói rồi vẽ hết một tab
+ *     (QA V4). Giờ mỗi lượt chỉ 20 dòng; bảng giá đầy đủ chỉ được kéo về một lần cho ô chọn
+ *     nhóm (xem `useCategories`); hàng "Gói nổi bật" hỏi riêng qua `useFeatured`.
+ *
+ * Việc mua chuyển sang trang chi tiết `/cua-hang/:id` — nút ở cột cuối chỉ dẫn tới đó.
  */
 export function Store() {
   const meta = useMeta();
   const me = useMe();
+  const stats = useStoreStats();
   const name = meta.data?.name;
   useTitle(name ? `Cửa hàng · ${name}` : undefined);
   const idBase = (meta.data?.id_base ?? "").replace(/\/+$/, "");
+
+  const [qInput, setQInput] = useState("");
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("");
+  const [sort, setSort] = useState("popular");
+  const [page, setPage] = useState(1);
+
+  // Gõ tới đâu lọc tới đó, nhưng chờ 400 ms cho ngón tay dừng lại — mỗi lượt là một truy vấn.
+  useEffect(() => {
+    const t = window.setTimeout(() => setQ(qInput.trim()), 400);
+    return () => window.clearTimeout(t);
+  }, [qInput]);
+  // Đổi bộ lọc thì về trang 1: giữ nguyên trang 7 của kết quả cũ sẽ ra bảng trống.
+  useEffect(() => setPage(1), [q, cat, sort]);
+
+  const cats = useCategories();
+  const featuredQ = useFeatured();
+  const list = usePkgList({ q, cat, sort, page, pageSize: PAGE_SIZE });
+  const catList = cats.data?.categories ?? [];
+  const view = list.data?.list;
+  const rows = view?.packages ?? [];
+
+  const guest = me.data ? !me.data.logged_in : false;
+  // `balance` KHÔNG mặc định về 0: `/api/game/me` bỏ hẳn trường này khi đọc ví lỗi, và hiện
+  // "0 Xu" cho người vừa nạp tiền là lời nói dối khó chịu nhất trang này có thể nói (QA V2).
+  const balance = me.data?.logged_in ? me.data.balance : undefined;
+
+  // Hỏi riêng thay vì duyệt `catList`: khối nhóm nay chỉ còn tên, không kèm gói.
+  const featured = featuredQ.data?.list?.packages ?? [];
+
+  const columns: Column<Pkg>[] = [
+    {
+      key: "name",
+      title: "Gói",
+      width: "34%",
+      render: (p) => (
+        <>
+          <span className="pb-tbl__title">
+            {p.name}
+            {p.badge ? <span className="gm-chip">{p.badge}</span> : null}
+          </span>
+          {p.description ? <span className="pb-tbl__sub">{p.description}</span> : null}
+        </>
+      ),
+    },
+    {
+      key: "item",
+      title: "Nội dung",
+      width: "22%",
+      render: (p) => (p.item_name ? `${p.item_name}${p.item_count > 1 ? ` × ${formatInt(p.item_count)}` : ""}` : "—"),
+    },
+    { key: "cond", title: "Điều kiện", width: "18%", hideOnMobile: true, render: (p) => p.cond || "—" },
+    {
+      key: "price",
+      title: "Giá",
+      align: "right",
+      width: "14%",
+      render: (p) => (
+        <span className={p.price_xu > (balance ?? Infinity) ? "gm-price is-poor" : "gm-price"}>{p.price_fmt} Xu</span>
+      ),
+    },
+    {
+      key: "act",
+      title: "Thao tác",
+      align: "right",
+      width: "12%",
+      render: (p) =>
+        guest ? (
+          <LinkButton variant="ghost" href="/choi-game">
+            Đăng nhập
+          </LinkButton>
+        ) : (
+          <LinkButton href={`/cua-hang/${encodeURIComponent(p.id)}`}>Mua</LinkButton>
+        ),
+    },
+  ];
+
+  const rate = stats.data
+    ? `${stats.data.rate_note}${stats.data.first_buy_bonus ? " · mỗi mốc lần đầu mua được x2" : ""}`
+    : "";
 
   return (
     <main className="pb-main">
@@ -31,286 +132,145 @@ export function Store() {
         eyebrow="Cửa hàng"
         title="Mua bằng Xu trong ví"
         lead="Xu là tiền chung của cả hệ thống. Nạp ở trang tài khoản, dùng ở game nào tuỳ bạn."
-      />
+      >
+        <TrustRow
+          items={[
+            { icon: "↩", title: "Hoàn Xu tự động", note: "Game từ chối là Xu về ví ngay, không phải yêu cầu." },
+            { icon: "⚡", title: "Thường trong một phút", note: "Lệnh phát hàng chạy ngay khi bạn xác nhận." },
+            { icon: "🏷", title: "Giá niêm yết", note: "Mua thẳng từ cổng, không qua trung gian." },
+          ]}
+        />
+      </PageHead>
 
-      {me.isPending ? (
-        <Card>
-          <Loading text="Đang kiểm tra phiên đăng nhập…" />
-        </Card>
-      ) : me.isError ? (
-        <QueryError error={me.error} prefix="Không kiểm tra được phiên đăng nhập" />
-      ) : !me.data.logged_in ? (
-        <Card>
-          <p style={{ margin: "0 0 16px" }}>Đăng nhập để xem số dư và mua gói.</p>
+      <Card className="gm-storebar">
+        <div>
+          <span className="pb-muted gm-storebar__k">Số dư ví</span>
+          <p className="gm-bal">
+            {guest ? "—" : balance === undefined ? "—" : formatInt(balance)}
+            <small>Xu</small>
+          </p>
+          <p className="gm-storebar__note">
+            {guest
+              ? "Đăng nhập để mua. Bảng giá dưới đây ai cũng xem được."
+              : balance === undefined
+                ? "Chưa đọc được số dư. Tải lại trang, hoặc xem ở trang tài khoản."
+                : rate}
+          </p>
+        </div>
+        {guest ? (
           <LinkButton href="/choi-game">Đăng nhập</LinkButton>
-        </Card>
-      ) : (
-        <StoreBody me={me.data} idBase={idBase} />
-      )}
+        ) : (
+          <LinkButton variant="ghost" href={`${idBase}/tai-khoan/vi`}>
+            Nạp thêm Xu
+          </LinkButton>
+        )}
+      </Card>
 
-      <div style={{ marginTop: 28 }}>
+      <FilterBar
+        action={
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setQInput("");
+              setQ("");
+              setCat("");
+              setSort("popular");
+              setPage(1);
+            }}
+          >
+            Đặt lại
+          </Button>
+        }
+      >
+        <SearchField value={qInput} onChange={setQInput} onSubmit={() => setQ(qInput.trim())} placeholder="Tên gói, vật phẩm…" />
+        <SelectField
+          label="Nhóm gói"
+          value={cat}
+          onChange={setCat}
+          options={[{ value: "", label: "Tất cả nhóm" }, ...catList.map((c) => ({ value: c.key, label: c.title }))]}
+        />
+        <SelectField label="Sắp xếp" value={sort} onChange={setSort} options={SORTS} />
+      </FilterBar>
+
+      {featured.length ? (
+        <Section eyebrow="Nổi bật" title="Gói nổi bật">
+          <div className="gm-pkgs">
+            {featured.map((p) => (
+              <PkgCard
+                key={p.id}
+                p={p}
+                href={`/cua-hang/${encodeURIComponent(p.id)}`}
+                poor={balance !== undefined && p.price_xu > balance}
+              />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      <Section eyebrow="Bảng giá" title="Tất cả gói" sub={view ? `${formatInt(view.total)} gói đang bán` : undefined}>
+        {list.isError ? (
+          <QueryError error={list.error} prefix="Không đọc được bảng giá" />
+        ) : (
+          <>
+            <DataTable
+              columns={columns}
+              rows={rows}
+              rowKey={(p) => p.id}
+              loading={list.isPending}
+              empty={q || cat ? "Không có gói nào khớp bộ lọc. Thử bỏ bớt điều kiện." : "Chưa có gói nào được mở."}
+            />
+            <Pagination page={page} pages={view?.pages ?? 1} onChange={setPage} />
+          </>
+        )}
+      </Section>
+
+      {guest ? null : <RecentOrders />}
+
+      <Section>
         <Card>
           <h3>Lưu ý</h3>
           <ul className="gm-notes">
             <li>Phải đăng nhập mới mua được; gói gửi qua thư cần có nhân vật ở máy chủ nhận.</li>
-            <li>Vật phẩm về hòm thư trong game, thường trong một phút.</li>
+            <li>Gói Nguyên Bảo, thẻ, quỹ, đặc quyền được game xử lý như một lần nạp — phần thưởng vào thẳng nhân vật.</li>
+            <li>Gói vật phẩm vào hòm thư trong game, thường trong một phút.</li>
             <li>Game từ chối (hết lượt, chưa tới ngày mở) thì Xu được hoàn ngay vào ví.</li>
           </ul>
         </Card>
-      </div>
+      </Section>
     </main>
   );
 }
 
-type Target = { value: string; text: string };
-
-function StoreBody({ me, idBase }: { me: Me; idBase: string }) {
-  const qc = useQueryClient();
-  const balance = me.balance ?? 0;
-  // Số dư sống ở cache ["me"]: đổi ở đây thì "tên · số dư Xu" trên thanh trên đổi theo.
-  const setBalance = (b: number) => qc.setQueryData<Me>(["me"], (old) => (old ? { ...old, balance: b } : old));
-
-  const servers = useServers();
-  const packages = usePackages();
-  const roles = useQuery({
-    queryKey: ["roles"],
-    queryFn: () => api.get<RolesResponse>("/api/game/roles"),
-    staleTime: Infinity,
-    retry: false,
-  });
+/** Đơn gần đây — cùng nguồn `["orders"]` với trang chi tiết, nên mua xong quay lại là thấy ngay. */
+function RecentOrders() {
   const orders = useQuery({ queryKey: ["orders"], queryFn: () => api.get<OrdersResponse>("/api/game/orders") });
-
-  // Nhận ở: nhân vật từ masterList; không có (hoặc không đọc được) thì để chọn máy chủ.
-  let targets: Target[] = [];
-  if (!roles.isPending) {
-    const rs = roles.data?.roles ?? [];
-    if (rs.length) {
-      targets = rs.map((r) => ({ value: `${r.srv_code}|${r.master_id_hex}`, text: `${r.name} · Lv${r.level} · ${r.srv_code}` }));
-    } else {
-      targets = (servers.data?.servers ?? []).map((s) => ({ value: `${s.code}|`, text: `Máy chủ ${s.name} (chưa có nhân vật)` }));
-      if (!targets.length) targets = [{ value: "", text: "Chưa đọc được máy chủ" }];
-    }
-  }
-  const [target, setTarget] = useState("");
-  const sel = targets.find((t) => t.value === target) ?? targets[0];
-
-  const cats = packages.data?.categories ?? [];
-  const [cat, setCat] = useState("");
-  const cur = cats.find((c) => c.key === cat) ?? cats[0];
-
-  const [chosen, setChosen] = useState<Pkg | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-
-  // Đơn gần đây: hỏi lại vài lần sau khi mua để thấy "Đang phát…" → "Đã phát"; Xu hoàn tự động
-  // (game từ chối) làm số dư đổi mà không qua tay người chơi.
-  const pollLeft = useRef(0);
-  const timer = useRef<number | undefined>(undefined);
-  useEffect(
-    () => () => {
-      window.clearTimeout(timer.current);
-      pollLeft.current = 0;
-    },
-    [],
-  );
-  function pollOrders(times: number) {
-    if (pollLeft.current) return;
-    pollLeft.current = times;
-    const tick = () => {
-      api
-        .get<OrdersResponse>("/api/game/orders")
-        .then((d) => {
-          if (!pollLeft.current) return; // đã rời trang
-          qc.setQueryData<OrdersResponse>(["orders"], d);
-          const cur = qc.getQueryData<Me>(["me"])?.balance;
-          if (typeof d.balance === "number" && d.balance !== cur) setBalance(d.balance);
-          const pending = (d.orders ?? []).some((o) => o.status === "pending");
-          if (--pollLeft.current > 0 && pending) timer.current = window.setTimeout(tick, 3000);
-          else pollLeft.current = 0;
-        })
-        .catch(() => {
-          pollLeft.current = 0;
-        });
-    };
-    tick();
-  }
-
-  // Hộp xác nhận: giá, nơi nhận, số dư sau; chặn khi thiếu Xu hoặc gói gửi thư mà chưa có nhân vật.
-  const after = chosen ? balance - chosen.price_xu : 0;
-  const parts = (sel?.value ?? "").split("|");
-  let note = "";
-  let canBuy = false;
-  if (chosen) {
-    if (after < 0) note = `Thiếu ${formatInt(-after)} Xu. Nạp thêm ở trang tài khoản.`;
-    else if (chosen.grant_mode === "mail" && parts[1] === "") note = "Gói này gửi qua thư: cần có nhân vật. Hãy vào game tạo nhân vật trước.";
-    else {
-      canBuy = true;
-      note =
-        chosen.grant_mode === "mail"
-          ? "Vật phẩm vào hòm thư trong game, thường trong một phút."
-          : "Game xử lý như một lần nạp. Game từ chối (hết lượt, chưa tới ngày) thì Xu được hoàn ngay.";
-    }
-  }
-
-  async function buy() {
-    if (!chosen || busy) return;
-    const pkg = chosen;
-    setBusy(true);
-    setMsg(null);
-    const srv = parts[0] ?? "";
-    const role = parts[1] ?? "";
-    // Khoá chống trùng: bấm hai lần vì sốt ruột không bị trừ hai lần.
-    const key = `${pkg.id}-${srv}-${role || "-"}-${Math.floor(Date.now() / 60000)}`;
-    try {
-      const d = await api.post<ConvertResponse>("/api/game/convert", {
-        package_id: pkg.id,
-        srv_code: srv,
-        role_id: role,
-        idempotency_key: key,
-      });
-      setChosen(null);
-      setBalance(Number(d.balance));
-      setMsg({ tone: "ok", text: `Đã trừ ${formatInt(pkg.price_xu)} Xu cho ${pkg.name}. ${d.message ?? ""}` });
-      pollOrders(8);
-    } catch (e) {
-      setChosen(null);
-      setMsg({ tone: "err", text: errText(e) });
-    }
-    setBusy(false);
-  }
-
   const list = (orders.data?.orders ?? []).slice(0, 10);
-
   return (
-    <>
-      <Card className="gm-wallet">
-        <div>
-          <span className="pb-muted gm-wallet__k">Số dư ví</span>
-          <p className="gm-bal" data-xu={balance}>
-            {formatInt(balance)}
-            <small>Xu</small>
+    <Section eyebrow="Của bạn" title="Đơn gần đây">
+      <Card>
+        {orders.isPending ? (
+          <Loading text="Đang đọc đơn…" />
+        ) : orders.isError ? (
+          <QueryError error={orders.error} prefix="Không đọc được đơn mua" />
+        ) : list.length === 0 ? (
+          <p className="pb-muted" style={{ margin: 0, fontSize: 14 }}>
+            Chưa mua gì.
           </p>
-          <p className="gm-target">
-            <label htmlFor="gm-role">Nhận ở:</label>
-            <select id="gm-role" value={sel?.value ?? ""} onChange={(e) => setTarget(e.target.value)} disabled={roles.isPending}>
-              {roles.isPending ? (
-                <option value="">đang tải nhân vật…</option>
-              ) : (
-                targets.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.text}
-                  </option>
-                ))
-              )}
-            </select>
-          </p>
-        </div>
-        <LinkButton variant="ghost" href={`${idBase}/tai-khoan/vi`}>
-          Nạp thêm Xu
-        </LinkButton>
-      </Card>
-
-      {msg ? (
-        <div style={{ marginTop: 14 }}>
-          <Msg tone={msg.tone}>{msg.text}</Msg>
-        </div>
-      ) : null}
-
-      {packages.isPending ? (
-        <Loading text="Đang đọc bảng giá…" />
-      ) : packages.isError ? (
-        <div style={{ marginTop: 14 }}>
-          <QueryError error={packages.error} prefix="Không đọc được bảng giá" />
-        </div>
-      ) : !cur ? (
-        <div style={{ marginTop: 22 }}>
-          <Card>
-            <Empty>Chưa có gói nào được mở.</Empty>
-          </Card>
-        </div>
-      ) : (
-        <>
-          <div className="gm-tabs" role="tablist" aria-label="Thể loại gói">
-            {cats.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                role="tab"
-                className="gm-tab"
-                aria-selected={c.key === cur.key}
-                onClick={() => setCat(c.key)}
-              >
-                {c.title}
-              </button>
-            ))}
-          </div>
-          <p className="gm-cat-hint">{cur.hint}</p>
-          <div className="gm-pkgs">
-            {cur.packages.map((p) => (
-              <PkgCard key={p.id} p={p} poor={p.price_xu > balance} onPick={setChosen} />
-            ))}
-          </div>
-        </>
-      )}
-
-      <div style={{ marginTop: 28 }}>
-        <Card>
-          <h3 style={{ marginBottom: 8 }}>Đơn gần đây</h3>
-          {orders.isPending ? (
-            <Loading text="Đang đọc đơn…" />
-          ) : orders.isError ? (
-            <QueryError error={orders.error} prefix="Không đọc được đơn mua" />
-          ) : list.length === 0 ? (
-            <p className="pb-muted" style={{ margin: 0, fontSize: 14 }}>
-              Chưa mua gì.
-            </p>
-          ) : (
-            list.map((o) => (
-              <div className="gm-order" key={o.id}>
-                <div>
-                  {o.name}
-                  <div className="gm-order__meta">
-                    {o.created_at} · {o.srv_code} · {o.amount_fmt} Xu
-                  </div>
+        ) : (
+          list.map((o) => (
+            <div className="gm-order" key={o.id}>
+              <div>
+                {o.name}
+                <div className="gm-order__meta">
+                  {o.created_at} · {o.srv_code} · {o.amount_fmt} Xu
                 </div>
-                <span className={`gm-st gm-st--${o.status}`}>{o.status_vi}</span>
               </div>
-            ))
-          )}
-        </Card>
-      </div>
-
-      <Modal
-        open={chosen !== null}
-        onClose={() => {
-          if (!busy) setChosen(null);
-        }}
-        title={chosen?.name ?? "Xác nhận"}
-        actions={
-          <>
-            <Button type="button" variant="ghost" onClick={() => setChosen(null)} disabled={busy}>
-              Để sau
-            </Button>
-            <Button type="button" onClick={buy} disabled={!canBuy || busy}>
-              {busy ? "Đang mua…" : "Mua"}
-            </Button>
-          </>
-        }
-      >
-        {chosen ? (
-          <>
-            <div className="gm-kv">
-              <b>Giá</b>
-              <span>{formatInt(chosen.price_xu)} Xu</span>
-              <b>Nhận ở</b>
-              <span>{sel?.text ?? "—"}</span>
-              <b>Số dư sau</b>
-              <span>{formatInt(after)} Xu</span>
+              <span className={`gm-st gm-st--${o.status}`}>{o.status_vi}</span>
             </div>
-            <p className="pb-sub">{note}</p>
-          </>
-        ) : null}
-      </Modal>
-    </>
+          ))
+        )}
+      </Card>
+    </Section>
   );
 }

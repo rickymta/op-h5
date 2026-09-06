@@ -1,7 +1,7 @@
 import { Card, Empty, LinkButton, Msg, Section, formatDate, timeAgo } from "@op/ui/publisher";
 import { errText } from "../../api";
 import { useBalance, useMe, useSite } from "../../lib/session";
-import { BalanceBig, GameRow, useMyGames } from "./parts";
+import { BalanceBig, GameRow, OrdersTable, useMyGames, useMyOrders } from "./parts";
 
 /** Tổng quan: số dư + [Nạp Xu], game của bạn (mỗi dòng có Vào game), thông báo hệ thống. */
 export function Overview() {
@@ -9,6 +9,7 @@ export function Overview() {
   const site = useSite();
   const bal = useBalance(true);
   const games = useMyGames();
+  const orders = useMyOrders(5);
   const u = me.data!;
 
   return (
@@ -22,11 +23,12 @@ export function Overview() {
       </div>
 
       <Card pad="lg">
-        {bal.isError ? (
-          <Msg tone="err">{errText(bal.error)}</Msg>
-        ) : (
-          <BalanceBig balance={bal.data?.balance} action={<LinkButton href="/tai-khoan/vi" size="lg">Nạp Xu</LinkButton>} />
-        )}
+        {/* Đọc hỏng thì BalanceBig hiện "—" và nói rõ vì sao, KHÔNG hiện 0 (lỗi V2, QA đợt 3). */}
+        <BalanceBig
+          balance={bal.data?.balance}
+          failed={bal.isError}
+          action={<LinkButton href="/tai-khoan/vi" size="lg">Nạp Xu</LinkButton>}
+        />
       </Card>
 
       {site.data?.notice && (
@@ -49,6 +51,19 @@ export function Overview() {
           {games.isSuccess && games.data.games.map((g) => (
             <GameRow key={g.code} g={g} sub={g.last_order_at ? `mua gần nhất ${timeAgo(g.last_order_at)}` : undefined} />
           ))}
+        </Card>
+      </Section>
+
+      {/* Đơn mua gói ở MỌI game — người chơi nhiều game không phải mở từng trang game để xem
+          đơn của mình đã phát chưa. Chi tiết tiền nong nằm ở Lịch sử nên chỉ liệt kê 5 đơn. */}
+      <Section title="Đơn gần đây" sub="Năm lần mua gói gần nhất ở tất cả các game."
+               action={<a href="/tai-khoan/lich-su">Lịch sử ví →</a>}>
+        <Card>
+          {orders.isError ? (
+            <Msg tone="err">{errText(orders.error)}</Msg>
+          ) : (
+            <OrdersTable orders={orders.data?.orders ?? []} loading={orders.isPending} />
+          )}
         </Card>
       </Section>
     </>

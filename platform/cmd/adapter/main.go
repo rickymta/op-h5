@@ -153,7 +153,8 @@ func main() {
 	}
 	if cfg.SPA {
 		spaHandler := spa.Handler(distFS, "dist")
-		for _, p := range []string{"/{$}", "/may-chu", "/cua-hang", "/tin-tuc", "/tin-tuc/{id}", "/app/"} {
+		for _, p := range []string{"/{$}", "/may-chu", "/cua-hang", "/cua-hang/{id}",
+			"/tin-tuc", "/tin-tuc/{id}", "/gioi-thieu", "/huong-dan", "/faq", "/app/"} {
 			mux.Handle("GET "+p, spaHandler)
 		}
 		log.Info("giao dien React bat (ADAPTER_SPA=1); trang cu o /cu/")
@@ -173,6 +174,10 @@ func main() {
 	mux.HandleFunc("GET /api/game/servers", srv.listServers)
 	mux.HandleFunc("POST /api/game/session", srv.createSession)
 	mux.HandleFunc("GET /api/game/packages", srv.listPackages)
+	mux.HandleFunc("GET /api/game/packages/{id}", srv.packageDetail)
+	mux.HandleFunc("GET /api/game/store/stats", srv.storeStats)
+	// Trang noi dung tinh (gioi thieu, huong dan, faq): ban rieng cua game, lui ve ban chung.
+	mux.HandleFunc("GET /api/game/pages/{slug}", srv.gamePage)
 	mux.HandleFunc("POST /api/game/convert", srv.convert)
 	mux.HandleFunc("GET /api/game/orders", srv.listOrders)
 	mux.HandleFunc("GET /api/game/roles", srv.listRoles)

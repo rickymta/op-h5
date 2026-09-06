@@ -9,7 +9,7 @@ background:var(--bg);border:1px solid var(--line);border-radius:3px}
 <main class="box"><div class="card">
   <h2>Quản trị nền tảng</h2>
   <p class="sub">Tài khoản quản trị, không phải tài khoản người chơi.</p>
-  {{if .Error}}<p class="err">Tài khoản hoặc mật khẩu không đúng.</p>{{end}}
+  {{if .Error}}<p class="err">{{.Error}}</p>{{end}}
   <form method="POST" action="/dang-nhap">
     <div class="f"><label for="u">Tài khoản</label>
       <input id="u" name="username" autocomplete="username" required autofocus></div>

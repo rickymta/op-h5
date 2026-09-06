@@ -343,6 +343,159 @@ a.pb-news__item:hover .pb-news__title { color: var(--brass); }
 .pb-toast.is-show { opacity: 1; }
 .pb-toast--err { border-left-color: var(--danger); }
 
+/* ------------------------------------------------------------------ chỉ cho trình đọc màn hình */
+.pb-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ------------------------------------------------------------------ breadcrumb */
+.pb-crumbs { display: flex; flex-wrap: wrap; align-items: center; font-size: 13px; margin: 0 0 14px; }
+.pb-crumbs:empty { display: none; }
+.pb-crumbs__i { display: inline-flex; align-items: center; min-height: 36px; color: var(--muted); }
+a.pb-crumbs__i:hover { color: var(--brass); text-decoration: none; }
+.pb-crumbs__i.is-cur { color: var(--text); }
+.pb-crumbs__i + .pb-crumbs__i::before { content: "›"; margin: 0 8px; color: var(--muted); opacity: 0.6; }
+
+/* ------------------------------------------------------------------ bảng dữ liệu */
+.pb-tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.pb-tbl th {
+  font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); text-align: left; white-space: nowrap;
+  padding: 0 14px 10px; border-bottom: 1px solid var(--line);
+}
+.pb-tbl td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.pb-tbl th:first-child, .pb-tbl td:first-child { padding-left: 4px; }
+.pb-tbl th:last-child, .pb-tbl td:last-child { padding-right: 4px; }
+.pb-tbl tbody tr { transition: background-color 0.12s; }
+.pb-tbl tbody tr:hover { background: var(--surface-2); }
+.pb-tbl tbody tr:last-child td { border-bottom: 0; }
+/* Số canh phải: chữ số cùng bề rộng để cột tiền thẳng hàng khi đổi trang. */
+.pb-tbl .is-r { text-align: right; font-variant-numeric: tabular-nums; }
+.pb-tbl .is-c { text-align: center; }
+.pb-tbl__v { display: block; }
+.pb-tbl__title { font-weight: 600; }
+.pb-tbl__sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+/* Ba dòng xương lúc `loading` — khung giữ nguyên chiều cao nên không nhảy khi dữ liệu về. */
+.pb-skel {
+  display: block; height: 12px; border-radius: 4px; width: 72%;
+  background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+  background-size: 200% 100%; animation: pb-skel 1.2s linear infinite;
+}
+.pb-tbl__skel:hover { background: transparent; }
+.pb-tbl__skel td::before { content: none; }
+.pb-tbl__skel td:nth-child(even) .pb-skel { width: 46%; }
+.pb-tbl__skel .is-r .pb-skel { margin-left: auto; }
+@keyframes pb-skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* ------------------------------------------------------------------ hàng bộ lọc */
+.pb-filters {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
+  padding: 14px 16px;
+}
+.pb-filters__row { display: flex; flex-wrap: wrap; gap: 12px; flex: 1 1 auto; min-width: 0; }
+.pb-filters__act { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 8px; }
+.pb-fctl { display: flex; flex-direction: column; gap: 6px; flex: 1 1 170px; min-width: 0; }
+.pb-fctl--wide { flex: 2 1 230px; }
+.pb-fctl__l {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+}
+.pb-search { position: relative; }
+.pb-search__in { padding-right: 44px; }
+/* Nút xoá của trình duyệt bị ẩn: đã có nút `×` riêng, rộng 44 px cho ngón tay. */
+.pb-search__in::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.pb-search__x {
+  position: absolute; right: 0; top: 0; width: 44px; height: 44px; border: 0; cursor: pointer;
+  background: transparent; color: var(--muted); font-size: 22px; line-height: 1; border-radius: var(--radius-btn);
+}
+.pb-search__x:hover { color: var(--text); }
+
+/* ------------------------------------------------------------------ nút chọn nhanh */
+.pb-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.pb-quick__b {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 16px; border-radius: var(--radius-pill);
+  border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+  font: 500 14px/1.2 var(--sans); transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.pb-quick__b:hover { color: var(--text); border-color: var(--muted); }
+.pb-quick__b.is-on { border-color: var(--accent); background: var(--surface-2); color: var(--text); }
+.pb-quick__b:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ------------------------------------------------------------------ ô số liệu có tone */
+.pb-stat__v--accent { color: var(--accent); }
+.pb-stat__v--brass { color: var(--brass); }
+.pb-stat__v--ok { color: var(--ok); }
+.pb-stat__v--warn { color: var(--warn); }
+
+/* ------------------------------------------------------------------ dải tin cậy */
+.pb-trust { display: flex; flex-wrap: wrap; gap: 12px 26px; list-style: none; margin: 0; padding: 0; }
+.pb-trust__i { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pb-trust__ic {
+  flex: 0 0 auto; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); color: var(--brass); font-size: 16px;
+}
+.pb-trust__tx { display: flex; flex-direction: column; min-width: 0; }
+.pb-trust__t { font-size: 14px; font-weight: 600; }
+.pb-trust__n { font-size: 12.5px; color: var(--muted); }
+
+/* ------------------------------------------------------------------ bảng khoá–giá trị */
+.pb-kv { margin: 0; }
+.pb-kv__r {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px 20px;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+}
+.pb-kv__r:last-child { border-bottom: 0; }
+.pb-kv__k { color: var(--muted); font-size: 14px; flex: 0 1 auto; }
+.pb-kv__v { margin: 0; min-width: 0; text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+.pb-kv__v--accent { color: var(--accent); }
+.pb-kv__v--brass { color: var(--brass); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+/* Dòng tổng: tách bằng viền trên, chữ to hơn — mắt dừng lại đúng chỗ cần kiểm. */
+.pb-kv__r.is-strong { border-top: 1px solid var(--line); border-bottom: 0; margin-top: 4px; padding-top: 14px; }
+.pb-kv__r.is-strong .pb-kv__k { color: var(--text); font-weight: 600; }
+.pb-kv__r.is-strong .pb-kv__v { font-size: 19px; }
+
+/* ------------------------------------------------------------------ thanh bước 1→N */
+.pb-steps__wrap { overflow: hidden; }
+.pb-steps { display: flex; align-items: flex-start; list-style: none; margin: 0; padding: 0; }
+.pb-step {
+  position: relative; flex: 1 1 0; min-width: 0; padding: 0 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+}
+/* Đường nối chạy từ tâm bước trước sang tâm bước này; bước đầu không có. */
+.pb-step::before { content: ""; position: absolute; top: 15px; left: -50%; right: 50%; height: 2px; background: var(--line); }
+.pb-step:first-child::before { content: none; }
+.pb-step.is-done::before, .pb-step.is-cur::before { background: var(--accent); }
+.pb-step__n {
+  position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 13px; background: var(--bg);
+  border: 2px solid var(--line); color: var(--muted);
+}
+.pb-step.is-done .pb-step__n { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pb-step.is-cur .pb-step__n { border-color: var(--accent); color: var(--accent); }
+.pb-step__t { font-size: 13px; line-height: 1.3; color: var(--muted); overflow-wrap: anywhere; }
+.pb-step.is-cur .pb-step__t { color: var(--text); font-weight: 600; }
+
+/* ------------------------------------------------------------------ phân trang */
+.pb-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin-top: 20px; }
+.pb-pager:empty { display: none; }
+.pb-pager__b {
+  min-width: 44px; min-height: 44px; padding: 0 10px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--radius-btn); background: transparent; color: var(--text);
+  font: 500 14px/1 var(--mono); font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.pb-pager__b:hover:not(:disabled) { border-color: var(--brass); color: var(--brass); }
+.pb-pager__b.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pb-pager__b:disabled { opacity: 0.4; cursor: not-allowed; }
+.pb-pager__b--arrow { font-size: 19px; }
+.pb-pager__gap { min-width: 22px; text-align: center; color: var(--muted); }
+
 /* ------------------------------------------------------------------ máy tính bảng / điện thoại */
 @media (max-width: 720px) {
   .pb-topbar__links { display: none; }
@@ -380,6 +533,63 @@ a.pb-news__item:hover .pb-news__title { color: var(--brass); }
   .pb-modal__acts .pb-btn { flex: 1 1 auto; }
   .pb-toast { left: 16px; right: 16px; transform: none; max-width: none; }
   .pb-main { padding: 0 16px 56px; }
+
+  .pb-crumbs { font-size: 12.5px; margin-bottom: 10px; }
+  .pb-crumbs__i { min-height: 44px; }
+
+  /* Bộ lọc: 2 cột (không cuộn ngang — cuộn ngang đẩy control ra khỏi tầm mắt).
+     Ô tìm chiếm cả hàng; nút "Đặt lại" kéo hết bề ngang cho dễ bấm. */
+  .pb-filters { padding: 12px; gap: 10px; }
+  .pb-filters__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .pb-fctl { flex: none; }
+  .pb-fctl--wide { grid-column: 1 / -1; }
+  .pb-filters__act { width: 100%; }
+  .pb-filters__act > * { flex: 1 1 auto; }
+
+  /* Bảng → thẻ: mỗi dòng một khung, mỗi ô một dòng "nhãn cột — giá trị". Không có gì
+     rộng hơn màn hình nên trang không sinh cuộn ngang. */
+  .pb-tbl, .pb-tbl tbody, .pb-tbl tr, .pb-tbl td { display: block; width: auto; }
+  .pb-tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .pb-tbl tbody tr {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
+    padding: 2px 14px; margin-bottom: 10px;
+  }
+  .pb-tbl tbody tr:hover { background: var(--surface); }
+  .pb-tbl tbody tr:last-child { margin-bottom: 0; }
+  .pb-tbl td {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 10px 0; text-align: right; overflow-wrap: anywhere;
+    border-bottom: 1px solid var(--line);
+  }
+  .pb-tbl__v { flex: 1 1 auto; min-width: 0; }
+  .pb-tbl td::before {
+    content: attr(data-label); flex: 0 0 auto; max-width: 45%; text-align: left;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pb-tbl tbody tr td:last-child { border-bottom: 0; }
+  .pb-tbl td:has(+ td.is-hm:last-child) { border-bottom: 0; }
+  .pb-tbl td.is-hm { display: none; }
+  .pb-tbl th:first-child, .pb-tbl td:first-child, .pb-tbl th:last-child, .pb-tbl td:last-child { padding-left: 0; padding-right: 0; }
+  .pb-tbl .is-c { text-align: right; }
+  .pb-tbl td .pb-btn { min-height: 44px; }
+  .pb-tbl__sub { text-align: right; }
+
+  /* Thanh bước: thu nhỏ; nếu vẫn không vừa thì cuộn ngang trong khung riêng. */
+  .pb-steps__wrap { overflow-x: auto; scrollbar-width: none; }
+  .pb-steps__wrap::-webkit-scrollbar { display: none; }
+  .pb-steps { min-width: 280px; }
+  .pb-step { padding: 0 3px; gap: 6px; }
+  .pb-step::before { top: 12px; }
+  .pb-step__n { width: 26px; height: 26px; font-size: 12px; }
+  .pb-step__t { font-size: 11.5px; }
+
+  .pb-pager { gap: 5px; }
+  .pb-pager__b { min-width: 44px; padding: 0 6px; }
+  /* 375 px không đủ chỗ cho 9 ô 44 px: giấu hai trang hàng xóm, còn `‹ 1 … 7 … 20 ›`
+     vừa đúng một dòng. Dấu `…` vẫn ở đó nên người đọc biết còn trang bị bỏ qua. */
+  .pb-pager__b.is-near { display: none; }
+  .pb-kv__r.is-strong .pb-kv__v { font-size: 17px; }
 }
 
 @media (max-width: 560px) {
@@ -399,6 +609,10 @@ a.pb-news__item:hover .pb-news__title { color: var(--brass); }
   .pb-game__body { padding: 10px 10px 12px; gap: 6px; }
   .pb-game__name { font-size: 14.5px; }
   .pb-game__initial { font-size: 56px; }
+  /* Bốn `StatCard` (trang Ví): 2×2 thay vì ba cột — số tiền không bị cắt. */
+  .pb-stats--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pb-trust { gap: 10px 16px; }
+  .pb-trust__i { flex: 1 1 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

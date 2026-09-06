@@ -1,14 +1,25 @@
 import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Button, Card, Msg } from "@op/ui/publisher";
+import { Button, Card, FilterBar, Msg, SelectField } from "@op/ui/publisher";
 import { api, errText, HISTORY_KIND_LABEL, type HistoryResponse } from "../../api";
-import { HistoryTable } from "./parts";
+import { HistoryTable, withKeys } from "./parts";
 
 const KINDS = ["all", "topup", "convert", "refund", "adjust"] as const;
 type Kind = (typeof KINDS)[number];
 const PAGE = 20;
 
-/** Lịch sử ví: pill lọc theo loại, "Xem thêm" nối trang theo `has_more`. */
+const KIND_OPTIONS = KINDS.map((k) => ({
+  value: k,
+  label: k === "all" ? "Tất cả" : (HISTORY_KIND_LABEL[k] ?? k),
+}));
+
+/**
+ * Lịch sử ví: `FilterBar` (lọc theo loại) + `DataTable`, "Xem thêm" nối trang theo `has_more`.
+ *
+ * Chỉ có một bộ lọc vì `GET /api/wallet/history` chỉ nhận `kind`, `page`, `page_size` — không
+ * có tìm theo nội dung, không có đảo thứ tự. Dựng thêm ô tìm rồi lọc phía client thì nó chỉ
+ * lọc mấy trang đã tải, tức là một ô tìm nói dối; thà không có.
+ */
 export function History() {
   const [kind, setKind] = useState<Kind>("all");
   const q = useInfiniteQuery({
@@ -20,6 +31,8 @@ export function History() {
     getNextPageParam: (last, all) => (last.has_more ? all.length + 1 : undefined),
   });
   const pages = q.data?.pages ?? [];
+  // Khoá theo (trang, dòng): "Xem thêm" nối nhiều trang nên `txn` có thể trùng.
+  const rows = pages.flatMap((p, i) => withKeys(p.items, `${kind}-${i}-`));
 
   return (
     <>
@@ -28,22 +41,28 @@ export function History() {
         <p className="pb-sub">Nạp, quy đổi vật phẩm, hoàn Xu khi game từ chối, điều chỉnh do hỗ trợ.</p>
       </div>
 
-      <div className="pt-pills" role="tablist" aria-label="Loại giao dịch">
-        {KINDS.map((k) => (
-          <button key={k} type="button" role="tab" aria-selected={kind === k}
-                  className={`pt-pill${kind === k ? " is-on" : ""}`} onClick={() => setKind(k)}>
-            {k === "all" ? "Tất cả" : HISTORY_KIND_LABEL[k]}
-          </button>
-        ))}
-      </div>
+      <FilterBar
+        action={
+          kind !== "all" ? (
+            <Button type="button" variant="ghost" onClick={() => setKind("all")}>Đặt lại</Button>
+          ) : undefined
+        }
+      >
+        <SelectField
+          label="Loại giao dịch"
+          id="hist-kind"
+          value={kind}
+          onChange={(v) => setKind(v as Kind)}
+          options={KIND_OPTIONS}
+        />
+      </FilterBar>
 
       <Card>
-        {q.isPending && <p className="pt-loading">Đang tải…</p>}
-        {q.isError && <Msg tone="err">{errText(q.error)}</Msg>}
-        {q.isSuccess && (
+        {q.isError ? (
+          <Msg tone="err">{errText(q.error)}</Msg>
+        ) : (
           <>
-            {/* Các trang gộp vào một bảng để đọc liền mạch; khoá dòng theo vị trí vì mock trả trùng txn. */}
-            <HistoryTable items={pages.flatMap((p) => p.items)} keyPrefix={kind} />
+            <HistoryTable rows={rows} loading={q.isPending} />
             {q.hasNextPage && (
               <div className="pt-actions">
                 <Button variant="ghost" onClick={() => void q.fetchNextPage()} disabled={q.isFetchingNextPage}>

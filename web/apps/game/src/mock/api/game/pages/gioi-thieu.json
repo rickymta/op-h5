@@ -1,0 +1,7 @@
+{
+  "slug": "gioi-thieu",
+  "game_code": "haitac",
+  "title": "Giới thiệu Đại Hải Trình",
+  "body": "Bản này do người vận hành soạn ở trang quản trị (mock) — nó thay bản mặc định viết trong mã.\n\nĐấu tướng rảnh tay chơi thẳng trên trình duyệt. Thu thập tướng, xếp đội hình theo vị trí, rồi để trận đánh tự diễn ra.\n\n## Rảnh tay vẫn tiến\n\nBản đồ phiêu lưu có 16 chương và 1.000 ải. Mỗi ải kèm một bảng rơi đồ riêng cho lúc treo máy, nên đội hình vẫn kiếm tài nguyên khi bạn đóng trang.\n\n## Có gì để đánh\n\n- Phiêu lưu đẩy ải và phó bản hàng ngày.\n- Thông Thiên Tháp, Tháp chủng tộc, Thí luyện vô tận.\n- Đấu trường, công hội chiến, BOSS liên server.\n",
+  "updated_at": "2026-09-06T09:12:00+07:00"
+}

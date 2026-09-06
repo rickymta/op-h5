@@ -3,23 +3,34 @@ import { createRoot } from "react-dom/client";
 import "../src/publisher/publisher.css";
 import {
   BandPill,
+  Breadcrumb,
   Button,
   Card,
+  DataTable,
   Empty,
   Field,
+  FilterBar,
   Footer,
   GameCard,
   Hero,
+  KeyValue,
   LinkButton,
   Modal,
   Msg,
   NewsList,
+  Pagination,
+  QuickPick,
+  SearchField,
   Section,
+  SelectField,
   ServerRow,
   SideNav,
+  StatCard,
   StatTiles,
+  Steps,
   Toast,
   TopBar,
+  TrustRow,
   formatDate,
   formatInt,
   timeAgo,
@@ -63,6 +74,16 @@ const news = [
   },
 ];
 
+/** Năm gói cho bảng cửa hàng — số liệu giả nhưng đúng khuôn `pkgView` của adapter. */
+type Pkg = { id: string; name: string; desc: string; item: string; cond: string; price: number };
+const packages: Pkg[] = [
+  { id: "p1", name: "Gói Tân Thủ", desc: "Chỉ mua một lần cho mỗi nhân vật", item: "Nguyên Bảo × 5.000", cond: "Cấp 10 trở lên", price: 50000 },
+  { id: "p2", name: "Thẻ Tháng Tiểu Ngạch", desc: "Nhận Nguyên Bảo mỗi ngày trong 30 ngày", item: "Nguyên Bảo × 300/ngày", cond: "", price: 120000 },
+  { id: "p3", name: "Quỹ Trưởng Thành", desc: "Hoàn thưởng theo cấp nhân vật", item: "Nguyên Bảo × 20.000", cond: "Máy chủ mở ≥ 3 ngày", price: 200000 },
+  { id: "p4", name: "Rương Tướng Hiếm", desc: "Mở ra một tướng SSR ngẫu nhiên", item: "Rương tướng × 1", cond: "VIP 3", price: 480000 },
+  { id: "p5", name: "Gói Kim Tệ", desc: "Kim tệ cho cường hoá trang bị", item: "Kim tệ × 2.000.000", cond: "", price: 30000 },
+];
+
 const navIcon = (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
     <circle cx="8" cy="8" r="6" />
@@ -81,6 +102,15 @@ function Swatch({ name }: { name: string }) {
 function Demo() {
   const [open, setOpen] = useState(false);
   const { toast, show } = useToast();
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("all");
+  const [sort, setSort] = useState("popular");
+  const [page, setPage] = useState(7);
+  const [who, setWho] = useState("s3-hailang");
+  const [step, setStep] = useState(2);
+  const [busy, setBusy] = useState(false);
+
+  const shown = packages.filter((p) => (q ? p.name.toLowerCase().includes(q.toLowerCase()) : true));
 
   return (
     <>
@@ -123,6 +153,195 @@ function Demo() {
       </Hero>
 
       <main className="pb-main">
+        <Section
+          id="cua-hang"
+          eyebrow="Cửa hàng"
+          title="Bảng gói + bộ lọc + phân trang"
+          sub="Bố cục theo mockup: hàng lọc trên, bảng dày ở giữa, số trang dưới. Ở 375 px mỗi dòng thành một thẻ."
+          action={
+            <Button variant="ghost" onClick={() => setBusy((b) => !b)}>
+              {busy ? "Tắt loading" : "Bật loading"}
+            </Button>
+          }
+        >
+          <Breadcrumb
+            items={[
+              { label: "Trang chủ", href: "#" },
+              { label: "Cửa hàng", href: "#cua-hang" },
+              { label: "Gói Tân Thủ" },
+            ]}
+          />
+
+          <TrustRow
+            items={[
+              { icon: "↩", title: "Hoàn Xu tự động", note: "Đơn không phát được sẽ hoàn ngay" },
+              { icon: "⏱", title: "Phát trong một phút", note: "Vật phẩm vào hòm thư trong game" },
+              { icon: "₫", title: "Giá niêm yết", note: "Không phụ phí, không đấu giá" },
+            ]}
+          />
+
+          <div style={{ height: 16 }} />
+
+          <FilterBar
+            action={
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setQ("");
+                  setCat("all");
+                  setSort("popular");
+                  setPage(1);
+                }}
+              >
+                Đặt lại
+              </Button>
+            }
+          >
+            <SearchField value={q} onChange={setQ} onSubmit={() => show(`Tìm: ${q || "(trống)"}`)} placeholder="Tên gói hoặc vật phẩm…" />
+            <SelectField
+              label="Nhóm gói"
+              value={cat}
+              onChange={setCat}
+              options={[
+                { value: "all", label: "Tất cả" },
+                { value: "newbie", label: "Tân thủ" },
+                { value: "month", label: "Thẻ tháng" },
+                { value: "fund", label: "Quỹ" },
+              ]}
+            />
+            <SelectField
+              label="Sắp xếp"
+              value={sort}
+              onChange={setSort}
+              options={[
+                { value: "popular", label: "Phổ biến" },
+                { value: "price_asc", label: "Giá thấp → cao" },
+                { value: "price_desc", label: "Giá cao → thấp" },
+              ]}
+            />
+          </FilterBar>
+
+          <DataTable<Pkg>
+            loading={busy}
+            rows={shown}
+            rowKey={(p) => p.id}
+            empty="Không có gói nào khớp từ khoá. Thử bỏ bớt chữ hoặc bấm Đặt lại."
+            columns={[
+              {
+                key: "name",
+                title: "Gói",
+                render: (p) => (
+                  <>
+                    <div className="pb-tbl__title">{p.name}</div>
+                    <div className="pb-tbl__sub">{p.desc}</div>
+                  </>
+                ),
+              },
+              { key: "item", title: "Nội dung", render: (p) => p.item },
+              { key: "cond", title: "Điều kiện", render: (p) => p.cond || "—" },
+              { key: "upd", title: "Cập nhật", hideOnMobile: true, render: () => <span className="pb-mono pb-muted">05/09</span> },
+              {
+                key: "price",
+                title: "Giá",
+                align: "right",
+                width: "130px",
+                render: (p) => <span className="pb-mono" style={{ color: "var(--brass)" }}>{formatInt(p.price)} Xu</span>,
+              },
+              {
+                key: "act",
+                title: "Thao tác",
+                align: "right",
+                width: "110px",
+                render: (p) => <Button onClick={() => show(`Đã chọn ${p.name}.`)}>Mua</Button>,
+              },
+            ]}
+          />
+
+          <Pagination page={page} pages={20} onChange={(p) => setPage(p)} />
+
+          <p className="pb-muted" style={{ marginTop: 14, fontSize: 13 }}>
+            Trang {page}/20 · cột “Cập nhật” có <code className="pb-mono">hideOnMobile</code> nên biến mất ở điện thoại.
+          </p>
+        </Section>
+
+        <Section
+          id="chi-tiet"
+          eyebrow="Chi tiết gói"
+          title="Bước · số liệu · chọn nhanh · tóm tắt đơn"
+          sub="Bốn thành phần của trang mua một gói."
+        >
+          <Steps steps={["Chọn gói", "Nhân vật", "Xác nhận", "Nhận hàng"]} current={step} />
+          <div style={{ marginTop: 14 }}>
+            <QuickPick
+              ariaLabel="Bước đang xem"
+              value={String(step)}
+              onChange={(v) => setStep(Number(v))}
+              options={[
+                { value: "1", label: "Bước 1" },
+                { value: "2", label: "Bước 2" },
+                { value: "3", label: "Bước 3" },
+                { value: "4", label: "Bước 4" },
+              ]}
+            />
+          </div>
+
+          <div className="pb-stats pb-stats--2" style={{ marginTop: 20 }}>
+            <StatCard label="Số dư" value={`${formatInt(250000)} Xu`} tone="brass" hint="ví dùng chung mọi game" />
+            <StatCard label="Tổng đã nạp" value={formatInt(1200000)} hint="từ 12/03/2025" />
+            <StatCard label="Đơn thành công" value="18" tone="ok" />
+            <StatCard label="Đang chờ" value="1" tone="warn" hint="thường xong trong một phút" />
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 16,
+              alignItems: "start",
+              marginTop: 20,
+            }}
+          >
+            <Card>
+              <h3 style={{ marginBottom: 12 }}>Nhân vật nhận</h3>
+              <QuickPick
+                ariaLabel="Nhân vật nhận vật phẩm"
+                value={who}
+                onChange={setWho}
+                options={[
+                  { value: "s3-hailang", label: "Hải Lang · S3" },
+                  { value: "s2-bachho", label: "Bạch Hổ Con · S2" },
+                  { value: "s1-thuyenphu", label: "Thuyền Phó · S1" },
+                ]}
+              />
+              <p className="pb-muted" style={{ margin: "14px 0 0", fontSize: 13 }}>
+                Từ 5 nhân vật trở lên dùng <code className="pb-mono">SelectField</code> cho gọn.
+              </p>
+            </Card>
+            <Card>
+              <h3 style={{ marginBottom: 8 }}>Tóm tắt đơn</h3>
+              <KeyValue
+                rows={[
+                  { k: "Gói", v: "Gói Tân Thủ" },
+                  { k: "Nhận ở", v: "Hải Lang · S3" },
+                  { k: "Nội dung", v: "Nguyên Bảo × 5.000" },
+                  { k: "Giá", v: `${formatInt(50000)} Xu`, tone: "brass" },
+                  { k: "Số dư hiện tại", v: `${formatInt(250000)} Xu` },
+                  { k: "Số dư sau", v: `${formatInt(200000)} Xu`, strong: true, tone: "brass" },
+                ]}
+              />
+              <div style={{ marginTop: 16 }}>
+                <Button full onClick={() => show("Đã trừ 50.000 Xu. Vật phẩm vào hòm thư trong game.")}>
+                  Xác nhận mua
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <DataTable<Pkg> rows={[]} rowKey={(p) => p.id} columns={[]} empty="Chưa mua gói nào. Đơn đã mua sẽ hiện ở đây." />
+          </div>
+        </Section>
+
         <Section eyebrow="Số liệu" title="Ba ô" sub="Chỉ hiện số thật; đủ ba ô thì ba cột ở cả điện thoại.">
           <StatTiles
             items={[

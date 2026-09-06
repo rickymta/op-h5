@@ -138,8 +138,44 @@ export interface Category {
   hint: string;
   packages: Pkg[];
 }
+/** `listView` trong store.go — khối `list` trả kèm khi có tham số lọc (hợp đồng đợt 3 mục 3.1). */
+export interface PkgList {
+  packages: Pkg[];
+  page: number;
+  page_size: number;
+  total: number;
+  pages: number;
+}
 export interface PackagesResponse {
-  categories: Category[];
+  /** `null` khi tham số `category` không khớp nhóm nào — trang lọc luôn bỏ qua khối này. */
+  categories: Category[] | null;
+  list?: PkgList;
+}
+
+/** `pkgDetail` — GET /api/game/packages/{id}. Gói ẩn hoặc `ingame` là 404 `package_unknown`. */
+export interface PkgDetail extends Pkg {
+  reward_items: { label: string; count: number }[];
+  grant_note: string;
+  server_days: { min: number; max: number };
+  daily_limit: number;
+  vip_required: number;
+}
+
+/** GET /api/game/store/stats — chỉ số thật: bao nhiêu gói, bao nhiêu nhóm. */
+export interface StoreStats {
+  packages: number;
+  categories: number;
+  rate_note: string;
+  first_buy_bonus: boolean;
+}
+
+/** GET /api/game/pages/{slug} — nội dung tĩnh sửa được ở trang quản trị; 404 nếu chưa có. */
+export interface PageDoc {
+  slug: string;
+  game_code: string;
+  title: string;
+  body: string;
+  updated_at: string;
 }
 
 /** `orderView` trong store.go. `created_at` dạng "2026-09-05 21:14" (DATE_FORMAT phía SQL). */

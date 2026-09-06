@@ -1,0 +1,27 @@
+{
+  "id": "daily-1",
+  "name": "Gói ngày — tuần đầu",
+  "category": "daily",
+  "grant_mode": "pay",
+  "description": "Gói giá rẻ cho 14 ngày đầu của máy chủ.",
+  "badge": "",
+  "cond": "ngày 1–14 sau mở máy chủ · 3 lần/ngày",
+  "item_name": "Gói ngày",
+  "item_count": 1,
+  "price_xu": 10000,
+  "price_fmt": "10.000",
+  "vip_points": 10,
+  "reward_items": [
+    {
+      "label": "Gói ngày",
+      "count": 1
+    }
+  ],
+  "grant_note": "Game xử lý như một lần nạp: phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn.",
+  "server_days": {
+    "min": 1,
+    "max": 14
+  },
+  "daily_limit": 3,
+  "vip_required": 0
+}

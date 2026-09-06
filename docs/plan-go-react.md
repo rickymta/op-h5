@@ -490,3 +490,22 @@ Sáu commit tách theo phần: tài liệu → `platform` (A) → `@op/ui/publis
 - Chưa kiểm vì không tự tạo tài khoản hay đăng nhập: khu tài khoản đã đăng nhập, mua gói, trang quản trị Game/Tin tức (SPA và trang đăng nhập admin phản hồi qua tunnel).
 - Còn để trống trên server: `ID_LEGAL_NOTE`, `ID_SUPPORT_URL`, `ID_FANPAGE_URL`, `ID_TOPUP_URL`; ảnh thương hiệu vẫn lấy từ `/assets/images/` của client cũ. Console trình duyệt của khách có một lỗi 401 từ `/api/me` (vô hại, có thể đổi thành 200 `logged_in:false` sau).
 
+### 15.9 Đợt 3 — 2026-09-06: cửa hàng theo mockup, nội dung, hai cửa quản trị
+
+Năm agent song song, mỗi phần một commit: `b4f2545` (UI) · `9780bfb` (Go) · `7092b54` (hạ tầng) · `b44b95f` (portal) · `7b62f7c` (game). Toàn bộ **đã chạy thật** trên `haitac-test`.
+
+**Mockup người vận hành gửi** là chợ Xu P2P của cổng khác. Không dựng chợ P2P (đó là giai đoạn 7, và một cái chợ không có người bán thì vô dụng); lấy bố cục và ngôn ngữ thị giác áp vào việc đã có. Bảng đối chiếu từng khối ở hợp đồng đợt 3.
+
+- **Cửa hàng** đổi từ lưới thẻ sang **bảng dữ liệu** có ô tìm, chọn nhóm, sắp xếp, phân trang; thêm trang chi tiết gói `/cua-hang/:id` với breadcrumb, bốn ô thông số, thanh bốn bước và tóm tắt đơn. Khách chưa đăng nhập xem được cả bảng lẫn giá. Trang cũ tải một lần 1.900 gói (489 KB); nay phân trang ở máy chủ.
+- **Ví** ở cổng tài khoản theo mockup: số dư lớn, bốn ô thống kê thật từ `/api/wallet/summary`, cảnh báo lừa đảo, bảng giao dịch.
+- **Nội dung**: bản mặc định nằm trong React, bản trong bảng `pages` (migration 0011) đè lên khi có, nên người vận hành sửa được ở trang quản trị mà không cần seed. Thêm Giới thiệu, Hỗ trợ, Điều khoản, Chính sách, Câu hỏi thường gặp cho cổng; Giới thiệu, Hướng dẫn, Câu hỏi thường gặp cho game; 6 tin mẫu.
+- **Hai cửa quản trị**: `admin.<domain>` và `haitac.<domain>/admin-portal` (302 sang `admin.<domain>/gm`). GM tool PHP rút về loopback vì nó nối chuỗi SQL thẳng từ tham số URL trong khi phát vật phẩm và gửi thư toàn server; bốn thao tác đó đã có bản Go. `ADMIN_PUBLIC=1` bật đếm đăng nhập sai theo tài khoản và IP, cookie 4 giờ, và từ chối khởi động nếu owner còn mật khẩu mặc định.
+
+**Ba sự cố trong đợt này, đều đã vá:**
+
+1. **Image CI có `dist` rỗng** nên cả ba giao diện trả 503 sau khi server pull. Binary vẫn chạy nên không lộ ra cho tới khi mở trang. CI nay có bước chặn image rỗng, và cache tách theo từng binary. Khôi phục bằng cách dựng image ngay trên server (`rsync platform/` kèm `dist` rồi `docker build`) vì máy dev là arm64 còn server là amd64.
+2. **`.env` trên server bị ghi đè hai lần**, ba cờ SPA quay về 0 (01:40 và trước đó). Không rõ nguồn; đã đặt lại và ghi vào runbook. Nếu người vận hành cố ý tắt thì nói lại.
+3. **1.924/1.933 gói còn tên tiếng Trung** trên server: bản seed đầu chạy trước khi tool có tên Việt, mà upsert cố ý bỏ `name` nên không bao giờ vá được. Nay `name` được ghi đè **chỉ khi** tên đang lưu còn chữ Hán, giữ nguyên tên người vận hành sửa tay.
+
+**Còn lại**: ảnh thương hiệu vẫn là của client cũ (logo ghi "TÂN THẾ GIỚI AFK" trong khi tên game là Đại Hải Trình) — chép ảnh vào `ASSETS_DIR/brand/haitac/` rồi sửa URL ở trang quản trị; `<title>` và thẻ meta theo route cho bộ máy tìm kiếm; luồng đã đăng nhập và luồng mua chưa được kiểm trên máy chủ thật vì không tự tạo tài khoản.
+

@@ -9,7 +9,7 @@ import { Forgot } from "./pages/Forgot";
 import { Reset } from "./pages/Reset";
 import { NewsPage } from "./pages/News";
 import { NewsDetailPage } from "./pages/NewsDetail";
-import { StaticPage } from "./pages/Static";
+import { ContentPage } from "./pages/Content";
 import { NotFound } from "./pages/NotFound";
 import { AccountLayout } from "./pages/account/Layout";
 import { Overview } from "./pages/account/Overview";
@@ -37,7 +37,9 @@ export function App() {
     { href: "/", label: "Trang chủ", active: loc === "/" },
     { href: "/#game", label: "Game" },
     { href: "/tin-tuc", label: "Tin tức", active: loc.startsWith("/tin-tuc") },
-    ...(s?.support_url ? [{ href: s.support_url, label: "Hỗ trợ", external: true }] : []),
+    // Trỏ vào trang Hỗ trợ của cổng chứ không ra thẳng kênh ngoài: trang đó luôn có nội dung
+    // (bản mặc định nằm trong mã), còn `support_url` có thể chưa được đặt.
+    { href: "/ho-tro", label: "Hỗ trợ", active: loc === "/ho-tro" },
   ];
 
   // Đã đăng nhập: "tên · số dư" thường trực (khảo sát: Steam). Chưa có số dư thì chỉ tên;
@@ -57,9 +59,11 @@ export function App() {
   const notice = s?.notice ? { text: s.notice.title, href: s.notice.link_url || `/tin-tuc/${s.notice.id}` } : null;
 
   const footLinks = [
+    { href: "/gioi-thieu", label: "Giới thiệu" },
+    { href: "/ho-tro", label: "Hỗ trợ" },
     { href: "/dieu-khoan", label: "Điều khoản" },
     { href: "/chinh-sach", label: "Chính sách" },
-    ...(s?.support_url ? [{ href: s.support_url, label: "Hỗ trợ" }] : []),
+    ...(s?.support_url ? [{ href: s.support_url, label: "Liên hệ" }] : []),
     ...(s?.fanpage_url ? [{ href: s.fanpage_url, label: "Fanpage" }] : []),
   ];
 
@@ -74,8 +78,10 @@ export function App() {
         <Route path="/dat-lai-mat-khau" component={Reset} />
         <Route path="/tin-tuc" component={NewsPage} />
         <Route path="/tin-tuc/:id" component={NewsDetailPage} />
-        <Route path="/dieu-khoan">{() => <StaticPage kind="terms" />}</Route>
-        <Route path="/chinh-sach">{() => <StaticPage kind="privacy" />}</Route>
+        <Route path="/gioi-thieu">{() => <ContentPage slug="gioi-thieu" />}</Route>
+        <Route path="/ho-tro">{() => <ContentPage slug="ho-tro" />}</Route>
+        <Route path="/dieu-khoan">{() => <ContentPage slug="dieu-khoan" />}</Route>
+        <Route path="/chinh-sach">{() => <ContentPage slug="chinh-sach" />}</Route>
         <Route path="/tai-khoan">{() => <AccountLayout title="Tổng quan"><Overview /></AccountLayout>}</Route>
         <Route path="/tai-khoan/vi">{() => <AccountLayout title="Ví & nạp Xu"><Wallet /></AccountLayout>}</Route>
         <Route path="/tai-khoan/lich-su">{() => <AccountLayout title="Lịch sử"><History /></AccountLayout>}</Route>

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -92,11 +93,44 @@ func main() {
 		log.Warn("chua cau hinh console (thieu CONSOLE_ADMIN_PASSWORD hoac TCG_SECRET) — cong cu GM se bao loi khi dung")
 	}
 
+	// ADMIN_PUBLIC=1: nginx cho `admin.<domain>` di vao trang nay. Cong nghe KHONG doi —
+	// van bind 127.0.0.1:8100, nginx la thu duy nhat noi ra ngoai — nhung ba lop o tang ung
+	// dung duoc siet lai (login.go): cookie bat buoc Secure, phien rut con 4 gio, va khong
+	// cho khoi dong neu chu he thong con dung mat khau mac dinh.
+	public := os.Getenv("ADMIN_PUBLIC") == "1"
+	if public {
+		owners, err := ownersWithDefaultPassword(ctx, db)
+		if err != nil {
+			log.Error("kiem tra mat khau tai khoan quan tri", "err", err)
+			os.Exit(1)
+		}
+		if err := publicGuardError(public, owners); err != nil {
+			log.Error("tu choi khoi dong o che do cong khai", "err", err)
+			os.Exit(1)
+		}
+	}
+	secure := os.Getenv("ADMIN_COOKIE_SECURE") != "false"
+	sessionTTL := 12 * time.Hour
+	if public {
+		// Mo ra Internet: cookie khong duoc phep di qua HTTP, va mot phien bi lay cap
+		// (may chung, quan net) chi con song mot buoi thay vi mot ngay lam viec.
+		secure, sessionTTL = true, 4*time.Hour
+	}
+
 	s := &server{
 		db: db, log: log, tpl: tpl,
-		secure:  os.Getenv("ADMIN_COOKIE_SECURE") != "false",
-		fetcher: newFleetFetcher(),
-		console: consoleClient,
+		secure:     secure,
+		fetcher:    newFleetFetcher(),
+		console:    consoleClient,
+		public:     public,
+		sessionTTL: sessionTTL,
+		// 8 lan sai / 15 phut, dem theo ca ten dang nhap lan IP. Nguoi go nham vai lan van
+		// vao duoc; may do tu dong thi dung lai sau chua den mot chuc lan.
+		guard: &loginGuard{
+			store:  sqlAttempts{db},
+			max:    envInt("ADMIN_LOGIN_MAX_ATTEMPT", 8),
+			window: envDur("ADMIN_LOGIN_WINDOW", 15*time.Minute),
+		},
 	}
 
 	mux := http.NewServeMux()
@@ -153,6 +187,11 @@ func main() {
 	mux.HandleFunc("POST /api/news", s.requireWrite(s.apiNewsCreate))
 	mux.HandleFunc("POST /api/news/{id}", s.requireWrite(s.apiNewsUpdate))
 	mux.HandleFunc("POST /api/news/{id}/delete", s.requireWrite(s.apiNewsDelete))
+	// Trang noi dung tinh (pages.go): operator tro len, ke ca doc — o day thay ca ban rieng
+	// cua tung game lan ban chung, va sua o day la sua thang trang cong khai.
+	mux.HandleFunc("GET /api/pages", s.requireWrite(s.apiPageList))
+	mux.HandleFunc("POST /api/pages", s.requireWrite(s.apiPageSave))
+	mux.HandleFunc("POST /api/pages/{id}/delete", s.requireWrite(s.apiPageDelete))
 	// Nguoi choi (players.go): xem thi can vai tro gm, khoa/mo thi can operator.
 	mux.HandleFunc("GET /api/players", s.requireGM(s.apiPlayerList))
 	mux.HandleFunc("GET /api/players/{id}", s.requireGM(s.apiPlayerDetail))
@@ -176,7 +215,8 @@ func main() {
 	}
 
 	go func() {
-		log.Info("admin khoi dong", "addr", addr)
+		log.Info("admin khoi dong", "addr", addr, "cong_khai", public,
+			"cookie_secure", secure, "phien_gio", int(sessionTTL.Hours()))
 		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("http server dung", "err", err)
 			os.Exit(1)
@@ -206,6 +246,20 @@ func firstNonEmpty(vals ...string) string {
 func envOr(key, def string) string {
 	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		return v
+	}
+	return def
+}
+
+func envInt(key string, def int) int {
+	if n, err := strconv.Atoi(strings.TrimSpace(os.Getenv(key))); err == nil && n > 0 {
+		return n
+	}
+	return def
+}
+
+func envDur(key string, def time.Duration) time.Duration {
+	if d, err := time.ParseDuration(strings.TrimSpace(os.Getenv(key))); err == nil && d > 0 {
+		return d
 	}
 	return def
 }
