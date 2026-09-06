@@ -126,8 +126,13 @@ if ($opAuto === null) {
      nguoi choi muon xem may chu, nap Xu hay doi tai khoan deu phai bam Back cua trinh
      duyet (tren app/webview thi khong co ca cai do).
      Dat o goc TRAI-TREN: goc phai-tren da co nut Dong cua khung nap tien (#close).
-     `env(safe-area-inset-*)` de khong bi tai tho tren iPhone che mat. -->
-<a id="opHome" href="/" title="Về trang chính">&#8592; Trang chính</a>
+     `env(safe-area-inset-*)` de khong bi tai tho tren iPhone che mat.
+
+     Ban dau nut nay mo mo (opacity .45) cho do che game. Sai: nguoi choi bam nham no
+     nhieu lan trong luc choi vi khong thay ro no o do. Nay lam NOI HAN — vien sang, nen
+     dam — va hoi lai truoc khi roi game, de mot cu cham nham khong keo nguoi ta ra khoi
+     tran dang danh. -->
+<a id="opHome" href="/" title="Về trang chính" onclick="return opRoiGame()">&#8592; Trang chính</a>
 <div class="frame" style="margin: auto;" id="iframe"></div>
 <button onclick="closes()" id="close" style="display:none;position: absolute; z-index: 99999999; left: auto; right: 6px; top: 6px; width: 44px; height: 46px; border: 0px; cursor: pointer; background: url(/assets/images/back.png) no-repeat; font-size: 0;">Đóng</button>
 <script>
@@ -140,6 +145,12 @@ var appVersion = "28.3";
 // van goi 192.168.1.69:7788 tu bundle trong cache.
 var opBundleV = "<?php echo @filemtime(__DIR__ . '/libs/e228b-0b904-ac44c.js') ?: '0'; ?>";
 
+// Hoi lai truoc khi roi game. Nut nam o goc man hinh, ma trong luc choi thi goc la cho
+// hay bi cham nham nhat — mot cu cham khong duoc phep keo nguoi ta ra khoi tran.
+function opRoiGame(){
+	return confirm('Rời khỏi game và về trang chính?');
+}
+
 function closes(){
 	$('.none').css('display','none');
 	$('#close').css('display','none');
@@ -149,14 +160,23 @@ $(function() {
         containment: "#body",
         scroll: false
     });
-$('.dragitem').click(function() {
-	$('#close').css('display','block');
-	$('#iframe').html("<iframe class='none' style='z-index: 999999; position: absolute;width: 100%; height: 100%;border: 0;' src='/nap-tien'></iframe>");
+$('.dragitem').click(openNapTien);
 });
-});
+
+// Trang nap/mua mo TRONG GAME.
+//
+// Truoc day tro vao '/nap-tien', ma nginx rewrite thanh '/user/index.php?page=naptien' —
+// cong PHP CU, co bang dang nhap RIENG (`web.user`) khong lien quan gi toi he thong ID.
+// Nguoi choi dang o trong game, phien con nguyen, van bi hoi dang nhap lan nua.
+//
+// '/cua-hang' do Adapter phuc vu, CUNG ORIGIN nen cookie `haitac_sess` di kem — nhan ra
+// nguoi choi ngay, hien so du vi ID va cac goi quy doi. Khong phai dang nhap lai.
+function opDuongNap() { return '/cua-hang'; }
+
 function openNapTien(){
 	$('#close').css('display','block');
-    $('#iframe').html("<iframe class='none' style='z-index: 999999; position: absolute;width: 100%; height: 100%;border: 0;' src='/nap-tien'></iframe>");
+	$('#iframe').html("<iframe class='none' style='z-index: 999999; position: absolute;"
+		+ "width: 100%; height: 100%;border: 0;' src='" + opDuongNap() + "'></iframe>");
 }
 </script>
     <div style="display:none" class="dragitem"></div>
@@ -165,7 +185,7 @@ function openNapTien(){
             width: 100%;
             height: 100%;
         }
-        /* Mo mo luc binh thuong de khong che game; ro han khi cham/tro vao. */
+        /* Hien RO. Ban mo mo truoc day lam nguoi choi bam nham vi khong biet no o do. */
         #opHome {
             position: fixed;
             z-index: 99999998;
@@ -178,11 +198,13 @@ function openNapTien(){
             font: 600 13px/1 ui-sans-serif, system-ui, sans-serif;
             text-decoration: none;
             border: 1px solid rgba(255, 255, 255, .16);
-            opacity: .45;
-            transition: opacity .15s;
+            opacity: .92;
+            transition: opacity .15s, transform .1s;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, .45);
             -webkit-tap-highlight-color: transparent;
         }
-        #opHome:hover, #opHome:active, #opHome:focus { opacity: 1; }
+        #opHome:hover, #opHome:focus { opacity: 1; }
+        #opHome:active { transform: scale(.96); }
         @font-face {
             font-family: Arial;
             src: url(/assets/fonts/msyh.ttf);
