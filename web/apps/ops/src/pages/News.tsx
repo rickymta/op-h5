@@ -143,6 +143,7 @@ function NewsForm({ initial, games, ghi, show, onDone, onCancel }: {
 }) {
   const { f, set, text } = useForm({
     game_code: initial?.game_code ?? "",
+    slug: initial?.slug ?? "",
     kind: initial?.kind ?? ("news" as NewsKind),
     title: initial?.title ?? "",
     summary: initial?.summary ?? "",
@@ -158,7 +159,7 @@ function NewsForm({ initial, games, ghi, show, onDone, onCancel }: {
   const save = useMutation({
     mutationFn: () => {
       const body: NewsInput = {
-        game_code: f.game_code || null, kind: f.kind, title: f.title.trim(), summary: f.summary.trim(),
+        game_code: f.game_code || null, slug: f.slug.trim(), kind: f.kind, title: f.title.trim(), summary: f.summary.trim(),
         body: f.body, image_url: f.image_url.trim(), link_url: f.link_url.trim(), pinned: f.pinned, status: f.status,
       };
       // Bỏ trống thì không gửi: đăng mà chưa có giờ, phía Go lấy lúc lưu.
@@ -201,6 +202,13 @@ function NewsForm({ initial, games, ghi, show, onDone, onCancel }: {
             <div className="rong">
               <Field label="Nội dung" hint="— văn bản thuần, đoạn cách nhau bằng dòng trống" htmlFor="n-body">
                 <textarea id="n-body" value={f.body} onChange={text("body")} rows={12} style={{ width: "100%", fontFamily: "var(--sans)" }} />
+              </Field>
+            </div>
+
+            <div className="rong">
+              <Field label="Đường dẫn" hint="— phần chữ trong /tin-tuc/…; để trống thì tự sinh từ tiêu đề" htmlFor="n-slug">
+                <input id="n-slug" value={f.slug} onChange={text("slug")} style={{ width: "100%", fontFamily: "var(--mono)" }}
+                       maxLength={96} placeholder="vi-du-duong-dan" />
               </Field>
             </div>
 

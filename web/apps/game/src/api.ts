@@ -91,9 +91,10 @@ export interface ServersResponse {
 
 export type NewsKind = "news" | "event" | "notice";
 
-/** GET /api/game/news — tin của game này và tin chung (game_code null). */
+/** GET /api/game/news — tin của game này và tin chung (game_code null hoặc rỗng). */
 export interface NewsItem {
   id: number;
+  slug: string;         // đường dẫn chữ: /tin-tuc/<slug>
   game_code: string | null;
   game_name: string;
   kind: NewsKind;
@@ -104,9 +105,11 @@ export interface NewsItem {
   pinned: boolean;
   published_at: string; // RFC 3339
 }
-/** GET /api/game/news/{id} — thêm `body` (văn bản thuần, đoạn cách nhau bằng dòng trống). */
+/** GET /api/game/news/{key} — `key` là slug hoặc id; thêm `body` (văn bản thuần, đoạn cách nhau bằng dòng trống). */
 export interface NewsDetail extends NewsItem {
   body: string;
+  /** Chỉ có khi vào bằng id mà bài đã có slug: trang tự đổi đường dẫn trên thanh địa chỉ. */
+  canonical_slug?: string;
 }
 
 /** GET /api/game/me — luôn 200; khách thì `logged_in:false`. */

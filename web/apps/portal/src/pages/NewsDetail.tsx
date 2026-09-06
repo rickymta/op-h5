@@ -1,18 +1,32 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { LinkButton, Msg, formatDate } from "@op/ui/publisher";
 import { api, ApiError, errText, NEWS_KIND_LABEL, type NewsDetail } from "../api";
 import { useTitle } from "../lib/title";
+import { RichText } from "../lib/content";
 
-/** Một tin: tiêu đề, game, thời gian, ảnh (nếu có), thân tách đoạn theo dòng trống, link ngoài. */
+/**
+ * Một tin: tiêu đề, game, thời gian, ảnh (nếu có), thân tách đoạn theo dòng trống, link ngoài.
+ *
+ * `:key` là slug hoặc id — API nhận cả hai, nên mọi liên kết `/tin-tuc/12` gửi đi trước đây vẫn
+ * mở đúng bài. Vào bằng id mà bài có slug thì API trả `canonical_slug` và ta thay đường dẫn tại
+ * chỗ (replace, không push) để người đọc chép được một URL đọc được và nút Quay lại không kẹt.
+ */
 export function NewsDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { key } = useParams<{ key: string }>();
+  const [, navigate] = useLocation();
   const q = useQuery({
-    queryKey: ["news", "one", id],
-    queryFn: () => api.get<NewsDetail>(`/api/news/${encodeURIComponent(id ?? "")}`),
-    enabled: !!id,
+    queryKey: ["news", "one", key],
+    queryFn: () => api.get<NewsDetail>(`/api/news/${encodeURIComponent(key ?? "")}`),
+    enabled: !!key,
   });
   useTitle(q.data?.title ?? "Tin tức");
+
+  const canonical = q.data?.canonical_slug;
+  useEffect(() => {
+    if (canonical && canonical !== key) navigate(`/tin-tuc/${canonical}`, { replace: true });
+  }, [canonical, key, navigate]);
 
   const notFound = q.error instanceof ApiError && q.error.status === 404;
 
@@ -39,9 +53,7 @@ export function NewsDetailPage() {
             <div className="pt-article__img"><img src={q.data.image_url} alt="" loading="lazy" /></div>
           )}
           {q.data.summary && !q.data.body && <p>{q.data.summary}</p>}
-          {(q.data.body ?? "").split(/\n\s*\n/).filter((p) => p.trim()).map((p, i) => (
-            <p key={i}>{p.trim()}</p>
-          ))}
+          {q.data.body ? <RichText body={q.data.body} /> : null}
           {q.data.link_url && (
             <div className="pt-actions">
               <LinkButton href={q.data.link_url} target="_blank" rel="noopener">Xem chi tiết ↗</LinkButton>

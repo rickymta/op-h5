@@ -1,7 +1,7 @@
 package main
 
 // Trang cua game (web/apps/game) doc "bo mat" cua game tu day: /api/game/meta, /api/game/news,
-// /api/game/news/{id}, /api/game/me. Ten, tagline, anh, mau nhan, lien ket nam trong bang games
+// /api/game/news/{key}, /api/game/me. Ten, tagline, anh, mau nhan, lien ket nam trong bang games
 // (migration 0010, sua o trang quan tri) — khong con gan cung trong template, nen MOT bundle
 // chay cho moi game. Hop dong giai doan 3 muc 4.4.
 
@@ -10,7 +10,6 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -92,20 +91,17 @@ func (s *adapterServer) gameNews(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]any{"news": items})
 }
 
+// gameNewsDetail: `{key}` la slug hoac id, nhu ben `id` (/api/news/{key}).
 func (s *adapterServer) gameNewsDetail(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil || id <= 0 {
-		httpx.Error(w, http.StatusNotFound, "not_found", "Không có tin này.")
-		return
-	}
+	key := r.PathValue("key")
 	// Tin rieng cua game khac khong hien o day: chi tin cua game nay hoac tin chung.
-	d, err := catalog.PublishedNewsByID(r.Context(), s.db, id, s.cfg.GameCode)
+	d, err := catalog.PublishedNewsByKey(r.Context(), s.db, key, s.cfg.GameCode)
 	if err != nil {
 		if errors.Is(err, catalog.ErrNotFound) {
 			httpx.Error(w, http.StatusNotFound, "not_found", "Không có tin này.")
 			return
 		}
-		s.log.Error("doc tin", "err", err, "id", id)
+		s.log.Error("doc tin", "err", err, "khoa", key)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được tin.")
 		return
 	}

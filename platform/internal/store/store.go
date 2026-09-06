@@ -100,7 +100,9 @@ func Migrate(ctx context.Context, db *sql.DB, log *slog.Logger) error {
 }
 
 // splitStatements tach file SQL theo dau ';' o cuoi dong, bo dong trong va dong chu thich.
-// Du cho schema nay vi khong co trigger hay stored procedure.
+// Du cho schema nay vi khong co stored procedure. Trigger duy nhat (0012) co than MOT cau
+// lenh nen dau ';' dau tien cung la dau ';' cuoi — viet trigger co BEGIN ... END thi phai
+// nang cho tach nay len truoc (hoac them DELIMITER), khong thi no bi cat lam doi.
 func splitStatements(body string) []string {
 	var (
 		out []string

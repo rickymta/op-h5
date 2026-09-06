@@ -1,6 +1,6 @@
 package main
 
-// Trang chinh cua cong (web/apps/portal): /api/site, /api/games, /api/news, /api/news/{id}.
+// Trang chinh cua cong (web/apps/portal): /api/site, /api/games, /api/news, /api/news/{key}.
 // Khong can dang nhap. Khuon JSON: hop dong giai doan 3 muc 4.2 (docs/plan-go-react.md muc 15).
 
 import (
@@ -10,7 +10,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -35,7 +34,8 @@ func (a *apiServer) apiSite(w http.ResponseWriter, r *http.Request) {
 	n, err := catalog.LatestNotice(r.Context(), a.db)
 	switch {
 	case err == nil:
-		notice = map[string]any{"id": n.ID, "title": n.Title, "link_url": catalog.AbsURL(n.SiteURL, n.LinkURL)}
+		notice = map[string]any{"id": n.ID, "slug": n.Slug, "title": n.Title,
+			"link_url": catalog.AbsURL(n.SiteURL, n.LinkURL)}
 	case !errors.Is(err, catalog.ErrNotFound):
 		a.log.Error("doc thong bao ghim", "err", err)
 	}
@@ -156,19 +156,17 @@ func (a *apiServer) apiNews(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]any{"news": items})
 }
 
+// apiNewsDetail: `{key}` la slug ("vi-xu-dung-chung") hoac id ("12"). Lien ket cu theo id van
+// mo duoc; bai co slug thi tra kem canonical_slug de trang web doi duong dan tren thanh dia chi.
 func (a *apiServer) apiNewsDetail(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil || id <= 0 {
-		httpx.Error(w, http.StatusNotFound, "not_found", "Không có tin này.")
-		return
-	}
-	d, err := catalog.PublishedNewsByID(r.Context(), a.db, id, "")
+	key := r.PathValue("key")
+	d, err := catalog.PublishedNewsByKey(r.Context(), a.db, key, "")
 	if err != nil {
 		if errors.Is(err, catalog.ErrNotFound) {
 			httpx.Error(w, http.StatusNotFound, "not_found", "Không có tin này.")
 			return
 		}
-		a.log.Error("doc tin", "err", err, "id", id)
+		a.log.Error("doc tin", "err", err, "khoa", key)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không đọc được tin.")
 		return
 	}

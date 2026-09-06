@@ -25,7 +25,7 @@ export function News() {
     title: n.title,
     summary: n.summary,
     image: n.image_url || undefined,
-    href: `/tin-tuc/${n.id}`,
+    href: `/tin-tuc/${n.slug || n.id}`,  // bài cũ chưa có slug thì vẫn đi theo id
     published_at: n.published_at,
     kind: n.kind,
     game_name: n.game_name,

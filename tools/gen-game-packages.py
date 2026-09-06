@@ -65,7 +65,20 @@ NAMES = {
     19007: "Gói quà hàng ngày", 19008: "Gói quà Quý 1", 19009: "Gói quà Quý 2",
     19101: "Mua một lượt (ngày 1–14)",
     27001: "Quà rút tướng", 27002: "Quà rút tướng sa hoa", 27003: "Quà lực chiến",
+    # 42201-42215: bon khoi "灯芯商店" (bac den) tier 1-5 giong het nhau trong 充值项; pay.txt chi
+    # dich toi 42200 nen 15 muc nay tung roi ve ten Han va HIEN RA cua hang. So thu tu khoi lay
+    # theo *商品ID (10186-10190 la khoi 1 = 42196-42200, roi 10191/10196/10201).
+    42201: "bấc đèn cửa hàng 2 - Thứ 1 Ngăn", 42202: "bấc đèn cửa hàng 2 - Thứ 2 Ngăn",
+    42203: "bấc đèn cửa hàng 2 - Thứ 3 Ngăn", 42204: "bấc đèn cửa hàng 2 - Thứ 4 Ngăn",
+    42205: "bấc đèn cửa hàng 2 - Thứ 5 Ngăn",
+    42206: "bấc đèn cửa hàng 3 - Thứ 1 Ngăn", 42207: "bấc đèn cửa hàng 3 - Thứ 2 Ngăn",
+    42208: "bấc đèn cửa hàng 3 - Thứ 3 Ngăn", 42209: "bấc đèn cửa hàng 3 - Thứ 4 Ngăn",
+    42210: "bấc đèn cửa hàng 3 - Thứ 5 Ngăn",
+    42211: "bấc đèn cửa hàng 4 - Thứ 1 Ngăn", 42212: "bấc đèn cửa hàng 4 - Thứ 2 Ngăn",
+    42213: "bấc đèn cửa hàng 4 - Thứ 3 Ngăn", 42214: "bấc đèn cửa hàng 4 - Thứ 4 Ngăn",
+    42215: "bấc đèn cửa hàng 4 - Thứ 5 Ngăn",
 }
+HAN = re.compile(r"[一-鿿]")
 CURRENCY = {"0:0": "Kim tệ", "0:1": "Nguyên Bảo", "0:2": "Ngân lượng", "0:3": "EXP nhân vật", "0:4": "EXP anh hùng"}
 
 
@@ -343,6 +356,12 @@ def main():
 
     rows, stats = build(a.game)
     print(f"{len(rows)} goi: " + ", ".join(f"{k}={v}" for k, v in sorted(stats.items())))
+    # Ten goi HIEN RA cua hang (ten goi + tieu de tab trinh duyet + lich su don). Con chu Han la
+    # nguoi choi Viet nhin thay chu Trung — them id vao NAMES o dau file, dung de lot.
+    han = [r for r in rows if HAN.search(r["name"])]
+    if han:
+        print(f"CON TEN CHU HAN: {len(han)} goi — them vao NAMES: " +
+              ", ".join(f"{r['package_id']}={r['name']}" for r in han[:10]), file=sys.stderr)
     for r in rows:
         if r["category"] != "event" and r["category"] != "ingame":
             print(f"  {r['category']:9s} {r['package_id']:>8} {r['price_xu']:>9,} {r['name']}" + (f" [{r['badge']}]" if r["badge"] else ""))

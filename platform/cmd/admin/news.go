@@ -1,8 +1,9 @@
 package main
 
-// Tin tuc & su kien (bang news, migration 0010): tin chung cua nen tang (game_code NULL) va tin
-// cua tung game. Trang chinh (id) va trang game (adapter) chi doc tin 'published' da toi gio;
-// o day thay ca ban nhap. Vai tro operator tro len (hop dong 4.5); moi lan ghi vao admin_audit.
+// Tin tuc & su kien (bang news, migration 0010 + 0012): tin chung cua nen tang (game_code NULL,
+// hoac rong khi den tu file seed) va tin cua tung game. Trang chinh (id) va trang game (adapter)
+// chi doc tin 'published' da toi gio; o day thay ca ban nhap. Moi bai co mot `slug` — duong dan
+// chu trong URL /tin-tuc/<slug>. Vai tro operator tro len (hop dong 4.5); moi lan ghi admin_audit.
 
 import (
 	"database/sql"
@@ -20,6 +21,7 @@ import (
 
 type newsRow struct {
 	ID            int64  `json:"id"`
+	Slug          string `json:"slug"`      // duong dan chu: /tin-tuc/<slug>
 	GameCode      string `json:"game_code"` // rong = tin chung
 	GameName      string `json:"game_name"`
 	Kind          string `json:"kind"`
@@ -77,7 +79,8 @@ func (s *server) apiNewsList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	switch p.Game {
 	case "":
 	case "common":
-		where += ` AND n.game_code IS NULL`
+		// Tin chung: game_code NULL (trang quan tri ghi the) hoac rong (file seed ghi the).
+		where += ` AND COALESCE(n.game_code,'') = ''`
 	default:
 		where += ` AND n.game_code = ?`
 		args = append(args, p.Game)
@@ -88,7 +91,7 @@ func (s *server) apiNewsList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	}
 	args = append(args, p.PageSize+1, (p.Page-1)*p.PageSize)
 	rows, err := s.db.QueryContext(r.Context(), `
-		SELECT n.id, COALESCE(n.game_code,''), COALESCE(g.name,''), n.kind, n.title, n.summary, COALESCE(n.body,''),
+		SELECT n.id, n.slug, COALESCE(n.game_code,''), COALESCE(g.name,''), n.kind, n.title, n.summary, COALESCE(n.body,''),
 		       n.image_url, n.link_url, n.pinned, n.status, n.published_at,
 		       COALESCE(n.created_by,0), COALESCE(u.username,''), n.created_at, n.updated_at
 		  FROM news n
@@ -105,7 +108,7 @@ func (s *server) apiNewsList(w http.ResponseWriter, r *http.Request, _ *admin) {
 	for rows.Next() {
 		var n newsRow
 		var pub, created, updated sql.NullTime
-		if err := rows.Scan(&n.ID, &n.GameCode, &n.GameName, &n.Kind, &n.Title, &n.Summary, &n.Body,
+		if err := rows.Scan(&n.ID, &n.Slug, &n.GameCode, &n.GameName, &n.Kind, &n.Title, &n.Summary, &n.Body,
 			&n.ImageURL, &n.LinkURL, &n.Pinned, &n.Status, &pub, &n.CreatedBy, &n.CreatedByName, &created, &updated); err != nil {
 			s.log.Error("doc tin", "err", err)
 			continue
@@ -123,6 +126,7 @@ func (s *server) apiNewsList(w http.ResponseWriter, r *http.Request, _ *admin) {
 // newsInput la khuon POST /api/news va POST /api/news/{id} (cap nhat thay ca dong).
 type newsInput struct {
 	GameCode    *string `json:"game_code"` // null hoac "" = tin chung
+	Slug        string  `json:"slug"`      // de trong = sinh tu tieu de
 	Kind        string  `json:"kind"`
 	Title       string  `json:"title"`
 	Summary     string  `json:"summary"`
@@ -137,6 +141,7 @@ type newsInput struct {
 // newsValues la dau vao da chuan hoa, san sang ghi.
 type newsValues struct {
 	GameCode    string // rong = tin chung (ghi NULL)
+	Slug        string // luon co gia tri sau validate()
 	Kind        string
 	Title       string
 	Summary     string
@@ -176,6 +181,20 @@ func (in newsInput) validate() (newsValues, error) {
 	if in.GameCode != nil {
 		v.GameCode = strings.TrimSpace(*in.GameCode)
 	}
+	// Slug do nguoi go nhap thi ha chu thuong giup (go "Vi-Xu" ra "vi-xu"), de trong thi sinh
+	// tu tieu de. Rat hiem khi tieu de khong con ky tu latin nao (toan chu Han/emoji) — luc do
+	// lay theo moc thoi gian de bai VAN dang duoc, thay vi bat nguoi truc tu nghi mot slug.
+	//
+	// Luc SUA bai, de trong cung sinh lai tu tieu de — nghia la doi tieu de roi xoa o duong
+	// dan la doi luon URL cua bai. Form o trang quan tri dien san slug hien tai nen sua binh
+	// thuong khong lam URL chay; muon doi thi phai chu dong xoa o do.
+	v.Slug = strings.ToLower(strings.TrimSpace(in.Slug))
+	if v.Slug == "" {
+		v.Slug = catalog.MakeSlug(v.Title)
+	}
+	if v.Slug == "" {
+		v.Slug = "tin-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	}
 	if v.Kind == "" {
 		v.Kind = "news"
 	}
@@ -199,6 +218,9 @@ func (in newsInput) validate() (newsValues, error) {
 		return v, errors.New("Liên kết phải để trống, bắt đầu bằng / hoặc http(s)://, tối đa 255 ký tự.")
 	case v.GameCode != "" && !codeRe.MatchString(v.GameCode):
 		return v, errors.New("Mã game không hợp lệ.")
+	case !catalog.ValidNewsSlug(v.Slug):
+		return v, errors.New("Đường dẫn chỉ gồm chữ thường không dấu, số và dấu gạch ngang, " +
+			"bắt đầu bằng chữ hoặc số, tối đa 96 ký tự, và không được toàn chữ số.")
 	}
 	pub, err := parsePublishedAt(in.PublishedAt)
 	if err != nil {
@@ -213,6 +235,16 @@ func nullStr(s string) any {
 		return nil
 	}
 	return s
+}
+
+// slugTaken: loi MySQL 1062 tren uq_news_slug (migration 0012) — mot bai khac da giu slug nay.
+// Nhan theo TEN CHI MUC nhu cho khac trong ma nguon: bang news co the co them chi muc unique
+// khac ve sau, luc do "trung slug" phai van la thong bao rieng cua slug.
+func slugTaken(err error) bool { return strings.Contains(err.Error(), "uq_news_slug") }
+
+func slugConflict(w http.ResponseWriter, slug string) {
+	httpx.Error(w, http.StatusConflict, "slug_taken",
+		"Đường dẫn "+slug+" đã có bài khác dùng. Hãy đặt đường dẫn khác.")
 }
 
 // readNews doc va kiem tra than request; kiem luon game co ton tai (tin cua game da xoa se
@@ -249,11 +281,15 @@ func (s *server) apiNewsCreate(w http.ResponseWriter, r *http.Request, a *admin)
 	}
 	ctx := r.Context()
 	res, err := s.db.ExecContext(ctx, `
-		INSERT INTO news (game_code, kind, title, summary, body, image_url, link_url, pinned, status, published_at, created_by)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-		nullStr(v.GameCode), v.Kind, v.Title, v.Summary, nullStr(v.Body), v.ImageURL, v.LinkURL,
+		INSERT INTO news (slug, game_code, kind, title, summary, body, image_url, link_url, pinned, status, published_at, created_by)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+		v.Slug, nullStr(v.GameCode), v.Kind, v.Title, v.Summary, nullStr(v.Body), v.ImageURL, v.LinkURL,
 		v.Pinned, v.Status, v.PublishedAt, a.ID)
 	if err != nil {
+		if slugTaken(err) {
+			slugConflict(w, v.Slug)
+			return
+		}
 		s.log.Error("tao tin", "err", err)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
 		return
@@ -282,7 +318,7 @@ func (s *server) apiNewsUpdate(w http.ResponseWriter, r *http.Request, a *admin)
 	ctx := r.Context()
 	// published_at: dat thi ghi; khong dat ma dang -> giu gio cu, chua co thi lay gio hien tai
 	// (sua mot tin da dang khong duoc lam no "moi dang lai"); ban nhap thi giu nguyen.
-	pubExpr, args := "?", []any{nullStr(v.GameCode), v.Kind, v.Title, v.Summary, nullStr(v.Body), v.ImageURL, v.LinkURL, v.Pinned, v.Status}
+	pubExpr, args := "?", []any{v.Slug, nullStr(v.GameCode), v.Kind, v.Title, v.Summary, nullStr(v.Body), v.ImageURL, v.LinkURL, v.Pinned, v.Status}
 	switch {
 	case v.PublishedAt.Valid:
 		args = append(args, v.PublishedAt)
@@ -293,10 +329,14 @@ func (s *server) apiNewsUpdate(w http.ResponseWriter, r *http.Request, a *admin)
 	}
 	args = append(args, id)
 	res, err := s.db.ExecContext(ctx, `
-		UPDATE news SET game_code = ?, kind = ?, title = ?, summary = ?, body = ?, image_url = ?, link_url = ?,
+		UPDATE news SET slug = ?, game_code = ?, kind = ?, title = ?, summary = ?, body = ?, image_url = ?, link_url = ?,
 		       pinned = ?, status = ?, published_at = `+pubExpr+`
 		 WHERE id = ?`, args...)
 	if err != nil {
+		if slugTaken(err) {
+			slugConflict(w, v.Slug)
+			return
+		}
 		s.log.Error("sua tin", "err", err, "id", id)
 		httpx.Error(w, http.StatusInternalServerError, "server_error", "Không ghi được.")
 		return

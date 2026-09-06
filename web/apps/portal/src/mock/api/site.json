@@ -1,6 +1,11 @@
 {
   "brand": "Hằng Long Game",
-  "notice": { "id": 3, "title": "Bảo trì máy chủ S1–S3 từ 02:00 đến 04:00 ngày 07/09 để cập nhật phiên bản 1.3", "link_url": "" },
+  "notice": {
+    "id": 3,
+    "title": "Bảo trì máy chủ S1–S3 từ 02:00 đến 04:00 ngày 07/09 để cập nhật phiên bản 1.3",
+    "link_url": "",
+    "slug": "bao-tri-may-chu-s1-s3-ngay-07-09"
+  },
   "support_url": "https://m.me/hanglonggame",
   "fanpage_url": "https://facebook.com/hanglonggame",
   "topup_url": "",

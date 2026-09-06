@@ -10,7 +10,8 @@
       "image_url": "",
       "link_url": "",
       "pinned": true,
-      "published_at": "2026-09-05T20:00:00+07:00"
+      "published_at": "2026-09-05T20:00:00+07:00",
+      "slug": "bao-tri-he-thong-id-va-vi-xu"
     },
     {
       "id": 2,
@@ -22,7 +23,8 @@
       "image_url": "/assets/images/banner-min.png",
       "link_url": "",
       "pinned": false,
-      "published_at": "2026-09-05T09:30:00+07:00"
+      "published_at": "2026-09-05T09:30:00+07:00",
+      "slug": "tuan-le-tan-the-gioi-x2-nguyen-bao"
     },
     {
       "id": 3,
@@ -34,7 +36,8 @@
       "image_url": "",
       "link_url": "",
       "pinned": false,
-      "published_at": "2026-09-03T10:00:00+07:00"
+      "published_at": "2026-09-03T10:00:00+07:00",
+      "slug": "mo-may-chu-moi-tay-hai-s3"
     },
     {
       "id": 4,
@@ -46,7 +49,8 @@
       "image_url": "",
       "link_url": "http://127.0.0.1:8080/tai-khoan/vi",
       "pinned": false,
-      "published_at": "2026-08-01T08:00:00+07:00"
+      "published_at": "2026-08-01T08:00:00+07:00",
+      "slug": "cua-hang-web-nhan-vat-nhan-truc-tiep"
     }
   ]
 }

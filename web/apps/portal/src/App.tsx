@@ -56,7 +56,7 @@ export function App() {
     <LinkButton variant="ghost" href="/dang-nhap">Đăng nhập</LinkButton>
   ) : null;
 
-  const notice = s?.notice ? { text: s.notice.title, href: s.notice.link_url || `/tin-tuc/${s.notice.id}` } : null;
+  const notice = s?.notice ? { text: s.notice.title, href: s.notice.link_url || `/tin-tuc/${s.notice.slug || s.notice.id}` } : null;
 
   const footLinks = [
     { href: "/gioi-thieu", label: "Giới thiệu" },
@@ -77,7 +77,7 @@ export function App() {
         <Route path="/quen-mat-khau" component={Forgot} />
         <Route path="/dat-lai-mat-khau" component={Reset} />
         <Route path="/tin-tuc" component={NewsPage} />
-        <Route path="/tin-tuc/:id" component={NewsDetailPage} />
+        <Route path="/tin-tuc/:key" component={NewsDetailPage} />
         <Route path="/gioi-thieu">{() => <ContentPage slug="gioi-thieu" />}</Route>
         <Route path="/ho-tro">{() => <ContentPage slug="ho-tro" />}</Route>
         <Route path="/dieu-khoan">{() => <ContentPage slug="dieu-khoan" />}</Route>

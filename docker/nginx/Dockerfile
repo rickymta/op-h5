@@ -13,6 +13,11 @@ COPY docker/nginx/adapter_proxy.conf /etc/nginx/adapter_proxy.conf
 # Danh sach cho phep vao cong cu GM. Mac dinh CHI loopback; muon mo cho mot dia chi co
 # dinh thi sua gm_access.conf roi build lai, hoac mount de len file nay.
 COPY docker/nginx/gm_access.conf /etc/nginx/gm_access.conf
+# Danh sach cho phep vao TRANG QUAN TRI (admin.<domain> va /admin-portal tren host game).
+# game_site.conf va domains.conf deu `include` file nay — thieu no la nginx khong khoi dong
+# duoc, ca website sap. Da dinh that: file duoc them vao repo 2026-09-06 nhung quen khai o
+# day, image moi thieu file trong khi cau hinh van include.
+COPY docker/nginx/admin_access.conf /etc/nginx/admin_access.conf
 # Cau hinh domain — KHONG dat vao conf.d/ nen mac dinh khong co tac dung. Bat bang cach
 # dien __PUBLIC_DOMAIN__ roi mount de len /etc/nginx/conf.d/domains.conf. Xem
 # docs/deploy-runbook.md muc "Tro domain that".
