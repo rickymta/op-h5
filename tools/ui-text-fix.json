@@ -15,7 +15,6 @@
     "LUU Y: `props.text` la VAN BAN MAU luc thiet ke; luc chay client thay bang gia tri that,",
     "thuong dai hon. Nen van con o nao tran thi phai noi rong o, khong rut them chu duoc nua."
   ],
-
   "doi": {
     "Người, tiên, yêu 5 Tinh anh hùng mảnh vỡ": "Mảnh tướng 5★ Nhân/Tiên/Yêu",
     "Tử 1 Tinh đến cam 2 Tinh trang bị": "Trang bị Tím 1★ – Cam 2★",
@@ -134,6 +133,9 @@
     "Xem ra ngươi vận khí không tệ, nơi này có thể mua được không ít đồ tốt!": "Vận khí ngươi khá đấy, chỗ này nhiều đồ tốt!",
     "Tham gia một lần vô tận luân hồi": "Tham gia Vô Tận Luân Hồi",
     "Mua nhanh": "Mua nhanh",
-    "500 VNĐ": "500 xu"
+    "500 VNĐ": "500 xu",
+    "Hôm nay có thể mua mua lượt:": "Hôm nay còn mua được:",
+    "Toàn bộ server hạn mua": "Hạn mua toàn server",
+    "Đồ đằng Thánh Điện đặc quyền! Mỗi ngày hai lần ngoài định mức miễn phí lượt, chung có thể mua mua lượt": "Đặc quyền Đồ Đằng Thánh Điện: mỗi ngày thêm 2 lượt miễn phí, tổng số lượt mua được"
   }
 }

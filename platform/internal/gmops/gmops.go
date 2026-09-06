@@ -174,8 +174,37 @@ func (s *Service) Meta(w http.ResponseWriter, r *http.Request, _ Actor) {
 			s.Log.Error("doc danh sach may chu", "err", err)
 		}
 	}
+	// Danh sach game. Giao dien doc `meta.games` de hien ten game tren thanh tieu de:
+	//   meta.data?.games.find((g) => g.code === meta.data?.game)
+	// Thieu khoa nay thi `games` la undefined va `.find` nem TypeError ngay khi ve trang —
+	// man hinh den, khong vao duoc cong cu GM. Luon tra ve mang (co the rong), khong bao gio
+	// nil: slice nil trong Go ra JSON `null`, va `null.find` cung nem dung loi do.
+	type gameOpt struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+	}
+	games := []gameOpt{}
+	if s.DB != nil {
+		rows, err := s.DB.QueryContext(r.Context(),
+			`SELECT code, name FROM games ORDER BY sort_order, code`)
+		if err == nil {
+			for rows.Next() {
+				var o gameOpt
+				if rows.Scan(&o.Code, &o.Name) == nil {
+					games = append(games, o)
+				}
+			}
+			_ = rows.Close()
+		} else if s.Log != nil {
+			s.Log.Error("doc danh sach game", "err", err)
+		}
+	}
+	if len(games) == 0 {
+		// Khong doc duoc bang thi van phai co dong cho game dang mo, de thanh tieu de co ten.
+		games = []gameOpt{{Code: s.GameCode, Name: s.GameCode}}
+	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
-		"game": s.GameCode, "servers": servers, "bags": BagKinds,
+		"games": games, "game": s.GameCode, "servers": servers, "bags": BagKinds,
 	})
 }
 

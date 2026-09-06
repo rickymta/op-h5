@@ -37,10 +37,19 @@ DIEU PHAI BIET TRUOC KHI SUA BANG
     `var`/`name`, tuc la CHO TRONG do game ghi so that de len luc chay — sua vao do khong
     doi duoc gi tren man hinh, chi lam lech ban mau cua nguoi thiet ke.
 """
-import argparse, glob, json, os, re, sys, unicodedata
+import argparse, glob, json, os, re, shutil, sys, unicodedata, zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UI   = os.path.join(ROOT, "website", "game", "res", "d6519-958fd-b2f8f")
+# CLIENT NAP ui.bin, KHONG NAP ui.json.
+#
+# Bang anh xa libs/2af72-f100c-2af72.json co ca hai: 'ui/ui.json' -> res/d6519-958fd-b2f8f
+# va 'ui/ui.bin' -> res/aace3-5ee03-baa8e. Nhung trong bundle游戏 chuoi 'ui/ui.bin' xuat hien
+# 1 lan lam DUONG DAN, con 'ui/ui.json' xuat hien 0 lan (cac cho co 'ui.json' deu la chuoi
+# GHI LOG "ui.json Tang them thoi gian..."). Sua ui.json khong doi duoc gi tren man hinh.
+#
+# ui.bin la JSON nen zlib (magic 78da), cung 865 man hinh va cung tap khoa voi ui.json.
+UI   = os.path.join(ROOT, "website", "game", "res", "aace3-5ee03-baa8e")
+UI_JSON = os.path.join(ROOT, "website", "game", "res", "d6519-958fd-b2f8f")
 XLS  = os.path.join(ROOT, "server", "excel-src")
 
 # --- Bang thuat ngu -------------------------------------------------------------------
@@ -129,8 +138,24 @@ def xu_ly(s, don_vi):
     return s2
 
 # --- ui.json ---------------------------------------------------------------------------
+def doc_ui(path):
+    """Doc ui.bin (zlib) hoac ui.json (JSON thuong). Tra (du_lieu, co_nen)."""
+    b = open(path, "rb").read()
+    if b[:1] == b"\x78":                      # zlib
+        return json.loads(zlib.decompress(b)), True
+    return json.loads(b.decode("utf-8")), False
+
+
+def ghi_ui(path, d, nen):
+    raw = json.dumps(d, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    if nen:
+        # Cung muc nen mac dinh -> header 78da giong ban goc.
+        raw = zlib.compress(raw, 9)
+    open(path, "wb").write(raw)
+
+
 def chay_ui(path, apply_):
-    d = json.load(open(path, encoding="utf-8"))
+    d, nen = doc_ui(path)
     doi = []
     def walk(n):
         if isinstance(n, dict):
@@ -148,8 +173,8 @@ def chay_ui(path, apply_):
     if apply_ and doi:
         sao = path + ".truoc-chuan-hoa"
         if not os.path.exists(sao):
-            os.replace(path, sao) if False else __import__("shutil").copy2(path, sao)
-        json.dump(d, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+            shutil.copy2(path, sao)
+        ghi_ui(path, d, nen)
     return doi
 
 # --- excel-src -------------------------------------------------------------------------

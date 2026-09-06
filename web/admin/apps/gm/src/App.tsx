@@ -68,7 +68,10 @@ export function App() {
   if (!me.data) return <DangNhap onXong={() => void me.refetch()} />;
 
   const nguoi = me.data;
-  const tenGame = meta.data?.games.find((g) => g.code === meta.data?.game)?.name ?? "game";
+  // `?.` chi bao ve `meta.data`, khong bao ve `games`. Server tung tra ve thieu khoa nay va
+  // `undefined.find` lam trang trang den truoc khi kip hien loi. Giao dien khong duoc sap chi
+  // vi mot khoa thieu, nen doc phong thu.
+  const tenGame = meta.data?.games?.find((g) => g.code === meta.data?.game)?.name ?? "game";
   const duocGhi = canGM(nguoi);
 
   return (

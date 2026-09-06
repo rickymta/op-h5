@@ -16,6 +16,7 @@ Chay lai duoc nhieu lan: chuoi da doi thi khong con khop khoa nao nua.
 """
 import argparse
 import json
+import zlib
 import os
 import shutil
 import sys
@@ -60,8 +61,10 @@ def main():
 
     with open(a.bang, encoding='utf-8') as f:
         doi = {chuan(k): v for k, v in json.load(f)['doi'].items()}
-    with open(a.ui, encoding='utf-8') as f:
-        ui = json.load(f)
+    # Client nap ui.bin (JSON nen zlib), khong nap ui.json — xem tools/chuan-hoa-dich.py.
+    _raw = open(a.ui, 'rb').read()
+    _nen = _raw[:1] == b'\x78'
+    ui = json.loads(zlib.decompress(_raw) if _nen else _raw.decode('utf-8'))
 
     dem = {}
     di(ui, doi, dem)
@@ -88,8 +91,8 @@ def main():
         shutil.copy2(a.ui, bak)
         print('  da sao luu -> %s' % os.path.basename(bak))
     # separators de khong chen dau cach thua; ensure_ascii=False de giu tieng Viet
-    with open(a.ui, 'w', encoding='utf-8') as f:
-        json.dump(ui, f, ensure_ascii=False, separators=(',', ':'))
+    _out = json.dumps(ui, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+    open(a.ui, 'wb').write(zlib.compress(_out, 9) if _nen else _out)
     print('  da ghi %s' % a.ui)
     return 0
 
