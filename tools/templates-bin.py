@@ -35,6 +35,7 @@ sach, du 680 bang, va cac dong moi giai ma dung theo chi so cot. Khong qua -> kh
     python3 tools/templates-bin.py chen   <goc> <ra> 501124 500198   # chen tu item-table.xlsm
     python3 tools/templates-bin.py xuat   <file> 基础物品        # in bang ra JSON
     python3 tools/templates-bin.py tuong  <goc> <ra>            # 英雄基础/英雄高阶升星 theo server (excel-src/hero)
+    python3 tools/templates-bin.py bang   <goc> <ra> [bang...]  # thay ca bang theo server (mac dinh: BANG_THEO_SERVER)
 """
 import argparse, json, os, struct, sys, zlib
 from importlib import util as _u
@@ -217,11 +218,13 @@ def _o_server(v):
     return str(v).strip()
 
 
-def _sheet_server(ten):
-    idx = json.load(open(os.path.join(CAY_HERO, "_index.json"), encoding="utf-8"))
+def _sheet_server_wb(wb, ten):
+    """Sheet `ten` trong server/excel-src/<wb>/ -> dict id -> {cot: gia tri} (giu thu tu dong)."""
+    cay = os.path.join(ROOT, "server", "excel-src", wb)
+    idx = json.load(open(os.path.join(cay, "_index.json"), encoding="utf-8"))
     for s in idx["sheets"]:
         if s["name"] != ten: continue
-        rows = json.load(open(os.path.join(CAY_HERO, s["file"]), encoding="utf-8"))["rows"]
+        rows = json.load(open(os.path.join(cay, s["file"]), encoding="utf-8"))["rows"]
         col = {_o_server(h): i for i, h in enumerate(rows[0]) if _o_server(h)}
         byid = {}
         for r in rows[1:]:
@@ -229,7 +232,42 @@ def _sheet_server(ten):
             if k.isdigit():
                 byid[k] = {h: (_o_server(r[i]) if i < len(r) else "") for h, i in col.items()}
         return byid
-    sys.exit(f"!! server/excel-src/hero khong co sheet {ten}")
+    sys.exit(f"!! server/excel-src/{wb} khong co sheet {ten}")
+
+
+def _sheet_server(ten):
+    return _sheet_server_wb("hero", ten)
+
+
+# ---------- thay ca bang theo server ----------
+# Cho cac bang ma SERVER quyet dinh toan bo (cua hang VIP, moc VIP...): client chi dung de ve
+# va sap xep, ma may chu gui id nao client khong co thi sap (vip商城商品: client 870 dong,
+# server 2646 -> "Cannot read properties of undefined (reading 'sort')" o VIP SHOP).
+# Dong = dong server, o = cot cua client (thieu -> ""), giu tieu de client.
+BANG_THEO_SERVER = {
+    "vip商城商品": ("vip-shop", "vip商城商品"),
+    "vip等级": ("main-character", "vip等级"),
+}
+
+
+def thay_bang(d, ten_bang):
+    tabs, ra, tk = doc(d), [], {}
+    for ten, rows in tabs:
+        if ten in ten_bang:
+            wb, sh = BANG_THEO_SERVER[ten]
+            keys = [c.decode("utf-8") for c in o_cua(rows[0])]
+            sv = _sheet_server_wb(wb, sh)
+            moi = [rows[0]]
+            for id_, r in sv.items():
+                cells = [r.get(k, "") for k in keys]; cells[0] = id_
+                moi.append(dong_tu_o([x.encode("utf-8") for x in cells]))
+            thieu = [k for k in keys if k not in next(iter(sv.values()), {})]
+            tk[ten] = (len(rows) - 1, len(moi) - 1, thieu)
+            rows = moi
+        ra.append((ten, rows))
+    for t in ten_bang:
+        if t not in tk: sys.exit(f"!! templates.bin khong co bang {t}")
+    return ghi(ra), tk
 
 
 def _dong_bo_bang(rows, sv, cot_luat, them_dong, tham_chieu=None):
@@ -289,7 +327,7 @@ def dong_bo_tuong(d):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("lenh", choices=["kiem", "chu", "chen", "xuat", "tuong"])
+    ap.add_argument("lenh", choices=["kiem", "chu", "chen", "xuat", "tuong", "bang"])
     ap.add_argument("goc"); ap.add_argument("ra", nargs="?"); ap.add_argument("them", nargs="*")
     a = ap.parse_args()
     d = zlib.decompress(open(a.goc, "rb").read())
@@ -301,6 +339,11 @@ def main():
         json.dump(out, sys.stdout, ensure_ascii=False, indent=1); return
     if a.lenh == "chu":
         moi, n = ap_chu(d); print(f"  o doi: {n}")
+    elif a.lenh == "bang":
+        ten_bang = a.them or list(BANG_THEO_SERVER)
+        moi, tk = thay_bang(d, ten_bang)
+        for ten, (cu, m, thieu) in tk.items():
+            print(f"  {ten}: {cu} dong -> {m} dong theo server{'; cot client khong co o server: ' + str(thieu) if thieu else ''}")
     elif a.lenh == "tuong":
         moi, tk = dong_bo_tuong(d)
         for ten, t in tk.items():
