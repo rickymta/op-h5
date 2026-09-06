@@ -4,6 +4,7 @@ import { useLocation, useParams } from "wouter";
 import { LinkButton, Msg, formatDate } from "@op/ui/publisher";
 import { api, ApiError, errText, NEWS_KIND_LABEL, type NewsDetail } from "../api";
 import { useTitle } from "../lib/title";
+import { RichText } from "../lib/content";
 
 /**
  * Một tin: tiêu đề, game, thời gian, ảnh (nếu có), thân tách đoạn theo dòng trống, link ngoài.
@@ -52,9 +53,7 @@ export function NewsDetailPage() {
             <div className="pt-article__img"><img src={q.data.image_url} alt="" loading="lazy" /></div>
           )}
           {q.data.summary && !q.data.body && <p>{q.data.summary}</p>}
-          {(q.data.body ?? "").split(/\n\s*\n/).filter((p) => p.trim()).map((p, i) => (
-            <p key={i}>{p.trim()}</p>
-          ))}
+          {q.data.body ? <RichText body={q.data.body} /> : null}
           {q.data.link_url && (
             <div className="pt-actions">
               <LinkButton href={q.data.link_url} target="_blank" rel="noopener">Xem chi tiết ↗</LinkButton>

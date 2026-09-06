@@ -4,7 +4,7 @@ import { useLocation, useParams } from "wouter";
 import { Empty, LinkButton, formatDate } from "@op/ui/publisher";
 import { ApiError, api, type NewsDetail as NewsDetailT } from "../api";
 import { useMeta, useTitle } from "../queries";
-import { Loading, Paragraphs, QueryError } from "../parts";
+import { Loading, QueryError, RichText } from "../parts";
 
 const KIND_LABEL: Record<string, string> = { news: "Tin", event: "Sự kiện", notice: "Thông báo" };
 
@@ -54,7 +54,7 @@ export function NewsDetail() {
               <img className="gm-article__img" src={n.image_url} alt="" onError={() => setImgBad(true)} />
             ) : null}
             {n.summary ? <p className="pb-lead">{n.summary}</p> : null}
-            {n.body ? <Paragraphs text={n.body} /> : null}
+            {n.body ? <RichText body={n.body} /> : null}
             <div className="gm-article__foot">
               {n.link_url ? (
                 <LinkButton variant="ghost" href={n.link_url}>
