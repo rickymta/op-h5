@@ -66,3 +66,4 @@ platform/cmd/*/dist-gm/*
 !platform/cmd/*/dist-gm/.gitkeep
 platform/cmd/*/dist-market/*
 !platform/cmd/*/dist-market/.gitkeep
+website/game/libs/*.truoc-kmb

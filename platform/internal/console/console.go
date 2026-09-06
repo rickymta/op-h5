@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -116,8 +117,8 @@ func (c *Client) login(ctx context.Context) (string, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	var token string
-	if err := c.do(req, &token); err != nil {
+	token, err := c.doLogin(req)
+	if err != nil {
 		return "", fmt.Errorf("dang nhap console: %w", err)
 	}
 	if token == "" {
@@ -209,6 +210,62 @@ func (c *Client) post(ctx context.Context, path, token string, payload, out any)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Login-Token", token)
 	return c.do(req, out)
+}
+
+// jwtDang nhan dien mot chuoi JWT tran: ba doan base64url ngan cach bang dau cham.
+var jwtDang = regexp.MustCompile(`^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$`)
+
+// doLogin goi /staff/login va chap nhan CA HAI dang phan hoi.
+//
+// Console tra ve token theo hai kieu tuy ban: boc trong EcResult (`{"errorcode":0,
+// "data":"<jwt>"}`) hoac TRA THANG chuoi JWT lam toan bo than phan hoi. Ban dang chay tra
+// kieu thu hai, nen `do()` — von bat buoc EcResult — bao "phan hoi khong phai JSON
+// EcResult" va Adapter khong bao gio dang nhap duoc. Hau qua khong chi la tra nhan vat
+// hong (502) ma con la HANG KHONG PHAT DUOC cho don da tru tien.
+//
+// KHONG dua than phan hoi vao thong bao loi: no chinh la token, va payload cua token co
+// ca hash mat khau tai khoan quan tri — thong bao loi se roi vao nhat ky.
+func (c *Client) doLogin(req *http.Request) (string, error) {
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("goi console: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		return "", ErrUnauthorized
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("console tra HTTP %d", resp.StatusCode)
+	}
+
+	than := strings.TrimSpace(string(raw))
+
+	// Kieu 1: EcResult.
+	var res ecResult
+	if json.Unmarshal(raw, &res) == nil && res.ErrorCode != nil {
+		if !res.ok() {
+			return "", &RejectedError{Code: *res.ErrorCode, Msg: res.ErrorMsg}
+		}
+		var token string
+		if len(res.Data) > 0 && string(res.Data) != "null" {
+			if err := json.Unmarshal(res.Data, &token); err != nil {
+				return "", fmt.Errorf("giai ma token: %w", err)
+			}
+		}
+		return token, nil
+	}
+
+	// Kieu 2: JWT tran, co the co hoac khong co dau nhay bao quanh.
+	than = strings.Trim(than, `"`)
+	if jwtDang.MatchString(than) {
+		return than, nil
+	}
+	return "", fmt.Errorf("phan hoi /staff/login khong nhan dang duoc (%d byte)", len(raw))
 }
 
 func (c *Client) do(req *http.Request, out any) error {
