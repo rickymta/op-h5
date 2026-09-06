@@ -43,6 +43,25 @@ export interface DongQua {
   soLuong: number;
 }
 
+/**
+ * Đổi một chuỗi quà có sẵn thành các dòng, tên do máy chủ tra. Dùng cho "Dán chuỗi có sẵn"
+ * và cho "Dùng lại" một thư trong lịch sử — một đường, không hai bản.
+ */
+export async function docChuoiQua(reward: string, nhom: NhomQua[]): Promise<DongQua[]> {
+  const t = reward.trim();
+  if (!t || !REWARD_RE.test(t)) return [];
+  const r = await api.get<{ mon: { loai: number; ma: number; so_luong: number; ten: string; nhan: string }[] }>(
+    `/admin-portal/api/reward?ma=${encodeURIComponent(t)}`,
+  );
+  return r.mon.map((m) => ({
+    loai: m.loai,
+    ma: m.ma,
+    ten: m.ten,
+    nhan: m.nhan || (nhom.find((n) => n.loai === m.loai)?.nhan ?? `Loại ${m.loai}`),
+    soLuong: m.so_luong,
+  }));
+}
+
 /** Ghép các dòng thành chuỗi máy chủ nhận. Dòng số lượng <= 0 bị bỏ. */
 export function ghepQua(dong: DongQua[]): string {
   return dong
@@ -69,10 +88,13 @@ export function ChonQua({
   nhom,
   dong,
   datDong,
+  canhBao,
 }: {
   nhom: NhomQua[];
   dong: DongQua[];
   datDong: (d: DongQua[]) => void;
+  /** Câu cảnh báo cho một dòng (số lượng vượt ngưỡng…); trả null khi không có gì. */
+  canhBao?: (d: DongQua) => string | null;
 }) {
   const [tuKhoa, setTuKhoa] = useState("");
   const [loc, setLoc] = useState(0); // 0 = mọi nhóm
@@ -238,9 +260,12 @@ export function ChonQua({
                 label="Số lượng"
                 value={d.soLuong === 0 ? "" : String(d.soLuong)}
                 onChange={(e) => doSo(i, e.target.value)}
-                error={d.soLuong <= 0}
+                error={d.soLuong <= 0 || !!canhBao?.(d)}
+                // Số có dấu chấm ngay dưới ô: "50000" và "5000" nhìn gần như nhau, còn
+                // "= 50.000" và "= 5.000" thì không. Đây là chỗ thừa một số 0 hay lọt nhất.
+                helperText={canhBao?.(d) ?? (d.soLuong >= 1000 ? `= ${formatInt(d.soLuong)}` : " ")}
                 inputMode="numeric"
-                sx={{ width: 132 }}
+                sx={{ width: 150 }}
               />
               <Tooltip title="Bỏ món này">
                 <IconButton size="small" onClick={() => datDong(dong.filter((_, j) => j !== i))}>

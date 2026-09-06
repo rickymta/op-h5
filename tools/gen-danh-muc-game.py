@@ -19,12 +19,12 @@ Cot `*英雄名` trong hero.xlsx VAN GIU ten cu — dau `*` nghia la cot ghi chu
 chu KHONG doc. Ten that di duong khac: `英雄名YID` -> bang `文本库` cua
 text-localization.xlsx. Ai doc nham cot `*英雄名` se in ra ten cua game khac.
 
-NGUON — deu la file chinh may chu nap, nen ten luon khop voi thu nguoi choi nhin thay:
+NGUON — file may chu nap, TRU ten vat pham lay theo client (xem duoi):
 
     loai 1  Tuong        hero.xlsx 英雄基础        英雄名YID -> 文本库 (KHONG dung *英雄名)
     loai 2  Trang bi     equipment-table.xlsx 装备表
-    loai 3  Vat pham     item-table.xlsm 基础物品   (tru 类型=6)
-    loai 4  Manh         item-table.xlsm 碎片 + 基础物品 类型=6
+    loai 3  Vat pham     item-table.xlsm 基础物品 (tru 类型=6), TEN ghi de theo templates.bin
+    loai 4  Manh         item-table.xlsm 碎片 + 基础物品 类型=6, TEN ghi de theo templates.bin
     loai 5  Bi kip       rune.xlsx 符文基础
     loai 6  Hon ngoc     destiny.xlsx 命格基础
     loai 7  Than khi     immortal-artifact.xlsx 仙器基础
@@ -38,6 +38,11 @@ Id vi khac de trong — tha hien `Vi · loai N` con hon bia mot cai ten.
     python3 tools/gen-danh-muc-game.py            # ghi JSON
     python3 tools/gen-danh-muc-game.py --check    # chi thong ke
     python3 tools/gen-danh-muc-game.py --doi-chieu ten-file.json   # so voi mau lay tu console
+
+VE `--doi-chieu`: console tra ten theo item-table.xlsm cua MAY CHU, con nguoi choi nhin ten
+trong templates.bin cua CLIENT — hai bang lech nhau 678/1066 vat pham (e41d043). Nguoi van
+hanh chon ten client. Nen tu do, doi chieu voi console chi con dung cho tuong/trang bi/bi
+kip/hon ngoc/than khi; vat pham se bao LECH la dung y, khong phai loi.
 """
 import argparse
 import hashlib

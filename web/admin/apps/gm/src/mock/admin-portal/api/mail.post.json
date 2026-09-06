@@ -1,1 +1,8 @@
-{ "message": "Đã gửi thư (phiếu #40218)." }
+{
+  "message": "Đã gửi 2 thư.",
+  "sent": 2, "failed": 0, "skipped": 0,
+  "results": [
+    { "srv": "s1", "role": "6a9c4fd863748a4930761533", "role_name": "Duyen", "ok": true, "mail_id": 131 },
+    { "srv": "s1", "role": "6a9c4fd863748a4930761534", "role_name": "Duyen Nhi", "ok": true, "mail_id": 132 }
+  ]
+}

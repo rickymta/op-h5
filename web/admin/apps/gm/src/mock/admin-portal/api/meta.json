@@ -1,28 +1,127 @@
 {
-  "games": [{ "code": "haitac", "name": "Đại Hải Trình" }],
+  "games": [
+    {
+      "code": "haitac",
+      "name": "Đại Hải Trình"
+    }
+  ],
   "game": "haitac",
-  "servers": [{ "code": "s1", "name": "Server 1" }],
+  "servers": [
+    {
+      "code": "s1",
+      "name": "Server 1"
+    }
+  ],
   "bags": [
-    { "type": 3, "label": "Vật phẩm", "note": "" },
-    { "type": 2, "label": "Trang bị", "note": "" },
-    { "type": 4, "label": "Mảnh", "note": "" },
-    { "type": 5, "label": "Bí kíp", "note": "" },
-    { "type": 6, "label": "Hồn ngọc", "note": "" },
-    { "type": 7, "label": "Thần khí", "note": "" },
-    { "type": 8, "label": "Mảnh thần khí", "note": "" },
-    { "type": 13, "label": "Sưu tập", "note": "" },
-    { "type": 1, "label": "Tướng", "note": "xoá tướng là thao tác không lùi được" }
+    {
+      "type": 3,
+      "label": "Vật phẩm",
+      "note": ""
+    },
+    {
+      "type": 2,
+      "label": "Trang bị",
+      "note": ""
+    },
+    {
+      "type": 4,
+      "label": "Mảnh",
+      "note": ""
+    },
+    {
+      "type": 5,
+      "label": "Bí kíp",
+      "note": ""
+    },
+    {
+      "type": 6,
+      "label": "Hồn ngọc",
+      "note": ""
+    },
+    {
+      "type": 7,
+      "label": "Thần khí",
+      "note": ""
+    },
+    {
+      "type": 8,
+      "label": "Mảnh thần khí",
+      "note": ""
+    },
+    {
+      "type": 13,
+      "label": "Sưu tập",
+      "note": ""
+    },
+    {
+      "type": 1,
+      "label": "Tướng",
+      "note": "xoá tướng là thao tác không lùi được"
+    }
   ],
   "nhom_qua": [
-    { "loai": 0, "nhan": "Ví" },
-    { "loai": 1, "nhan": "Tướng" },
-    { "loai": 2, "nhan": "Trang bị" },
-    { "loai": 3, "nhan": "Vật phẩm" },
-    { "loai": 4, "nhan": "Mảnh" },
-    { "loai": 5, "nhan": "Bí kíp" },
-    { "loai": 6, "nhan": "Hồn ngọc" },
-    { "loai": 7, "nhan": "Thần khí" },
-    { "loai": 8, "nhan": "Mảnh thần khí" },
-    { "loai": 13, "nhan": "Sưu tập" }
-  ]
+    {
+      "loai": 0,
+      "nhan": "Ví"
+    },
+    {
+      "loai": 1,
+      "nhan": "Tướng"
+    },
+    {
+      "loai": 2,
+      "nhan": "Trang bị"
+    },
+    {
+      "loai": 3,
+      "nhan": "Vật phẩm"
+    },
+    {
+      "loai": 4,
+      "nhan": "Mảnh"
+    },
+    {
+      "loai": 5,
+      "nhan": "Bí kíp"
+    },
+    {
+      "loai": 6,
+      "nhan": "Hồn ngọc"
+    },
+    {
+      "loai": 7,
+      "nhan": "Thần khí"
+    },
+    {
+      "loai": 8,
+      "nhan": "Mảnh thần khí"
+    },
+    {
+      "loai": 13,
+      "nhan": "Sưu tập"
+    }
+  ],
+  "nguong_qua": {
+    "vi": [
+      {
+        "loai": 0,
+        "ma": 1,
+        "toi_da": 100000,
+        "ten": "Nguyên bảo"
+      },
+      {
+        "loai": 0,
+        "ma": 0,
+        "toi_da": 50000000,
+        "ten": "Kim tệ"
+      },
+      {
+        "loai": 0,
+        "ma": 4,
+        "toi_da": 50000000,
+        "ten": "Kinh nghiệm tướng"
+      }
+    ],
+    "mon_toi_da": 999
+  }
 }

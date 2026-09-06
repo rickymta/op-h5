@@ -257,4 +257,7 @@ func (s *adapterServer) mountAdminPortal(mux *http.ServeMux) {
 	mux.HandleFunc("POST "+admBase+"/api/mail", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		s.gm().Mail(w, r, a)
 	}))
+	mux.HandleFunc("GET "+admBase+"/api/mail/history", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
+		s.gm().MailHistory(w, r, a)
+	}))
 }

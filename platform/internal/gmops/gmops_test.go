@@ -68,29 +68,37 @@ func TestRewardPattern(t *testing.T) {
 	}
 }
 
-// Danh muc phai nap duoc va tra dung ten cua game DANG CHAY. Ba mau duoi day lay tu kho do
-// that tren may chu (console /role/bag/query, nhan vat s1/Duyen): neu ai do sinh lai danh
-// muc tu cot `*英雄名` cua hero.xlsx thi 1:401301 se thanh "Chuc Dung" va test nay do.
+// Danh muc phai nap duoc va tra dung ten nguoi choi NHIN THAY.
+//
+// Tuong: kiem chinh xac ten — day la chot chan cho loi "doc cot *英雄名" (ten cua ban goc
+// truoc khi thay ao): 1:401301 ma ra "Chuc Dung" la doc sai cot. Vat pham: chi kiem CO ten
+// va khong con chu Han, khong ghim chuoi — ten vat pham lay theo client (e41d043) va con
+// duoc chuan hoa lai theo bang thuat ngu, ghim chuoi la test do moi lan doi loi dich.
 func TestDanhMucKhopGameDangChay(t *testing.T) {
-	mau := []struct {
-		loai int
-		ma   int64
-		ten  string
-	}{
-		{0, 1, "Nguyên bảo"},
-		{1, 401301, "Hoàng Dung"},
-		{1, 500801, "Trương Vô Kỵ"},
-		{2, 19000100, "Thô Chế"},
-		{3, 100001, "Đan tiến giai"},
-		{3, 100022, "Lệnh tướng cao cấp"},
-		{4, 606001, "4 sao ngẫu nhiên mảnh vỡ"},
-		{5, 5, "Cửu Dương Công"},
-		{6, 30001, "Hồn ngọc ( Tiểu )"},
-		{7, 55000101, "Cửu Âm Nội Lực"},
+	tuong := map[int64]string{401301: "Hoàng Dung", 500801: "Trương Vô Kỵ", 401601: "Tiểu Long Nữ"}
+	for ma, muon := range tuong {
+		if got := TenMuc(1, ma); got != muon {
+			t.Errorf("TenMuc(1, %d) = %q, muon %q", ma, got, muon)
+		}
 	}
-	for _, m := range mau {
-		if got := TenMuc(m.loai, m.ma); got != m.ten {
-			t.Errorf("TenMuc(%d, %d) = %q, muon %q", m.loai, m.ma, got, m.ten)
+	for _, sai := range []string{"Chúc Dung", "Hình Thiên", "Mụ Tổ"} {
+		for _, m := range TimDanhMuc(sai, 1, 5) {
+			if m.Ten == sai {
+				t.Errorf("danh muc con ten ban goc %q (ma %d) — doc nham cot *英雄名", sai, m.Ma)
+			}
+		}
+	}
+	co := [][2]int64{{0, 1}, {2, 19000100}, {3, 100001}, {3, 100022}, {4, 606001}, {5, 5}, {6, 30001}, {7, 55000101}, {13, 30101}}
+	for _, c := range co {
+		ten := TenMuc(int(c[0]), c[1])
+		if ten == "" {
+			t.Errorf("TenMuc(%d, %d) rong", c[0], c[1])
+		}
+		for _, r := range ten {
+			if r >= 0x4E00 && r <= 0x9FFF {
+				t.Errorf("TenMuc(%d, %d) = %q con chu Han", c[0], c[1], ten)
+				break
+			}
 		}
 	}
 }
@@ -146,7 +154,7 @@ func TestCatalogVaDocQuaQuaHTTP(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &rb); err != nil {
 		t.Fatalf("doc JSON reward: %v", err)
 	}
-	if len(rb.Mon) != 2 || rb.Mon[0].Ten != "Nguyên bảo" || rb.Mon[1].Ten != "Lệnh tướng cao cấp" {
+	if len(rb.Mon) != 2 || rb.Mon[0].Ten != "Nguyên bảo" || rb.Mon[1].Ten == "" || rb.Mon[1].Ten != TenMuc(3, 100022) {
 		t.Fatalf("reward tra ve %+v", rb.Mon)
 	}
 	if rb.Mon[1].SoLuo != 10 || rb.Mon[1].Nhan != "Vật phẩm" {

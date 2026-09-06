@@ -45,12 +45,57 @@ export interface NhomQua {
   nhan: string;
 }
 
+/** Ngưỡng quà lớn — cùng con số máy chủ sẽ kiểm, phát qua meta để không giữ hai bản. */
+export interface NguongQua {
+  loai: number;
+  ma: number;
+  toi_da: number;
+  ten: string;
+}
+
 export interface GMMeta {
   games: GameOpt[];
   game: string;
   servers: ServerOpt[];
   bags: BagKind[];
   nhom_qua: NhomQua[];
+  nguong_qua: { vi: NguongQua[]; mon_toi_da: number };
+}
+
+/** Kết quả gửi thư cho một người nhận. */
+export interface KetQuaThu {
+  srv: string;
+  role: string;
+  role_name: string;
+  ok: boolean;
+  mail_id?: number;
+  error?: "console_rejected" | "console_unavailable" | "skipped";
+  message?: string;
+}
+
+export interface GuiThuResult {
+  message: string;
+  sent: number;
+  failed: number;
+  skipped: number;
+  results: KetQuaThu[];
+}
+
+/** Một thư đã gửi, đọc từ nhật ký — có cả lần thất bại và tên người bấm. */
+export interface ThuDaGui {
+  id: number;
+  luc: string;
+  nguoi: string;
+  srv: string;
+  role: string;
+  role_name: string;
+  title: string;
+  content: string;
+  reward: string;
+  qua_ten: string;
+  ok: boolean;
+  loi?: string;
+  mail_id?: number;
 }
 
 /**

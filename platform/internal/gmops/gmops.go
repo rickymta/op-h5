@@ -212,6 +212,8 @@ func (s *Service) Meta(w http.ResponseWriter, r *http.Request, _ Actor) {
 		"games": games, "game": s.GameCode, "servers": servers, "bags": BagKinds,
 		// Nhom cua danh muc qua: de o day vi trang tai meta mot lan roi dung lai cho moi o tim.
 		"nhom_qua": NhomKhoDo(),
+		// Nguong qua lon: giao dien dung DUNG con so may chu se kiem, khong giu mot ban rieng.
+		"nguong_qua": map[string]any{"vi": NguongVi, "mon_toi_da": MonToiDa},
 	})
 }
 
@@ -521,64 +523,5 @@ func (s *Service) Pay(w http.ResponseWriter, r *http.Request, a Actor) {
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
 		"message": fmt.Sprintf("Đã nạp %s ×%d cho %s.", name, in.Count, in.Name),
-	})
-}
-
-type mailRequest struct {
-	Srv     string `json:"srv"`
-	Role    string `json:"role"`
-	Name    string `json:"role_name"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Reward  string `json:"reward"`
-}
-
-// Mail gui mot thu kem qua cho MOT nhan vat.
-//
-// Co y khong ho tro gui toan may chu o day: gui nham mot nguoi thi thu hoi duoc bang tay,
-// gui nham ca may chu thi khong. Khi nao can thi lam mot duong rieng co buoc xac nhan hai lop.
-func (s *Service) Mail(w http.ResponseWriter, r *http.Request, a Actor) {
-	c, ok := s.client(w)
-	if !ok {
-		return
-	}
-	var in mailRequest
-	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8<<10)).Decode(&in); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Dữ liệu không đọc được.")
-		return
-	}
-	in.Reward = strings.TrimSpace(in.Reward)
-	in.Title = strings.TrimSpace(in.Title)
-	if in.Srv == "" || in.Role == "" {
-		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Thiếu máy chủ hoặc nhân vật.")
-		return
-	}
-	if !rewardRe.MatchString(in.Reward) {
-		httpx.Error(w, http.StatusBadRequest, "invalid_request",
-			"Quà phải dạng type:id:count, nhiều món nối bằng # (ví dụ 0:1:5000 là 5.000 Nguyên Bảo).")
-		return
-	}
-	if in.Title == "" {
-		in.Title = "Thư từ quản trị"
-	}
-	if len(in.Title) > 120 || len(in.Content) > 1000 {
-		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Tiêu đề tối đa 120 ký tự, nội dung 1.000.")
-		return
-	}
-	ctx := r.Context()
-	req := console.NewItemMail(in.Srv, in.Role, in.Name,
-		s.or(s.PlatformCode, "develop"), in.Title, in.Content, in.Reward)
-	id, err := c.MailCreate(ctx, req)
-	if err == nil {
-		err = c.MailComplete(ctx, id)
-	}
-	s.audit(ctx, a, "gm_mail", in.Srv+"/"+in.Role,
-		map[string]any{"reward": in.Reward, "title": in.Title, "mail_id": id}, err)
-	if err != nil {
-		fail(w, err)
-		return
-	}
-	httpx.JSON(w, http.StatusOK, map[string]any{
-		"message": "Đã gửi thư (phiếu #" + strconv.FormatInt(id, 10) + ").",
 	})
 }
