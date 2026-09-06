@@ -518,3 +518,29 @@ Năm agent song song, mỗi phần một commit: `b4f2545` (UI) · `9780bfb` (Go
 - **Hai lỗi tự phát hiện khi kiểm bản triển khai**: image nginx thiếu `admin_access.conf` vì tệp mới không được khai trong Dockerfile (cả hai tệp cấu hình đều nạp nó, nên image thiếu là nginx không khởi động được); và trang chi tiết bài viết in nguyên dấu `##` thay vì dựng tiêu đề phụ, do dùng bộ tách đoạn thay vì bộ dựng đã có.
 - **Trên server**: 50 bài đã nạp, 6 bài của bản seed đầu bị xoá vì trùng chủ đề. Nạp lại tệp seed không sinh bản trùng.
 
+### 15.11 Tái cấu trúc giao diện — 2026-09-06
+
+Ba quyết định của người vận hành: **chỉ tách giao diện** (giữ ba tiến trình Go), **chợ chỉ làm giao diện**, **thay thẳng** (xoá cây cũ, không giữ cờ chuyển đổi). Tám agent song song, mỗi phần một commit.
+
+**Cấu trúc**: `web/admin/*` dùng MUI, `web/site/*` dùng Tailwind, hai nhóm **không import chéo**. Năm app, năm bundle riêng, nhúng vào ba binary:
+
+| App | Nhúng vào | Địa chỉ |
+|---|---|---|
+| `admin/apps/platform` | `admin/dist` | `admin.<domain>` |
+| `admin/apps/gm` | `adapter/dist-gm` | `haitac.<domain>/admin-portal` |
+| `site/apps/portal` | `id/dist` | `<domain>`, `id.<domain>` |
+| `site/apps/market` | `id/dist-market` | `<domain>/cho` |
+| `site/apps/haitac` | `adapter/dist` | `haitac.<domain>` |
+
+**Màu làm lại từ đầu**: thang có ngữ nghĩa trong `site/packages/ui/tailwind-preset.js` — `ink` (nền), `brand` (nhấn), `gold` (tiền), `ok`/`warn`/`danger`, `fg` ba mức. Đổi màu một chỗ là đổi cả ba trang công khai.
+
+**Một quyết định sửa giữa chừng**: giao diện GM ban đầu định đặt ở `admin.<domain>/gm`, nhưng API GM chạy trong Adapter của từng game với cookie riêng — hai nguồn gốc khác nhau thì trình duyệt không gửi cookie. Nay bundle GM nhúng vào Adapter và phục vụ tại `/admin-portal`, đúng địa chỉ ban đầu. Game thêm sau có cổng GM riêng ở tên miền của nó.
+
+**Đã xoá**: `web/apps/*`, `web/packages/ui`, ba cờ `ADMIN_SPA`/`ID_SPA`/`ADAPTER_SPA`, và toàn bộ template Go cũ trừ `full.html` (màn hình quá tải) cùng `login.html` của luồng OIDC.
+
+**Kích thước gzip**: portal 96,7 + 8,0 KB · haitac 93,1 + 7,7 · chợ 77,5 + 7,5 · quản trị 311,8 · GM 301,6. Mọi route công khai đo 375 px không tràn ngang, vùng chạm ≥ 44 px.
+
+**Hai lỗi bắt được nhờ agent kiểm chéo**: nút phụ mất viền và cỡ lớn không cao lên, vì lớp nền và lớp biến thể cùng khai một thuộc tính mà thứ tự trong tệp CSS mới quyết định; và image nginx thiếu `admin_access.conf` do tệp mới chưa khai trong Dockerfile.
+
+**Chợ còn thiếu để mở thật**: migration bảng tin rao và sự kiện, thử `numType=1` khi ký gửi Nguyên Bảo trên máy dev, giao dịch mua khoá dòng, bảy endpoint, và trang theo dõi tin ký gửi treo. Mọi nút tiền trong bản xem trước đều đã khoá.
+
