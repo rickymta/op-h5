@@ -60,11 +60,30 @@ NAMES = {
     31002: "Thẻ tuần Phù Văn đúc lại", 31003: "Thẻ tuần Thú Hồn bạc", 31004: "Thẻ tuần Đồ Đằng Thánh Điện",
     31005: "Thẻ tuần Tỉ Ấn đúc lại bạc", 31006: "Thẻ tuần Thú Hồn vàng", 31007: "Thẻ tuần Tỉ Ấn đúc lại vàng",
     31008: "Thẻ tuần Trang bị bạc", 31009: "Thẻ tuần Trang bị vàng",
-    19001: "Gói quà hàng ngày", 19002: "Gói quà Quý 1", 19003: "Gói quà Quý 2",
-    19004: "Gói quà hàng ngày", 19005: "Gói quà Quý 1", 19006: "Gói quà Quý 2",
-    19007: "Gói quà hàng ngày", 19008: "Gói quà Quý 1", 19009: "Gói quà Quý 2",
+    # 19001-19009 la 3 muc gia x 3 giai doan ngay mo may chu (功能ID 720, *商品ID 1/2/3).
+    # Ba muc cung ten thi tren bang hien 3 dong y het nhau; giai doan phai nam trong TEN, vi
+    # ten con di theo don mua va thu trong game — nhung cho khong co cot Dieu kien.
+    19001: "Gói quà ngày mức 1 · ngày 1–14",
+    19002: "Gói quà ngày mức 2 · ngày 1–14",
+    19003: "Gói quà ngày mức 3 · ngày 1–14",
+    19004: "Gói quà ngày mức 1 · ngày 15–30",
+    19005: "Gói quà ngày mức 2 · ngày 15–30",
+    19006: "Gói quà ngày mức 3 · ngày 15–30",
+    19007: "Gói quà ngày mức 1 · từ ngày 31",
+    19008: "Gói quà ngày mức 2 · từ ngày 31",
+    19009: "Gói quà ngày mức 3 · từ ngày 31",
     19101: "Mua một lượt (ngày 1–14)",
     27001: "Quà rút tướng", 27002: "Quà rút tướng sa hoa", 27003: "Quà lực chiến",
+    # 27011-27013 va 27021-27023 la HAI bo goi gioi han toan may chu, trong 充值项 deu ten
+    # 全服限购1/2/3 nen tung bo doi mot trung ten nhau. Chung khac nhau o *商品ID (2/3/4 va
+    # 6/7/8) va o gia; bang cau hinh khong noi noi dung tung goi, nen dat ten theo dung thu
+    # biet chac: moc gia. Dung bia noi dung cho goi tru tien that.
+    27011: "Gói giới hạn toàn máy chủ 1 · mốc 15.000",
+    27012: "Gói giới hạn toàn máy chủ 2 · mốc 40.000",
+    27013: "Gói giới hạn toàn máy chủ 3 · mốc 50.000",
+    27021: "Gói giới hạn toàn máy chủ 1 · mốc 3.000",
+    27022: "Gói giới hạn toàn máy chủ 2 · mốc 15.000",
+    27023: "Gói giới hạn toàn máy chủ 3 · mốc 40.000",
     # 42201-42215: bon khoi "灯芯商店" (bac den) tier 1-5 giong het nhau trong 充值项; pay.txt chi
     # dich toi 42200 nen 15 muc nay tung roi ve ten Han va HIEN RA cua hang. So thu tu khoi lay
     # theo *商品ID (10186-10190 la khoi 1 = 42196-42200, roi 10191/10196/10201).
