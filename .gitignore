@@ -67,3 +67,4 @@ platform/cmd/*/dist-gm/*
 platform/cmd/*/dist-market/*
 !platform/cmd/*/dist-market/.gitkeep
 website/game/libs/*.truoc-kmb
+website/game/libs/*.truoc-va-crash
