@@ -4,15 +4,19 @@ import { cx } from "./cx";
 export type ButtonVariant = "primary" | "ghost" | "danger";
 export type ButtonSize = "md" | "lg";
 
+// KHONG dat `border-transparent` va `min-h-touch` o day: hai lop cung thuoc tinh thi thu tu
+// trong CSS Tailwind sinh ra quyet dinh, khong phai thu tu trong chuoi. Da do that: nut `ghost`
+// mat vien (mau ve rgba(0,0,0,0)) va `size="lg"` khong cao len duoc. Moi bien the va moi co tu
+// khai mau vien va chieu cao cua minh.
 const BASE =
-  "items-center justify-center gap-2 min-h-touch px-5 rounded-md border border-transparent " +
+  "items-center justify-center gap-2 px-5 rounded-md border " +
   "cursor-pointer whitespace-nowrap font-sans font-semibold text-[15px] leading-tight " +
   "tracking-[0.01em] no-underline hover:no-underline transition-colors duration-150 " +
   "disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 " +
   "aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none";
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-brand-500 text-white hover:bg-brand-600 hover:text-white",
+  primary: "bg-brand-500 border-transparent text-white hover:bg-brand-600 hover:text-white",
   ghost: "bg-transparent text-gold-400 border-line hover:bg-ink-800 hover:border-gold-400",
   danger: "bg-danger-bg text-danger-400 border-danger-500 hover:bg-danger-500 hover:text-white",
 };
@@ -20,7 +24,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 // Cỡ lớn thu bớt ở điện thoại (48 px / 16 px) rồi mới nở ra ở máy tính bàn — nút hero
 // cỡ 52 px chiếm gần hết bề ngang 375 px.
 const SIZE: Record<ButtonSize, string> = {
-  md: "",
+  md: "min-h-touch",
   lg: "min-h-12 px-6 text-base tb:min-h-[52px] tb:px-8 tb:text-[17px]",
 };
 
