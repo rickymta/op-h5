@@ -76,12 +76,133 @@ def doc_gia_goc():
     return g
 
 
+def gia_cua_hang():
+    """{充值项ID: {cac gia cua hang dat cho no}} — quet 52 bang co cot 价格 + 充值项ID."""
+    import glob
+    ra = collections.defaultdict(set)
+    for f in sorted(glob.glob(os.path.join(ROOT, "server/excel-src/*/*.json"))):
+        if f.endswith("_index.json"):
+            continue
+        try:
+            j = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        rows = j.get("rows") or []
+        if not rows:
+            continue
+        h = [str(c) for c in (rows[0] or [])]
+        gi = [i for i, c in enumerate(h) if c == "价格"]
+        ri = [i for i, c in enumerate(h) if "充值项" in c]
+        if not gi or not ri:
+            continue
+        gi, ri = gi[0], ri[0]
+        for r in rows[1:]:
+            if not r or len(r) <= max(gi, ri):
+                continue
+            k = str(r[ri]).strip() if r[ri] is not None else ""
+            if k in ("", "None"):
+                continue
+            try:
+                ra[k].add(int(float(r[gi])))
+            except (TypeError, ValueError):
+                pass
+    return ra
+
+
+def theo_cua_hang(apply_, chi_cu, chi_moi):
+    """Ha 额度 va id.txt xuong bang gia CUA HANG TRONG GAME dang hien.
+
+    Chi dung cho truong hop da xac dinh: cua hang hien 300.000 nhung he thong ghi 500.000,
+    tuc nguoi choi bi tru nhieu hon gia nhin thay. Phai sua CA HAI cho — `额度` de game ghi
+    dung moc nap, va `id.txt` vi web thu theo do (id.txt -> game_packages.price_xu ->
+    payAmount). Chi sua mot ben thi nguoi choi van bi tru 500.000.
+
+    Bo qua muc nao duoc nhieu cua hang dat gia khac nhau ma khong quy ve mot gia xu duy
+    nhat — luc do khong biet lay gia nao.
+    """
+    doc = json.load(open(ITEM, encoding="utf-8"))
+    rows = doc["rows"]
+    h = rows[0]
+    iA, iN = h.index("额度"), h.index("*名称")
+    shop = gia_cua_hang()
+    web = doc_gia_web()
+
+    sua, bo = [], []
+    for r in rows[1:]:
+        if not r or r[0] in (None, ""):
+            continue
+        pid = str(r[0]).strip()
+        gs = shop.get(pid)
+        if not gs:
+            continue
+        try:
+            cu = int(float(r[iA]))
+        except (TypeError, ValueError):
+            continue
+        # Gia cua hang tinh bang xu: bo cac dong ghi bang 元 (nho hon nhieu bac).
+        xu = {g for g in gs if g >= 500 and cu / g < 100}
+        if len(xu) != 1:
+            if gs and cu not in gs:
+                bo.append((pid, sorted(gs), cu))
+            continue
+        moi = xu.pop()
+        if moi == cu:
+            continue
+        # Chi dung toi dung cap gia da duoc duyet.
+        if cu != chi_cu or moi != chi_moi:
+            continue
+        sua.append((pid, cu, moi, str(r[iN])))
+        r[iA] = moi
+
+    print(f"ha 额度 xuong bang gia cua hang, chi cap {chi_cu:,} -> {chi_moi:,}: {len(sua)} muc")
+    for (c, m), n in collections.Counter((x[1], x[2]) for x in sua).most_common():
+        print(f"   {c:>9,} -> {m:>9,}   x{n}")
+    if bo:
+        print(f"bo qua {len(bo)} muc khong quy ve mot gia xu duy nhat: "
+              + ", ".join(f"{p}{g}" for p, g, _ in bo[:5]))
+
+    can = {p for p, _, _, _ in sua}
+    n_id = sum(1 for p in can if web.get(p) is not None and web[p] != dict((x[0], x[2]) for x in sua)[p])
+    print(f"id.txt can sua theo: {n_id} muc (web thu theo day, khong sua thi van tru gia cu)")
+
+    if apply_ and sua:
+        with open(ITEM, "w", encoding="utf-8") as f:
+            json.dump(doc, f, ensure_ascii=False, separators=(",", ":"), indent=None)
+        moi_map = {p: m for p, _, m, _ in sua}
+        out = []
+        for ln in open(ID_TXT, encoding="utf-8", errors="replace"):
+            if ";" in ln:
+                pid = ln.split(";", 1)[0].strip()
+                if pid in moi_map:
+                    out.append(f"{pid};{moi_map[pid]}\n")
+                    continue
+            out.append(ln)
+        with open(ID_TXT, "w", encoding="utf-8") as f:
+            f.writelines(out)
+        print(f"da ghi {os.path.relpath(ITEM, ROOT)} va {os.path.relpath(ID_TXT, ROOT)}")
+    else:
+        print("chua ghi (--apply de ghi)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--theo-gia-cua-hang", metavar="CU:MOI",
+                    help="ha 额度 VA id.txt xuong bang gia cua hang, CHI cho cap gia neu ro "
+                         "(vd 500000:300000). Bat buoc neu ro de khong lo tay sua ca cac cap "
+                         "khac — 60.000->100.000 va 150.000->200.000 la QUY VE BAC NAP co chu "
+                         "y, khong phai loi (xem tools/soat-gia.py).")
     ap.add_argument("--don-id-txt", action="store_true",
                     help="xoa cac dong payId lap lai trong id.txt, giu lan dau")
     a = ap.parse_args()
+
+    if a.theo_gia_cua_hang:
+        try:
+            cu, moi = (int(x) for x in a.theo_gia_cua_hang.split(":"))
+        except ValueError:
+            raise SystemExit("--theo-gia-cua-hang can dang CU:MOI, vd 500000:300000")
+        theo_cua_hang(a.apply, cu, moi)
+        return
 
     web, goc = doc_gia_web(), doc_gia_goc()
     doc = json.load(open(ITEM, encoding="utf-8"))
