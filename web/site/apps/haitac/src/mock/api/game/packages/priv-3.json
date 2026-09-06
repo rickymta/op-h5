@@ -1,0 +1,27 @@
+{
+  "id": "priv-3",
+  "name": "Đặc quyền Cao Cấp",
+  "category": "privilege",
+  "grant_mode": "pay",
+  "description": "Cộng thưởng treo máy lâu dài.",
+  "badge": "",
+  "cond": "",
+  "item_name": "Đặc quyền Cao Cấp",
+  "item_count": 1,
+  "price_xu": 60000,
+  "price_fmt": "60.000",
+  "vip_points": 60,
+  "reward_items": [
+    {
+      "label": "Đặc quyền Cao Cấp",
+      "count": 1
+    }
+  ],
+  "grant_note": "Game xử lý như một lần nạp: phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn.",
+  "server_days": {
+    "min": 0,
+    "max": 0
+  },
+  "daily_limit": 0,
+  "vip_required": 0
+}

@@ -1,0 +1,10 @@
+{
+  "servers": [
+    { "code": "s1", "name": "Bắc Hải", "band": "busy", "label": "Đông", "status": "open", "recommend": false, "online": 1420, "soft_limit": 1500 },
+    { "code": "s2", "name": "Đông Hải", "band": "smooth", "label": "Mượt", "status": "open", "recommend": true, "online": 380, "soft_limit": 1500 },
+    { "code": "s3", "name": "Tây Hải", "band": "full", "label": "Đầy", "status": "open", "recommend": false, "online": 1500, "soft_limit": 1500 }
+  ],
+  "online": 3300,
+  "soft_total": 4500,
+  "utilization": 73
+}

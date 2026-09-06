@@ -1,0 +1,23 @@
+{
+  "code": "haitac",
+  "name": "Đại Hải Trình",
+  "tagline": "Ra khơi cùng băng hải tặc của riêng bạn",
+  "genre": "Đấu tướng · Idle",
+  "description": "Thu phục hải tặc, dựng băng của riêng bạn và chinh phục Tân Thế Giới. Chơi thẳng trên trình duyệt, không cần tải.",
+  "cover_url": "/assets/images/banner-min.png",
+  "banner_url": "/assets/images/bg_pc.jpg",
+  "logo_url": "/assets/images/logo.png",
+  "accent": "#EE4623",
+  "badge": "hot",
+  "site_url": "http://127.0.0.1:5175",
+  "id_base": "http://127.0.0.1:8080",
+  "brand": "Cổng game",
+  "links": {
+    "fanpage_url": "https://www.facebook.com/daihaitrinh",
+    "group_url": "https://www.facebook.com/groups/daihaitrinh",
+    "support_url": "https://m.me/daihaitrinh"
+  },
+  "recommended": { "srv_code": "s2", "name": "Đông Hải", "band": "smooth", "label": "Mượt" },
+  "servers_open": 3,
+  "online": 3300
+}
