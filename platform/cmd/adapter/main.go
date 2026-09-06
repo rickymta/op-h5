@@ -66,6 +66,14 @@ var templatesFS embed.FS
 //go:embed all:dist
 var distFS embed.FS
 
+// Giao dien cong cu GM cua RIENG game nay (web/admin/apps/gm -> dist-gm/, base "/admin-portal/").
+// Vi sao nam o day chu khong o tien trinh admin: moi thao tac GM di qua console cua cum game
+// nay, API tuong ung o adminportal.go, va phien dung cookie rieng `haitac_adm`. Dat bundle o
+// admin:8100 thi trinh duyet phai goi API khac origin va khac cookie.
+//
+//go:embed all:dist-gm
+var distGMFS embed.FS
+
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -137,6 +145,7 @@ func main() {
 		db:      db,
 		log:     log,
 		tpl:     tpl,
+		gmDist:  distGMFS,
 		// Host cong khai dien vao URL WebSocket tra cho client: login server chi biet
 		// dia chi noi bo (127.0.0.1).
 		publicHost: envOr("ADAPTER_PUBLIC_HOST", ""),

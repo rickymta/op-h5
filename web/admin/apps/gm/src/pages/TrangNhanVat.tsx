@@ -94,7 +94,7 @@ export function TrangNhanVat({ me, bags }: { me: Me; bags: BagKind[] }) {
     queryKey: key,
     queryFn: () =>
       api.get<{ slots: BagSlot[] }>(
-        `/api/gm/bag?srv=${encodeURIComponent(role!.srvCode)}&role=${encodeURIComponent(role!.roleId)}&type=${type}`,
+        `/admin-portal/api/bag?srv=${encodeURIComponent(role!.srvCode)}&role=${encodeURIComponent(role!.roleId)}&type=${type}`,
       ),
     enabled: !!role,
     retry: false,
@@ -104,7 +104,7 @@ export function TrangNhanVat({ me, bags }: { me: Me; bags: BagKind[] }) {
 
   const xoa = useMutation({
     mutationFn: (expect: number) =>
-      api.post<ClearResult>("/api/gm/bag/clear", {
+      api.post<ClearResult>("/admin-portal/api/bag/clear", {
         srv: role!.srvCode,
         role: role!.roleId,
         type,
@@ -148,7 +148,7 @@ export function TrangNhanVat({ me, bags }: { me: Me; bags: BagKind[] }) {
     <Page
       title={role.roleName}
       sub={`Máy chủ ${role.srvCode} · cấp ${role.level} · VIP ${role.vipLevel} · lực chiến ${formatInt(role.power)}`}
-      breadcrumb={[{ label: "Tra nhân vật", href: "/gm/" }, { label: role.roleName }]}
+      breadcrumb={[{ label: "Tra nhân vật", href: "/admin-portal/" }, { label: role.roleName }]}
       actions={
         <>
           <Button

@@ -1,5 +1,5 @@
 // Điểm vào của công cụ GM. Phục vụ ở admin.<domain>/gm nên mọi đường phải tính từ tiền tố
-// đó: Vite dựng tài sản với `base: "/gm/"`, còn wouter được đặt `base="/gm"` ở đây một lần —
+// đó: Vite dựng tài sản với `base: "/admin-portal/"`, còn wouter được đặt `base="/admin-portal"` ở đây một lần —
 // nhờ vậy trong app viết `/nhan-vat`, không ai phải nhớ gõ `/gm/nhan-vat`.
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
@@ -9,7 +9,7 @@ import { ChonProvider } from "./chon";
 
 createRoot(document.getElementById("root")!).render(
   <AdminApp>
-    <Router base="/gm">
+    <Router base="/admin-portal">
       <ChonProvider>
         <App />
       </ChonProvider>

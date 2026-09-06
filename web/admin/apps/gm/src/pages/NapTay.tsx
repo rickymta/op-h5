@@ -36,7 +36,7 @@ export function NapTay({ me }: { me: Me }) {
 
   const nap = useMutation({
     mutationFn: () =>
-      api.post<MessageResult>("/api/gm/pay", {
+      api.post<MessageResult>("/admin-portal/api/pay", {
         srv: role!.srvCode,
         role: role!.roleId,
         account_uid: role!.accountUid,
@@ -65,7 +65,7 @@ export function NapTay({ me }: { me: Me }) {
     <Page
       title="Nạp tay"
       sub={`Cho ${role.roleName} · ${role.srvCode} · tài khoản ${role.accountUid}`}
-      breadcrumb={[{ label: "Tra nhân vật", href: "/gm/" }, { label: "Nạp tay" }]}
+      breadcrumb={[{ label: "Tra nhân vật", href: "/admin-portal/" }, { label: "Nạp tay" }]}
     >
       <Alert severity="warning" sx={{ mb: 2 }}>
         <b>Thao tác này tạo ra giá trị thật trong game.</b> Máy chủ xử lý y như một lần nạp có

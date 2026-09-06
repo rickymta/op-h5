@@ -28,7 +28,7 @@ async function docJSON(res: Response): Promise<{ error?: string; error_descripti
 
 /** Trả về người đang đăng nhập, hoặc `null` khi chưa — `null` không phải lỗi. */
 export async function layMe(): Promise<Me | null> {
-  const res = await fetch("/api/me", { headers: { Accept: "application/json" } });
+  const res = await fetch("/admin-portal/api/me", { headers: { Accept: "application/json" } });
   if (res.status === 401 || res.status === 403) return null;
   const body = await docJSON(res);
   if (!res.ok) {
@@ -43,7 +43,7 @@ export async function layMe(): Promise<Me | null> {
  * người, một cookie. Ai đã đăng nhập ở admin.<domain> thì vào /gm là dùng được ngay.
  */
 export async function dangNhap(username: string, password: string): Promise<Me> {
-  const res = await fetch("/api/login", {
+  const res = await fetch("/admin-portal/dang-nhap", {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),

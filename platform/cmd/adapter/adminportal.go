@@ -33,6 +33,7 @@ import (
 	"github.com/rickymta/op-h5/platform/internal/gmops"
 	"github.com/rickymta/op-h5/platform/internal/httpx"
 	"github.com/rickymta/op-h5/platform/internal/identity"
+	"github.com/rickymta/op-h5/platform/internal/spa"
 )
 
 const (
@@ -88,25 +89,42 @@ func (s *adapterServer) admAPI(h func(http.ResponseWriter, *http.Request, gmops.
 	}
 }
 
-func (s *adapterServer) admLoginPage(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.admCurrent(r); ok {
-		http.Redirect(w, r, admBase+"/", http.StatusFound)
-		return
-	}
-	s.admRender(w, "gmlogin.html", map[string]any{
-		"Error": r.URL.Query().Get("loi") != "",
-		"Game":  s.cfg.GameCode,
-	})
+// admWantsJSON: SPA goi bang fetch va dat Accept/Content-Type JSON; trinh duyet gui form
+// thi khong. Mot handler phuc vu ca hai de khong phai giu hai duong dang nhap.
+func admWantsJSON(r *http.Request) bool {
+	return strings.Contains(r.Header.Get("Content-Type"), "application/json") ||
+		strings.Contains(r.Header.Get("Accept"), "application/json")
 }
 
 func (s *adapterServer) admDoLogin(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Redirect(w, r, admBase+"/dang-nhap?loi=1", http.StatusFound)
-		return
-	}
 	ctx := r.Context()
-	user := strings.ToLower(strings.TrimSpace(r.FormValue("username")))
-	pass := r.FormValue("password")
+	var user, pass string
+	asJSON := admWantsJSON(r)
+	if asJSON {
+		var in struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<10)).Decode(&in); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "invalid_request", "Dữ liệu không đọc được.")
+			return
+		}
+		user, pass = strings.ToLower(strings.TrimSpace(in.Username)), in.Password
+	} else {
+		if err := r.ParseForm(); err != nil {
+			http.Redirect(w, r, admBase+"/dang-nhap?loi=1", http.StatusFound)
+			return
+		}
+		user, pass = strings.ToLower(strings.TrimSpace(r.FormValue("username"))), r.FormValue("password")
+	}
+	deny := func(reason string) {
+		s.log.Warn("dang nhap cong GM that bai", "user", user, "ip", httpx.ClientIP(r), "ly_do", reason)
+		if asJSON {
+			httpx.Error(w, http.StatusUnauthorized, "invalid_credentials", "Sai tài khoản hoặc mật khẩu.")
+			return
+		}
+		http.Redirect(w, r, admBase+"/dang-nhap?loi=1", http.StatusFound)
+	}
 
 	var (
 		id     int64
@@ -119,14 +137,12 @@ func (s *adapterServer) admDoLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil || status != "active" {
 		// Van bam mot lan de thoi gian phan hoi khong tiet lo tai khoan co ton tai khong.
 		_, _ = identity.HashPassword(pass)
-		s.log.Warn("dang nhap cong GM that bai", "user", user, "ip", httpx.ClientIP(r), "ly_do", "khong co tai khoan hoac bi khoa")
-		http.Redirect(w, r, admBase+"/dang-nhap?loi=1", http.StatusFound)
+		deny("khong co tai khoan hoac bi khoa")
 		return
 	}
 	ok, err := identity.VerifyPassword(pass, hash)
 	if err != nil || !ok {
-		s.log.Warn("dang nhap cong GM that bai", "user", user, "ip", httpx.ClientIP(r), "ly_do", "sai mat khau")
-		http.Redirect(w, r, admBase+"/dang-nhap?loi=1", http.StatusFound)
+		deny("sai mat khau")
 		return
 	}
 
@@ -152,6 +168,10 @@ func (s *adapterServer) admDoLogin(w http.ResponseWriter, r *http.Request) {
 	detail, _ := json.Marshal(map[string]any{"ip": httpx.ClientIP(r), "cong": "game:" + s.cfg.GameCode})
 	s.admAudit(ctx, id, "login", user, string(detail))
 	s.log.Info("dang nhap cong GM", "user", user, "id", id, "ip", httpx.ClientIP(r))
+	if asJSON {
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+		return
+	}
 	http.Redirect(w, r, admBase+"/", http.StatusFound)
 }
 
@@ -164,6 +184,10 @@ func (s *adapterServer) admDoLogout(w http.ResponseWriter, r *http.Request) {
 		Name: admCookie, Value: "", Path: admBase, HttpOnly: true,
 		Secure: s.useTLS, SameSite: http.SameSiteStrictMode, MaxAge: -1,
 	})
+	if admWantsJSON(r) {
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
+		return
+	}
 	http.Redirect(w, r, admBase+"/dang-nhap", http.StatusFound)
 }
 
@@ -172,23 +196,6 @@ func (s *adapterServer) admAudit(ctx context.Context, adminID int64, action, tar
 		`INSERT INTO admin_audit (admin_id, action, target, detail) VALUES (?,?,?,?)`,
 		adminID, action, target, detail); err != nil {
 		s.log.Error("ghi admin_audit", "err", err, "action", action)
-	}
-}
-
-func (s *adapterServer) admHome(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
-	s.admRender(w, "gm.html", map[string]any{
-		"User": a.Username, "Role": a.Role, "CanGM": a.CanGM(),
-		"Game": s.cfg.GameCode, "Base": admBase,
-	})
-}
-
-func (s *adapterServer) admRender(w http.ResponseWriter, name string, data map[string]any) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// Trang quan tri khong bao gio nen bi nhung trong khung cua trang khac.
-	w.Header().Set("X-Frame-Options", "DENY")
-	w.Header().Set("Referrer-Policy", "no-referrer")
-	if err := s.tpl.ExecuteTemplate(w, name, data); err != nil {
-		s.log.Error("render cong GM", "err", err, "tpl", name)
 	}
 }
 
@@ -208,19 +215,19 @@ func (s *adapterServer) gm() *gmops.Service {
 
 // mountAdminPortal gan cong GM vao mux.
 func (s *adapterServer) mountAdminPortal(mux *http.ServeMux) {
-	mux.HandleFunc("GET "+admBase+"/dang-nhap", s.admLoginPage)
 	mux.HandleFunc("POST "+admBase+"/dang-nhap", s.admDoLogin)
 	mux.HandleFunc("POST "+admBase+"/dang-xuat", s.admDoLogout)
 
-	// `{$}` de "/admin-portal/" khong nuot moi duong con.
-	mux.HandleFunc("GET "+admBase+"/{$}", s.admPage(s.admHome))
-	mux.HandleFunc("GET "+admBase, func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, admBase+"/", http.StatusFound)
-	})
-	// Duong la duoi /admin-portal/ phai 404, khong roi vao SPA cong khai o "GET /" — go nham
-	// mot duong quan tri ma nhan trang chu cua game la mot bao cao loi kho hieu.
-	mux.HandleFunc("GET "+admBase+"/", http.NotFound)
+	// Giao dien la SPA rieng (web/admin/apps/gm, base "/admin-portal/"), nhung trong binary
+	// nay va phuc vu tu day — cung origin va cung cookie voi cac API ben duoi. spa.Mount lo
+	// index.html cho moi duong con, cache cho tai san co bam, va 404 cho duong la duoi
+	// /admin-portal/api/ (khong de roi vao SPA cong khai o "GET /": go nham mot duong quan
+	// tri ma nhan trang chu cua game la mot bao cao loi kho hieu).
+	spa.Mount(mux, admBase, s.gmDist, "dist-gm")
 
+	mux.HandleFunc("GET "+admBase+"/api/me", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
+		httpx.JSON(w, http.StatusOK, map[string]any{"username": a.Username, "role": a.Role, "game": s.cfg.GameCode})
+	}))
 	mux.HandleFunc("GET "+admBase+"/api/meta", s.admAPI(func(w http.ResponseWriter, r *http.Request, a gmops.Actor) {
 		s.gm().Meta(w, r, a)
 	}))

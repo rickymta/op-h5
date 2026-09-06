@@ -127,7 +127,7 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
-          ls -la ../platform/cmd/admin/dist ../platform/cmd/admin/dist-gm \
+          ls -la ../platform/cmd/admin/dist ../platform/cmd/adapter/dist-gm \
                  ../platform/cmd/id/dist ../platform/cmd/id/dist-market \
                  ../platform/cmd/adapter/dist
 
@@ -138,7 +138,7 @@ jobs:
       # trang. Nen chan o day thay vi phat hien ngoai san xuat.
       - name: Chan image rong — moi dist phai co index.html
         run: |
-          for d in admin/dist admin/dist-gm id/dist id/dist-market adapter/dist; do
+          for d in admin/dist adapter/dist-gm id/dist id/dist-market adapter/dist; do
             f="platform/cmd/$d/index.html"
             test -s "$f" || { echo "::error::$f rong hoac khong co — buoc build React da that bai"; exit 1; }
             grep -q 'src="/' "$f" || { echo "::error::$f khong tro toi tai san nao"; exit 1; }

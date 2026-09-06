@@ -35,7 +35,7 @@ export function TraNhanVat() {
     queryKey: ["gm-roles", srv, tuKhoa],
     queryFn: () =>
       api.get<{ roles: Role[] }>(
-        `/api/gm/roles?srv=${encodeURIComponent(srv)}&name=${encodeURIComponent(tuKhoa)}`,
+        `/admin-portal/api/roles?srv=${encodeURIComponent(srv)}&name=${encodeURIComponent(tuKhoa)}`,
       ),
     enabled: !!srv && !!tuKhoa,
     retry: false,

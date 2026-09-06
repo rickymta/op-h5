@@ -52,7 +52,7 @@ export function App() {
   // Chưa chọn game thì để máy chủ tự quyết (`pickGame`) rồi đồng bộ ngược lại qua ThanhChon.
   const meta = useQuery({
     queryKey: ["gm-meta", game],
-    queryFn: () => api.get<GMMeta>("/api/gm/meta" + (game ? `?game=${encodeURIComponent(game)}` : "")),
+    queryFn: () => api.get<GMMeta>("/admin-portal/api/meta" + (game ? `?game=${encodeURIComponent(game)}` : "")),
     enabled: !!me.data,
     staleTime: 5 * 60_000,
   });
@@ -75,14 +75,14 @@ export function App() {
     <Shell
       brand={`Công cụ GM · ${tenGame}`}
       nav={NAV}
-      base="/gm"
+      base="/admin-portal"
       onNavigate={go}
       user={{ username: nguoi.username, role: nguoi.role }}
       onLogout={() => {
         // Đăng xuất là form POST của Go (cookie HttpOnly, cùng phiên với trang quản trị).
         const f = document.createElement("form");
         f.method = "POST";
-        f.action = "/dang-xuat";
+        f.action = "/admin-portal/dang-xuat";
         document.body.appendChild(f);
         f.submit();
       }}

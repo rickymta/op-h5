@@ -62,7 +62,7 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
 
   const gui = useMutation({
     mutationFn: () =>
-      api.post<MessageResult>("/api/gm/mail", {
+      api.post<MessageResult>("/admin-portal/api/mail", {
         srv: role!.srvCode,
         role: role!.roleId,
         role_name: role!.roleName,
@@ -89,7 +89,7 @@ export function GuiThu({ me, bags }: { me: Me; bags: BagKind[] }) {
     <Page
       title="Gửi thư kèm quà"
       sub={`Cho ${role.roleName} · ${role.srvCode}`}
-      breadcrumb={[{ label: "Tra nhân vật", href: "/gm/" }, { label: "Gửi thư kèm quà" }]}
+      breadcrumb={[{ label: "Tra nhân vật", href: "/admin-portal/" }, { label: "Gửi thư kèm quà" }]}
     >
       <Alert severity="warning" sx={{ mb: 2 }}>
         <b>Quà trong thư là giá trị thật trong game.</b> Thư gửi đi rồi thì phải nhờ người chơi

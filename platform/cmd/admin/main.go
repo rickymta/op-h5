@@ -29,7 +29,6 @@ import (
 // Hai giao dien React da build, phuc vu tu CUNG mot tien trinh:
 //
 //	dist/     web/admin/apps/platform -> "/"    quan tri nen tang
-//	dist-gm/  web/admin/apps/gm       -> "/gm"  cong cu GM cua game
 //
 // Khong tach tien trinh vi ca hai dung chung bang `admin_users`, chung phien dang nhap va
 // chung nhat ky thao tac — tach ra chi de tach mot bo bundle, khong tach quyen.
@@ -39,9 +38,6 @@ import (
 //
 //go:embed all:dist
 var distFS embed.FS
-
-//go:embed all:dist-gm
-var distGMFS embed.FS
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -139,7 +135,6 @@ func main() {
 	// Hai SPA trong mot tien trinh. Pattern "GET /gm/" cu the hon "GET /" nen ServeMux luon
 	// chon dung ban, khong phu thuoc thu tu dang ky. Xem internal/spa.
 	spa.Mount(mux, "/", distFS, "dist")
-	spa.Mount(mux, "/gm", distGMFS, "dist-gm")
 
 	// Duong API khong ton tai phai tra 404 JSON, khong phai index.html cua SPA: mot API go
 	// nham ten se bao "khong doc duoc JSON" o tan trinh duyet, rat kho lan ra.
