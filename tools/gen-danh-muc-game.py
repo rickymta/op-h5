@@ -43,6 +43,7 @@ import argparse
 import hashlib
 import json
 import os
+from importlib import util as _u
 import sys
 
 try:
@@ -270,6 +271,48 @@ def gom():
     muc[3] = doc_sheet(wb, "基础物品", "物品ID", "名称", them=("类型说明",), loc=khong_manh)
     manh = doc_sheet(wb, "基础物品", "物品ID", "名称", them=("类型说明",), loc=la_manh)
     manh += doc_sheet(wb, "碎片", "碎片ID", "名称", them=("星级",))
+
+    # TEN VAT PHAM: lay theo CLIENT, khong theo item-table.xlsm.
+    #
+    # Cung cai bay ma phan TUONG o tren da tranh: game bi thay ao (goc Trung Quoc than
+    # thoai -> ban dang chay One Piece), va bang cua server van con ten ban goc. Do duoc:
+    # 1066 vat pham co ca hai ben thi 678 KHAC TEN (63%) — 601013 server 'Vo Don Nho' /
+    # client 'Bege', 1000001 server 'Tien xu tui' / client 'Tui beri'. Nguoi van hanh da
+    # xac nhan theo client moi dung: mon trong anh chup cua ho hien 'Chieu mo cao cap',
+    # dung ten client, khong phai 'Lenh tuong cao cap' cua item-table.
+    #
+    # Nguon: bang `基础物品` trong templates.bin — chinh file client nap de ve giao dien.
+    ten_client = {}
+    try:
+        _sp = _u.spec_from_file_location(
+            "_dbt", os.path.join(os.path.dirname(os.path.abspath(__file__)), "doc-bang-templates.py"))
+        _m = _u.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        ten_client = _m.ten_vat_pham()
+    except Exception as e:
+        canh.append("khong doc duoc ten vat pham tu templates.bin (%s) — dang dung ten cua "
+                    "item-table.xlsm, co the la ten cua ban game khac" % e)
+
+    if ten_client:
+        def theo_client(ds):
+            doi = thieu = 0
+            ra = []
+            for t in ds:
+                tid, ten = str(t[0]), t[1]
+                moi = ten_client.get(tid)
+                if moi is None:
+                    thieu += 1
+                    ra.append(t)
+                    continue
+                if moi != ten:
+                    doi += 1
+                ra.append((t[0], moi) + tuple(t[2:]))
+            return ra, doi, thieu
+
+        muc[3], d3, t3 = theo_client(muc[3])
+        manh, d4, t4 = theo_client(manh)
+        canh.append("ten vat pham lay theo client: doi %d, client khong co %d (giu ten server)"
+                    % (d3 + d4, t3 + t4))
     muc[4] = manh
     wb.close()
 
