@@ -74,10 +74,12 @@ type pkgView struct {
 }
 
 type catView struct {
-	Key      string    `json:"key"`
-	Title    string    `json:"title"`
-	Hint     string    `json:"hint"`
-	Packages []pkgView `json:"packages"`
+	Key   string `json:"key"`
+	Title string `json:"title"`
+	Hint  string `json:"hint"`
+	// Count chi co khi goi voi cats_only=1 (luc do Packages rong): so goi trong nhom.
+	Count    int       `json:"count,omitempty"`
+	Packages []pkgView `json:"packages,omitempty"`
 }
 
 // condText dien giai dieu kien mua thanh mot dong ngan. Game van la noi quyet dinh.
@@ -442,6 +444,19 @@ func (s *adapterServer) listPackages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
+	// cats_only=1: chi ten cac nhom, KHONG kem goi. Trang cua hang can danh sach nhom de do
+	// vao o chon ngay khi mo; keo ca bang gia ve chi de lam viec do la 512 KB (1.933 goi, rieng
+	// nhom 'event' 1.870) — do tren server that 2026-09-06. Voi nguoi choi dung dien thoai
+	// day la nua MB moi lan mo cua hang, trong khi bang o duoi da phan trang tu may chu.
+	if q.Get("cats_only") == "1" {
+		cats := groupCategories(pkgs, "")
+		out := make([]catView, 0, len(cats))
+		for _, c := range cats {
+			out = append(out, catView{Key: c.Key, Title: c.Title, Hint: c.Hint, Count: len(c.Packages)})
+		}
+		httpx.JSON(w, http.StatusOK, map[string]any{"categories": out})
+		return
+	}
 	out := map[string]any{"categories": groupCategories(pkgs, strings.TrimSpace(q.Get("category")))}
 	if sq := parseStoreQuery(q); sq.On {
 		out["list"] = buildList(pkgs, sq)

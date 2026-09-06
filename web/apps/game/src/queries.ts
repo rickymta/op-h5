@@ -32,14 +32,29 @@ export const useServers = () =>
 /**
  * Danh sách nhóm gói (để đổ vào ô chọn và lấy "Gói nổi bật").
  *
- * Đây là lượt gọi **duy nhất** kéo cả bảng giá về; mọi lượt lọc/lật trang sau đó đi qua
- * `usePkgList` với khối `list` nhỏ. Trước đợt 3 thì mỗi lần đổi tab cũng phải giữ nguyên
- * 1.900 gói trong bộ nhớ và vẽ hết ra.
+ * Chỉ lấy TÊN các nhóm (`cats_only=1`), không kèm gói: bảng ở dưới đã phân trang từ máy chủ
+ * qua `usePkgList`. Trước đợt 3 thì mỗi lần đổi tab đều giữ nguyên 1.900 gói trong bộ nhớ và
+ * vẽ hết ra; kéo cả bảng giá về chỉ để đổ vào ô chọn là 512 KB mỗi lần mở cửa hàng.
  */
 export const useCategories = () =>
   useQuery({
     queryKey: ["cats"],
-    queryFn: () => api.get<PackagesResponse>("/api/game/packages"),
+    // cats_only=1: chi ten nhom, khong kem goi (512 KB -> ~400 B).
+    queryFn: () => api.get<PackagesResponse>("/api/game/packages?cats_only=1"),
+    staleTime: 5 * 60_000,
+  });
+
+/**
+ * Sáu gói cho hàng "Gói nổi bật".
+ *
+ * Trước đây lấy từ khối `categories` bằng cách duyệt toàn bộ 1.933 gói tìm cái có `badge`;
+ * từ khi khối đó chỉ còn tên nhóm (`cats_only=1`) thì phải hỏi riêng. Chọn nhóm `diamond`
+ * (mốc Nguyên Bảo) vì đó là hàng chính của cửa hàng và mọi mốc đều có nhãn "x2 lần đầu".
+ */
+export const useFeatured = () =>
+  useQuery({
+    queryKey: ["featured"],
+    queryFn: () => api.get<PackagesResponse>("/api/game/packages?cat=diamond&sort=price_asc&page=1&page_size=6"),
     staleTime: 5 * 60_000,
   });
 

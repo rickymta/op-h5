@@ -15,7 +15,7 @@ import {
   type Column,
 } from "@op/ui/publisher";
 import { api, type OrdersResponse, type Pkg } from "../api";
-import { useCategories, useMe, useMeta, usePkgList, useStoreStats, useTitle } from "../queries";
+import { useCategories, useFeatured, useMe, useMeta, usePkgList, useStoreStats, useTitle } from "../queries";
 import { Loading, PageHead, PkgCard, QueryError } from "../parts";
 
 const PAGE_SIZE = 20;
@@ -34,7 +34,7 @@ const SORTS = [
  *     "Đăng nhập để xem…", nên người mới không biết ở đây bán gì (QA đợt 3, V3).
  *  2. **Phân trang phía máy chủ.** Trước đây trang tải cả 1.900 gói rồi vẽ hết một tab
  *     (QA V4). Giờ mỗi lượt chỉ 20 dòng; bảng giá đầy đủ chỉ được kéo về một lần cho ô chọn
- *     nhóm và hàng "Gói nổi bật" (xem `useCategories`).
+ *     nhóm (xem `useCategories`); hàng "Gói nổi bật" hỏi riêng qua `useFeatured`.
  *
  * Việc mua chuyển sang trang chi tiết `/cua-hang/:id` — nút ở cột cuối chỉ dẫn tới đó.
  */
@@ -61,6 +61,7 @@ export function Store() {
   useEffect(() => setPage(1), [q, cat, sort]);
 
   const cats = useCategories();
+  const featuredQ = useFeatured();
   const list = usePkgList({ q, cat, sort, page, pageSize: PAGE_SIZE });
   const catList = cats.data?.categories ?? [];
   const view = list.data?.list;
@@ -71,10 +72,8 @@ export function Store() {
   // "0 Xu" cho người vừa nạp tiền là lời nói dối khó chịu nhất trang này có thể nói (QA V2).
   const balance = me.data?.logged_in ? me.data.balance : undefined;
 
-  const featured = catList
-    .flatMap((c) => c.packages)
-    .filter((p) => p.badge)
-    .slice(0, 6);
+  // Hỏi riêng thay vì duyệt `catList`: khối nhóm nay chỉ còn tên, không kèm gói.
+  const featured = featuredQ.data?.list?.packages ?? [];
 
   const columns: Column<Pkg>[] = [
     {
