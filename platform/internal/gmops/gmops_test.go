@@ -1,6 +1,7 @@
 package gmops
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -114,5 +115,49 @@ func TestTimDanhMuc(t *testing.T) {
 	// Tu khoa rong khong duoc lam sap: tra ve mot trang dau de nguoi truc duyet.
 	if len(TimDanhMuc("", 1, 5)) != 5 {
 		t.Errorf("tu khoa rong phai tra du gioi han")
+	}
+}
+
+// Hai duong tra cuu phai chay duoc that, khong chi ham ben trong: tra JSON dung khoa ma
+// giao dien doc, va tu choi chuoi qua sai dinh dang thay vi tra ve mot danh sach rong.
+func TestCatalogVaDocQuaQuaHTTP(t *testing.T) {
+	s := &Service{GameCode: "haitac"}
+
+	rec := httptest.NewRecorder()
+	s.Catalog(rec, httptest.NewRequest("GET", "/api/catalog?q=nguyen+bao&limit=5", nil), Actor{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("catalog -> %d", rec.Code)
+	}
+	var ra struct {
+		Muc []MucDanhMuc `json:"muc"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &ra); err != nil {
+		t.Fatalf("doc JSON catalog: %v", err)
+	}
+	if len(ra.Muc) == 0 || ra.Muc[0].Ten != "Nguyên bảo" {
+		t.Errorf("catalog tra ve %+v", ra.Muc)
+	}
+
+	rec = httptest.NewRecorder()
+	s.DocQua(rec, httptest.NewRequest("GET", "/api/reward?ma=0:1:5000%233:100022:10", nil), Actor{})
+	var rb struct {
+		Mon []MonQua `json:"mon"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &rb); err != nil {
+		t.Fatalf("doc JSON reward: %v", err)
+	}
+	if len(rb.Mon) != 2 || rb.Mon[0].Ten != "Nguyên bảo" || rb.Mon[1].Ten != "Lệnh tướng cao cấp" {
+		t.Fatalf("reward tra ve %+v", rb.Mon)
+	}
+	if rb.Mon[1].SoLuo != 10 || rb.Mon[1].Nhan != "Vật phẩm" {
+		t.Errorf("mon thu hai: %+v", rb.Mon[1])
+	}
+
+	// Chuoi sai dinh dang: phai bao loi. Tra ve mang rong se khien trang hien "khong co mon
+	// nao" — nguoi truc tuong minh go dung ma quy khong cho.
+	rec = httptest.NewRecorder()
+	s.DocQua(rec, httptest.NewRequest("GET", "/api/reward?ma=0-1-5000", nil), Actor{})
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("chuoi sai dinh dang -> muon 400, duoc %d", rec.Code)
 	}
 }
