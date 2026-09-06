@@ -30,4 +30,7 @@ loadLib("libs/fe8a3-bb91d-7fb1b.js");
 // opBundleV (do play.php dat, theo filemtime) di kem appVersion: doi host thi bundle
 // duoc sed lai, URL phai doi theo, neu khong cache "immutable 30d" giu ban cu.
 loadLib("libs/e228b-0b904-ac44c.js?v="+appVersion+(typeof opBundleV!=="undefined"?"&b="+opBundleV:""));
-loadLib("libs/795bf-bff72-0d910.js?v="+appVersion); 
+// opManifestV (play.php dat theo filemtime cua manifest): loader nay fetch manifest bang
+// URL co dinh, ma /libs/ cache "immutable 30d" — khong bust thi nguoi choi cu khong bao gio
+// thay tai nguyen moi du manifest da tro sang ten bam moi.
+loadLib("libs/795bf-bff72-0d910.js?v="+appVersion+(typeof opManifestV!=="undefined"?"&b="+opManifestV:"")); 

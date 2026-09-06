@@ -69,3 +69,4 @@ platform/cmd/*/dist-market/*
 website/game/libs/*.truoc-kmb
 website/game/libs/*.truoc-va-crash
 website/game/res/*.truoc-chuan-hoa-tpl
+website/game/libs/*.goc

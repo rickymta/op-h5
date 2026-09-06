@@ -144,6 +144,9 @@ var appVersion = "28.3";
 // nguoi choi tiep tuc goi host CU toi 30 ngay. Da dinh that: sau khi doi host, client
 // van goi 192.168.1.69:7788 tu bundle trong cache.
 var opBundleV = "<?php echo @filemtime(__DIR__ . '/libs/e228b-0b904-ac44c.js') ?: '0'; ?>";
+// Cung ly do: manifest (ten logic -> ten bam) duoc loader fetch bang URL co dinh va cache
+// immutable. Doi mot tai nguyen = ten bam moi + manifest moi, nen manifest PHAI doi URL.
+var opManifestV = "<?php echo @filemtime(__DIR__ . '/libs/2af72-f100c-2af72.json') ?: '0'; ?>";
 
 // Hoi lai truoc khi roi game. Nut nam o goc man hinh, ma trong luc choi thi goc la cho
 // hay bi cham nham nhat — mot cu cham khong duoc phep keo nguoi ta ra khoi tran.
