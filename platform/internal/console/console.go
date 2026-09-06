@@ -487,6 +487,16 @@ func (c *Client) FindRoles(ctx context.Context, srvCode, roleName string, limit 
 }
 
 // BagType la loai kho do. Gia tri lay tu CLAUDE.md muc 7 va tu gmhanglong/gm/api.php.
+//
+// Ten tieng Anh o day theo BANG CAU HINH may chu doc, khong theo ten hien thi: ban dang chay
+// da bi thay ao (tuong than thoai -> tuong Kim Dung) nen chu hien thi lech han. Doi chieu tu
+// kho do that tren may chu:
+//
+//	5  符文 rune.xlsx 符文基础            'Cuu Duong Cong'  — KHONG phai "mac an"
+//	6  命格 destiny.xlsx 命格基础          'Hon ngoc ( Tieu )' — KHONG phai "thu hon"
+//	7  仙器 immortal-artifact.xlsx 仙器基础 'Cuu Am Noi Luc'
+//
+// Nhan tieng Viet nam o gmops.BagKinds; sua nhan thi sua o day cho khop.
 type BagType int
 
 const (
@@ -494,8 +504,8 @@ const (
 	BagEquipment    BagType = 2
 	BagItem         BagType = 3
 	BagFragment     BagType = 4
-	BagSeal         BagType = 5
-	BagBeastSoul    BagType = 6
+	BagRune         BagType = 5
+	BagDestiny      BagType = 6
 	BagArtifact     BagType = 7
 	BagArtifactFrag BagType = 8
 	BagCollection   BagType = 13

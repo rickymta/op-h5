@@ -1,0 +1,9 @@
+{
+  "muc": [
+    { "loai": 0, "ma": 1, "ten": "Nguyên bảo" },
+    { "loai": 0, "ma": 0, "ten": "Kim tệ" },
+    { "loai": 3, "ma": 100022, "ten": "Lệnh tướng cao cấp", "phu": "Đạo cụ" },
+    { "loai": 3, "ma": 100001, "ten": "Đan tiến giai", "phu": "Vật liệu" },
+    { "loai": 1, "ma": 401301, "ten": "Hoàng Dung", "phu": "4★" }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "goi": [
+    { "ma": "18003", "ten": "Nạp 50K xu", "gia_xu": 50000, "nhom": "diamond", "an_tren_web": false },
+    { "ma": "19001", "ten": "Gói quà ngày mức 1 · ngày 1–14", "gia_xu": 20000, "nhom": "daily", "an_tren_web": false }
+  ]
+}

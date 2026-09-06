@@ -42,7 +42,7 @@ def q(x):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--tu", default="68a9bf3,e33da1a,a180958",
+    ap.add_argument("--tu", default="68a9bf3,e33da1a,a180958,181cf35",
                     help="cac commit lay ten CU lam dieu kien bao ve, cach nhau bang dau phay")
     a = ap.parse_args()
 
@@ -78,9 +78,13 @@ def main():
 -- SINH TU DONG boi tools/gen-doi-ten-goi.py — dung sua tay, sua nguon roi chay lai.
 --
 -- Vi sao phai co file rieng: `game_packages.haitac.sql` chi ghi de cot `name` khi ten dang
--- luu CON CHU HAN. {len(lenh)} goi duoi day da mang ten tieng Viet nhung dich chua chuan
--- (con "anh hung" thay vi "tuong", "500 van KNB" thay vi "5M KNB", trat tu kieu Trung
--- "tinh anh goi qua"), nen upsert kia khong bao gio cham toi.
+-- luu CON CHU HAN. {len(lenh)} goi duoi day da mang ten tieng Viet nen upsert kia khong bao
+-- gio cham toi, trong khi ten van sai o hai kieu:
+--   * dich chua chuan: con "anh hung" thay vi "tuong", "500 van KNB" thay vi "5M KNB",
+--     trat tu kieu Trung "tinh anh goi qua";
+--   * goi ten tuong cua BAN GOC: game da bi thay ao (tuong than thoai -> tuong Kim Dung)
+--     nhung ten goi dich tu chuoi Han cu, nen dang goi ten tuong khong co trong game
+--     ("Hong Quan do cat giu goi qua" trong khi tuong do ten la Ly Mac Sau).
 --
 -- Dieu kien `AND (name=<ten cu>...)` liet ke cac ten tung duoc sinh ra truoc day. Nguoi van
 -- hanh da tu dat ten khac -> khong khop -> giu nguyen. Chay lai vo hai.

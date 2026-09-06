@@ -1,0 +1,6 @@
+{
+  "mon": [
+    { "raw": "0:1:5000", "loai": 0, "ma": 1, "so_luong": 5000, "ten": "Nguyên bảo", "nhan": "Ví" },
+    { "raw": "3:100022:10", "loai": 3, "ma": 100022, "so_luong": 10, "ten": "Lệnh tướng cao cấp", "nhan": "Vật phẩm" }
+  ]
+}

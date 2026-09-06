@@ -1,7 +1,0 @@
-{
-  "roles": [
-    { "roleId": "65f1a0c4e7b2d91a3c0f4471", "roleName": "Râu Trắng", "srvCode": "s1", "accountUid": "haitac_10231", "platformCode": "develop", "level": 96, "vipLevel": 9, "power": 18450320 },
-    { "roleId": "65f1a0c4e7b2d91a3c0f4472", "roleName": "Râu Trắng II", "srvCode": "s1", "accountUid": "haitac_10488", "platformCode": "develop", "level": 74, "vipLevel": 5, "power": 6120890 },
-    { "roleId": "65f1a0c4e7b2d91a3c0f4473", "roleName": "Râu Trắng Nhí", "srvCode": "s1", "accountUid": "haitac_11902", "platformCode": "develop", "level": 41, "vipLevel": 1, "power": 733410 }
-  ]
-}

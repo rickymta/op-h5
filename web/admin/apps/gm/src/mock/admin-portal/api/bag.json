@@ -1,0 +1,9 @@
+{
+  "slots": [
+    { "id": "6a9c4fed63748a4930761faa", "tid": 100001, "num": 32868, "name": "Đan tiến giai" },
+    { "id": "6a9c4ff763748a4930761fb1", "tid": 100022, "num": 856, "name": "Lệnh tướng cao cấp" },
+    { "id": "6a9c500463748a4930761fb7", "tid": 100021, "num": 3, "name": "Lệnh tướng thường" },
+    { "id": "6a9c50df63748a4930761fd0", "tid": 100005, "num": 100, "name": "Vé tầm bảo thường" },
+    { "id": "6a9cb6e208ec0b51f8ac2e86", "tid": 500015, "num": 9163, "name": "Đá hiệp khách gói quà" }
+  ]
+}

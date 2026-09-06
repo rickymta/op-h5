@@ -1,0 +1,6 @@
+{
+  "roles": [
+    { "roleId": "6a9c4fd863748a4930761533", "roleName": "Duyen", "srvCode": "s1", "accountUid": "6be2e5d0-f493-41d1-8530-37f34e8f0c5d", "platformCode": "develop", "level": 98, "vipLevel": 51, "power": 5460023 },
+    { "roleId": "6a9c4fd863748a4930761534", "roleName": "Duyen Nhi", "srvCode": "s1", "accountUid": "0a41c9de-2b77-4a20-9c0e-1d6b8f204c11", "platformCode": "develop", "level": 74, "vipLevel": 5, "power": 1120889 }
+  ]
+}

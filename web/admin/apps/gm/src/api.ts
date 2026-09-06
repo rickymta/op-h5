@@ -39,11 +39,51 @@ export interface BagKind {
   note: string;
 }
 
+/** Một nhóm trong danh mục quà (loại kho đồ + nhãn), dùng cho bộ lọc của ô tìm. */
+export interface NhomQua {
+  loai: number;
+  nhan: string;
+}
+
 export interface GMMeta {
   games: GameOpt[];
   game: string;
   servers: ServerOpt[];
   bags: BagKind[];
+  nhom_qua: NhomQua[];
+}
+
+/**
+ * Một mục tra được trong danh mục của game: đúng thứ máy chủ sẽ phát khi gửi `loai:ma`.
+ *
+ * Tên ở đây do máy chủ đọc từ chính bảng cấu hình game nạp, nên khớp với thứ người chơi thấy
+ * trong game. Đừng dựng thêm một bảng tên nào ở phía trình duyệt.
+ */
+export interface MucQua {
+  loai: number;
+  ma: number;
+  ten: string;
+  phu?: string;
+}
+
+/** Một món trong chuỗi quà, đã được máy chủ tra ra tên. */
+export interface MonQua {
+  raw: string;
+  loai: number;
+  ma: number;
+  so_luong: number;
+  ten: string;
+  nhan: string;
+}
+
+/** Một gói nạp tay chọn được. */
+export interface GoiNap {
+  ma: string;
+  ten: string;
+  gia_xu: number;
+  nhom: string;
+  mo_ta?: string;
+  an_tren_web: boolean;
 }
 
 export interface Role {
