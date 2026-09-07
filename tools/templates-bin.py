@@ -241,6 +241,61 @@ def _sheet_server(ten):
     return _sheet_server_wb("hero", ten)
 
 
+def _dong_bo_bang(rows, sv, cot_luat, them_dong, tham_chieu=None):
+    keys = [c.decode("utf-8") for c in o_cua(rows[0])]
+    cl = []   # [id, cells(str)] giu thu tu
+    for pl in rows[1:]:
+        c = o_cua(pl)
+        cl.append([c[0].decode("utf-8", "replace") if c else "", [x.decode("utf-8", "replace") for x in (c or [])]])
+    co = {i for i, _ in cl}
+    se_them = [k for k in sorted(sv, key=int) if k not in co and int(k) < 900000] if them_dong else []
+    dich_hop_le = (co | set(se_them)) if tham_chieu is None else tham_chieu
+    doi, giu_tc = {}, []
+    for id_, cells in cl:
+        if id_ not in sv: continue
+        for k in cot_luat:
+            if k not in keys or k not in sv[id_]: continue
+            i = keys.index(k); moi = sv[id_][k]
+            if i >= len(cells): continue
+            if k in COT_THAM_CHIEU and moi not in ("", "0") and moi not in dich_hop_le:
+                giu_tc.append((id_, k, moi)); continue
+            if cells[i] != moi:
+                doi[k] = doi.get(k, 0) + 1; cells[i] = moi
+    them = []
+    for id_ in se_them:
+        proto = sv[id_].get("原型ID", "")
+        # lay dong trinh bay tu cung nguyen mau, sao cao nhat nho hon dong moi
+        ung = [(int(c[keys.index("星级")] or 0), c) for i, c in cl
+               if i in sv and sv[i].get("原型ID") == proto and c[keys.index("星级")].isdigit()]
+        if not ung: giu_tc.append((id_, "them", "khong co nguyen mau tren client")); continue
+        sao_moi = int(sv[id_].get("星级") or 0)
+        thap = [u for u in ung if u[0] <= sao_moi] or ung
+        cells = list(max(thap, key=lambda u: u[0])[1])
+        cells[0] = id_
+        for k in cot_luat:
+            if k in keys and k in sv[id_] and keys.index(k) < len(cells):
+                moi = sv[id_][k]
+                if k in COT_THAM_CHIEU and moi not in ("", "0") and moi not in dich_hop_le: continue
+                cells[keys.index(k)] = moi
+        cl.append([id_, cells]); them.append(id_)
+    ra = [rows[0]] + [dong_tu_o([x.encode("utf-8") for x in cells]) for _, cells in cl]
+    return ra, {"doi": doi, "them": them, "giu_tham_chieu": giu_tc, "chi_client": len(co - set(sv))}
+
+
+def dong_bo_tuong(d):
+    sv, sv_cao = _sheet_server("英雄基础"), _sheet_server("英雄高阶升星")
+    tabs, ra, tk = doc(d), [], {}
+    for ten, rows in tabs:
+        if ten == "英雄基础":
+            rows, tk[ten] = _dong_bo_bang(rows, sv, COT_LUAT, True)
+            id_tuong = {o_cua(pl)[0].decode("utf-8", "replace") for pl in rows[1:] if o_cua(pl)}
+        elif ten == "英雄高阶升星":   # 下一星英雄ID o day tro sang 英雄基础
+            rows, tk[ten] = _dong_bo_bang(rows, sv_cao, COT_LUAT_CAO, False, id_tuong)
+        ra.append((ten, rows))
+    if len(tk) != 2: sys.exit("!! templates.bin thieu 英雄基础 / 英雄高阶升星")
+    return ghi(ra), tk
+
+
 # ---------- thay ca bang theo server ----------
 # Cho cac bang ma SERVER quyet dinh (cua hang, hoat dong, moc, drop...): client chi dung de ve
 # va sap xep, ma may chu gui id nao client khong co thi sap (vip商城商品: client 870 dong,

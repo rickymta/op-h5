@@ -279,6 +279,7 @@ a3b31-4c087-1dc2f.js            → ydwxConfig (basePath, metaDataServer :12345,
 - `ios.html`, `hiente.php` — biến thể loader cho iOS / domain khác (chú ý `appVersion` khác nhau: `play.php` = 28.3, `hiente.php` = 5.9)
 - `version` — `{"Name":"Newworld AFK","Version":"1.4"}`
 - **Bảng luật trong `templates.bin` phải theo server, chữ thì theo client** — 261/668 bảng cùng tên đang lệch ([docs/lech-bang-client-server.md](docs/lech-bang-client-server.md)); máy chủ gửi id client không có là màn đó sập (VIP SHOP 2026-09-06). Đồng bộ bằng `python3 tools/templates-bin.py bang|tuong`, xem [docs/bang-client-theo-server.md](docs/bang-client-theo-server.md).
+- 11 nguyên mẫu One Piece đặc biệt là **phe Hỗn độn (6) ở cả client lẫn server** (`tools/phe-hon-don.py`, quyết định 2026-09-07) — nhận Excel mới từ nhà phát hành thì chạy lại tool này trước khi `tuong`.
 - **Bảng tướng trong `templates.bin` phải theo server** (`server/excel-src/hero/`): server kiểm tra vật liệu thăng tinh bằng bảng của nó, lệch là toast 80026. Đồng bộ bằng `python3 tools/templates-bin.py tuong`, phát hành bằng `tools/phat-hanh-res.py` — xem [docs/thang-tinh-lech-bang.md](docs/thang-tinh-lech-bang.md).
 
 Client gọi thẳng: `:9000` (login), `:12345/announce/one`, `:7788/client/error/log` và `/login/flow/add`, `:9999/status`, `/api/getSession.php`.

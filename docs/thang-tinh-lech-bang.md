@@ -46,3 +46,14 @@ phận từ trước, nên giao diện giờ mới khớp với trận đấu th
 
 Nếu nhận `hero.xlsx` mới từ nhà phát hành: `python tools/excel-to-json.py` rồi chạy lại
 `tuong`.
+
+## Cập nhật 2026-09-07 — 11 nguyên mẫu về phe Hỗn độn ở CẢ máy chủ
+Sau khi client theo phe máy chủ, người chơi không dùng được 20 bản Nika 6★ làm vật liệu
+`15:6:1` (Hỗn độn chỉ nhận phe 4/5/6) vì máy chủ xếp Nika phe Người; ứng viên duy nhất là
+Kaido lại đang trong đội hình → kẹt. Người vận hành chốt theo thiết kế One Piece: 11 nguyên
+mẫu (Law, S.Rozo, Black Beard, Luffy G4, Rayleigh, Otohime, Kaido, Shanks, Yamato, Oden, Nika)
+là **Hỗn độn ở cả hai bên**. `tools/phe-hon-don.py` sửa `阵营=6` cho 470 dòng trong
+`excel-src/hero/01.json` → `json-to-excel hero` → ExcelProbe OK → image server; client chạy lại
+`templates-bin.py tuong` (cột 阵营 là cột luật) → `res/97cec-ae249-5f56f`. Máy chủ có sẵn lớp
+phe 6 (tướng Hỗn độn riêng 6012–6016) nên không phải vá code. Hệ quả: nội dung tính theo phe
+(khắc chế, duyên phận phe, đấu trường chủng tộc) coi 11 tướng này là Hỗn độn.
