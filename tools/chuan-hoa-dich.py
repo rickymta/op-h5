@@ -59,6 +59,12 @@ GLOSSARY = [
     # "nguyen bao" la am Han-Viet cua ban goc, nguoi choi khong hieu. Ap cho ca UI, Excel may chu,
     # templates.bin, cong GM, web (2026-09-07).
     (r"nguyên bảo",            "kim cương"),
+    # Man thang tinh (HeroDetail box1Lv/box1Desc1): nhan rong 130px, chu 24px, gia tri dung o
+    # x=152 — nhan dich may dai 21-22 ky tu de len so ("Cap han muc 255 >> 280"). Rut cho vua.
+    (r"cấp hạn mức cao nhất",   "cấp tối đa"),
+    (r"công máu trưởng thành",  "công/máu"),
+    # CHI dang nhan (co dau hai cham): "toc do tang len 10%" trong mo ta ky nang phai giu nguyen.
+    (r"tốc độ tăng lên:",       "tốc độ:"),
     # 领取 — "nhan lay" la dich thua, dong tu tieng Viet chi can "nhan"
     (r"nhận lấy",              "nhận"),
     # 奖励 — "ban thuong" la tu Han-Viet co, van dung la "thuong" / "phan thuong"
