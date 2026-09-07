@@ -118,6 +118,9 @@ if ($opAuto === null) {
     <script src="/assets/js/jquery.ui.touch-punch.min.js"></script>
     <script src="/assets/js/jquery.modal.min.js"></script>
 	<link rel="stylesheet" href="/assets/css/jquery.modal.min.css" />
+	<!-- Font của game (31 KB) phải về trước khi engine vẽ chữ lần đầu: LayaAir vẽ chữ một lần
+	     rồi giữ ảnh, vẽ bằng font dự phòng là giữ mãi font dự phòng. -->
+	<link rel="preload" href="/assets/fonts/msyh.ttf" as="font" type="font/ttf" crossorigin>
     <!--<script src="/check.js"></script>-->
 </head>
 
@@ -226,6 +229,15 @@ function openNapTien(){
             font-family: Arial;
             src: url(/assets/fonts/msyh.ttf);
         }
+        /* msyh.ttf thật ra là UTM Cafeta (font Việt hẹp, 251 glyph). Ba khai báo trên gán nó
+           đè lên tên font hệ thống (Arial/Helvetica/Times) — trên iPhone canvas vẫn vẽ bằng
+           Helvetica đậm, chữ rộng gấp rưỡi, nhãn dài đè lên nhau (màn Tu luyện 2026-09-07).
+           Khai báo thêm dưới tên THẬT để nhãn nào cần thì gọi đích danh trong ui.bin
+           (tools/va-nhan-canh-gioi.py), không phụ thuộc cách trình duyệt xử lý tên trùng. */
+        @font-face {
+            font-family: 'UTM Cafeta';
+            src: url(/assets/fonts/msyh.ttf);
+        }
         @font-face {
             font-family: heroname;
             src: url(/assets/fonts/heroname.ttf);
@@ -259,11 +271,23 @@ function openNapTien(){
         }
     </style>
     <script type="text/javascript">
+        // Giữ các lib của game lại tới khi font đã nạp (tối đa 3 giây), xem chú thích ở
+        // thẻ preload. `async = false` giữ đúng thứ tự chèn, nên hoãn cả loạt là an toàn.
+        var opFontXong = Promise.resolve();
+        if (document.fonts && document.fonts.load) {
+            ['bold 30px Arial', '30px Arial', "bold 22px 'UTM Cafeta'"].forEach(function (f) {
+                document.fonts.load(f).catch(function () {});
+            });
+            opFontXong = Promise.race([
+                document.fonts.ready.catch(function () {}),
+                new Promise(function (r) { setTimeout(r, 3000); })
+            ]);
+        }
         function loadLib(url) {
             var script = document.createElement("script");
             script.async = false;
             script.src = url;
-            document.body.appendChild(script);
+            opFontXong.then(function () { document.body.appendChild(script); });
         }
     </script>
     <script type="text/javascript">

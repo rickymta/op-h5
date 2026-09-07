@@ -70,3 +70,6 @@ website/game/libs/*.truoc-kmb
 website/game/libs/*.truoc-va-crash
 website/game/res/*.truoc-chuan-hoa-tpl
 website/game/libs/*.goc
+
+# Ban sao luu cua cac tool va bundle/ui (va-*.py, apply-ui-text.py)
+website/game/**/*.truoc-*
