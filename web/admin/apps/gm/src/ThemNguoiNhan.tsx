@@ -100,7 +100,9 @@ export function ThemNguoiNhan({
         const roles = await traTen(srv, t);
         // Dịch vụ tra tên trả về cả tên GẦN GIỐNG; chỉ nhận đúng tên (không phân biệt hoa
         // thường). Một tên đúng → thấy; nhiều tên đúng → để người trực chọn, không tự đoán.
-        const dung = roles.filter((r) => r.roleName.toLowerCase() === t.toLowerCase());
+        const dung = roles.filter(
+          (r) => r.roleName.toLowerCase() === t.toLowerCase() || (r.idUsername ?? "").toLowerCase() === t.toLowerCase(),
+        );
         if (dung.length === 1) ra.push({ ten: t, trangThai: "thay", role: dung[0]! });
         else if (dung.length > 1) ra.push({ ten: t, trangThai: "nhieu", roles: dung });
         else ra.push({ ten: t, trangThai: "khong_thay" });
@@ -139,7 +141,7 @@ export function ThemNguoiNhan({
             <Stack direction="row" spacing={1}>
               <TextField
                 size="small"
-                label="Tên nhân vật"
+                label="Tên nhân vật hoặc tài khoản ID"
                 value={ten}
                 onChange={(e) => setTen(e.target.value)}
                 onKeyDown={(e) => {
@@ -175,7 +177,7 @@ export function ThemNguoiNhan({
                   >
                     <ListItemText
                       primary={r.roleName}
-                      secondary={`cấp ${r.level} · VIP ${r.vipLevel} · lực chiến ${formatInt(r.power)} · ${r.roleId}`}
+                      secondary={`tài khoản ID: ${r.idUsername ?? "?"} · cấp ${r.level} · VIP ${r.vipLevel} · lực chiến ${formatInt(r.power)} · ${r.roleId}`}
                     />
                     {daChon(r) && <Chip size="small" label="đã có" />}
                   </ListItemButton>
@@ -194,7 +196,7 @@ export function ThemNguoiNhan({
               onChange={(e) => setDanhSach(e.target.value)}
               multiline
               minRows={5}
-              placeholder={"Duyen\nDuyen Nhi\n…"}
+              placeholder={"Duyen\nquandh\n…"}
               helperText="Dán từ phiếu hỗ trợ hay bảng tính; có dấu phẩy hoặc tab thì chỉ lấy cột đầu."
               fullWidth
             />

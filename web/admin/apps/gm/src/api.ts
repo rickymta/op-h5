@@ -140,6 +140,9 @@ export interface Role {
   level: number;
   vipLevel: number;
   power: number;
+  /** username của tài khoản ID sở hữu nhân vật (adapter tra từ game_identities); thiếu nếu chưa liên kết */
+  idUsername?: string;
+  gameUsername?: string;
 }
 
 export interface BagSlot {

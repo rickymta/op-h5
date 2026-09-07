@@ -179,6 +179,7 @@ export function TrangNhanVat({ me, bags }: { me: Me; bags: BagKind[] }) {
           }}
         >
           <O nhan="Mã nhân vật" gia={role.roleId} mono />
+          <O nhan="Tài khoản ID" gia={role.idUsername ?? "(chưa liên kết)"} />
           <O nhan="Mã tài khoản" gia={role.accountUid} mono />
           <O nhan="Nền tảng" gia={role.platformCode || "—"} mono />
           <O nhan="Máy chủ" gia={role.srvCode} mono />

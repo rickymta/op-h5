@@ -337,7 +337,12 @@ func (s *Service) Packages(w http.ResponseWriter, r *http.Request, _ Actor) {
 	httpx.JSON(w, http.StatusOK, map[string]any{"goi": goi})
 }
 
-// Roles tim nhan vat theo ten.
+// Roles tim nhan vat theo ten nhan vat HOAC theo tai khoan ID.
+//
+// Ten nhan vat va ten tai khoan la hai thu khac nhau ma nguoi truc rat de nham: tai khoan ID
+// `quandh` choi nhan vat `Duyen`, con nhan vat ten `QuanDH` lai cua tai khoan `duyenham`
+// (2026-09-07: thu gui nham nguoi vi vay). Nen: tim ca hai chieu, va moi dong ket qua deu
+// mang ten tai khoan ID de nguoi truc doi chieu truoc khi bam.
 func (s *Service) Roles(w http.ResponseWriter, r *http.Request, _ Actor) {
 	c, ok := s.client(w)
 	if !ok {
@@ -346,18 +351,107 @@ func (s *Service) Roles(w http.ResponseWriter, r *http.Request, _ Actor) {
 	srv := strings.TrimSpace(r.URL.Query().Get("srv"))
 	name := strings.TrimSpace(r.URL.Query().Get("name"))
 	if srv == "" || name == "" {
-		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Cần chọn máy chủ và nhập tên nhân vật.")
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "Cần chọn máy chủ và nhập tên nhân vật hoặc tài khoản ID.")
 		return
 	}
-	roles, err := c.FindRoles(r.Context(), srv, name, 20)
+	ctx := r.Context()
+	roles, err := c.FindRoles(ctx, srv, name, 20)
 	if err != nil {
 		fail(w, err)
 		return
 	}
+	// Theo tai khoan ID: username hoac email cua id.<domain> -> tai khoan game cua game nay.
+	for _, uid := range s.accountUIDsOfUser(ctx, name) {
+		them, err := c.FindRolesByAccount(ctx, srv, uid, 20)
+		if err != nil {
+			fail(w, err)
+			return
+		}
+		for _, t := range them {
+			trung := false
+			for _, r0 := range roles {
+				if r0.RoleID == t.RoleID {
+					trung = true
+					break
+				}
+			}
+			if !trung {
+				roles = append(roles, t)
+			}
+		}
+	}
 	if roles == nil {
 		roles = []console.RoleRecord{}
 	}
+	s.ganTaiKhoanID(ctx, roles)
 	httpx.JSON(w, http.StatusOK, map[string]any{"roles": roles})
+}
+
+// accountUIDsOfUser: tu khoa la username/email cua mot tai khoan ID -> cac tcg.account.uid
+// cua no trong game nay (thuong chi mot). Khong co DB hay khong khop thi rong.
+func (s *Service) accountUIDsOfUser(ctx context.Context, tuKhoa string) []string {
+	if s.DB == nil {
+		return nil
+	}
+	rows, err := s.DB.QueryContext(ctx,
+		`SELECT gi.account_uid FROM users u
+		   JOIN game_identities gi ON gi.user_id = u.id AND gi.game_code = ?
+		  WHERE (u.username = ? OR u.email = ?) AND gi.account_uid IS NOT NULL AND gi.account_uid <> ''`,
+		s.GameCode, strings.ToLower(tuKhoa), strings.ToLower(tuKhoa))
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var uid string
+		if rows.Scan(&uid) == nil && uid != "" {
+			out = append(out, uid)
+		}
+	}
+	return out
+}
+
+// ganTaiKhoanID dien IDUsername/GameUsername cho tung dong ket qua theo account_uid.
+func (s *Service) ganTaiKhoanID(ctx context.Context, roles []console.RoleRecord) {
+	if s.DB == nil || len(roles) == 0 {
+		return
+	}
+	uids := map[string]bool{}
+	for _, r := range roles {
+		if r.AccountUID != "" {
+			uids[r.AccountUID] = true
+		}
+	}
+	if len(uids) == 0 {
+		return
+	}
+	args := []any{s.GameCode}
+	dau := make([]string, 0, len(uids))
+	for uid := range uids {
+		args = append(args, uid)
+		dau = append(dau, "?")
+	}
+	rows, err := s.DB.QueryContext(ctx,
+		`SELECT gi.account_uid, u.username, gi.game_username FROM game_identities gi
+		   JOIN users u ON u.id = gi.user_id
+		  WHERE gi.game_code = ? AND gi.account_uid IN (`+strings.Join(dau, ",")+`)`, args...)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	ten := map[string][2]string{}
+	for rows.Next() {
+		var uid, id, game string
+		if rows.Scan(&uid, &id, &game) == nil {
+			ten[uid] = [2]string{id, game}
+		}
+	}
+	for i := range roles {
+		if t, ok := ten[roles[i].AccountUID]; ok {
+			roles[i].IDUsername, roles[i].GameUsername = t[0], t[1]
+		}
+	}
 }
 
 // Bag doc mot loai kho do cua nhan vat.

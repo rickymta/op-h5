@@ -82,14 +82,26 @@ export function TraNhanVat() {
     },
     {
       field: "accountUid",
-      headerName: "Mã tài khoản",
+      headerName: "Tài khoản",
       flex: 1,
-      minWidth: 140,
+      minWidth: 160,
       sortable: false,
       hideBelow: "md",
-      renderCell: (p) => (
-        <span style={{ fontFamily: "ui-monospace, monospace" }}>{(p.row as Role).accountUid}</span>
-      ),
+      // Tên tài khoản ID đứng trước, mã tài khoản game bên dưới: người trực tra theo tên
+      // nhân vật nhưng gửi quà theo tài khoản — hai thứ này hay bị nhầm nhau.
+      renderCell: (p) => {
+        const r = p.row as Role;
+        return (
+          <Box sx={{ py: 0.5, lineHeight: 1.3 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {r.idUsername ?? "(chưa liên kết ID)"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "ui-monospace, monospace" }}>
+              {r.accountUid}
+            </Typography>
+          </Box>
+        );
+      },
     },
     { field: "srvCode", headerName: "Máy chủ", width: 96, sortable: false },
     { field: "level", headerName: "Cấp", width: 74, align: "right", headerAlign: "right", sortable: false },
@@ -140,10 +152,10 @@ export function TraNhanVat() {
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
           <TextField
             size="small"
-            label="Tên nhân vật"
+            label="Tên nhân vật hoặc tài khoản ID"
             value={ten}
             onChange={(e) => setTen(e.target.value)}
-            placeholder="tên hiển thị trong game"
+            placeholder="tên hiển thị trong game, hoặc username/email tài khoản ID"
             autoComplete="off"
             autoFocus
             fullWidth

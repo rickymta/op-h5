@@ -556,6 +556,12 @@ type RoleRecord struct {
 	Level        int    `json:"level"`
 	VipLevel     int    `json:"vipLevel"`
 	Power        int64  `json:"power"`
+	// Hai truong duoi do gmops dien them tu platform.game_identities/users: tai khoan ID
+	// (username o id.<domain>) va username trong tcg.account. Nguoi truc nham ten nhan vat
+	// voi ten tai khoan (ID `quandh` choi nhan vat `Duyen`, con nhan vat `QuanDH` la cua
+	// nguoi khac) — phai hien ca hai canh nhau.
+	IDUsername   string `json:"idUsername,omitempty"`
+	GameUsername string `json:"gameUsername,omitempty"`
 }
 
 // FindRoles tim nhan vat theo ten trong mot may chu.
@@ -573,6 +579,27 @@ func (c *Client) FindRoles(ctx context.Context, srvCode, roleName string, limit 
 		"roleName": {roleName},
 		"page":     {"1"},
 		"pageSize": {strconv.Itoa(limit)},
+	}
+	if err := c.getAuthed(ctx, c.statBase(), "/role/record/list", q, &out); err != nil {
+		return nil, err
+	}
+	return out.Records, nil
+}
+
+// FindRolesByAccount tim nhan vat theo ma tai khoan game (tcg.account.uid) trong mot may chu.
+// RoleRecordFilter cua statistic co accountUid (doc tu bytecode 2026-09-07).
+func (c *Client) FindRolesByAccount(ctx context.Context, srvCode, accountUID string, limit int) ([]RoleRecord, error) {
+	if limit <= 0 || limit > 50 {
+		limit = 10
+	}
+	var out struct {
+		Records []RoleRecord `json:"records"`
+	}
+	q := url.Values{
+		"srvCode":    {srvCode},
+		"accountUid": {accountUID},
+		"page":       {"1"},
+		"pageSize":   {strconv.Itoa(limit)},
 	}
 	if err := c.getAuthed(ctx, c.statBase(), "/role/record/list", q, &out); err != nil {
 		return nil, err
