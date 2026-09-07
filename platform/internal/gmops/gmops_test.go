@@ -127,6 +127,19 @@ func TestTimDanhMuc(t *testing.T) {
 	if len(TimDanhMuc("", 1, 5)) != 5 {
 		t.Errorf("tu khoa rong phai tra du gioi han")
 	}
+	// Than khi doc quyen tim duoc theo TEN TUONG (qua cot phu): "black beard" -> "Trái Yami"
+	// cap 1 dung dau nhom 7, va manh cua no o nhom 8.
+	ra = TimDanhMuc("black beard", 7, 5)
+	if len(ra) == 0 || ra[0].Ten != "Trái Yami" || ra[0].Ma != 48000101 || ra[0].Phu != "Black Beard · cấp 1" {
+		t.Fatalf("tim than khi theo ten tuong ra %+v", ra)
+	}
+	if ra := TimDanhMuc("black beard", 8, 5); len(ra) == 0 || ra[0].Ma != 48000001 {
+		t.Fatalf("tim manh than khi theo ten tuong ra %+v", ra)
+	}
+	// Ten mon do van la duong chinh: "trai yami" bat dau bang -> xep truoc moi ket qua "chua".
+	if ra := TimDanhMuc("trai yami", 0, 5); len(ra) == 0 || ra[0].Ma != 48000101 {
+		t.Fatalf("tim 'trai yami' ra %+v", ra)
+	}
 }
 
 // Hai duong tra cuu phai chay duoc that, khong chi ham ben trong: tra JSON dung khoa ma

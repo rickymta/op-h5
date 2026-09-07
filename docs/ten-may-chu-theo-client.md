@@ -60,3 +60,33 @@ thứ hai song song bộ cũ), `ExitOnOutOfMemoryError` tắt tiến trình, Doc
 người chơi rớt mạng ~2 phút, và trong lúc nạp dở thì thăng tinh trả NPE
 (`HeroAction.starUp:178`). Restart container game sạch hơn: cũng ~2 phút nhưng không có
 khoảng "nửa cũ nửa mới".
+
+## Thần khí trong cổng GM tìm được theo tên tướng (2026-09-07)
+Nhóm 7 "Thần khí" (仙器基础) đặt tên theo món đồ — "Trái Yami", "Huyết Đao", "Tam Kiếm" — không
+nhắc tướng nào dùng, nên gõ "Black Beard" vào ô tìm của GM không ra gì. `gen-danh-muc-game.py`
+nay ghi cột phụ `"<tướng> · cấp N"` cho thần khí độc quyền (cột `专属英雄` → tên tướng qua
+`英雄名YID`), `"cấp N"` cho thần khí chung, và tên tướng cho mảnh (nhóm 8, qua `仙器ID`);
+`gmops.TimDanhMuc` gộp cột phụ vào chuỗi tìm (tên món vẫn đứng trước để "bắt đầu bằng" ưu
+tiên tên món). Muốn phát thần khí gốc thì chọn dòng **cấp 1** (`…0101`); 34 dòng cấp cao hơn
+là cùng món đã lên cấp. Thần khí độc quyền của 12 tướng One Piece và nguồn nhận trong game
+(theo `excel-src`, 2026-09-07):
+
+| Tướng | Thần khí (cấp 1) | Mảnh | Nguồn trong game |
+|---|---|---|---|
+| S.Rozo 102300 | 22000101 Tam Kiếm | 22000001–4 | Tiên khí UP, Bảo Thanh Phường, cửa hàng tướng giới hạn, gói nạp |
+| Black Beard 501700 | 48000101 Trái Yami | 48000001–4 | Tiên khí UP, Bảo Thanh Phường, cửa hàng tướng giới hạn, gói nạp, kế thừa |
+| White Beard 501800 | 49000101 Trái Gura | 49000001–4 | Tiên khí UP, Bảo Thanh Phường, cửa hàng tướng giới hạn, cửa hàng theo ngày |
+| Luffy G4 600100 | 52000101 Trái Nika | 52000001–4 | Tiên khí UP, Bảo Thanh Phường, cửa hàng tướng giới hạn, nhiệm vụ 13★ |
+| Rayleigh 600200 | 54000101 Kiếm Rayleigh | 54000001–4 | Tiên khí UP, Bảo Thanh Phường, cửa hàng tướng giới hạn, nhiệm vụ 13★ |
+| Otohime 600300 | 55000101 Long Châu | 55000001–4 (chỉ S1 có nguồn) | Cửa hàng tướng giới hạn, VIP, đổi theo ngày, nhiệm vụ 13★ |
+| Kaido 600400 | 58000101 Trái Uo | 58000001–4 (không nguồn) | Cửa hàng tướng giới hạn, VIP, cửa hàng theo ngày, nhiệm vụ 13★ |
+| Shanks 600500 | 65000101 Huyết Đao | không có | Cửa hàng tướng giới hạn, nhiệm vụ 10★/13★ |
+| Yamato 600600 | 91000101 Okuchi no Makami | không có | Cửa hàng tướng giới hạn, nhiệm vụ 10★/13★ |
+| Oden 600700 | 67000101 Thanh Kiếm Enma | không có | Cửa hàng tướng giới hạn, nhiệm vụ 10★/13★ |
+| Nika 600800 | 68000101 Trái Thần Nika | không có | **không có nguồn nào** — chỉ phát qua GM |
+| Law 102200 | không có thần khí độc quyền | — | — |
+
+Đổi phe 11 tướng sang Hỗn độn **không** đụng thần khí: máy chủ (`FairyHandler`) và client
+đều ràng thần khí độc quyền theo `专属英雄` (mã nguyên mẫu), cột `阵营` của thần khí chỉ dùng
+cho nhãn/sắp xếp/kế thừa/lọc cửa hàng. Trái Yami vẫn phe 5, Tam Kiếm phe 1 — để nguyên vì
+`仙器继承基础` 10001 đang liệt kê 48000101 theo phe cũ.

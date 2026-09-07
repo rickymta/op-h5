@@ -100,9 +100,15 @@ func nap() *khoDanhMuc {
 			k.muc = append(k.muc, m)
 			k.tra[[2]int64{loai, ma}] = ten
 		}
+		// Chuoi tim = ten + cot phu: than khi doc quyen mang ten mon do ("Trái Yami") con
+		// nguoi truc chi biet ten tuong ("Black Beard") — cot phu ghi tuong, nen phai tim
+		// duoc qua do. Ten dung truoc de "bat dau bang" van uu tien ten mon.
 		k.tim = make([]string, len(k.muc))
 		for i, m := range k.muc {
 			k.tim[i] = textnorm.Fold(m.Ten)
+			if m.Phu != "" {
+				k.tim[i] += " " + textnorm.Fold(m.Phu)
+			}
 		}
 		kho = k
 	})

@@ -155,6 +155,52 @@ def doc_sheet(wb, sheet, cot_id, cot_ten, them=None, loc=None):
     return out
 
 
+def doc_tien_khi(wb, tuong):
+    """Than khi (仙器基础) + manh (仙器碎片), cot phu = TEN TUONG doc quyen + cap.
+
+    Ten than khi la ten mon do ("Trai Yami", "Huyet Dao"), khong nhac tuong nao dung — nguoi
+    truc go "Black Beard" vao GM thi khong ra gi (2026-09-07). Cot phu mang "<tuong> · cấp N"
+    (manh: "<tuong> · S1"), gmops gop ca cot phu vao chuoi tim, nen tim theo ten tuong ra
+    dung than khi. Than khi chung (khong 专属英雄) chi ghi cap.
+    """
+    ten_proto = {}
+    for rid, ten, _ in tuong:
+        ten_proto.setdefault(rid // 100 * 100, ten)
+    ws = wb["仙器基础"]
+    it = ws.iter_rows(values_only=True)
+    hdr = list(next(it))
+    i_id, i_ten, i_cap, i_hero = cot(hdr, "仙器ID"), cot(hdr, "名称"), cot(hdr, "等级"), cot(hdr, "专属英雄")
+    n = max(i_id, i_ten, i_cap, i_hero) + 1
+    than_khi, hero_cua = [], {}
+    for r in it:
+        r = du(r, n)
+        rid, ten = r[i_id], r[i_ten]
+        if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
+            continue
+        hero = ""
+        if isinstance(r[i_hero], (int, float)) and int(r[i_hero]) > 0:
+            hero = ten_proto.get(int(r[i_hero]) // 100 * 100, "")
+        phu = hero
+        if isinstance(r[i_cap], (int, float)):
+            phu = ("%s · cấp %d" % (hero, r[i_cap])) if hero else ("cấp %d" % r[i_cap])
+        than_khi.append((int(rid), ten.strip(), phu))
+        hero_cua[int(rid)] = hero
+    ws = wb["仙器碎片"]
+    it = ws.iter_rows(values_only=True)
+    hdr = list(next(it))
+    i_id, i_ten, i_tk = cot(hdr, "碎片ID"), cot(hdr, "名称"), cot(hdr, "仙器ID")
+    n = max(i_id, i_ten, i_tk) + 1
+    manh = []
+    for r in it:
+        r = du(r, n)
+        rid, ten = r[i_id], r[i_ten]
+        if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
+            continue
+        hero = hero_cua.get(int(r[i_tk]), "") if isinstance(r[i_tk], (int, float)) else ""
+        manh.append((int(rid), ten.strip(), hero))
+    return than_khi, manh
+
+
 def bang_ten_tuong():
     """id tuong -> ten NGUOI CHOI NHIN THAY, qua 英雄名YID -> 文本库."""
     wb, _ = mo("text-localization.xlsx")
@@ -352,8 +398,7 @@ def gom():
     wb.close()
 
     wb, _ = mo("immortal-artifact.xlsx")
-    muc[7] = doc_sheet(wb, "仙器基础", "仙器ID", "名称")
-    muc[8] = doc_sheet(wb, "仙器碎片", "碎片ID", "名称")
+    muc[7], muc[8] = doc_tien_khi(wb, tuong)
     wb.close()
 
     wb, _ = mo("collection.xlsx")
