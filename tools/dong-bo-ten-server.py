@@ -120,7 +120,7 @@ def dong_bo_json(client, ghi):
                 r[si] = moi; doi += 1
         if ghi and doi:
             with open(p, "w", encoding="utf-8") as fh:
-                json.dump(j, fh, ensure_ascii=False, indent=1)
+                json.dump(j, fh, ensure_ascii=False, separators=(",", ":"))
         tk.append((wb, sh, f"chung {chung}, doi {doi}"))
     return tk
 
