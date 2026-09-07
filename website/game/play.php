@@ -147,6 +147,20 @@ var opBundleV = "<?php echo @filemtime(__DIR__ . '/libs/e228b-0b904-ac44c.js') ?
 // Cung ly do: manifest (ten logic -> ten bam) duoc loader fetch bang URL co dinh va cache
 // immutable. Doi mot tai nguyen = ten bam moi + manifest moi, nen manifest PHAI doi URL.
 var opManifestV = "<?php echo @filemtime(__DIR__ . '/libs/2af72-f100c-2af72.json') ?: '0'; ?>";
+// Engine (b025d, ResourceVersion.onManifestLoaded) goi `await getStrVersion()` — ham nay do
+// loader libs/795bf dinh nghia, ma loader duoc nap SAU engine va bundle. Manifest tai xong
+// truoc khi loader chay thi "ReferenceError: getStrVersion is not defined" (Uncaught in
+// promise), va bang anh xa ten->file bam co the trong. Khai bao truoc mot ban cho: doi
+// getVersion() cua loader xuat hien roi giao lai; khi loader nap, khai bao `async function
+// getStrVersion` cua no thay the ban nay.
+window.getStrVersion = function () {
+	if (typeof getVersion === 'function') return getVersion();
+	return new Promise(function (ok) {
+		var t = setInterval(function () {
+			if (typeof getVersion === 'function') { clearInterval(t); ok(getVersion()); }
+		}, 30);
+	});
+};
 
 // Hoi lai truoc khi roi game. Nut nam o goc man hinh, ma trong luc choi thi goc la cho
 // hay bi cham nham nhat — mot cu cham khong duoc phep keo nguoi ta ra khoi tran.
