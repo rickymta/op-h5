@@ -57,3 +57,27 @@ là **Hỗn độn ở cả hai bên**. `tools/phe-hon-don.py` sửa `阵营=6` 
 `templates-bin.py tuong` (cột 阵营 là cột luật) → `res/97cec-ae249-5f56f`. Máy chủ có sẵn lớp
 phe 6 (tướng Hỗn độn riêng 6012–6016) nên không phải vá code. Hệ quả: nội dung tính theo phe
 (khắc chế, duyên phận phe, đấu trường chủng tộc) coi 11 tướng này là Hỗn độn.
+
+## Cập nhật 2026-09-07 (chiều) — nguyên liệu thăng tinh của 11 nguyên mẫu Hỗn độn
+Đổi phe xong, Black Beard vẫn báo "sai nguyên liệu": cột `消耗狗粮` của Black Beard/Law/S.Rozo
+vẫn mang khuôn phe thường (`12:65` = tướng 6★ phe Ma, `12:51`/`12:61` = phe Người) nên bản
+sao của chính họ (giờ là Hỗn độn) không được nhận. `tools/phe-hon-don.py` nay đổi luôn
+`12:<sao><phe>:n` → `15:<sao>:n` (tướng <sao>★ Hỗn độn — máy chủ nhận phe 4/5/6) cho 11 nguyên
+mẫu: 98 dòng (1022: 8, 1023: 45, 5017: 45); 8 nguyên mẫu 6001–6008 đã sẵn khuôn `15:`.
+Mã `11:<sao>` (phe bất kỳ) và `1:<id>` (đúng tướng) giữ nguyên. Quy trình như trên:
+`phe-hon-don.py` → `json-to-excel hero` → probe → `docker cp` vào 6 container Java + `restart game`
+→ `templates-bin.py tuong` → `res/97cec-60e97-5f56f`.
+
+Đã rà thêm White Beard, Shanks, Rayleigh, Otohime — **không cần sửa**:
+
+| Tướng | Phe (client = server) | Nguyên liệu tướng | Huy hiệu từ 10★ | Nguồn huy hiệu (excel-src) |
+|---|---|---|---|---|
+| White Beard 5018 | 5 Ma | `12:55` / `12:65` — 6★ phe Ma, cùng khuôn Mihawk 5008 | 100051 Ngũ hoàng | Đồ Đằng Thánh Điện, Bảo Thanh Phường, mê cung, đập trứng |
+| Shanks 6005 | 6 Hỗn độn | `15:5` / `15:6` sẵn từ gốc | 100050 Hải quân | Đồ Đằng Thánh Điện, nhiệm vụ, mê cung, đập trứng |
+| Rayleigh 6002 | 6 Hỗn độn | `15:5` / `15:6` sẵn từ gốc | 100048 Hải tặc | Đồ Đằng Thánh Điện, mê cung, đập trứng |
+| Otohime 6003 | 6 Hỗn độn | `15:5` / `15:6` sẵn từ gốc | 100049 Kiếm sĩ | Đồ Đằng Thánh Điện, Bảo Thanh Phường, mê cung, đập trứng |
+
+Phe Ma có 12 tướng gốc 5★ nên `12:55:4` của White Beard là khả thi. 46 dòng máy chủ (5★–50★)
+của cả bốn khớp client từng cột; `下一星英雄ID` của dòng 50★ là `0` ở cả hai bên nên 50 dòng
+51★–100★ chỉ client có là dữ liệu chết (186 dòng chết của 11 nguyên mẫu vẫn mang `12:` — không
+tới được, để nguyên). Law 1022 và 34 nguyên mẫu "10 dòng" dừng ở 14★ (`下一星英雄ID=0`) ở cả hai bên.
