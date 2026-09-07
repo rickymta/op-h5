@@ -125,17 +125,13 @@ if ($opAuto === null) {
 </head>
 
 <body id="body">
-<!-- Duong ve trang chinh. Canvas game chiem toan man hinh nen khong co loi ra nao khac:
-     nguoi choi muon xem may chu, nap Xu hay doi tai khoan deu phai bam Back cua trinh
-     duyet (tren app/webview thi khong co ca cai do).
-     Dat o goc TRAI-TREN: goc phai-tren da co nut Dong cua khung nap tien (#close).
-     `env(safe-area-inset-*)` de khong bi tai tho tren iPhone che mat.
-
-     Ban dau nut nay mo mo (opacity .45) cho do che game. Sai: nguoi choi bam nham no
-     nhieu lan trong luc choi vi khong thay ro no o do. Nay lam NOI HAN — vien sang, nen
-     dam — va hoi lai truoc khi roi game, de mot cu cham nham khong keo nguoi ta ra khoi
-     tran dang danh. -->
-<a id="opHome" href="/" title="Về trang chính" onclick="return opRoiGame()">&#8592; Trang chính</a>
+<!-- Loi ra khoi canvas game (toan man hinh, khong co menu nao khac): nut "Cai dat" tron
+     do op-cai-dat.js tao — keo tha, tu hut ve mep trai/phai. Bam vao la hop thoai: am
+     thanh, choi tu dong, nap Xu, tai khoan, tin tuc/thong bao, va "Ve trang chinh".
+     Truoc 2026-09-07 day la mot nut <a> "Trang chinh" co dinh o goc trai-tren (cung mot
+     nut "Tu danh" rieng ben duoi); gop lai cho gon vi hai nut chu che ca goc man choi.
+     Nut van HOI LAI truoc khi roi game (opRoiGame ben duoi) — mot cu cham nham khong
+     duoc keo nguoi ta ra khoi tran dang danh. -->
 <div class="frame" style="margin: auto;" id="iframe"></div>
 <button onclick="closes()" id="close" style="display:none;position: absolute; z-index: 99999999; left: auto; right: 6px; top: 6px; width: 44px; height: 46px; border: 0px; cursor: pointer; background: url(/assets/images/back.png) no-repeat; font-size: 0;">Đóng</button>
 <script>
@@ -165,8 +161,8 @@ window.getStrVersion = function () {
 	});
 };
 
-// Hoi lai truoc khi roi game. Nut nam o goc man hinh, ma trong luc choi thi goc la cho
-// hay bi cham nham nhat — mot cu cham khong duoc phep keo nguoi ta ra khoi tran.
+// Hoi lai truoc khi roi game (muc "Ve trang chinh" trong hop thoai cua op-cai-dat.js).
+// Mot cu cham khong duoc phep keo nguoi ta ra khoi tran dang danh.
 function opRoiGame(){
 	return confirm('Rời khỏi game và về trang chính?');
 }
@@ -205,26 +201,6 @@ function openNapTien(){
             width: 100%;
             height: 100%;
         }
-        /* Hien RO. Ban mo mo truoc day lam nguoi choi bam nham vi khong biet no o do. */
-        #opHome {
-            position: fixed;
-            z-index: 99999998;
-            left: calc(8px + env(safe-area-inset-left, 0px));
-            top: calc(8px + env(safe-area-inset-top, 0px));
-            padding: 7px 12px;
-            border-radius: 999px;
-            background: rgba(6, 18, 28, .55);
-            color: #DCE7EF;
-            font: 600 13px/1 ui-sans-serif, system-ui, sans-serif;
-            text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, .16);
-            opacity: .92;
-            transition: opacity .15s, transform .1s;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, .45);
-            -webkit-tap-highlight-color: transparent;
-        }
-        #opHome:hover, #opHome:focus { opacity: 1; }
-        #opHome:active { transform: scale(.96); }
         @font-face {
             font-family: Arial;
             src: url(/assets/fonts/msyh.ttf);
@@ -310,6 +286,10 @@ function openNapTien(){
         echo @filemtime(__DIR__ . '/a3b31-4c087-1dc2f.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-console-en.js?v=<?php echo @filemtime(__DIR__ . '/op-console-en.js') ?: '0'; ?>"></script>
     <script type="text/javascript" src="op-https.js?v=<?php echo @filemtime(__DIR__ . '/op-https.js') ?: '0'; ?>"></script>
+    <script type="text/javascript" src="op-cai-dat.js?v=<?php
+        // Nut "Cai dat" tron + hop thoai (am thanh, tu danh, tin tuc...). Nap TRUOC cac shim
+        // choi tu dong: chung doc cac khoa localStorage ma hop thoai nay ghi.
+        echo @filemtime(__DIR__ . '/op-cai-dat.js') ?: '1'; ?>"></script>
     <script type="text/javascript" src="op-autologin.js?v=<?php
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
         // giu ban cu trong cache va thay doi khong co tac dung nao.
@@ -319,7 +299,7 @@ function openNapTien(){
         echo @filemtime(__DIR__ . '/op-dialog-close.js') ?: '1'; ?>"></script>
     <script type="text/javascript" src="op-tu-di-ai.js?v=<?php
         // Tu bam "Xac dinh" o man hinh thang tran de sang ai tiep, thay vi doi dem nguoc
-        // roi dong. Tat bang localStorage.setItem('opTuDiAi','0') — xem dau file do.
+        // roi dong. Bat/tat o hop thoai Cai dat (khoa localStorage opTuDiAi).
         echo @filemtime(__DIR__ . '/op-tu-di-ai.js') ?: '1'; ?>"></script>
 </body>
 </html>

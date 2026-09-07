@@ -22,15 +22,17 @@
 //   * Cho `CHO_MS` truoc khi bam de nguoi choi kip nhin phan thuong.
 //   * Hong o bat ky buoc nao cung chi dan den: khong lam gi ca, dem nguoc chay nhu cu.
 //
-// TAT DI: mo Console cua trinh duyet, go
-//     localStorage.setItem('opTuDiAi', '0')
-// roi tai lai trang. Bat lai bang '1' (hoac xoa khoa do).
+// TAT DI: cong tac "Tu sang ai sau khi thang" trong hop thoai Cai dat (op-cai-dat.js), ghi
+// localStorage khoa opTuDiAi = '0'. Mac dinh (khong co khoa, hoac '1') la BAT. Khoa duoc doc
+// lai o moi nhip quet, khong doc mot lan luc nap, de bat/tat co tac dung ngay khong can tai
+// lai trang.
 (function () {
 	'use strict';
 
-	try {
-		if (window.localStorage && localStorage.getItem('opTuDiAi') === '0') { return; }
-	} catch (e) { /* trinh duyet chan localStorage thi cu chay */ }
+	function daTat() {
+		try { return window.localStorage && localStorage.getItem('opTuDiAi') === '0'; }
+		catch (e) { return false; } // trinh duyet chan localStorage thi cu chay
+	}
 
 	var CHO_MS = 1200;      // de nguoi choi kip nhin phan thuong roi moi chuyen ai
 	var NHIP = 400;         // nhip quet cay hien thi
@@ -75,6 +77,7 @@
 
 	var hen = setInterval(function () {
 		if (Date.now() - batDau > HAN) { clearInterval(hen); return; }
+		if (daTat()) { return; }
 		try {
 			if (typeof Laya === 'undefined' || !Laya.stage) { return; }
 			var man = duyet(Laya.stage, 0);
