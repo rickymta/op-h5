@@ -314,6 +314,7 @@ function openNapTien(){
         // filemtime chu khong phai so co dinh: sua shim ma quen tang so thi trinh duyet
         // giu ban cu trong cache va thay doi khong co tac dung nao.
         echo @filemtime(__DIR__ . '/op-autologin.js') ?: '1'; ?>"></script>
+    <script type="text/javascript" src="op-tu-danh.js?v=<?php echo @filemtime(__DIR__ . '/op-tu-danh.js') ?: '1'; ?>"></script>
     <script type="text/javascript" src="op-dialog-close.js?v=<?php
         echo @filemtime(__DIR__ . '/op-dialog-close.js') ?: '1'; ?>"></script>
     <script type="text/javascript" src="op-tu-di-ai.js?v=<?php
