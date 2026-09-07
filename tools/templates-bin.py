@@ -113,8 +113,9 @@ def mo_phong(d, so_bang_mong=None):
         if by.pos != by.n: raise ValueError(f"ket thuc lech: {by.pos} != {by.n}")
     except Exception as e:
         loi = f"{type(e).__name__}: {e}"
-    if not loi and so_bang_mong is not None and len(tpl) != so_bang_mong:
-        loi = f"so bang {len(tpl)} != {so_bang_mong}"
+    so_that = sum(1 for t in tpl if t != "_vop")   # bang gia _vop (xem nen()) khong tinh
+    if not loi and so_bang_mong is not None and so_that != so_bang_mong:
+        loi = f"so bang {so_that} != {so_bang_mong}"
     return tpl, loi
 
 
@@ -335,14 +336,64 @@ def thay_bang(d, ten_bang):
         if t not in tk: sys.exit(f"!! templates.bin khong co bang {t}")
     return ghi(ra), tk
 
+# ---------- nen: byte 10 PHAI la 0x76 ----------
+# Client (uncompress2) ghi de byte thu 10 cua file nen thanh 0x76 roi moi inflate — mot kieu
+# chong sua file: file goc tinh co co byte 10 = 0x76 nen khong sao, file nen lai bang zlib
+# thuong thi byte 10 la gi cung duoc -> bi ghi de -> luong deflate hong -> zlib.js xin cap
+# 4,4 GB -> "treo 40%" (do that 2026-09-07 bang chinh parser client). Cach xu ly: thu cac
+# tham so nen khac nhau (level/strategy/memLevel/wbits) toi khi byte 10 dung — moi to hop cho
+# mot luong khac, xac suat 1/256 moi lan, vai chuc lan la trung.
+BYTE10 = 0x76
+
+
+BANG_GIA = b"_vop"   # byte thu 2 cua ten = 'v' = 0x76 — xem nen()
+
+
+def _bang_gia():
+    """Mot bang rong ten `_vop` dat dau file: parseData khong biet ten thi chi warn roi bo qua
+    (doc tu bytecode). Ten nay duoc chon de byte thu 2 cua no la 'v' (0x76)."""
+    hang = struct.pack(">H", 2) + b"id"
+    return struct.pack(">H", len(BANG_GIA)) + BANG_GIA + struct.pack(">i", 1) + struct.pack(">h", len(hang)) + hang
+
+
+def nen(d):
+    """Nen d thanh luong zlib co byte 10 = 0x76, khong can do dan.
+
+    Tu dung luong: [78 9C] + mot khoi STORED chua bang gia _vop + cac khoi deflate thuong cua
+    phan con lai (wbits=-15) + adler32 cua toan bo du lieu. Khoi stored: 1 byte dau khoi (0x00),
+    LEN, NLEN (4 byte) roi du lieu tho — nen byte 10 cua luong = byte thu 4 cua bang gia = ky tu
+    thu 2 cua ten `_vop` = 'v'. Doi tham so zlib hay them bang gia vao luong nen thuong deu
+    khong doi duoc byte 10 (no nam trong bang cay Huffman, rat on dinh), cach nay thi chac chan.
+    """
+    dm = _bang_gia(); full = dm + d
+    co = zlib.compressobj(9, zlib.DEFLATED, -15)
+    phan_sau = co.compress(d) + co.flush()
+    stored = b"\x00" + struct.pack("<H", len(dm)) + struct.pack("<H", 0xFFFF ^ len(dm)) + dm
+    ra = b"\x78\x9c" + stored + phan_sau + struct.pack(">I", zlib.adler32(full) & 0xFFFFFFFF)
+    if ra[10] != BYTE10 or zlib.decompress(ra) != full:
+        sys.exit("!! nen(): luong tu dung khong hop le")
+    return ra
+
+
+def kiem_nen(ra):
+    """Cong kiem cho file NEN: byte 10 = 0x76 va giai nen duoc. Dung truoc khi phat hanh."""
+    return len(ra) > 10 and ra[10] == BYTE10
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("lenh", choices=["kiem", "chu", "chen", "xuat", "tuong", "bang"])
     ap.add_argument("goc"); ap.add_argument("ra", nargs="?"); ap.add_argument("them", nargs="*")
     a = ap.parse_args()
-    d = zlib.decompress(open(a.goc, "rb").read())
+    goc_nen = open(a.goc, "rb").read()
+    d = zlib.decompress(goc_nen)
     if a.lenh == "kiem":
-        ok, _ = kiem(d); sys.exit(0 if ok else 1)
+        ok, _ = kiem(d)
+        if not kiem_nen(goc_nen):
+            print(f"  !! byte 10 cua file nen = 0x{goc_nen[10]:02x}, client se ghi de thanh 0x76 -> hong (treo 40%)"); ok = False
+        else:
+            print("  byte 10 = 0x76  OK")
+        sys.exit(0 if ok else 1)
     if a.lenh == "xuat":
         tpl, _ = mo_phong(d); rows = tpl[a.ra]
         out = [giai_ma_dong(rows[0], pl)[0] for pl in rows[1:]]
@@ -368,8 +419,9 @@ def main():
             print(f"  + {tid}: {len(row)} o -> id={g['物品ID']} ten={g['名称']!r} icon={g['图标']} type={g['类型']}")
     ok, _ = kiem(moi)
     if not ok: sys.exit("!! KHONG QUA CONG KIEM — khong ghi")
-    open(a.ra, "wb").write(zlib.compress(moi, 9))
-    print(f"  da ghi {a.ra}  (giai nen {len(moi)} byte)")
+    ra = nen(moi)
+    open(a.ra, "wb").write(ra)
+    print(f"  da ghi {a.ra}  (giai nen {len(moi)} byte, nen {len(ra)} byte, byte10=0x{ra[10]:02x})")
 
 
 if __name__ == "__main__":

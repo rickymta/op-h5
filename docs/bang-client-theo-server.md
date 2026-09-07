@@ -14,6 +14,16 @@ Nguy hiểm nhất là các bảng máy chủ có **nhiều dòng hơn** client 
 `精英召唤活动` +867, `锦鲤活动` +440, `地区` +421, `砸金蛋活动` +84, `通天塔关卡` +20, `充值项` +15…
 — mỗi bảng là một màn có thể sập y như VIP SHOP khi máy chủ gửi id mới.
 
+## Bẫy byte 10 của `templates.bin` (2026-09-07, treo 40%)
+Client giải nén bằng `uncompress2`: **ghi đè byte thứ 10 của file nén thành `0x76` rồi mới
+inflate** — một kiểu chống sửa file. File gốc (và hai bản đầu tiên, vì đoạn đầu chưa đổi) tình cờ
+có byte 10 = `0x76`; bản VIP-fix và đợt 1 nén lại bằng zlib thường thì byte 10 = `0xf5` → bị ghi
+đè → luồng deflate hỏng → zlib.js xin cấp 4,4 GB → treo ở 40% ("Đang phân tích dữ liệu" = 2/5).
+Đã đo bằng chính parser client trong trình duyệt (`op-test.html` cục bộ, móc `TemplateManager`
+ra `window`). Từ nay `templates-bin.py` tự dựng luồng zlib: khối *stored* đầu chứa bảng giả
+`_vop` (client không biết tên thì chỉ `warn` rồi bỏ qua), nên byte 10 luôn = ký tự `v`;
+`kiem` báo đỏ nếu byte 10 ≠ 0x76. Đừng nén `templates.bin` bằng zlib thường nữa.
+
 ## Nguyên tắc
 | Loại bảng | Bên đúng | Công cụ |
 |---|---|---|
