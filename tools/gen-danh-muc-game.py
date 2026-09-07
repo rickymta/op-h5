@@ -123,6 +123,23 @@ def du(r, n):
     return list(r) + [None] * (n - len(r)) if len(r) < n else list(r)
 
 
+def so(v):
+    """O so cua Excel ve int, chap nhan ca o CHUOI chi chua chu so ("10", " 12 ").
+
+    hero.xlsx ghi 1703/2428 o 星级 dang chuoi (sao 10 tro len cua hau het tuong), may chu doc
+    bang getInteger nen khong phan biet — tool ma chi nhan int/float thi 1703 dong tuong mat
+    nhan sao ("White Beard 10★" thanh "White Beard" tron, GM tuong khong co 10 sao, 2026-09-07).
+    Tra ve None neu khong phai so.
+    """
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return int(v)
+    if isinstance(v, str) and v.strip().lstrip("-").isdigit():
+        return int(v.strip())
+    return None
+
+
 def cot(hdr, *ten):
     """Chi so cot theo TEN header — thu tu cot doi thi tool van dung, giong cach may chu doc."""
     for t in ten:
@@ -143,15 +160,15 @@ def doc_sheet(wb, sheet, cot_id, cot_ten, them=None, loc=None):
     out = []
     for r in it:
         r = du(r, n)
-        rid, ten = r[i_id], r[i_ten]
-        if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
+        rid, ten = so(r[i_id]), r[i_ten]
+        if rid is None or not isinstance(ten, str) or not ten.strip():
             continue
         if loc and not loc(hdr, r):
             continue
         phu = ""
         if i_them >= 0 and r[i_them] not in (None, ""):
             phu = str(r[i_them]).strip()
-        out.append((int(rid), ten.strip(), phu))
+        out.append((rid, ten.strip(), phu))
     return out
 
 
@@ -174,17 +191,17 @@ def doc_tien_khi(wb, tuong):
     than_khi, hero_cua = [], {}
     for r in it:
         r = du(r, n)
-        rid, ten = r[i_id], r[i_ten]
-        if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
+        rid, ten = so(r[i_id]), r[i_ten]
+        if rid is None or not isinstance(ten, str) or not ten.strip():
             continue
-        hero = ""
-        if isinstance(r[i_hero], (int, float)) and int(r[i_hero]) > 0:
-            hero = ten_proto.get(int(r[i_hero]) // 100 * 100, "")
+        hero, h, cap = "", so(r[i_hero]), so(r[i_cap])
+        if h:
+            hero = ten_proto.get(h // 100 * 100, "")
         phu = hero
-        if isinstance(r[i_cap], (int, float)):
-            phu = ("%s · cấp %d" % (hero, r[i_cap])) if hero else ("cấp %d" % r[i_cap])
-        than_khi.append((int(rid), ten.strip(), phu))
-        hero_cua[int(rid)] = hero
+        if cap is not None:
+            phu = ("%s · cấp %d" % (hero, cap)) if hero else ("cấp %d" % cap)
+        than_khi.append((rid, ten.strip(), phu))
+        hero_cua[rid] = hero
     ws = wb["仙器碎片"]
     it = ws.iter_rows(values_only=True)
     hdr = list(next(it))
@@ -193,11 +210,10 @@ def doc_tien_khi(wb, tuong):
     manh = []
     for r in it:
         r = du(r, n)
-        rid, ten = r[i_id], r[i_ten]
-        if not isinstance(rid, (int, float)) or not isinstance(ten, str) or not ten.strip():
+        rid, ten = so(r[i_id]), r[i_ten]
+        if rid is None or not isinstance(ten, str) or not ten.strip():
             continue
-        hero = hero_cua.get(int(r[i_tk]), "") if isinstance(r[i_tk], (int, float)) else ""
-        manh.append((int(rid), ten.strip(), hero))
+        manh.append((rid, ten.strip(), hero_cua.get(so(r[i_tk]), "")))
     return than_khi, manh
 
 
@@ -225,8 +241,8 @@ def bang_ten_tuong():
     ra, thieu = [], 0
     for r in it:
         r = du(r, n)
-        rid, yid = r[i_id], r[i_yid]
-        if not isinstance(rid, (int, float)) or yid in (None, ""):
+        rid, yid = so(r[i_id]), r[i_yid]
+        if rid is None or yid in (None, ""):
             continue
         try:
             ten = lut.get(int(str(yid).strip()))
@@ -235,8 +251,8 @@ def bang_ten_tuong():
         if not ten:
             thieu += 1
             continue
-        sao = r[i_sao] if i_sao >= 0 else None
-        ra.append((int(rid), ten, ("%d★" % sao) if isinstance(sao, (int, float)) else ""))
+        sao = so(r[i_sao]) if i_sao >= 0 else None
+        ra.append((rid, ten, ("%d★" % sao) if sao is not None else ""))
     wb.close()
     return ra, thieu, len(lut)
 
