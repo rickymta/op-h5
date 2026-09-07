@@ -125,7 +125,7 @@ func NhomKhoDo() []NhomDanhMuc { return nap().nhom }
 
 // TenVi tra ve ten loai tien trong vi, va false khi chua doi chieu duoc.
 //
-// CO Y chi co ba dong (Kim te, Nguyen bao, Kinh nghiem tuong): chi ba cai do doc duoc tu
+// CO Y chi co ba dong (Kim te, Kim cuong, Kinh nghiem tuong): chi ba cai do doc duoc tu
 // chinh bang cau hinh phat thuong cua game. Cac id vi khac de trong de giao dien hien
 // "Vi · loai N" — noi khong biet van hon dat mot cai ten sai vao mot thao tac phat tien.
 func TenVi(id int64) (string, bool) {

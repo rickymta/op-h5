@@ -283,7 +283,7 @@ func (s *server) apiCreatePackage(w http.ResponseWriter, r *http.Request, a *adm
 	case in.PriceXu <= 0:
 		httpx.Error(w, http.StatusBadRequest, "invalid_request", "giá phải lớn hơn 0")
 	case !rewardRe.MatchString(in.Reward):
-		httpx.Error(w, http.StatusBadRequest, "invalid_request", "quà phải dạng type:id:count#… (0:1:5000 = 5.000 Nguyên Bảo)")
+		httpx.Error(w, http.StatusBadRequest, "invalid_request", "quà phải dạng type:id:count#… (0:1:5000 = 5.000 Kim Cương)")
 	case !validCategory(in.Category):
 		httpx.Error(w, http.StatusBadRequest, "invalid_request", "nhóm không hợp lệ")
 	default:

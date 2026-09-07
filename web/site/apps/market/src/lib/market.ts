@@ -1,5 +1,5 @@
 /**
- * Quy tac cho Xu ⇄ Nguyen Bao — docs/plan-go-react.md muc 12.3.
+ * Quy tac cho Xu ⇄ Kim Cuong — docs/plan-go-react.md muc 12.3.
  *
  * Cac tham so duoi day la **thiet ke da chot**, khong phai so lieu thong ke bia ra:
  * chung se thanh bien moi truong MARKET_* khi backend duoc dung. Tinh phi ngay tren
@@ -7,10 +7,10 @@
  * con so cuoi cung van do may chu tinh lai, trinh duyet khong duoc tin.
  */
 
-/** Don vi niem yet gia: Xu cho moi 1.000 Nguyen Bao. */
+/** Don vi niem yet gia: Xu cho moi 1.000 Kim Cuong. */
 export const PRICE_UNIT = 1000;
 
-/** Cua hang ban 1 Xu = 1 Nguyen Bao, nen 1.000 Nguyen Bao o cua hang = 1.000 Xu. */
+/** Cua hang ban 1 Xu = 1 Kim Cuong, nen 1.000 Kim Cuong o cua hang = 1.000 Xu. */
 export const SHOP_PRICE_PER_UNIT = 1000;
 
 /** MARKET_FEE_PCT — tru vao phan **nguoi ban** nhan. */
@@ -25,7 +25,7 @@ export const PRICE_MAX_PCT = 100;
 /** MARKET_MAX_OPEN_LISTINGS — chan spam bang. */
 export const MAX_OPEN_LISTINGS = 5;
 
-/** Buoc so luong Nguyen Bao khi dang ban. */
+/** Buoc so luong Kim Cuong khi dang ban. */
 export const AMOUNT_STEP = 100;
 
 /** So luong toi thieu mot tin rao. */
@@ -56,8 +56,8 @@ export function quote(amount: number, pricePerUnit: number): Quote {
 
 /** Loi cua o so luong, hoac null neu hop le. */
 export function checkAmount(amount: number): string | null {
-  if (!Number.isFinite(amount) || amount <= 0) return "Nhập số Nguyên Bảo muốn bán.";
-  if (amount < AMOUNT_MIN) return `Tối thiểu ${AMOUNT_MIN.toLocaleString("vi-VN")} Nguyên Bảo một tin.`;
+  if (!Number.isFinite(amount) || amount <= 0) return "Nhập số Kim Cương muốn bán.";
+  if (amount < AMOUNT_MIN) return `Tối thiểu ${AMOUNT_MIN.toLocaleString("vi-VN")} Kim Cương một tin.`;
   if (amount % AMOUNT_STEP !== 0) return `Số lượng phải là bội của ${AMOUNT_STEP}.`;
   return null;
 }
@@ -65,7 +65,7 @@ export function checkAmount(amount: number): string | null {
 /** Loi cua o don gia, hoac null neu hop le. */
 export function checkPrice(price: number): string | null {
   if (!Number.isFinite(price) || price <= 0) return "Nhập đơn giá.";
-  if (price < PRICE_FLOOR) return `Giá sàn là ${PRICE_FLOOR.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo.`;
-  if (price > PRICE_CEIL) return `Giá trần là ${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo.`;
+  if (price < PRICE_FLOOR) return `Giá sàn là ${PRICE_FLOOR.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương.`;
+  if (price > PRICE_CEIL) return `Giá trần là ${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương.`;
   return null;
 }

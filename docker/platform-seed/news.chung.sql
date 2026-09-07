@@ -12,7 +12,7 @@
 -- `body` la VAN BAN THUAN: doan cach nhau bang dong trong, '## ' mo tieu de phu, '- ' mo gach
 -- dau dong. Khong HTML — tang hien thi khong phai loc XSS.
 --
--- Thuat ngu thong nhat: Xu (tien chung cua nen tang), Nguyen Bao (tien trong game), may chu,
+-- Thuat ngu thong nhat: Xu (tien chung cua nen tang), Kim Cuong (tien trong game), may chu,
 -- hom thu trong game.
 --
 -- Dung MOT bai pinned=1 (bai gioi thieu nen tang). Bai do la kind='news' chu khong phai
@@ -34,12 +34,12 @@ VALUES ('gioi-thieu-nen-tang', '', 'news',
 ## Ba thứ tạo nên cổng
 - Tài khoản cổng: đăng ký một lần bằng tên đăng nhập và mật khẩu. Mỗi lần bạn mở một game mới, tài khoản trong game đó được tạo tự động từ tài khoản cổng, bạn không phải nhớ thêm mật khẩu nào.
 - Ví Xu: Xu là đơn vị quy ước của cổng, gắn với tài khoản chứ không gắn với từng game. Nạp một lần rồi tiêu ở game nào tuỳ bạn.
-- Cửa hàng của từng game: nơi đổi Xu lấy vật phẩm, gói Nguyên Bảo, thẻ, quỹ hay đặc quyền của game đó.
+- Cửa hàng của từng game: nơi đổi Xu lấy vật phẩm, gói Kim Cương, thẻ, quỹ hay đặc quyền của game đó.
 
 ## Cái gì chung, cái gì riêng
 Dùng chung cho mọi game: tài khoản, mật khẩu, ví Xu và toàn bộ lịch sử giao dịch.
 
-Riêng theo từng game: nhân vật, tiến độ, kho đồ và tiền trong game. Hai game không dùng chung nhân vật, và Nguyên Bảo của game này không chuyển sang game khác được.
+Riêng theo từng game: nhân vật, tiến độ, kho đồ và tiền trong game. Hai game không dùng chung nhân vật, và Kim Cương của game này không chuyển sang game khác được.
 
 ## Bạn tự làm được những gì
 Trong mục Tài khoản bạn xem số dư, lịch sử nạp và quy đổi, danh sách nhân vật theo từng game, các phiên đăng nhập đang mở, đổi mật khẩu và gắn email khôi phục. Không phải nhắn ai để làm những việc đó.
@@ -205,8 +205,8 @@ Chưa thoả điều kiện thì máy chủ game từ chối đơn. Bạn không
 ## 4. Giá Xu và số dư còn lại
 Bảng tóm tắt có hai dòng Số dư hiện tại và Số dư sau. Nếu con số ở dòng Số dư sau không như bạn nghĩ, dừng lại và xem lại gói.
 
-## Một điều nữa về gói Nguyên Bảo
-Các mốc đổi Nguyên Bảo được game tính như một lần nạp: lần đầu mua mỗi mốc được cộng gấp đôi, và mỗi lần mua đều cộng điểm VIP. Từ lần thứ hai của cùng một mốc trở đi thì chỉ nhận đúng số ghi trên gói. Nếu bạn định mua nhiều, mua lần đầu ở nhiều mốc khác nhau sẽ khác với mua nhiều lần cùng một mốc.',
+## Một điều nữa về gói Kim Cương
+Các mốc đổi Kim Cương được game tính như một lần nạp: lần đầu mua mỗi mốc được cộng gấp đôi, và mỗi lần mua đều cộng điểm VIP. Từ lần thứ hai của cùng một mốc trở đi thì chỉ nhận đúng số ghi trên gói. Nếu bạn định mua nhiều, mua lần đầu ở nhiều mốc khác nhau sẽ khác với mua nhiều lần cùng một mốc.',
 '', '', 0, 'published', '2026-08-22 17:00:00')
 ON DUPLICATE KEY UPDATE game_code=VALUES(game_code), kind=VALUES(kind), title=VALUES(title),
   summary=VALUES(summary), body=VALUES(body), image_url=VALUES(image_url), link_url=VALUES(link_url),
@@ -622,7 +622,7 @@ Trạng thái đơn tự cập nhật trên trang, bạn không cần tải lạ
 
 ## Tìm quà ở đâu
 Tuỳ loại gói, và trang gói ghi rõ:
-- Gói được game xử lý như một lần nạp, gồm các mốc Nguyên Bảo, thẻ, quỹ, đặc quyền và gói ngày: phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn. Vào game là thấy, không qua hòm thư.
+- Gói được game xử lý như một lần nạp, gồm các mốc Kim Cương, thẻ, quỹ, đặc quyền và gói ngày: phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn. Vào game là thấy, không qua hòm thư.
 - Gói vật phẩm: gửi bằng thư trong game. Vào game, mở hòm thư của đúng nhân vật đã chọn lúc mua, bấm nhận.
 
 ## Nếu vào game mà chưa thấy
@@ -685,9 +685,9 @@ VALUES ('nhan-vat-co-dung-chung-khong', '', 'news',
 'Câu hỏi này hay gặp, và câu trả lời có hai tầng: riêng theo game, và riêng theo máy chủ.
 
 ## Riêng theo từng game
-Mỗi game bạn mở là một tài khoản game riêng bên trong game đó, dù xuất phát từ cùng một tài khoản cổng. Nhân vật, cấp độ, kho đồ, Nguyên Bảo và mọi tiến độ đều nằm trong game đó và không chuyển đi đâu được.
+Mỗi game bạn mở là một tài khoản game riêng bên trong game đó, dù xuất phát từ cùng một tài khoản cổng. Nhân vật, cấp độ, kho đồ, Kim Cương và mọi tiến độ đều nằm trong game đó và không chuyển đi đâu được.
 
-Nguyên Bảo là tiền của một game cụ thể. Nguyên Bảo ở game này không dùng được ở game kia, và cũng không đổi ngược thành Xu.
+Kim Cương là tiền của một game cụ thể. Kim Cương ở game này không dùng được ở game kia, và cũng không đổi ngược thành Xu.
 
 ## Riêng theo từng máy chủ
 Trong cùng một game, mỗi máy chủ là một thế giới tách biệt. Nhân vật bạn tạo ở máy chủ A không xuất hiện ở máy chủ B, và tiến độ hai bên không cộng vào nhau.

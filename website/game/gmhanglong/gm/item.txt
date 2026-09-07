@@ -1,5 +1,5 @@
 0:0|Kim tệ
-0:1|Nguyên bảo
+0:1|Kim cương
 0:2|Ngân lượng
 0:3|Nhân vật chính kinh nghiệm
 0:4|Anh hùng kinh nghiệm

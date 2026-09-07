@@ -251,7 +251,7 @@ export function Store() {
           <CardTitle>Lưu ý</CardTitle>
           <Notes>
             <li>Phải đăng nhập mới mua được; gói gửi qua thư cần có nhân vật ở máy chủ nhận.</li>
-            <li>Gói Nguyên Bảo, thẻ, quỹ, đặc quyền được game xử lý như một lần nạp — phần thưởng vào thẳng nhân vật.</li>
+            <li>Gói Kim Cương, thẻ, quỹ, đặc quyền được game xử lý như một lần nạp — phần thưởng vào thẳng nhân vật.</li>
             <li>Gói vật phẩm vào hòm thư trong game, thường trong một phút.</li>
             <li>Game từ chối (hết lượt, chưa tới ngày mở) thì Xu được hoàn ngay vào ví.</li>
           </Notes>

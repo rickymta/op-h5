@@ -11,7 +11,7 @@ export function Xu({ n, tone }: { n: number; tone?: "gold" | "muted" }) {
   );
 }
 
-/** Số Nguyên Bảo. */
+/** Số Kim Cương. */
 export function NB({ n }: { n: number }) {
   return (
     <span className="whitespace-nowrap font-mono nums text-fg">
@@ -20,7 +20,7 @@ export function NB({ n }: { n: number }) {
   );
 }
 
-/** Đơn giá: Xu cho mỗi 1.000 Nguyên Bảo. Đơn vị viết nhỏ để cột không bị dài. */
+/** Đơn giá: Xu cho mỗi 1.000 Kim Cương. Đơn vị viết nhỏ để cột không bị dài. */
 export function UnitPrice({ n }: { n: number }) {
   return (
     <span className="whitespace-nowrap font-mono nums text-fg">

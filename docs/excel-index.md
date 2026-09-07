@@ -285,7 +285,7 @@
 | `invite.xlsx` | `邀请.xlsx` | Mời (chứa sheet `每日邀请` — **lỗi định dạng**) |
 | `personal-space.xlsx` | `个人空间.xlsx` | Không gian cá nhân |
 | `榜单.xlsx` | *(giữ tên gốc — code không tham chiếu)* | Bảng xếp hạng |
-| `cross-ingot-ranking.xlsx` | `跨服元宝排行.xlsx` | Xếp hạng Nguyên Bảo liên server |
+| `cross-ingot-ranking.xlsx` | `跨服元宝排行.xlsx` | Xếp hạng Kim Cương liên server |
 | `cross-recharge-ranking.xlsx` | `跨服充值排行.xlsx` | Xếp hạng nạp liên server |
 | `backend-mail-reward.xlsx` | `后台邮件奖励.xlsx` | Thưởng thư từ hậu trường (GM) |
 | `resource-recovery.xlsx` | `资源找回.xlsx` | Tìm lại tài nguyên |

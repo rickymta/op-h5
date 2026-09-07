@@ -10,11 +10,11 @@ import (
 // samplePackages mo phong thu tu ma DB tra ve (`sort_order, price_xu, package_id`).
 func samplePackages() []wallet.Package {
 	return []wallet.Package{
-		{ID: "18001", Name: "10.000 Nguyên Bảo", Category: "diamond", GrantMode: "pay", PriceXu: 10000,
-			ItemName: "10.000 Nguyên Bảo", ItemCount: 1, ItemTid: 18001, Reward: "0:1:10000",
-			Description: "Nhận 10.000 Nguyên Bảo.", Badge: "x2 lần đầu"},
-		{ID: "18002", Name: "20.000 Nguyên Bảo", Category: "diamond", GrantMode: "pay", PriceXu: 20000,
-			ItemName: "20.000 Nguyên Bảo", ItemCount: 1, ItemTid: 18002},
+		{ID: "18001", Name: "10.000 Kim Cương", Category: "diamond", GrantMode: "pay", PriceXu: 10000,
+			ItemName: "10.000 Kim Cương", ItemCount: 1, ItemTid: 18001, Reward: "0:1:10000",
+			Description: "Nhận 10.000 Kim Cương.", Badge: "x2 lần đầu"},
+		{ID: "18002", Name: "20.000 Kim Cương", Category: "diamond", GrantMode: "pay", PriceXu: 20000,
+			ItemName: "20.000 Kim Cương", ItemCount: 1, ItemTid: 18002},
 		{ID: "31002", Name: "Thẻ tuần Phù Văn đúc lại", Category: "card", GrantMode: "pay", PriceXu: 50000,
 			ItemName: "Thẻ tuần Phù Văn đúc lại", ItemCount: 1},
 		{ID: "17001", Name: "Quỹ đặc biệt", Category: "fund", GrantMode: "pay", PriceXu: 100000,
@@ -88,9 +88,9 @@ func TestBuildListHidesIngameAndKeepsDBOrder(t *testing.T) {
 	}
 }
 
-// Tim kiem khong dau: nguoi choi go "nguyen bao" phai ra "Nguyên Bảo".
+// Tim kiem khong dau: nguoi choi go "nguyen bao" phai ra "Kim Cương".
 func TestBuildListSearchIgnoresDiacritics(t *testing.T) {
-	for _, q := range []string{"nguyen bao", "NGUYÊN BẢO", "bao nguyen"} {
+	for _, q := range []string{"nguyen bao", "KIM CƯƠNG", "bao nguyen"} {
 		l := buildList(samplePackages(), parseStoreQuery(url.Values{"q": {q}}))
 		if !eq(ids(l), []string{"18001", "18002"}) {
 			t.Errorf("q=%q -> %v, muon [18001 18002]", q, ids(l))
@@ -149,7 +149,7 @@ func TestParseRewardAndItems(t *testing.T) {
 	// Nhieu muc: ma tien te co nhan rieng, ma la thi hien "Vật phẩm #<id>".
 	got := parseReward("0:1:5000#0:0:1000000#3:100001:10#0:4:250", "Gói tổng hợp")
 	want := []rewardItem{
-		{"Nguyên Bảo", 5000}, {"Kim tệ", 1000000}, {"Vật phẩm #100001", 10}, {"EXP anh hùng", 250},
+		{"Kim Cương", 5000}, {"Kim tệ", 1000000}, {"Vật phẩm #100001", 10}, {"EXP anh hùng", 250},
 	}
 	if len(got) != len(want) {
 		t.Fatalf("parseReward -> %+v, muon %+v", got, want)
@@ -171,7 +171,7 @@ func TestParseRewardAndItems(t *testing.T) {
 
 	// grant_mode='mail' doc chuoi qua.
 	mail := wallet.Package{GrantMode: "mail", Reward: "0:1:5000000", ItemName: "500 vạn KNB", ItemCount: 1}
-	if got := rewardItems(mail); len(got) != 1 || got[0] != (rewardItem{"Nguyên Bảo", 5000000}) {
+	if got := rewardItems(mail); len(got) != 1 || got[0] != (rewardItem{"Kim Cương", 5000000}) {
 		t.Errorf("mail -> %+v", got)
 	}
 	// grant_mode='pay' khong co chuoi qua: noi dung o item_name/item_count.
@@ -182,8 +182,8 @@ func TestParseRewardAndItems(t *testing.T) {
 	// 'pay' co san chuoi reward van dung item_name (game xu ly nhu mot lan nap, chuoi kia
 	// chi la ghi chu cua bo sinh du lieu).
 	payWithReward := wallet.Package{GrantMode: "pay", Reward: "0:1:10000",
-		ItemName: "10.000 Nguyên Bảo", ItemCount: 1}
-	if got := rewardItems(payWithReward); len(got) != 1 || got[0].Label != "10.000 Nguyên Bảo" {
+		ItemName: "10.000 Kim Cương", ItemCount: 1}
+	if got := rewardItems(payWithReward); len(got) != 1 || got[0].Label != "10.000 Kim Cương" {
 		t.Errorf("pay co reward -> %+v", got)
 	}
 	// Thieu ca hai: lui ve ten goi, so luong toi thieu 1.

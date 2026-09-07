@@ -64,6 +64,7 @@ def doc(d):
 def ghi(tabs):
     ra = bytearray()
     for ten, rows in tabs:
+        if ten == "_vop": continue   # bang gia cua nen() — nen() se them lai, khong de dinh hai lan
         tb = ten.encode("utf-8")
         ra += struct.pack(">H", len(tb)) + tb + struct.pack(">i", len(rows))
         for pl in rows:

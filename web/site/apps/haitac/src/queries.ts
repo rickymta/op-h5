@@ -49,7 +49,7 @@ export const useCategories = () =>
  *
  * Trước đây lấy từ khối `categories` bằng cách duyệt toàn bộ 1.933 gói tìm cái có `badge`;
  * từ khi khối đó chỉ còn tên nhóm (`cats_only=1`) thì phải hỏi riêng. Chọn nhóm `diamond`
- * (mốc Nguyên Bảo) vì đó là hàng chính của cửa hàng và mọi mốc đều có nhãn "x2 lần đầu".
+ * (mốc Kim Cương) vì đó là hàng chính của cửa hàng và mọi mốc đều có nhãn "x2 lần đầu".
  * `category=diamond` giới hạn khối `categories` server đính kèm về đúng một nhóm; thiếu nó
  * thì mỗi lượt gọi vẫn là 526 KB (đo trên máy chủ thật).
  */
@@ -99,7 +99,7 @@ export const usePkgList = (sq: StoreQuery) =>
  * Tên và mô tả của **một** nhóm gói, cho trang chi tiết.
  *
  * Không dùng `useCategories` ở đó: người mở thẳng liên kết `/cua-hang/<id>` sẽ phải tải cả
- * bảng giá chỉ để biết chữ "Nguyên Bảo". Gửi `category` + `page_size=1` thì server chỉ đính
+ * bảng giá chỉ để biết chữ "Kim Cương". Gửi `category` + `page_size=1` thì server chỉ đính
  * đúng một tab và một gói — vài trăm byte.
  */
 export const useCategoryInfo = (key: string) =>

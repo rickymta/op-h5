@@ -3,7 +3,7 @@
 --
 -- Hai duong phat hang (grant_mode):
 --   pay  = console /gm/pay/manual voi item_tid = ID muc nap (充值项) — game xu ly nhu mot lan
---          nap that: Nguyen Bao theo moc, x2 lan dau, diem VIP, the thang, quy, dac quyen...
+--          nap that: Kim Cuong theo moc, x2 lan dau, diem VIP, the thang, quy, dac quyen...
 --   mail = console /gm/mail/x/create voi `reward` dang "type:id:count#..." — thu kem qua,
 --          khong tinh la nap (goi vat pham web tu dinh nghia).
 -- category = nhom hien thi tren web; 'ingame' = khong hien, chi de tra gia khi mua trong game.

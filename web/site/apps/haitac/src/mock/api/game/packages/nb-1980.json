@@ -1,19 +1,19 @@
 {
   "id": "nb-1980",
-  "name": "1980 Nguyên Bảo",
+  "name": "1980 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
-  "description": "Mốc lớn, tặng thêm 180 Nguyên Bảo.",
+  "description": "Mốc lớn, tặng thêm 180 Kim Cương.",
   "badge": "",
   "cond": "VIP ≥ 3",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 1980,
   "price_xu": 600000,
   "price_fmt": "600.000",
   "vip_points": 600,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 1980
     }
   ],

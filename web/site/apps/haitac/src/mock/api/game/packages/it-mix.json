@@ -3,7 +3,7 @@
   "name": "Túi khởi đầu",
   "category": "item",
   "grant_mode": "mail",
-  "description": "Gồm Nguyên Bảo, vàng và vé chiêu mộ.",
+  "description": "Gồm Kim Cương, vàng và vé chiêu mộ.",
   "badge": "Mới",
   "cond": "",
   "item_name": "Túi khởi đầu",
@@ -13,7 +13,7 @@
   "vip_points": 0,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 500
     },
     {

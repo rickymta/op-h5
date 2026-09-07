@@ -464,7 +464,7 @@ function SuaGoi({
       {row.grant_mode === "mail" ? (
         <TextField
           label="Quà gửi qua thư"
-          helperText="type:id:count, nhiều món nối bằng #. 0:1:N = N Nguyên Bảo · 0:0:N = Kim tệ · 3:id:N = vật phẩm."
+          helperText="type:id:count, nhiều món nối bằng #. 0:1:N = N Kim Cương · 0:0:N = Kim tệ · 3:id:N = vật phẩm."
           value={f.reward}
           onChange={text("reward")}
           size="small"
@@ -522,7 +522,7 @@ function ThemGoi({
       : gia <= 0
         ? "Giá phải lớn hơn 0."
         : !QUA.test(f.reward.trim())
-          ? "Quà phải dạng type:id:count#… (0:1:5000 = 5.000 Nguyên Bảo)."
+          ? "Quà phải dạng type:id:count#… (0:1:5000 = 5.000 Kim Cương)."
           : "";
 
   return (
@@ -539,7 +539,7 @@ function ThemGoi({
       <Typography variant="body2" color="text.secondary">
         Gói thêm ở đây luôn phát qua thư (<code>grant_mode = mail</code>) cho game <b>{game}</b>.
         Quà dạng <code>type:id:count</code>, nhiều món nối bằng <code>#</code>. <code>0:1:N</code> = N
-        Nguyên Bảo, <code>0:0:N</code> = Kim tệ, <code>0:4:N</code> = EXP anh hùng,{" "}
+        Kim Cương, <code>0:0:N</code> = Kim tệ, <code>0:4:N</code> = EXP anh hùng,{" "}
         <code>3:id:N</code> = vật phẩm (tra <code>gmhanglong/gm/item.txt</code>).
       </Typography>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -557,7 +557,7 @@ function ThemGoi({
           label="Tên"
           value={f.name}
           onChange={text("name")}
-          placeholder="500 vạn Nguyên Bảo"
+          placeholder="500 vạn Kim Cương"
           size="small"
           fullWidth
           required

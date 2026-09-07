@@ -1,7 +1,7 @@
 // Nạp tay: đẩy một mục nạp vào game như thể người chơi vừa trả tiền thật.
 //
 // Đây là thao tác TẠO RA GIÁ TRỊ, không phải sửa dữ liệu. Game chạy trọn vẹn luồng nạp: cộng
-// Nguyên Bảo theo mốc, nhân đôi lần đầu, cộng điểm VIP, kích hoạt thẻ tháng và quỹ. Không có
+// Kim Cương theo mốc, nhân đôi lần đầu, cộng điểm VIP, kích hoạt thẻ tháng và quỹ. Không có
 // đường lùi — không có "huỷ đơn" ở phía game. Nên trang này bắt xem trước rồi mới xác nhận,
 // dù bản cũ bấm một nhát là gửi.
 //
@@ -97,7 +97,7 @@ export function NapTay({ me }: { me: Me }) {
     >
       <Alert severity="warning" sx={{ mb: 2 }}>
         <b>Thao tác này tạo ra giá trị thật trong game.</b> Máy chủ xử lý y như một lần nạp có
-        trả tiền: cộng Nguyên Bảo theo mốc, nhân đôi lần đầu, cộng điểm VIP, kích hoạt thẻ và
+        trả tiền: cộng Kim Cương theo mốc, nhân đôi lần đầu, cộng điểm VIP, kích hoạt thẻ và
         quỹ. Game không có đường thu hồi — chỉ nạp khi đã đối chiếu xong phiếu.
       </Alert>
 

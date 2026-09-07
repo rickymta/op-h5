@@ -206,13 +206,13 @@ Nạp tiền vẫn để nguyên PHP ở giai đoạn này: trang nạp trỏ sa
 
 **Kết quả**: 7.906 dòng PHP → 0. Một container ít hơn, 192 MB RAM tiết kiệm, và mọi truy vấn SQL đi qua tham số thay vì nối chuỗi.
 
-### Giai đoạn 7 — Chợ Xu ⇄ Nguyên Bảo (sau cùng)
+### Giai đoạn 7 — Chợ Xu ⇄ Kim Cương (sau cùng)
 
 Làm sau khi PHP đã bỏ hết: đây là tính năng mới, không phải phần việc chuyển đổi, nên không chặn giai đoạn nào khác. Thiết kế đầy đủ ở mục 12. Việc: migration 0009, `internal/market`, lệnh ký gửi qua console, trang chợ trong `apps/game`, trang giám sát trong `apps/ops`.
 
-**Trước hết phải thử `numType=1`** trên máy dev: đăng một tin nhỏ, xem Nguyên Bảo có thật sự rời nhân vật không. Sai giá trị này là trừ nhầm loại tiền.
+**Trước hết phải thử `numType=1`** trên máy dev: đăng một tin nhỏ, xem Kim Cương có thật sự rời nhân vật không. Sai giá trị này là trừ nhầm loại tiền.
 
-**Xong khi**: bán → mua → nhận Nguyên Bảo trong game chạy hết một vòng, phí vào `market_fee`, huỷ tin trả lại đúng số lượng.
+**Xong khi**: bán → mua → nhận Kim Cương trong game chạy hết một vòng, phí vào `market_fee`, huỷ tin trả lại đúng số lượng.
 
 ## 7. Dữ liệu: 21 bảng `web` đi đâu
 
@@ -269,9 +269,9 @@ Giai đoạn 1 gỡ được lỗ hổng lớn nhất: công cụ phát vật ph
 3. **Hoãn cổng thanh toán**, làm công cụ GM trước. Thứ tự giai đoạn ở mục 6 đã xếp lại theo đó.
 4. **Bỏ `hiente.php` và bản APK.** Bản điện thoại làm lại sau, không kế thừa.
 
-## 12. Chợ Xu ⇄ Nguyên Bảo (giai đoạn 7)
+## 12. Chợ Xu ⇄ Kim Cương (giai đoạn 7)
 
-Bảng `web.sellcoin` cũ cho người chơi bán Nguyên Bảo lấy Xu, nhưng **chưa bao giờ chạy**: nó gọi `gmhanglong/gm/coin.php`, file đó không tồn tại trong bản triển khai (lỗi số 6 trong CLAUDE.md). Nên đây là làm mới, không phải khôi phục.
+Bảng `web.sellcoin` cũ cho người chơi bán Kim Cương lấy Xu, nhưng **chưa bao giờ chạy**: nó gọi `gmhanglong/gm/coin.php`, file đó không tồn tại trong bản triển khai (lỗi số 6 trong CLAUDE.md). Nên đây là làm mới, không phải khôi phục.
 
 ### 12.1 Ký gửi được, đã kiểm chứng
 
@@ -282,15 +282,15 @@ POST /role/wallet/query   {srvCode, roleId}                      -> số dư nh�
 POST /role/wallet/reduce  {srvCode, roleId, numType, num, note}  -> trừ tiền của nhân vật
 ```
 
-`numType` là một byte. Suy từ `gm/item.txt` (`0:1` = Nguyên Bảo) thì `numType=1`, **chưa chạy thật lần nào** — phải thử trên máy dev trước khi mở chợ.
+`numType` là một byte. Suy từ `gm/item.txt` (`0:1` = Kim Cương) thì `numType=1`, **chưa chạy thật lần nào** — phải thử trên máy dev trước khi mở chợ.
 
-Chiều ngược lại (giao Nguyên Bảo cho người mua) dùng đúng đường thư đã có: `game_grants` với `grant_mode='mail'`, phần quà `0:1:<số lượng>`.
+Chiều ngược lại (giao Kim Cương cho người mua) dùng đúng đường thư đã có: `game_grants` với `grant_mode='mail'`, phần quà `0:1:<số lượng>`.
 
 ### 12.2 Luồng
 
-**Đăng bán** — ký gửi trước, niêm yết sau. Không có bước ký gửi thì người bán tiêu hết Nguyên Bảo rồi vẫn còn tin rao.
+**Đăng bán** — ký gửi trước, niêm yết sau. Không có bước ký gửi thì người bán tiêu hết Kim Cương rồi vẫn còn tin rao.
 
-1. Người bán chọn nhân vật, số Nguyên Bảo, giá (Xu cho mỗi 1.000 Nguyên Bảo).
+1. Người bán chọn nhân vật, số Kim Cương, giá (Xu cho mỗi 1.000 Kim Cương).
 2. Ghi `market_listings` trạng thái `escrowing` **trước khi** gọi console.
 3. Gọi `/role/wallet/reduce`. Thành công → `active`. Console từ chối → `void`, người bán không mất gì.
 
@@ -298,10 +298,10 @@ Chiều ngược lại (giao Nguyên Bảo cho người mua) dùng đúng đư�
 
 1. Khoá tin (`SELECT … FOR UPDATE`), kiểm còn `active`.
 2. Trừ Xu người mua; cộng cho người bán phần đã trừ phí; phí vào tài khoản hệ thống `market_fee`. Cả ba dòng trong một `ledger_txns` loại `market`, tổng bằng 0 như mọi giao dịch khác.
-3. Tin → `sold`, tạo `game_grants` giao Nguyên Bảo cho nhân vật người mua.
+3. Tin → `sold`, tạo `game_grants` giao Kim Cương cho nhân vật người mua.
 4. Worker phát hàng như cửa hàng, kể cả hoàn Xu nếu game từ chối.
 
-**Huỷ tin**: tạo lệnh trả Nguyên Bảo về nhân vật người bán qua thư, tin → `cancelled`.
+**Huỷ tin**: tạo lệnh trả Kim Cương về nhân vật người bán qua thư, tin → `cancelled`.
 
 ### 12.3 Phí và giới hạn giá
 
@@ -313,7 +313,7 @@ Chiều ngược lại (giao Nguyên Bảo cho người mua) dùng đúng đư�
 | `MARKET_MAX_OPEN_LISTINGS` | 5 tin/người | chặn spam bảng |
 | `MARKET_MAX_DAILY_VOLUME` | cấu hình | trần khối lượng mỗi người mỗi ngày |
 
-Cửa hàng bán 1 Xu = 1 Nguyên Bảo và lần đầu mỗi mốc được x2. Chợ luôn rẻ hơn cửa hàng theo thiết kế, nên **phí là thứ duy nhất giữ cho cửa hàng không bị chợ ăn hết**. Nếu doanh thu cửa hàng tụt sau khi mở chợ thì nâng phí hoặc nâng giá sàn, không phải đóng chợ.
+Cửa hàng bán 1 Xu = 1 Kim Cương và lần đầu mỗi mốc được x2. Chợ luôn rẻ hơn cửa hàng theo thiết kế, nên **phí là thứ duy nhất giữ cho cửa hàng không bị chợ ăn hết**. Nếu doanh thu cửa hàng tụt sau khi mở chợ thì nâng phí hoặc nâng giá sàn, không phải đóng chợ.
 
 ### 12.4 Dữ liệu (migration 0009)
 
@@ -327,7 +327,7 @@ wallet_accounts   thêm một dòng hệ thống: code = 'market_fee'
 
 ### 12.5 Chỗ hỏng không tự chữa được
 
-Nếu `/role/wallet/reduce` thành công mà ghi DB hỏng ngay sau đó, Nguyên Bảo đã rời nhân vật nhưng không có tin rao. Ghi dòng `escrowing` trước khi gọi console giúp phát hiện: mọi dòng `escrowing` quá hai phút được đánh dấu và hiện ở trang quản trị để xử lý tay. Không tự hoàn được, vì console không có lệnh "cộng lại" nào an toàn để gọi mù.
+Nếu `/role/wallet/reduce` thành công mà ghi DB hỏng ngay sau đó, Kim Cương đã rời nhân vật nhưng không có tin rao. Ghi dòng `escrowing` trước khi gọi console giúp phát hiện: mọi dòng `escrowing` quá hai phút được đánh dấu và hiện ở trang quản trị để xử lý tay. Không tự hoàn được, vì console không có lệnh "cộng lại" nào an toàn để gọi mù.
 
 ## 13. Cần bạn quyết: công cụ GM là của ai
 
@@ -542,7 +542,7 @@ Ba quyết định của người vận hành: **chỉ tách giao diện** (gi�
 
 **Hai lỗi bắt được nhờ agent kiểm chéo**: nút phụ mất viền và cỡ lớn không cao lên, vì lớp nền và lớp biến thể cùng khai một thuộc tính mà thứ tự trong tệp CSS mới quyết định; và image nginx thiếu `admin_access.conf` do tệp mới chưa khai trong Dockerfile.
 
-**Chợ còn thiếu để mở thật**: migration bảng tin rao và sự kiện, thử `numType=1` khi ký gửi Nguyên Bảo trên máy dev, giao dịch mua khoá dòng, bảy endpoint, và trang theo dõi tin ký gửi treo. Mọi nút tiền trong bản xem trước đều đã khoá.
+**Chợ còn thiếu để mở thật**: migration bảng tin rao và sự kiện, thử `numType=1` khi ký gửi Kim Cương trên máy dev, giao dịch mua khoá dòng, bảy endpoint, và trang theo dõi tin ký gửi treo. Mọi nút tiền trong bản xem trước đều đã khoá.
 
 ### 15.12 Kiểm thử toàn hệ trên máy chủ — 2026-09-06
 

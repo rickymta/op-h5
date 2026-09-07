@@ -36,7 +36,7 @@ NGUON — file may chu nap, TRU ten vat pham lay theo client (xem duoi):
     loai 0  Vi           theo client (toItemId -> 基础物品), xem VI_VAT_PHAM
 
 Loai 0 la VI, khong co bang cau hinh nao dat ten. Chi liet ke ba dong doc duoc tu chinh
-cau hinh phat thuong (recharge-benefit): 0 Kim te, 1 Nguyen bao, 4 Kinh nghiem tuong.
+cau hinh phat thuong (recharge-benefit): 0 Kim te, 1 Kim cuong, 4 Kinh nghiem tuong.
 Id vi khac de trong — tha hien `Vi · loai N` con hon bia mot cai ten.
 
     python3 tools/gen-danh-muc-game.py            # ghi JSON
@@ -86,10 +86,10 @@ NHOM = [
 
 # Ba dong nay doc tu server/excel-src/recharge-benefit: cot '备注（道具名称）' dat canh
 # chuoi thuong tuong ung, nen la ten cua chinh game chu khong phai suy dien.
-#   09.json  '0:1:1000'    -> 'Nguyên bảo'
+#   09.json  '0:1:1000'    -> 'Kim cương'
 #   09.json  '0:4:5000000' -> 'Tướng kinh nghiệm'
 #   21.json  '0:0:1000000' -> 金币, tieng Viet trong item-table la 'Kim tệ'
-VI_TIEN = {0: "Kim tệ", 1: "Nguyên bảo", 4: "Kinh nghiệm tướng"}
+VI_TIEN = {0: "Kim tệ", 1: "Kim cương", 4: "Kinh nghiệm tướng"}
 
 # Ten VI theo CLIENT: client ve moi loai tien bang mot vat pham ao trong 基础物品 (ham
 # toItemId trong bundle: M0->200003 "Beri", M1->200004 "Kim cuong", ...). Ma loai tien (cot

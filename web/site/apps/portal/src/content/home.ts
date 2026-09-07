@@ -47,7 +47,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Quy đổi Xu ra vật phẩm thế nào?",
-    a: "Mở cửa hàng của game, chọn gói, chọn nhân vật hoặc máy chủ sẽ nhận, rồi xác nhận. Hệ thống trừ Xu và gửi lệnh phát hàng sang máy chủ game. Với các gói Nguyên Bảo, tỷ lệ hiện tại là 1 Xu = 1 Nguyên Bảo.",
+    a: "Mở cửa hàng của game, chọn gói, chọn nhân vật hoặc máy chủ sẽ nhận, rồi xác nhận. Hệ thống trừ Xu và gửi lệnh phát hàng sang máy chủ game. Với các gói Kim Cương, tỷ lệ hiện tại là 1 Xu = 1 Kim Cương.",
   },
   {
     q: "Bao lâu thì nhận được vật phẩm?",

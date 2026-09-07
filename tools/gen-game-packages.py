@@ -83,7 +83,7 @@ OUT_DIR = os.path.join(ROOT, "docker", "platform-seed")
 
 # 功能ID -> nhom hien thi. Khong co trong bang -> 'event'.
 FUNC_CATEGORY = {
-    710: "diamond",                       # 付费充值: 8 moc Nguyen Bao
+    710: "diamond",                       # 付费充值: 8 moc Kim Cuong
     730: "fund", 732: "fund", 734: "fund", 750: "fund",
     721: "privilege", 722: "privilege", 723: "privilege",
     13600: "card", 13800: "card", 14000: "card", 14500: "card", 17100: "card",
@@ -152,10 +152,10 @@ HAN = re.compile(r"[一-鿿]")
 # Cac id vi khac khong xuat hien trong bat ky chuoi qua nao cua bo goi VA khong co bang nao
 # dat ten cho chung, nen KHONG liet ke bua — thieu ten thi mo ta hien ma, khong doan.
 #
-# 'Nguyen Bao' viet hoa theo loi cua hang (ten goi la "10.000 Nguyen Bao"); bang cau hinh
-# game viet 'Nguyen bao'. Danh muc cua cong GM giu nguyen chu cua game vi no phai khop tung
+# 'Kim Cuong' viet hoa theo loi cua hang (ten goi la "10.000 Kim Cuong"); bang cau hinh
+# game viet 'Kim cuong'. Danh muc cua cong GM giu nguyen chu cua game vi no phai khop tung
 # chu voi thu console tra ve — cho nay la van ban ban hang, giu mot loi viet trong cua hang.
-CURRENCY = {"0:0": "Kim tệ", "0:1": "Nguyên Bảo", "0:4": "Kinh nghiệm tướng"}
+CURRENCY = {"0:0": "Kim tệ", "0:1": "Kim Cương", "0:4": "Kinh nghiệm tướng"}
 
 
 def fmt(n):
@@ -299,7 +299,7 @@ def read_webshop():
 
 # ---------------------------------------------------------------- mo ta qua
 def describe_reward(reward, items):
-    """'0:1:500#3:100001:1000' -> 'Nguyên Bảo ×500 · Tiến giai thạch ×1.000'."""
+    """'0:1:500#3:100001:1000' -> 'Kim Cương ×500 · Tiến giai thạch ×1.000'."""
     if not reward:
         return ""
     parts = []
@@ -316,7 +316,7 @@ def describe_reward(reward, items):
 
 
 def reward_diamonds(reward):
-    """Tong Nguyen Bao (0:1:N) trong mot chuoi qua."""
+    """Tong Kim Cuong (0:1:N) trong mot chuoi qua."""
     total = 0
     for piece in str(reward or "").split("#"):
         seg = piece.split(":")
@@ -359,15 +359,15 @@ def build(game):
         base, first = as_int(d.get("基础元宝"), 0), as_int(d.get("首冲赠送元宝"), 0)
         if pid:
             detail[pid] = dict(
-                name=f"{fmt(base)} Nguyên Bảo",
-                description=f"Nhận {fmt(base)} Nguyên Bảo. Lần đầu mua mốc này được thêm {fmt(first)} (tổng {fmt(base + first)}). Cộng điểm VIP.",
+                name=f"{fmt(base)} Kim Cương",
+                description=f"Nhận {fmt(base)} Kim Cương. Lần đầu mua mốc này được thêm {fmt(first)} (tổng {fmt(base + first)}). Cộng điểm VIP.",
                 badge="x2 lần đầu", reward=f"0:1:{base}")
 
     for d in read_sheet(XLS_BENEFIT, "月基金"):
         full, disc = as_int(d.get("人民币价格")), as_int(d.get("打折价格"))
         gift, total = as_int(d.get("购买送元宝"), 0), as_int(d.get("总价值"), 0)
         d_open, d_renew = as_int(d.get("开服打折天数")), as_int(d.get("续费打折天数"))
-        base_desc = f"Tặng ngay {fmt(gift)} Nguyên Bảo, nhận thêm thưởng mỗi ngày đăng nhập. Tổng giá trị {fmt(total)}."
+        base_desc = f"Tặng ngay {fmt(gift)} Kim Cương, nhận thêm thưởng mỗi ngày đăng nhập. Tổng giá trị {fmt(total)}."
         if pid := as_int(d.get("充值项ID")):
             detail[pid] = dict(description=base_desc, reward=f"0:1:{gift}")
         if (pid2 := as_int(d.get("优惠价格充值项ID"))) and full and disc:
@@ -379,12 +379,12 @@ def build(game):
         rows = read_sheet(XLS_BENEFIT, sheet)
         extra = sum(reward_diamonds(r.get("额外奖励")) for r in rows)
         detail[pid] = dict(
-            description=f"Kích hoạt quỹ, nhận thưởng theo {len(rows)} mốc trong game" + (f" — tổng {fmt(extra)} Nguyên Bảo phần thưởng thêm." if extra else "."))
+            description=f"Kích hoạt quỹ, nhận thưởng theo {len(rows)} mốc trong game" + (f" — tổng {fmt(extra)} Kim Cương phần thưởng thêm." if extra else "."))
 
     for d in read_sheet(XLS_BENEFIT, "特权商城"):
         pid = as_int(d.get("充值项ID"))
         if not pid:
-            continue  # mua bang Nguyen Bao trong game, khong ban bang tien
+            continue  # mua bang Kim Cuong trong game, khong ban bang tien
         goods = "#".join(x for x in (str(d.get("特权商品") or ""), str(d.get("额外商品") or "")) if x)
         period = as_int(d.get("限购周期"))
         per = f" Mỗi {period // 86400} ngày mua được một lần." if period and period > 0 else ""
@@ -403,7 +403,7 @@ def build(game):
             continue
         dbl = reward_diamonds(d.get("翻倍奖励"))
         mult = as_int(d.get("翻倍系数"), 2)
-        desc = f"Nguyên Bảo ×{fmt(dbl)} (đã x{mult}) · {describe_reward(d.get('一般奖励'), items)}"
+        desc = f"Kim Cương ×{fmt(dbl)} (đã x{mult}) · {describe_reward(d.get('一般奖励'), items)}"
         detail[pid] = dict(
             description=clip(desc), reward=f"0:1:{dbl}#{d.get('一般奖励') or ''}",
             server_day_min=as_int(d.get("开服天数下限")), server_day_max=as_int(d.get("开服天数上限")),

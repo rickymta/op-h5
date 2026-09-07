@@ -1,7 +1,7 @@
 import { cx } from "./cx";
 
 /**
- * Nhóm nút pill chọn nhanh: mốc Nguyên Bảo, bộ lọc nhanh, hoặc chọn nhân vật khi ít lựa chọn
+ * Nhóm nút pill chọn nhanh: mốc Kim Cương, bộ lọc nhanh, hoặc chọn nhân vật khi ít lựa chọn
  * (từ 5 lựa chọn trở lên nên dùng `SelectField` cho gọn).
  *
  * Là `<button>` thật chứ không phải radio ẩn: bấm một cái đổi ngay, không cần nhãn `for`.

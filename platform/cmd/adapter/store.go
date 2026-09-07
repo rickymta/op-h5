@@ -1,6 +1,6 @@
 package main
 
-// Cua hang: mua goi va doi Xu -> Nguyen Bao tu vi he thong ID. Thiet ke: docs/design-cua-hang.md.
+// Cua hang: mua goi va doi Xu -> Kim Cuong tu vi he thong ID. Thiet ke: docs/design-cua-hang.md.
 //
 // Ba cua vao:
 //   /cua-hang, /api/game/packages, /api/game/convert, /api/game/orders, /api/game/roles — trang web.
@@ -34,7 +34,7 @@ type storeCategory struct{ Key, Title, Hint string }
 
 // storeCategories la thu tu tab tren trang. Goi thuoc nhom khong co o day (vd 'ingame') khong hien.
 var storeCategories = []storeCategory{
-	{"diamond", "Nguyên Bảo", "Đổi Xu lấy Nguyên Bảo. Game tính như nạp thật: mỗi mốc lần đầu mua được x2 và cộng điểm VIP."},
+	{"diamond", "Kim Cương", "Đổi Xu lấy Kim Cương. Game tính như nạp thật: mỗi mốc lần đầu mua được x2 và cộng điểm VIP."},
 	{"card", "Thẻ tuần", "Kích hoạt trong game, nhận thưởng mỗi ngày trong 7 ngày."},
 	{"fund", "Quỹ", "Mua một lần, nhận thưởng theo mốc khi chơi."},
 	{"privilege", "Đặc quyền", "Mở tính năng hoặc quyền lợi lâu dài."},
@@ -253,7 +253,7 @@ func buildList(pkgs []wallet.Package, sq storeQuery) listView {
 // Cac ma con lai khong tra cuu duoc o day (bang vat pham nam trong Excel cua game), nen lui ve
 // item_name hoac "Vật phẩm #<id>".
 var rewardLabels = map[string]string{
-	"0:1": "Nguyên Bảo",
+	"0:1": "Kim Cương",
 	"0:0": "Kim tệ",
 	"0:4": "EXP anh hùng",
 }
@@ -299,7 +299,7 @@ func parseReward(reward, itemName string) []rewardItem {
 //
 // grant_mode='mail': doc chuoi `reward` — day la chuoi that ma console gui kem thu.
 // grant_mode='pay': game xu ly nhu mot lan nap, khong co chuoi qua; noi dung nam o
-// item_name/item_count (vd "10.000 Nguyên Bảo" x1).
+// item_name/item_count (vd "10.000 Kim Cương" x1).
 func rewardItems(p wallet.Package) []rewardItem {
 	if p.GrantMode == "mail" && strings.TrimSpace(p.Reward) != "" {
 		if items := parseReward(p.Reward, p.ItemName); len(items) > 0 {
@@ -480,7 +480,7 @@ func (s *adapterServer) storeStats(w http.ResponseWriter, r *http.Request) {
 		}
 		n++
 		cats[p.Category] = true
-		// Thuong lan dau x2 la luat cua cac MOC doi Nguyen Bao (nhom 'diamond'); khong co
+		// Thuong lan dau x2 la luat cua cac MOC doi Kim Cuong (nhom 'diamond'); khong co
 		// moc nao dang ban thi khong duoc noi la co.
 		if p.Category == "diamond" {
 			firstBuy = true
@@ -489,7 +489,7 @@ func (s *adapterServer) storeStats(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]any{
 		"packages":        n,
 		"categories":      len(cats),
-		"rate_note":       "1 Xu = 1 Nguyên Bảo",
+		"rate_note":       "1 Xu = 1 Kim Cương",
 		"first_buy_bonus": firstBuy,
 	})
 }

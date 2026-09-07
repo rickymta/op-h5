@@ -366,7 +366,7 @@ function Buy({ pkg, me, idBase }: { pkg: PkgDetail; me?: Me; idBase: string }) {
             <li>Phần thưởng phát về đúng nơi ghi ở dòng "Nhận ở" và không chuyển sang nhân vật khác được.</li>
             <li>{pkg.grant_note}</li>
             {pkg.cond ? <li>Điều kiện của gói: {pkg.cond}. Không thoả thì game từ chối và Xu được hoàn.</li> : null}
-            <li>Giá trừ vào ví Xu chung của tài khoản, không phải Nguyên Bảo trong game.</li>
+            <li>Giá trừ vào ví Xu chung của tài khoản, không phải Kim Cương trong game.</li>
           </Notes>
         </Card>
         <Card>

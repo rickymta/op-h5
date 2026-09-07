@@ -101,8 +101,8 @@ mặc định `"Cửa hàng " + tên game`. Ảnh thương hiệu đặt ở `AS
 thì trả **thêm** khối `{list:{packages,page,page_size,total,pages}}` — một lượt gọi, một lượt đọc DB.
 Tìm kiếm **bỏ dấu tiếng Việt ở Go** (`internal/textnorm`), không dựa vào collation: bảng dùng
 `utf8mb4_unicode_ci`, collation đó coi `ê` khác `e` nên `LIKE '%nguyen%'` không bao giờ khớp
-"Nguyên Bảo". `GET /api/game/packages/{id}` trả thêm `reward_items` (dựng từ chuỗi quà
-`type:id:count#…`; `0:1`=Nguyên Bảo, `0:0`=Kim tệ, `0:4`=EXP anh hùng), `grant_note`, `server_days`,
+"Kim Cương". `GET /api/game/packages/{id}` trả thêm `reward_items` (dựng từ chuỗi quà
+`type:id:count#…`; `0:1`=Kim Cương, `0:0`=Kim tệ, `0:4`=EXP anh hùng), `grant_note`, `server_days`,
 `daily_limit`, `vip_required`. `GET /api/game/store/stats` trả số gói và số nhóm **thật**.
 Nhóm `ingame` (các mục nạp chỉ để tra giá khi mua trong game) bị lọc ở **mọi** cửa vào — danh sách,
 tìm kiếm và cả trang chi tiết (404 `package_unknown`).

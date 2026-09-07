@@ -1,19 +1,19 @@
 {
   "id": "nb-3280",
-  "name": "3280 Nguyên Bảo",
+  "name": "3280 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
   "description": "Mốc dành cho người chơi lâu dài.",
   "badge": "",
   "cond": "",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 3280,
   "price_xu": 1000000,
   "price_fmt": "1.000.000",
   "vip_points": 1000,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 3280
     }
   ],

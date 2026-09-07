@@ -94,8 +94,8 @@ export function Home() {
     <main>
       <Hero
         eyebrow="Chợ giữa người chơi"
-        title="Chợ Xu ⇄ Nguyên Bảo"
-        lead="Người chơi ký gửi Nguyên Bảo rồi rao bán lấy Xu. Giá do người bán đặt, trong khoảng sàn và trần do cổng quy định; cổng chỉ thu một khoản phí, trừ vào phần người bán nhận."
+        title="Chợ Xu ⇄ Kim Cương"
+        lead="Người chơi ký gửi Kim Cương rồi rao bán lấy Xu. Giá do người bán đặt, trong khoảng sàn và trần do cổng quy định; cổng chỉ thu một khoản phí, trừ vào phần người bán nhận."
         actions={
           <>
             <LinkButton href={to("/dang-ban")} size="lg">
@@ -111,7 +111,7 @@ export function Home() {
           items={[
             {
               title: "Ký gửi trước khi niêm yết",
-              note: "Nguyên Bảo rời nhân vật người bán ngay lúc đăng, nên tin rao không thể là tin ảo.",
+              note: "Kim Cương rời nhân vật người bán ngay lúc đăng, nên tin rao không thể là tin ảo.",
             },
             {
               title: `Phí ${FEE_PCT}% hiện trước khi đăng`,
@@ -119,7 +119,7 @@ export function Home() {
             },
             {
               title: "Giá có sàn và trần",
-              note: `Từ ${PRICE_FLOOR.toLocaleString("vi-VN")} đến ${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo.`,
+              note: `Từ ${PRICE_FLOOR.toLocaleString("vi-VN")} đến ${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương.`,
             },
           ]}
         />
@@ -136,7 +136,7 @@ export function Home() {
             <StatCard
               label="Giá sàn"
               value={PRICE_FLOOR.toLocaleString("vi-VN")}
-              hint={`Xu / ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo`}
+              hint={`Xu / ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương`}
               tone="gold"
             />
             <StatCard

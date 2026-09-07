@@ -31,9 +31,9 @@ export interface DemoListing {
   game: string;
   srv: string;
   seller: string;
-  /** So Nguyen Bao ky gui. */
+  /** So Kim Cuong ky gui. */
   amount: number;
-  /** Xu cho moi 1.000 Nguyen Bao. */
+  /** Xu cho moi 1.000 Kim Cuong. */
   price: number;
   createdAt: string;
   status: ListingStatus;
@@ -44,7 +44,7 @@ export interface DemoCharacter {
   game: string;
   srv: string;
   name: string;
-  /** So Nguyen Bao dang co trong nhan vat. */
+  /** So Kim Cuong dang co trong nhan vat. */
   balance: number;
 }
 

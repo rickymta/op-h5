@@ -139,9 +139,9 @@ Nghĩa là đẩy được xa hơn thì phần treo máy vừa nhiều hơn vừ
 
 ## Chiến nhanh
 
-Chiến nhanh mở ở cấp 4. Mỗi lượt thu ngay phần treo máy của 120 phút, khỏi phải chờ. Mỗi ngày có một lượt miễn phí, và mua thêm được ba lượt nữa bằng Nguyên Bảo với giá tăng dần.
+Chiến nhanh mở ở cấp 4. Mỗi lượt thu ngay phần treo máy của 120 phút, khỏi phải chờ. Mỗi ngày có một lượt miễn phí, và mua thêm được ba lượt nữa bằng Kim Cương với giá tăng dần.
 
-Đây là cách hợp lý để dùng Nguyên Bảo trong giai đoạn đầu, vì nó rút ngắn đúng thứ đang chặn bạn là thời gian.
+Đây là cách hợp lý để dùng Kim Cương trong giai đoạn đầu, vì nó rút ngắn đúng thứ đang chặn bạn là thời gian.
 
 ## Thưởng khi đang mở game
 
@@ -187,7 +187,7 @@ Phần treo máy tính theo ải xa nhất đã qua, nên trước khi tắt hã
 
 ## Chưa cần vội
 
-Công hội mở ở cấp 15, các hoạt động liên máy chủ mở ở cấp 70. Ngày đầu chưa phải lo tới chúng. Cũng chưa cần mua gì: Nguyên Bảo trong giai đoạn này dùng cho chiến nhanh và mua thêm lượt phó bản là hợp lý hơn cả.',
+Công hội mở ở cấp 15, các hoạt động liên máy chủ mở ở cấp 70. Ngày đầu chưa phải lo tới chúng. Cũng chưa cần mua gì: Kim Cương trong giai đoạn này dùng cho chiến nhanh và mua thêm lượt phó bản là hợp lý hơn cả.',
   '', '', 0, 'published', '2026-08-22 09:00:00')
 ON DUPLICATE KEY UPDATE game_code=VALUES(game_code), kind=VALUES(kind), title=VALUES(title),
   summary=VALUES(summary), body=VALUES(body), image_url=VALUES(image_url), link_url=VALUES(link_url),
@@ -379,7 +379,7 @@ Trả bằng điểm hữu nghị: 100 điểm cho một lượt, 1.000 điểm 
 
 ## Chiêu mộ cao cấp
 
-Dùng thẻ chiêu mộ cao cấp; không có thẻ thì trả bằng Nguyên Bảo. Kênh này cũng cho một lượt miễn phí mỗi 24 giờ, và có gói nhiều lượt một lần cho ai muốn quay dồn.
+Dùng thẻ chiêu mộ cao cấp; không có thẻ thì trả bằng Kim Cương. Kênh này cũng cho một lượt miễn phí mỗi 24 giờ, và có gói nhiều lượt một lần cho ai muốn quay dồn.
 
 ## Đổi bằng điểm triệu hồi
 
@@ -462,7 +462,7 @@ Cách chơi hợp lý là mỗi ngày thử bậc cao nhất bạn qua được,
 
 ## Lượt và quét
 
-Mỗi phó bản cho hai lượt miễn phí mỗi ngày. Mua thêm lượt tốn 50 Nguyên Bảo. Sau khi đã qua một bậc, bạn quét lại được thay vì đánh, và phần thưởng quét bằng đúng phần thưởng đánh.
+Mỗi phó bản cho hai lượt miễn phí mỗi ngày. Mua thêm lượt tốn 50 Kim Cương. Sau khi đã qua một bậc, bạn quét lại được thay vì đánh, và phần thưởng quét bằng đúng phần thưởng đánh.
 
 ## Ưu tiên khi thiếu lượt
 
@@ -481,7 +481,7 @@ VALUES ('haitac-dau-truong-va-giai-vo-dich', 'haitac', 'news', 'Đấu trường
 
 ## Đấu trường
 
-Bạn khiêu chiến đội hình phòng thủ của người khác. Mỗi ngày có ba lượt miễn phí, và mua thêm vé khiêu chiến bằng Nguyên Bảo nếu muốn đánh nữa.
+Bạn khiêu chiến đội hình phòng thủ của người khác. Mỗi ngày có ba lượt miễn phí, và mua thêm vé khiêu chiến bằng Kim Cương nếu muốn đánh nữa.
 
 Thắng hay thua đều có thưởng, chỉ khác về mức — nên lượt miễn phí không bao giờ phí. Sau khoảng mười lần khiêu chiến, bạn được phép bỏ qua hoạt cảnh trận đấu để đi nhanh hơn.
 
@@ -489,7 +489,7 @@ Thắng hay thua đều có thưởng, chỉ khác về mức — nên lượt m
 
 ## Thưởng của đấu trường
 
-- Thưởng theo hạng, trả mỗi ngày, chia theo bậc hạng — từ hạng nhất, rồi các bậc 2, 3, 4–5, 6–10, 11–20, 21–50, 51–100, 101–200, 201–500 và phần còn lại. Gồm danh vọng đấu trường và Nguyên Bảo.
+- Thưởng theo hạng, trả mỗi ngày, chia theo bậc hạng — từ hạng nhất, rồi các bậc 2, 3, 4–5, 6–10, 11–20, 21–50, 51–100, 101–200, 201–500 và phần còn lại. Gồm danh vọng đấu trường và Kim Cương.
 - Rương tuần mở theo số lượt đã khiêu chiến trong tuần, với các mốc 5, 10, 20, 40, 60, 80 và 100 lượt.
 - Thưởng cuối mùa giải theo hạng đạt được.
 
@@ -512,7 +512,7 @@ VALUES ('haitac-bon-kieu-leo-thap', 'haitac', 'news', 'Bốn kiểu leo tháp',
 
 ## Thông Thiên Tháp
 
-Mở ở cấp 10, hơn 1.500 tầng, mỗi tầng một đội đối thủ cố định. Mỗi ngày có hai lượt khiêu chiến miễn phí, và mua thêm được tối đa ba lượt bằng Nguyên Bảo với giá tăng dần.
+Mở ở cấp 10, hơn 1.500 tầng, mỗi tầng một đội đối thủ cố định. Mỗi ngày có hai lượt khiêu chiến miễn phí, và mua thêm được tối đa ba lượt bằng Kim Cương với giá tăng dần.
 
 Từ cấp 40, mục quét tháp tự động mở ra, quét được tối đa 100 tầng — rất tiện khi bạn đã bỏ tháp lâu và cần đuổi lại phần dễ.
 
@@ -548,7 +548,7 @@ VALUES ('haitac-cong-hoi-va-cong-hoi-chien', 'haitac', 'news', 'Công hội và 
 ## Công hội có gì
 
 - 30 cấp. Cấp càng cao thì sức chứa thành viên càng lớn, bắt đầu từ 20 người.
-- Đóng góp kim tệ hoặc Nguyên Bảo để đổi lấy kinh nghiệm công hội và điểm cống hiến cá nhân.
+- Đóng góp kim tệ hoặc Kim Cương để đổi lấy kinh nghiệm công hội và điểm cống hiến cá nhân.
 - Cửa hàng công hội tiêu bằng điểm cống hiến.
 - Kỹ năng công hội, nâng bằng tài nguyên chung, cộng chỉ số cho mọi thành viên.
 - Phó bản công hội và BOSS công hội, cùng mở ở cấp 15.
@@ -556,7 +556,7 @@ VALUES ('haitac-cong-hoi-va-cong-hoi-chien', 'haitac', 'news', 'Công hội và 
 
 ## Độ sinh động
 
-Công hội có bảng nhiệm vụ sinh động riêng, gồm những việc như nâng kỹ năng công hội, đánh phó bản công hội, tiêu ở cửa hàng công hội, đóng góp kim tệ hoặc Nguyên Bảo, và gửi hồng bao. Đủ mốc sinh động thì cả hội nhận thưởng.
+Công hội có bảng nhiệm vụ sinh động riêng, gồm những việc như nâng kỹ năng công hội, đánh phó bản công hội, tiêu ở cửa hàng công hội, đóng góp kim tệ hoặc Kim Cương, và gửi hồng bao. Đủ mốc sinh động thì cả hội nhận thưởng.
 
 Vì vậy một công hội đông mà im lìm không bằng một công hội ít người nhưng ai cũng làm vài việc mỗi ngày.
 
@@ -592,7 +592,7 @@ Gần như mọi hoạt động liên máy chủ mở ở cấp phiêu lưu 70. 
 - Đấu trường liên máy chủ: khiêu chiến người ở máy chủ khác, có rương mở theo số lượt đánh trong ngày và bảng xếp hạng riêng. Thưởng trả bằng công huân, tiêu ở cửa hàng của mục này.
 - BOSS liên máy chủ: đánh chung một mục tiêu, thưởng chia theo thứ hạng.
 - Giải đấu hạng liên máy chủ: hệ thống thăng hạng riêng, có cửa hàng và kho phần thưởng riêng.
-- Xếp hạng Nguyên Bảo và xếp hạng nạp giữa các máy chủ.
+- Xếp hạng Kim Cương và xếp hạng nạp giữa các máy chủ.
 
 ## Tám bảng xếp hạng
 
@@ -644,20 +644,20 @@ ON DUPLICATE KEY UPDATE game_code=VALUES(game_code), kind=VALUES(kind), title=VA
   pinned=VALUES(pinned), status=VALUES(status), published_at=VALUES(published_at);
 
 INSERT INTO news (slug, game_code, kind, title, summary, body, image_url, link_url, pinned, status, published_at)
-VALUES ('haitac-nguyen-bao-dung-lam-gi', 'haitac', 'news', 'Nguyên Bảo dùng làm gì, và các loại tiền khác',
-  'Nguyên Bảo là tiền cao cấp trong game. Ngoài nó còn Kim tệ, Ngân lượng, điểm hữu nghị, danh vọng đấu trường, cống hiến công hội — mỗi loại chỉ tiêu ở đúng chỗ của nó.',
+VALUES ('haitac-nguyen-bao-dung-lam-gi', 'haitac', 'news', 'Kim Cương dùng làm gì, và các loại tiền khác',
+  'Kim Cương là tiền cao cấp trong game. Ngoài nó còn Kim tệ, Ngân lượng, điểm hữu nghị, danh vọng đấu trường, cống hiến công hội — mỗi loại chỉ tiêu ở đúng chỗ của nó.',
   'Game có nhiều loại tiền, và người mới hay tiêu nhầm chỗ. Đây là bức tranh chung.
 
-## Nguyên Bảo
+## Kim Cương
 
-Nguyên Bảo là tiền cao cấp, dùng được ở gần như mọi chỗ. Những cách tiêu đáng giá nhất trong giai đoạn đầu:
+Kim Cương là tiền cao cấp, dùng được ở gần như mọi chỗ. Những cách tiêu đáng giá nhất trong giai đoạn đầu:
 
 - Chiến nhanh: mỗi lượt thu ngay 120 phút treo máy. Một lượt miễn phí mỗi ngày, ba lượt trả phí với giá tăng dần.
-- Mua thêm lượt phó bản hằng ngày: 50 Nguyên Bảo một lượt.
+- Mua thêm lượt phó bản hằng ngày: 50 Kim Cương một lượt.
 - Mua thêm lượt Thông Thiên Tháp: tối đa ba lượt mỗi ngày, giá tăng dần.
 - Chiêu mộ cao cấp khi không có thẻ.
 - Làm mới nhiệm vụ treo thưởng sau khi hết hai lượt miễn phí.
-- Đóng góp Nguyên Bảo cho công hội, đổi lấy cống hiến và độ sinh động.
+- Đóng góp Kim Cương cho công hội, đổi lấy cống hiến và độ sinh động.
 
 ## Kim tệ và Ngân lượng
 
@@ -677,40 +677,40 @@ Nguyên tắc chung: đồng tiền phụ không chuyển đổi qua lại, và 
 
 ## Xu thì khác
 
-Xu là tiền của cổng, không phải tiền trong game. Xu nằm ở ví tài khoản và dùng được cho mọi game trong hệ thống. Muốn có Nguyên Bảo từ Xu thì mua ở trang Cửa hàng.',
+Xu là tiền của cổng, không phải tiền trong game. Xu nằm ở ví tài khoản và dùng được cho mọi game trong hệ thống. Muốn có Kim Cương từ Xu thì mua ở trang Cửa hàng.',
   '', '', 0, 'published', '2026-09-01 16:00:00')
 ON DUPLICATE KEY UPDATE game_code=VALUES(game_code), kind=VALUES(kind), title=VALUES(title),
   summary=VALUES(summary), body=VALUES(body), image_url=VALUES(image_url), link_url=VALUES(link_url),
   pinned=VALUES(pinned), status=VALUES(status), published_at=VALUES(published_at);
 
 INSERT INTO news (slug, game_code, kind, title, summary, body, image_url, link_url, pinned, status, published_at)
-VALUES ('haitac-moc-nap-va-x2-lan-dau', 'haitac', 'news', 'Tám mốc đổi Nguyên Bảo và luật x2 lần đầu',
-  'Tỉ lệ là 1 Xu đổi 1 Nguyên Bảo, chia làm tám mốc từ 10.000 tới 2.000.000 Xu. Mỗi mốc được nhân đôi ở lần mua đầu tiên, và mọi lần mua đều cộng điểm VIP.',
-  'Ở trang Cửa hàng, nhóm Nguyên Bảo là cách đổi Xu sang tiền trong game.
+VALUES ('haitac-moc-nap-va-x2-lan-dau', 'haitac', 'news', 'Tám mốc đổi Kim Cương và luật x2 lần đầu',
+  'Tỉ lệ là 1 Xu đổi 1 Kim Cương, chia làm tám mốc từ 10.000 tới 2.000.000 Xu. Mỗi mốc được nhân đôi ở lần mua đầu tiên, và mọi lần mua đều cộng điểm VIP.',
+  'Ở trang Cửa hàng, nhóm Kim Cương là cách đổi Xu sang tiền trong game.
 
 ## Tám mốc
 
-Tám mốc lần lượt là 10.000, 20.000, 50.000, 100.000, 200.000, 500.000, 1.000.000 và 2.000.000 Xu. Mỗi mốc trả về đúng số Nguyên Bảo bằng số Xu đã bỏ ra — tỉ lệ 1 đổi 1, không có mốc nào lợi hơn mốc nào về tỉ lệ gốc.
+Tám mốc lần lượt là 10.000, 20.000, 50.000, 100.000, 200.000, 500.000, 1.000.000 và 2.000.000 Xu. Mỗi mốc trả về đúng số Kim Cương bằng số Xu đã bỏ ra — tỉ lệ 1 đổi 1, không có mốc nào lợi hơn mốc nào về tỉ lệ gốc.
 
 ## Luật x2 lần đầu
 
-Đây là chỗ có khác biệt thật sự. Mỗi mốc được tính riêng, và lần đầu tiên bạn mua một mốc thì game cộng thêm đúng số đó lần nữa. Ví dụ mốc 50.000 ở lần mua đầu tiên trả về 100.000 Nguyên Bảo; từ lần thứ hai trở đi chỉ còn đúng 50.000.
+Đây là chỗ có khác biệt thật sự. Mỗi mốc được tính riêng, và lần đầu tiên bạn mua một mốc thì game cộng thêm đúng số đó lần nữa. Ví dụ mốc 50.000 ở lần mua đầu tiên trả về 100.000 Kim Cương; từ lần thứ hai trở đi chỉ còn đúng 50.000.
 
 Vì mỗi mốc tính riêng, phần thưởng lần đầu tồn tại ở cả tám mốc chứ không chỉ ở mốc nhỏ nhất.
 
 ## Điểm VIP
 
-Mọi lần mua ở nhóm này đều cộng điểm VIP, kể cả lần thứ hai trở đi. Đó là vì game xử lý chúng đúng như một lần nạp trong game: cộng Nguyên Bảo theo mốc, tính phần thưởng lần đầu, cộng điểm VIP, và tính vào các mốc tích nạp.
+Mọi lần mua ở nhóm này đều cộng điểm VIP, kể cả lần thứ hai trở đi. Đó là vì game xử lý chúng đúng như một lần nạp trong game: cộng Kim Cương theo mốc, tính phần thưởng lần đầu, cộng điểm VIP, và tính vào các mốc tích nạp.
 
 Cấp VIP mang lại phúc lợi nhận mỗi ngày, một hệ số nhân cho kinh nghiệm treo máy, và điều kiện mở một số mục.
 
 ## Hàng về đâu
 
-Nguyên Bảo vào thẳng nhân vật ở máy chủ bạn chọn lúc mua, không qua hòm thư. Trạng thái đơn hiện ngay trên trang Cửa hàng và tự cập nhật.
+Kim Cương vào thẳng nhân vật ở máy chủ bạn chọn lúc mua, không qua hòm thư. Trạng thái đơn hiện ngay trên trang Cửa hàng và tự cập nhật.
 
 ## Một lưu ý
 
-Xu chỉ đi một chiều: từ ví vào game. Không có cách đổi ngược Nguyên Bảo thành Xu, và Xu không quy đổi lại thành tiền.',
+Xu chỉ đi một chiều: từ ví vào game. Không có cách đổi ngược Kim Cương thành Xu, và Xu không quy đổi lại thành tiền.',
   '', '', 0, 'published', '2026-09-02 09:00:00')
 ON DUPLICATE KEY UPDATE game_code=VALUES(game_code), kind=VALUES(kind), title=VALUES(title),
   summary=VALUES(summary), body=VALUES(body), image_url=VALUES(image_url), link_url=VALUES(link_url),
@@ -723,7 +723,7 @@ VALUES ('haitac-mua-goi-bang-xu-tren-web', 'haitac', 'news', 'Mua gói bằng Xu
 
 ## Tám nhóm
 
-- Nguyên Bảo: tám mốc đổi thẳng.
+- Kim Cương: tám mốc đổi thẳng.
 - Thẻ tuần: kích hoạt rồi nhận thưởng mỗi ngày trong bảy ngày.
 - Quỹ: kích hoạt một lần, sau đó nhận thưởng theo từng mốc tiến độ trong game.
 - Đặc quyền: mở thêm lượt hoặc thêm quyền lợi cho một mục cụ thể.
@@ -827,7 +827,7 @@ VALUES ('haitac-nhan-qua-qua-hom-thu', 'haitac', 'notice', 'Nhận quà qua hòm
 
 ## Gói tính như một lần nạp
 
-Phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn, không qua hòm thư. Các mốc Nguyên Bảo, thẻ tuần, quỹ, đặc quyền và gói ngày đều đi đường này. Kiểm tra chúng ở túi đồ và ở mục nạp trong game.
+Phần thưởng vào thẳng nhân vật ở máy chủ bạn chọn, không qua hòm thư. Các mốc Kim Cương, thẻ tuần, quỹ, đặc quyền và gói ngày đều đi đường này. Kiểm tra chúng ở túi đồ và ở mục nạp trong game.
 
 ## Gói gửi qua thư
 

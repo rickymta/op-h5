@@ -81,7 +81,7 @@ Quà từ hoạt động, đền bù và các gói web thuộc loại "gửi th�
 
 Xu là tiền chung của hệ thống, nạp ở trang tài khoản. Ở Cửa hàng, bạn chọn gói, chọn nhân vật nhận, xác nhận — Xu bị trừ và lệnh phát hàng chạy ngay.
 
-- Gói Nguyên Bảo, thẻ, quỹ, đặc quyền: game xử lý như một lần nạp, phần thưởng vào thẳng nhân vật và tính cả điểm VIP.
+- Gói Kim Cương, thẻ, quỹ, đặc quyền: game xử lý như một lần nạp, phần thưởng vào thẳng nhân vật và tính cả điểm VIP.
 - Gói vật phẩm: gửi qua hòm thư trong game.
 - Game từ chối (hết lượt trong ngày, chưa tới ngày mở, chưa đủ VIP) thì Xu được hoàn lại ví tự động; bạn không phải yêu cầu.`,
 };
@@ -92,9 +92,9 @@ export const PAGE_FAQ: DefaultPage = {
 
 Không. Game chạy thẳng trong trình duyệt. Lần đầu vào sẽ mất một lúc để tải tài nguyên, những lần sau nhanh hơn vì trình duyệt đã giữ lại.
 
-## Xu và Nguyên Bảo khác nhau thế nào?
+## Xu và Kim Cương khác nhau thế nào?
 
-Xu là tiền của cổng, nằm trong ví tài khoản và dùng được cho mọi game trên hệ thống. Nguyên Bảo là tiền trong game này. Ở Cửa hàng, các mốc đổi theo tỷ lệ 1 Xu = 1 Nguyên Bảo; riêng mỗi mốc thì lần mua đầu tiên được game nhân đôi, giống hệt luật nạp trong game.
+Xu là tiền của cổng, nằm trong ví tài khoản và dùng được cho mọi game trên hệ thống. Kim Cương là tiền trong game này. Ở Cửa hàng, các mốc đổi theo tỷ lệ 1 Xu = 1 Kim Cương; riêng mỗi mốc thì lần mua đầu tiên được game nhân đôi, giống hệt luật nạp trong game.
 
 ## Mua ở Cửa hàng bao lâu thì nhận được?
 

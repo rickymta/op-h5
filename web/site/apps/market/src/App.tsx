@@ -9,7 +9,7 @@ import { Mine } from "./pages/Mine";
 import { NotFound } from "./pages/NotFound";
 
 /**
- * Chợ Xu ⇄ Nguyên Bảo — SPA riêng, tiến trình `id` phục vụ dưới `/cho` (hợp đồng mục 2).
+ * Chợ Xu ⇄ Kim Cương — SPA riêng, tiến trình `id` phục vụ dưới `/cho` (hợp đồng mục 2).
  *
  * Đợt này **chỉ có giao diện**: dữ liệu lấy từ `src/demo-data.ts`, không gọi API, và mọi nút
  * thao tác tiền đều khoá. `PreviewBanner` nằm ngoài `Switch` nên có mặt ở mọi route.

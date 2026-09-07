@@ -1499,9 +1499,9 @@
 91003,đẳng cấp gói quà thứ ba ngăn,12| Đẳng cấp gói quà thứ ba ngăn
 91004,đẳng cấp gói quà thứ tư ngăn,30| Đẳng cấp gói quà thứ tư ngăn
 91005,đẳng cấp gói quà thứ năm ngăn,98| Đẳng cấp gói quà thứ năm ngăn
-91006,trợ lực thú linh Nguyên bảo thứ 1 Ngăn,30| Trợ lực thú linh Nguyên bảo thứ 1 Ngăn
-91007,trợ lực thú linh Nguyên bảo thứ 2 Ngăn,98| Trợ lực thú linh Nguyên bảo thứ 2 Ngăn
-91008,trợ lực thú linh Nguyên bảo thứ 3 Ngăn,198| Trợ lực thú linh Nguyên bảo thứ 3 Ngăn
+91006,trợ lực thú linh Kim cương thứ 1 Ngăn,30| Trợ lực thú linh Kim cương thứ 1 Ngăn
+91007,trợ lực thú linh Kim cương thứ 2 Ngăn,98| Trợ lực thú linh Kim cương thứ 2 Ngăn
+91008,trợ lực thú linh Kim cương thứ 3 Ngăn,198| Trợ lực thú linh Kim cương thứ 3 Ngăn
 91009,trợ lực anh hùng vượt phục thứ 1 Ngăn,30| Trợ lực anh hùng vượt phục thứ 1 Ngăn
 91010,trợ lực anh hùng vượt phục thứ 2 Ngăn,98| Trợ lực anh hùng vượt phục thứ 2 Ngăn
 91011,trợ lực anh hùng vượt phục thứ 3 Ngăn,198| Trợ lực anh hùng vượt phục thứ 3 Ngăn

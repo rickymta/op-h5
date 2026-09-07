@@ -43,7 +43,7 @@ type Order = { id: number; pkg: string; srv: string; xu: number; status: string;
 
 const ORDERS: Order[] = [
   { id: 90211, pkg: "Gói Tân Thủ", srv: "S1 · Hải Tặc", xu: 20000, status: "granted", at: "2026-09-05T14:03:00+07:00" },
-  { id: 90210, pkg: "Nguyên Bảo 6.480", srv: "S3 · Vịnh Bão", xu: 150000, status: "pending", at: "2026-09-05T09:41:00+07:00" },
+  { id: 90210, pkg: "Kim Cương 6.480", srv: "S3 · Vịnh Bão", xu: 150000, status: "pending", at: "2026-09-05T09:41:00+07:00" },
   { id: 90204, pkg: "Thẻ Tháng", srv: "S1 · Hải Tặc", xu: 50000, status: "refunded", at: "2026-09-02T21:12:00+07:00" },
   { id: 90188, pkg: "Quỹ Trưởng Thành", srv: "S2 · Đảo Xương", xu: 98000, status: "failed", at: "2026-08-29T08:00:00+07:00" },
 ];
@@ -252,7 +252,7 @@ function App() {
               <h3 className="mb-3">Tóm tắt đơn</h3>
               <KeyValue
                 rows={[
-                  { k: "Gói", v: "Nguyên Bảo 6.480" },
+                  { k: "Gói", v: "Kim Cương 6.480" },
                   { k: "Máy chủ", v: "S1 · Hải Tặc" },
                   { k: "Nhân vật", v: "ThuyThuTruong" },
                   { k: "Giá", v: `${formatInt(150000)} Xu`, tone: "gold" },

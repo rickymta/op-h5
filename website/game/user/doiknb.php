@@ -2,7 +2,7 @@
     <h1 style="font-size:0">Đại Hải Trình Mobile</h1>
     <div class="form-card form-get-gc">
         <div class="form-group" id="account-pay">
-            <label><b>Đổi Kim Nguyên Bảo</b></label>
+            <label><b>Đổi Kim Kim Cương</b></label>
             <div class="payment-invoice">
                 <div class="form-group">
                     <label>Tài khoản</label>

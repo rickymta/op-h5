@@ -1,4 +1,4 @@
-# Thiết kế: Cửa hàng — mua gói và đổi Xu → Nguyên Bảo từ ví hệ thống ID
+# Thiết kế: Cửa hàng — mua gói và đổi Xu → Kim Cương từ ví hệ thống ID
 
 Bản điều tra + thiết kế, 2026-09-05. Mục 8 là quyết định của người vận hành, mục 9 là những gì đã làm (build/test xanh trên PC, chưa chạy thật) và còn lại. Mục 7 là kế hoạch gốc.
 
@@ -8,7 +8,7 @@ Bản điều tra + thiết kế, 2026-09-05. Mục 8 là quyết định của 
 
 | Khái niệm | Trong game | Chuỗi vật phẩm | Ghi chú |
 |---|---|---|---|
-| Nguyên Bảo (元宝) — "kim cương" | tiền cao cấp | `0:1:N` | `gm/item.txt`: `0:1` = "Nguyên bảo" |
+| Kim Cương (元宝) — "kim cương" | tiền cao cấp | `0:1:N` | `gm/item.txt`: `0:1` = "Kim cương" |
 | Kim tệ (金币) | tiền thường | `0:0:N` | |
 | EXP anh hùng | | `0:4:N` | |
 | Vật phẩm / mảnh / trang bị… | | `3:tid:N`, `4:tid:N`, `2:tid:N`… | tên Việt trong `gm/item.txt` (1.072 dòng) |
@@ -19,7 +19,7 @@ Chuỗi quà nhiều món nối bằng `#`: `0:1:500#3:100001:1000#0:0:5000000`.
 
 | Cách | API console | Game làm gì | Dùng khi |
 |---|---|---|---|
-| **A. Nạp một "mục nạp"** (充值项, `recharge-item.xlsx`) | `POST /gm/pay/manual` với `PayRecord{itemTid=ID mục nạp, itemCount, payAmount, srvCode, accountUid…}` → pay server → game `pay/deliver` → `PayDeliverExe.exeFunc` | Xử lý **như một lần nạp thật**: cộng Nguyên Bảo theo mốc, x2 lần đầu, cộng điểm VIP (`vip积分`), tích nạp, nạp đầu, kích hoạt thẻ tháng/quỹ/đặc quyền… Mỗi mục nạp có `功能ID` → module tương ứng kiểm tra điều kiện mua (`PayAvailable.check`: giới hạn ngày, VIP, ngày mở server) | Đổi Xu → Nguyên Bảo, mua thẻ tháng, quỹ, đặc quyền, gói ngày… |
+| **A. Nạp một "mục nạp"** (充值项, `recharge-item.xlsx`) | `POST /gm/pay/manual` với `PayRecord{itemTid=ID mục nạp, itemCount, payAmount, srvCode, accountUid…}` → pay server → game `pay/deliver` → `PayDeliverExe.exeFunc` | Xử lý **như một lần nạp thật**: cộng Kim Cương theo mốc, x2 lần đầu, cộng điểm VIP (`vip积分`), tích nạp, nạp đầu, kích hoạt thẻ tháng/quỹ/đặc quyền… Mỗi mục nạp có `功能ID` → module tương ứng kiểm tra điều kiện mua (`PayAvailable.check`: giới hạn ngày, VIP, ngày mở server) | Đổi Xu → Kim Cương, mua thẻ tháng, quỹ, đặc quyền, gói ngày… |
 | **B. Gửi thư kèm quà** | `POST /gm/mail/x/create` `{gmMailEntity:{type:2, operation:12, title, content, reward:"0:1:N#…"}, gmMailTars:[{srvCode, masterIdHex, roleId, …}]}` rồi `gm/mail/x/complete` | Thư vào hòm, người chơi nhận | Gói vật phẩm web tự định nghĩa (như `web.webshop` cũ), đền bù |
 
 Adapter hiện tại chỉ có đường A (`platform/internal/grants/worker.go` → `PayManual`). GM tool `gmhanglong/gm/api.php` dùng cả hai (nạp = INSERT `tcg.pay_approval` + `completeApproval`; gửi đồ = mail).
@@ -28,7 +28,7 @@ Adapter hiện tại chỉ có đường A (`platform/internal/grants/worker.go`
 
 - **`recharge-item.xlsx` sheet 充值项** — 1.934 mục nạp: `ID, 名称, 额度 (= giá, đơn vị VND), 功能ID, 商品ID, vip积分`. 86 `功能ID` khác nhau; phần lớn là gói theo sự kiện/giới hạn (每日限购, 周限购, 迎新大促, 战令…).
 - **`recharge-benefit.xlsx`** (充值福利) — mô tả nội dung, **có tên tiếng Việt**:
-  - `付费充值`: **8 mốc đổi Nguyên Bảo** — `18001…18008`, giá 10k → 2.000k VND, `基础元宝 = giá` (1 VND = 1 Nguyên Bảo), `首冲赠送元宝 = giá` (lần đầu x2).
+  - `付费充值`: **8 mốc đổi Kim Cương** — `18001…18008`, giá 10k → 2.000k VND, `基础元宝 = giá` (1 VND = 1 Kim Cương), `首冲赠送元宝 = giá` (lần đầu x2).
   - `月卡`: Thẻ tháng vinh diệu (100k → 20.000/ngày × 30), Thẻ tháng chí tôn (200k → 40.000/ngày).
   - `月基金`: Quỹ đặc biệt 100k (`17001`, giá ưu đãi `17101` 50k), Quỹ sa hoa 200k (`17002`/`17202`); `成长基金 12001`, `爬塔基金 13001`, `种族塔基金 13002` (50k).
   - `特权商城`: 5 đặc quyền (`20001…20005`, 15k–100k), `超级特权 31001` (300k), 8 thẻ tuần (`31002…31009`).
@@ -36,7 +36,7 @@ Adapter hiện tại chỉ có đường A (`platform/internal/grants/worker.go`
   - `全服限购商品`: Quà rút tướng `27001` (3k, giá gốc 30k), `27002`, `27003`.
   - `钜惠礼包`, 周/月限购, sự kiện lễ…: gói theo điều kiện/thời điểm, game tự bật tắt.
 - **`gmhanglong/gm/pay.txt`** — 1.918 dòng `payId,tên Việt,giá Nguyên` cho **toàn bộ** mục nạp (tên máy dịch, cần sửa cho ~30 mục hiển thị).
-- **`web.webshop`** (bảng seed, 9 dòng) — gói vật phẩm web cũ, ví dụ `500 vạn KNB` = `0:1:5000000` giá 1.500.000 xu (tỷ giá 1 xu = 3,3 Nguyên Bảo — hào phóng hơn mốc nạp 1:1; phải quyết định giữ hay bỏ).
+- **`web.webshop`** (bảng seed, 9 dòng) — gói vật phẩm web cũ, ví dụ `500 vạn KNB` = `0:1:5000000` giá 1.500.000 xu (tỷ giá 1 xu = 3,3 Kim Cương — hào phóng hơn mốc nạp 1:1; phải quyết định giữ hay bỏ).
 
 ### 1.4 Trang `/quy-doi` hiện tại không dùng được cho người chơi
 
@@ -60,11 +60,11 @@ Hệ quả:
 
 Một trang **Cửa hàng** (thay `/quy-doi`) cho người chơi đã đăng nhập hệ thống ID, ba việc:
 
-1. **Đổi Xu → Nguyên Bảo**: 8 mốc `18001…18008`, đúng luật game (1 Xu = 1 Nguyên Bảo, lần đầu x2, cộng VIP) — đường A.
+1. **Đổi Xu → Kim Cương**: 8 mốc `18001…18008`, đúng luật game (1 Xu = 1 Kim Cương, lần đầu x2, cộng VIP) — đường A.
 2. **Mua gói**: thẻ tháng, quỹ, đặc quyền, gói ngày, gói giới hạn — đường A, có mô tả tiếng Việt và điều kiện; cộng gói vật phẩm web tự định nghĩa — đường B.
 3. **Nút mua trong game trừ cùng một ví**: thay `apisv.php`/`api.php` bằng endpoint của Adapter.
 
-Không làm: nạp Xu (đã có ở `id.<domain>/tai-khoan`), đổi ngược Nguyên Bảo → Xu, bán coin giữa người chơi (`sellcoin` cũ).
+Không làm: nạp Xu (đã có ở `id.<domain>/tai-khoan`), đổi ngược Kim Cương → Xu, bán coin giữa người chơi (`sellcoin` cũ).
 
 ## 3. Dữ liệu
 
@@ -144,10 +144,10 @@ Mobile-first 375 px như phần còn lại của Adapter (`shell.html`), desktop
 │ Số dư: 1.250.000 Xu        [Nạp thêm Xu →]   │  ← link id.<domain>/tai-khoan
 │ Máy chủ: S1 · Nhân vật: Hằng Nga (tự chọn)   │  ← từ masterList; chỉ hỏi khi >1
 ├──────────────────────────────────────────────┤
-│ [Nguyên Bảo] [Thẻ & Quỹ] [Đặc quyền] [Gói]   │  ← tab = category
+│ [Kim Cương] [Thẻ & Quỹ] [Đặc quyền] [Gói]   │  ← tab = category
 ├──────────────────────────────────────────────┤
 │ ┌ 10.000 Xu ────────┐ ┌ 20.000 Xu ────────┐  │
-│ │ 10.000 Nguyên Bảo  │ │ 20.000 Nguyên Bảo  │  │
+│ │ 10.000 Kim Cương  │ │ 20.000 Kim Cương  │  │
 │ │ x2 lần đầu · VIP+10k│ │ x2 lần đầu · VIP+20k│ │
 │ │        [Đổi]       │ │        [Đổi]       │  │
 │ └────────────────────┘ └────────────────────┘  │
@@ -184,7 +184,7 @@ Mobile-first 375 px như phần còn lại của Adapter (`shell.html`), desktop
 
 ## 8. Quyết định (2026-09-05, người vận hành)
 
-1. **Tỷ giá**: giữ cả hai — 8 mốc nạp 1 Xu = 1 Nguyên Bảo (đường A, có x2 lần đầu và VIP) **và** gói vật phẩm web cũ (`500 vạn KNB` = 1,5 triệu Xu qua thư, đường B). Giá gói web sửa được ở trang quản trị.
+1. **Tỷ giá**: giữ cả hai — 8 mốc nạp 1 Xu = 1 Kim Cương (đường A, có x2 lần đầu và VIP) **và** gói vật phẩm web cũ (`500 vạn KNB` = 1,5 triệu Xu qua thư, đường B). Giá gói web sửa được ở trang quản trị.
 2. **Gói sự kiện/giới hạn**: hiện trên web (tab "Gói sự kiện", tên máy dịch từ `pay.txt`). Game từ chối → hoàn Xu.
 3. **Hoàn Xu tự động** khi console từ chối hoặc hết lần thử.
 4. **`payRedirect`**: chấp nhận mọi nút mua trong game mở tab web nếu đường 4.2 không chạy.

@@ -50,7 +50,7 @@ type NguongQua struct {
 }
 
 // NguongVi cho tung loai tien. Moc lay tu chinh bang gia cua game: goi 20K xu cho 10.000
-// Nguyen bao, nen 100.000 Nguyen bao ~ 200K xu — mot khoan den bu phai co nguoi thu hai
+// Kim cuong, nen 100.000 Kim cuong ~ 200K xu — mot khoan den bu phai co nguoi thu hai
 // nhin qua. Kim te va kinh nghiem re hon nhieu (goi 300K xu cho 20M), nguong dat 50M.
 var NguongVi = []NguongQua{
 	{Loai: 0, Ma: 1, ToiDa: 100_000, Ten: "Kim cương"}, // ten theo client (danh-muc: vi 1)
@@ -191,7 +191,7 @@ func (s *Service) Mail(w http.ResponseWriter, r *http.Request, a Actor) {
 
 	if !rewardRe.MatchString(in.Reward) {
 		httpx.Error(w, http.StatusBadRequest, "invalid_request",
-			"Quà phải dạng type:id:count, nhiều món nối bằng # (ví dụ 0:1:5000 là 5.000 Nguyên Bảo).")
+			"Quà phải dạng type:id:count, nhiều món nối bằng # (ví dụ 0:1:5000 là 5.000 Kim Cương).")
 		return
 	}
 	if in.Title == "" {
@@ -279,7 +279,7 @@ type ThuDaGui struct {
 	Title    string `json:"title"`
 	Content  string `json:"content"`
 	Reward   string `json:"reward"`
-	QuaTen   string `json:"qua_ten"` // "Nguyen bao ×5.000 · Lenh tuong cao cap ×10"
+	QuaTen   string `json:"qua_ten"` // "Kim cuong ×5.000 · Lenh tuong cao cap ×10"
 	OK       bool   `json:"ok"`
 	Loi      string `json:"loi,omitempty"`
 	MailID   int64  `json:"mail_id,omitempty"`

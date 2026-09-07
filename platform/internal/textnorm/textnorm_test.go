@@ -4,7 +4,7 @@ import "testing"
 
 func TestFold(t *testing.T) {
 	cases := map[string]string{
-		"Nguyên Bảo":    "nguyen bao",
+		"Kim Cương":     "kim cuong",
 		"Thẻ tháng":     "the thang",
 		"Đại Hải Trình": "dai hai trinh",
 		"Quỹ sa hoa":    "quy sa hoa",
@@ -23,10 +23,10 @@ func TestFold(t *testing.T) {
 
 	// NFD — dau nam rieng thanh ky tu ket hop (mot so ban go tren macOS cho ra khuon nay).
 	// Phai ra ket qua y het ban dung san (NFC), neu khong nguoi go tren may do se khong bao
-	// gio tim thay goi nao. "Nguye" + U+0302 U+0303 + "n Ba" + U+0309 + "o" = "Nguyễn Bảo".
-	nfd := "Nguye\u0302\u0303n Ba\u0309o"
-	if got := Fold(nfd); got != "nguyen bao" {
-		t.Errorf("Fold(NFD) = %q, muon %q", got, "nguyen bao")
+	// gio tim thay goi nao. "Kim Cu" + U+031B U+0303 + "ong" = "Kim Cương" (dang NFD).
+	nfd := "Kim Cu\u031bo\u031bng"
+	if got := Fold(nfd); got != "kim cuong" {
+		t.Errorf("Fold(NFD) = %q, muon %q", got, "kim cuong")
 	}
 	// U+031B (horn) cua "ơ"/"ư" cung phai bi bo: "Tu" + U+031B + " nhan" = "Tư nhân".
 	if got := Fold("Tu\u031b nha\u0301n"); got != "tu nhan" {
@@ -36,8 +36,8 @@ func TestFold(t *testing.T) {
 
 func TestMatches(t *testing.T) {
 	ok := []struct{ text, q string }{
-		{"Nguyên Bảo", "nguyen bao"},
-		{"10.000 Nguyên Bảo", "NGUYEN"},
+		{"Kim Cương", "kim cuong"},
+		{"10.000 Kim Cương", "KIM"},
 		{"Thẻ tháng vinh diệu", "the thang"},
 		{"Thẻ tháng vinh diệu", "thang the"}, // khong phu thuoc thu tu tu
 		{"Quỹ đặc biệt", "dac biet"},
@@ -51,7 +51,7 @@ func TestMatches(t *testing.T) {
 		}
 	}
 	no := []struct{ text, q string }{
-		{"Nguyên Bảo", "kim te"},
+		{"Kim Cương", "kim te"},
 		{"Thẻ tháng", "the thang vinh"},
 		{"Quỹ sa hoa", "quy sa hoaa"},
 	}

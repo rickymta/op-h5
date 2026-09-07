@@ -1,19 +1,19 @@
 {
   "id": "nb-60",
-  "name": "60 Nguyên Bảo",
+  "name": "60 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
   "description": "Mốc nhỏ để thử; lần đầu mua được x2.",
   "badge": "",
   "cond": "",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 60,
   "price_xu": 50000,
   "price_fmt": "50.000",
   "vip_points": 50,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 60
     }
   ],

@@ -65,11 +65,11 @@ export function Sell() {
   const price = Number(priceStr || 0);
   const q = quote(amount, price);
 
-  const roleErr = char ? null : "Chọn nhân vật sẽ ký gửi Nguyên Bảo.";
+  const roleErr = char ? null : "Chọn nhân vật sẽ ký gửi Kim Cương.";
   const amountErr =
     checkAmount(amount) ??
     (char && amount > char.balance
-      ? `Nhân vật ${char.name} chỉ có ${formatInt(char.balance)} Nguyên Bảo.`
+      ? `Nhân vật ${char.name} chỉ có ${formatInt(char.balance)} Kim Cương.`
       : null);
   const priceErr = checkPrice(price);
   const stepErr = step === 1 ? roleErr : step === 2 ? (amountErr ?? priceErr) : null;
@@ -78,7 +78,7 @@ export function Sell() {
     { k: "Game", v: gameName(game) },
     { k: "Nhân vật", v: char ? `${char.name} · ${serverName(game, char.srv)}` : "—" },
     { k: "Số lượng ký gửi", v: <NB n={amount} /> },
-    { k: `Đơn giá (mỗi ${formatInt(PRICE_UNIT)} Nguyên Bảo)`, v: <UnitPrice n={price} /> },
+    { k: `Đơn giá (mỗi ${formatInt(PRICE_UNIT)} Kim Cương)`, v: <UnitPrice n={price} /> },
   ];
 
   return (
@@ -87,7 +87,7 @@ export function Sell() {
 
       <Section
         eyebrow="Người bán"
-        title="Đăng bán Nguyên Bảo"
+        title="Đăng bán Kim Cương"
         sub="Bốn bước; số Xu thực nhận được tính ngay ở bước ba, trước khi xác nhận."
         action={<DemoTag>nhân vật mẫu</DemoTag>}
       >
@@ -99,7 +99,7 @@ export function Sell() {
               <>
                 <h3>Bước 1 · Chọn game và nhân vật</h3>
                 <p className="m-0 mt-1.5 text-[13px] text-fg-muted">
-                  Nguyên Bảo được trừ khỏi đúng nhân vật này ngay khi tin lên bảng, không phải khi bán được.
+                  Kim Cương được trừ khỏi đúng nhân vật này ngay khi tin lên bảng, không phải khi bán được.
                 </p>
                 <div className="mt-4 grid gap-3">
                   <SelectField
@@ -139,7 +139,7 @@ export function Sell() {
                 <h3>Bước 2 · Số lượng và đơn giá</h3>
                 <div className="mt-4 grid gap-3">
                   <Field
-                    label="Số Nguyên Bảo muốn bán"
+                    label="Số Kim Cương muốn bán"
                     htmlFor="s-amount"
                     hint={`Tối thiểu ${formatInt(AMOUNT_MIN)}, bội của ${AMOUNT_STEP}.`}
                   >
@@ -153,7 +153,7 @@ export function Sell() {
                     />
                   </Field>
                   <Field
-                    label={`Đơn giá — Xu cho mỗi ${formatInt(PRICE_UNIT)} Nguyên Bảo`}
+                    label={`Đơn giá — Xu cho mỗi ${formatInt(PRICE_UNIT)} Kim Cương`}
                     htmlFor="s-price"
                     hint={`Trong khoảng ${formatInt(PRICE_FLOOR)}–${formatInt(PRICE_CEIL)} Xu.`}
                   >
@@ -211,7 +211,7 @@ export function Sell() {
                   <Msg tone="warn">
                     Khi chợ mở thật, bấm nút dưới sẽ trừ <NB n={amount} /> khỏi nhân vật{" "}
                     {char ? char.name : "đã chọn"} <strong>ngay lập tức</strong> rồi mới đưa tin lên bảng. Huỷ tin
-                    chưa bán được thì số Nguyên Bảo ấy về lại hòm thư trong game.
+                    chưa bán được thì số Kim Cương ấy về lại hòm thư trong game.
                   </Msg>
                 </div>
                 <div className="mt-4 flex flex-col gap-2">
@@ -263,7 +263,7 @@ export function Sell() {
             <h3 className="text-[15px]">Trước khi đăng</h3>
             <ul className="mk-bullets m-0 mt-3 grid list-none gap-3 p-0 text-[13px] leading-relaxed text-fg-muted">
               <li>
-                <strong className="text-fg">Ký gửi trước.</strong> Nguyên Bảo rời nhân vật ngay lúc đăng, nên tin
+                <strong className="text-fg">Ký gửi trước.</strong> Kim Cương rời nhân vật ngay lúc đăng, nên tin
                 trên bảng luôn có hàng thật đứng sau.
               </li>
               <li>
@@ -271,7 +271,7 @@ export function Sell() {
               </li>
               <li>
                 <strong className="text-fg">Giá sàn và trần.</strong> {formatInt(PRICE_FLOOR)}–
-                {formatInt(PRICE_CEIL)} Xu cho {formatInt(PRICE_UNIT)} Nguyên Bảo.
+                {formatInt(PRICE_CEIL)} Xu cho {formatInt(PRICE_UNIT)} Kim Cương.
               </li>
               <li>
                 <strong className="text-fg">Tối đa {MAX_OPEN_LISTINGS} tin</strong> mở cùng lúc cho mỗi tài khoản.

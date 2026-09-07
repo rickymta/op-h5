@@ -55,6 +55,10 @@ XLS  = os.path.join(ROOT, "server", "excel-src")
 # --- Bang thuat ngu -------------------------------------------------------------------
 # (tu nguon Trung)  cach dich cu  ->  cach dich chuan
 GLOSSARY = [
+    # 元宝 — game hai tac goi tien nap la "kim cuong" (client: vat pham 200004 "Kim cương");
+    # "nguyen bao" la am Han-Viet cua ban goc, nguoi choi khong hieu. Ap cho ca UI, Excel may chu,
+    # templates.bin, cong GM, web (2026-09-07).
+    (r"nguyên bảo",            "kim cương"),
     # 领取 — "nhan lay" la dich thua, dong tu tieng Viet chi can "nhan"
     (r"nhận lấy",              "nhận"),
     # 奖励 — "ban thuong" la tu Han-Viet co, van dung la "thuong" / "phan thuong"

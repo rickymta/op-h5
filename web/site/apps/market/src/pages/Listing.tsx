@@ -9,7 +9,7 @@ import { NB, UnitPrice, Xu } from "../components/Num";
 const NOTES: { k: string; v: string }[] = [
   {
     k: "Ký gửi trước khi niêm yết",
-    v: "Số Nguyên Bảo bị trừ khỏi nhân vật người bán ngay lúc đăng tin, không phải lúc bán được. Nhờ vậy tin đang rao luôn có hàng thật đứng sau; nếu bước trừ thất bại thì tin bị huỷ và người bán không mất gì.",
+    v: "Số Kim Cương bị trừ khỏi nhân vật người bán ngay lúc đăng tin, không phải lúc bán được. Nhờ vậy tin đang rao luôn có hàng thật đứng sau; nếu bước trừ thất bại thì tin bị huỷ và người bán không mất gì.",
   },
   {
     k: "Phí trừ vào phần người bán nhận",
@@ -17,11 +17,11 @@ const NOTES: { k: string; v: string }[] = [
   },
   {
     k: "Giá có sàn và trần",
-    v: `Đơn giá phải nằm trong khoảng ${PRICE_FLOOR.toLocaleString("vi-VN")}–${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo. Trần bằng giá cửa hàng vì bán đắt hơn thì không ai mua; sàn chặn bán tháo và chặn chuyển Xu trá hình qua giá gần 0.`,
+    v: `Đơn giá phải nằm trong khoảng ${PRICE_FLOOR.toLocaleString("vi-VN")}–${PRICE_CEIL.toLocaleString("vi-VN")} Xu cho ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương. Trần bằng giá cửa hàng vì bán đắt hơn thì không ai mua; sàn chặn bán tháo và chặn chuyển Xu trá hình qua giá gần 0.`,
   },
   {
     k: "Huỷ tin thì hàng trả về qua thư",
-    v: "Người bán huỷ tin chưa bán được thì số Nguyên Bảo đã ký gửi được gửi trả vào hòm thư trong game của chính nhân vật đó, không trả bằng Xu.",
+    v: "Người bán huỷ tin chưa bán được thì số Kim Cương đã ký gửi được gửi trả vào hòm thư trong game của chính nhân vật đó, không trả bằng Xu.",
   },
 ];
 
@@ -75,7 +75,7 @@ export function Listing({ id }: { id: string }) {
               Gói <NB n={l.amount} /> từ người bán <span className="font-mono">{l.seller}</span>
             </h3>
             <p className="m-0 mt-2 text-[14px] text-fg-muted">
-              Người bán đã ký gửi số Nguyên Bảo này; khi có người mua, hàng được giao vào hòm thư trong game của
+              Người bán đã ký gửi số Kim Cương này; khi có người mua, hàng được giao vào hòm thư trong game của
               nhân vật người mua trên đúng máy chủ {serverName(l.game, l.srv)}.
             </p>
 
@@ -86,7 +86,7 @@ export function Listing({ id }: { id: string }) {
                   { k: "Máy chủ", v: serverName(l.game, l.srv) },
                   { k: "Người bán", v: <span className="font-mono">{l.seller}</span> },
                   { k: "Số lượng", v: <NB n={l.amount} /> },
-                  { k: `Đơn giá (mỗi ${PRICE_UNIT.toLocaleString("vi-VN")} Nguyên Bảo)`, v: <UnitPrice n={l.price} /> },
+                  { k: `Đơn giá (mỗi ${PRICE_UNIT.toLocaleString("vi-VN")} Kim Cương)`, v: <UnitPrice n={l.price} /> },
                   { k: "Đăng lúc", v: formatDate(l.createdAt) },
                 ]}
               />

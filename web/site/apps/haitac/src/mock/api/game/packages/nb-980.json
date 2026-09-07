@@ -1,19 +1,19 @@
 {
   "id": "nb-980",
-  "name": "980 Nguyên Bảo",
+  "name": "980 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
-  "description": "Tặng thêm 80 Nguyên Bảo so với giá gốc.",
+  "description": "Tặng thêm 80 Kim Cương so với giá gốc.",
   "badge": "",
   "cond": "",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 980,
   "price_xu": 300000,
   "price_fmt": "300.000",
   "vip_points": 300,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 980
     }
   ],

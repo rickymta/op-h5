@@ -9,7 +9,7 @@
 // rồi chép sang" không chỉ chậm — nó còn dẫn tới gửi nhầm món.
 //
 // Nay danh mục do máy chủ phát ra, đọc từ chính bảng cấu hình mà game nạp (xem
-// platform/internal/gmops/danhmuc.go). Gõ "nguyên bảo" hay gõ thẳng "100022" đều ra.
+// platform/internal/gmops/danhmuc.go). Gõ "kim cương" hay gõ thẳng "100022" đều ra.
 //
 // Ô "sửa tay" vẫn còn: phiếu hỗ trợ hay kèm sẵn chuỗi quà, dán vào nhanh hơn chọn lại từng
 // món. Dán xong máy chủ tra tên ngay để người trực đối chiếu trước khi gửi.
@@ -215,7 +215,7 @@ export function ChonQua({
             {...p}
             size="small"
             label="Tìm món quà"
-            placeholder="gõ tên trong game, hoặc mã — ví dụ: nguyên bảo, 100022"
+            placeholder="gõ tên trong game, hoặc mã — ví dụ: kim cương, 100022"
             helperText="Tên lấy từ bảng cấu hình máy chủ đang chạy, đúng thứ người chơi thấy trong game."
             slotProps={{
               input: {

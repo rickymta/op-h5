@@ -1,6 +1,6 @@
 {
   "thu": [
-    { "id": 41, "luc": "2026-09-06T09:12:00+07:00", "nguoi": "gm.hoa", "srv": "s1", "role": "6a9c4fd863748a4930761533", "role_name": "Duyen", "title": "Đền bù sự cố", "content": "Chào Duyen,\n\nHệ thống vừa gặp sự cố ảnh hưởng đến trải nghiệm của bạn. Ban quản trị gửi phần quà đền bù kèm thư này.", "reward": "0:1:5000#3:100022:10", "qua_ten": "Nguyên bảo ×5.000 · Lệnh tướng cao cấp ×10", "ok": true, "mail_id": 128 },
+    { "id": 41, "luc": "2026-09-06T09:12:00+07:00", "nguoi": "gm.hoa", "srv": "s1", "role": "6a9c4fd863748a4930761533", "role_name": "Duyen", "title": "Đền bù sự cố", "content": "Chào Duyen,\n\nHệ thống vừa gặp sự cố ảnh hưởng đến trải nghiệm của bạn. Ban quản trị gửi phần quà đền bù kèm thư này.", "reward": "0:1:5000#3:100022:10", "qua_ten": "Kim cương ×5.000 · Lệnh tướng cao cấp ×10", "ok": true, "mail_id": 128 },
     { "id": 37, "luc": "2026-09-05T21:40:00+07:00", "nguoi": "admin", "srv": "s1", "role": "6a9c4fd863748a4930761533", "role_name": "Duyen", "title": "Phản hồi yêu cầu hỗ trợ", "content": "Chào Duyen, yêu cầu của bạn đã được xử lý.", "reward": "3:100001:300", "qua_ten": "Đan tiến giai ×300", "ok": false, "loi": "console tu choi (errorcode=1): 找不到角色" }
   ]
 }

@@ -1,19 +1,19 @@
 {
   "id": "nb-6480",
-  "name": "6480 Nguyên Bảo",
+  "name": "6480 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
   "description": "Mốc cao nhất đang mở.",
   "badge": "",
   "cond": "",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 6480,
   "price_xu": 2000000,
   "price_fmt": "2.000.000",
   "vip_points": 2000,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 6480
     }
   ],

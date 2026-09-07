@@ -1,19 +1,19 @@
 {
   "id": "nb-300",
-  "name": "300 Nguyên Bảo",
+  "name": "300 Kim Cương",
   "category": "diamond",
   "grant_mode": "pay",
   "description": "Mốc phổ biến nhất. Lần đầu mua được x2 và cộng điểm VIP.",
   "badge": "Hot",
   "cond": "",
-  "item_name": "Nguyên Bảo",
+  "item_name": "Kim Cương",
   "item_count": 300,
   "price_xu": 100000,
   "price_fmt": "100.000",
   "vip_points": 100,
   "reward_items": [
     {
-      "label": "Nguyên Bảo",
+      "label": "Kim Cương",
       "count": 300
     }
   ],

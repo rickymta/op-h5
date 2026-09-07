@@ -2,7 +2,7 @@
 //
 // Vi sao lam o Go chu khong dua vao collation MySQL: bang `game_packages` dung
 // utf8mb4_unicode_ci — collation do coi 'ê' KHAC 'e', nen `LIKE '%nguyen%'` khong bao gio
-// khop "Nguyên Bảo". Doi collation cua bang la thay doi luoc do dung chung cho ca cum, va
+// khop "Kim Cương". Doi collation cua bang la thay doi luoc do dung chung cho ca cum, va
 // utf8mb4_general_ci cung khong bo dau tieng Viet cho 'ơ'/'ư'/'đ'. Bo goi hien tai chi vai
 // nghin dong va da doc san trong bo nho de dung tab, nen loc o Go vua dung vua re.
 package textnorm
@@ -32,7 +32,7 @@ func init() {
 	}
 }
 
-// Fold ha chu thuong va bo dau tieng Viet: "Nguyên Bảo" -> "nguyen bao".
+// Fold ha chu thuong va bo dau tieng Viet: "Kim Cương" -> "nguyen bao".
 //
 // Xu ly ca hai cach ma dau co the duoc ma hoa: mot ky tu dung san (NFC, 'ế') tra ve tu bang
 // tren; dau ket hop rieng (NFD, 'e' + U+0301) bi bo qua o nhanh thu hai. Thieu nhanh thu hai

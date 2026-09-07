@@ -48,7 +48,7 @@ export function Mine() {
         </div>
       </Section>
 
-      <Section title="Tin rao" sub="Tin đang ký gửi là tin đã trừ Nguyên Bảo nhưng chưa lên bảng.">
+      <Section title="Tin rao" sub="Tin đang ký gửi là tin đã trừ Kim Cương nhưng chưa lên bảng.">
         <DataTable<DemoListing>
           rows={DEMO_MY_LISTINGS}
           rowKey={(r) => r.id}

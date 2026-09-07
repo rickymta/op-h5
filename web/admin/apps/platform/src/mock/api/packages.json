@@ -14,10 +14,10 @@
     { "category": "ingame", "active": 30, "total": 30 }
   ],
   "packages": [
-    { "id": "web-knb-100k", "name": "100 vạn Nguyên Bảo", "category": "diamond", "grant_mode": "mail",
+    { "id": "web-knb-100k", "name": "100 vạn Kim Cương", "category": "diamond", "grant_mode": "mail",
       "reward": "0:1:1000000", "description": "Gói khởi đầu", "badge": "", "status": "active",
       "price_xu": 100000, "item_tid": 0, "sort_order": 100 },
-    { "id": "web-knb-500k", "name": "500 vạn Nguyên Bảo", "category": "diamond", "grant_mode": "mail",
+    { "id": "web-knb-500k", "name": "500 vạn Kim Cương", "category": "diamond", "grant_mode": "mail",
       "reward": "0:1:5000000", "description": "Được ưa chuộng nhất", "badge": "Hot", "status": "active",
       "price_xu": 500000, "item_tid": 0, "sort_order": 110 },
     { "id": "web-thang-vip", "name": "Thẻ tháng VIP", "category": "card", "grant_mode": "mail",

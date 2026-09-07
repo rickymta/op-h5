@@ -97,14 +97,14 @@ docker logs op-mysql 2>&1 | grep -c "Unknown column"                            
 
 1. Đăng nhập, có nhân vật (đợt 2). Ô "Nhận ở" tự liệt kê nhân vật (từ `/api/game/roles`); không có nhân vật thì liệt kê máy chủ.
 2. Nạp Xu tay ở trang quản trị (`/nap-tay`) cho tài khoản test, ví dụ 3.000.000.
-3. **Tab Nguyên Bảo**: mua mốc `10.000` → modal → Mua → "Đã trừ…", đơn hiện "Đang phát…" rồi "Đã phát" trong ~5 s. Trong game: +10.000 Nguyên Bảo (lần đầu x2 = 20.000?) — ghi số thực nhận. `docker logs op-adapter | grep -iE "grant|phat"`.
+3. **Tab Kim Cương**: mua mốc `10.000` → modal → Mua → "Đã trừ…", đơn hiện "Đang phát…" rồi "Đã phát" trong ~5 s. Trong game: +10.000 Kim Cương (lần đầu x2 = 20.000?) — ghi số thực nhận. `docker logs op-adapter | grep -iE "grant|phat"`.
 4. **Tab Vật phẩm** (đường thư): mua `Đá trang bị Đỏ` (1.000 Xu). Đây là chỗ **chưa kiểm chứng** nhất: `console.MailCreate` đọc `id` phiếu từ `data` của `/gm/mail/x/create`. Nếu đơn `failed` với lỗi "console khong tra id phieu thu (data=…)": ghi nguyên văn `data`, rồi sửa `mailID()` trong `platform/internal/console/console.go` cho đúng khuôn (hoặc, nếu console không trả id, đọc `SELECT id FROM tcg.gm_mail_approval WHERE status=1` là cách gm/api.php làm — cần thêm cách lấy id, ghi vào mục 7). Thành công thì thư có trong hòm thư game.
 5. **Hoàn Xu tự động**: mua một gói ngày (`19001`) 4 lần liên tiếp (giới hạn 3/ngày) hoặc gói ưu đãi quỹ `17101` sau ngày 7 — lần bị game từ chối phải chuyển `refunded`, số dư tăng lại, `/don-mua` ghi lý do trong cột Lỗi. Nếu console **không** từ chối mà vẫn "granted" trong khi game không phát gì → ghi lại (game nuốt lỗi), đây là rủi ro đã nêu ở thiết kế 4.1.
 6. Tắt `op-console`, mua một gói: đơn ở "Đang phát…" và thử lại theo backoff; bật lại console → "Đã phát".
 
 ### 0b.3 Nút mua TRONG GAME — điểm quan trọng nhất của đợt này
 
-1. Trong game mở shop (ví dụ nạp Nguyên Bảo mốc nhỏ nhất). Trước khi bấm: `docker exec op-game tail -0f .logs/game-s1/info.log` ở một terminal, `docker logs -f op-adapter` ở terminal khác.
+1. Trong game mở shop (ví dụ nạp Kim Cương mốc nhỏ nhất). Trước khi bấm: `docker exec op-game tail -0f .logs/game-s1/info.log` ở một terminal, `docker logs -f op-adapter` ở terminal khác.
 2. Bấm mua. Mong đợi: adapter log `apisv: mua trong game user=… payid=… xu=…`, game log in `ok` (println của `PayWithTokenMoneyReq`), rồi hàng vào túi; `/don-mua` có dòng `grant_mode=ingame`, ví bị trừ.
 3. **Điểm chưa biết**: sau `true`, game gọi `BagPropPO.removeItem(999999, giá)`. Nếu client báo "không đủ …" và `error.log`/`info.log` có dòng về 999999 → đường này không chạy: Xu đã bị trừ nhưng không có hàng. Ghi rõ dòng log, hoàn Xu tay ở `/don-mua`, rồi chuyển sang phương án `payRedirect` (thiết kế 4.3): thử đặt `payRedirect=1` — nằm trong `GameLoading` do console phát (`/conf/global/get` hay `dynamic_conf`? tìm bằng `docker exec op-game grep -m1 payRedirect .logs/game-s1/info.log` và grep trong `console/store/global.conf.json`), xem client có mở `app.client_path` không.
 4. Kiểm bảo vệ: từ máy Mac `curl -s 'http://127.0.0.1:8080/api/apisv.php?payid=18001&user=id000000001'` phải là **403** (nginx `allow 127.0.0.1` — trên Mac request đi qua proxy Docker Desktop nên có thể thấy 172.17.0.1 → nếu 403 cả từ trong container thì ghi nhận, đó là hạn chế môi trường Mac, trên Linux game gọi qua loopback thật). Từ trong netns: `docker exec op-console curl -s 'http://127.0.0.1/api/apisv.php?payid=18001&user=khong-co'` → `false`.
@@ -277,7 +277,7 @@ docker logs op-php 2>&1 | grep -E 'web-entrypoint' | tail -3                  # 
 | 5.7 | **Đợt 2:** GM tool `/adminportal` đăng nhập bằng `gm_users`; api.php 401; gửi thư 1 nhân vật nhận được | | |
 | 5.8 | **Đợt 2:** seed DYNAMIC không lỗi; group/cross không OOM ở 1152m; ACME 404; enable-domain.sh đọc soát | | |
 | 5.9 | **Đợt 3:** migration 0007 + seed 1.933 gói theo nhóm | | |
-| 5.10 | **Đợt 3:** /cua-hang mua mốc Nguyên Bảo → granted → nhận trong game | | |
+| 5.10 | **Đợt 3:** /cua-hang mua mốc Kim Cương → granted → nhận trong game | | |
 | 5.11 | **Đợt 3:** gói thư (`item`) nhận được; hoàn Xu tự động khi game từ chối | | |
 | 5.12 | **Đợt 3:** nút mua trong game → apisv → trừ ví → hàng vào túi (hoặc kết luận payRedirect) | | |
 | — | RAM thật | ✅ | **2,3 GiB / 7,75 GiB** lúc 13 container chạy (game 1,21 GiB, group 1,25 GiB lớn nhất). Trần heap 6016m chỉ là mức đặt trước |
