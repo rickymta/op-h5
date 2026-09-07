@@ -156,6 +156,14 @@ func TenMuc(loai int, ma int64) string {
 // truc thuong da biet mot phan ten ("nguyen bao", "manh 5"), va thinh thoang biet dung ma —
 // ca hai duong deu phai ra ket qua o dong dau.
 func TimDanhMuc(q string, loai, gioiHan int) []MucDanhMuc {
+	out, _ := timDanhMuc(q, loai, gioiHan)
+	return out
+}
+
+// timDanhMuc nhu TimDanhMuc, kem TONG so dong khop truoc khi cat theo gioi han — giao dien
+// duyet theo nhom can biet "60/1440 mon" de nguoi truc hieu con phai go them. Tong chi dung
+// toi 4.000 (tran quet ben duoi); moi nhom rieng le deu duoi muc do nen tong la chinh xac.
+func timDanhMuc(q string, loai, gioiHan int) ([]MucDanhMuc, int) {
 	k := nap()
 	if gioiHan <= 0 || gioiHan > 200 {
 		gioiHan = 30
@@ -203,6 +211,7 @@ func TimDanhMuc(q string, loai, gioiHan int) []MucDanhMuc {
 		}
 		return k.muc[ra[a].i].Ma < k.muc[ra[b].i].Ma
 	})
+	tong := len(ra)
 	if len(ra) > gioiHan {
 		ra = ra[:gioiHan]
 	}
@@ -210,5 +219,5 @@ func TimDanhMuc(q string, loai, gioiHan int) []MucDanhMuc {
 	for _, x := range ra {
 		out = append(out, k.muc[x.i])
 	}
-	return out
+	return out, tong
 }

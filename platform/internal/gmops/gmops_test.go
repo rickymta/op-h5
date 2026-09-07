@@ -140,6 +140,10 @@ func TestTimDanhMuc(t *testing.T) {
 	if ra := TimDanhMuc("trai yami", 0, 5); len(ra) == 0 || ra[0].Ma != 48000101 {
 		t.Fatalf("tim 'trai yami' ra %+v", ra)
 	}
+	// Duyet mot nhom khong tu khoa: tra trang dau + TONG that, de giao dien ghi "60/1440 mon".
+	if out, tong := timDanhMuc("", 16, 60); len(out) != 60 || tong != 1440 {
+		t.Fatalf("duyet nhom 16: %d dong, tong %d (muon 60, 1440)", len(out), tong)
+	}
 }
 
 // Hai duong tra cuu phai chay duoc that, khong chi ham ben trong: tra JSON dung khoa ma

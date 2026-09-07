@@ -225,11 +225,11 @@ func (s *Service) Catalog(w http.ResponseWriter, r *http.Request, _ Actor) {
 	q := r.URL.Query()
 	loai, _ := strconv.Atoi(q.Get("loai"))
 	gioiHan, _ := strconv.Atoi(q.Get("limit"))
-	muc := TimDanhMuc(q.Get("q"), loai, gioiHan)
+	muc, tong := timDanhMuc(q.Get("q"), loai, gioiHan)
 	if muc == nil {
 		muc = []MucDanhMuc{}
 	}
-	httpx.JSON(w, http.StatusOK, map[string]any{"muc": muc})
+	httpx.JSON(w, http.StatusOK, map[string]any{"muc": muc, "tong": tong})
 }
 
 // MonQua la mot mon trong chuoi qua, da tra ra ten trong game.

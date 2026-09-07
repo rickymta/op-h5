@@ -88,9 +88,10 @@ func TestBuildListHidesIngameAndKeepsDBOrder(t *testing.T) {
 	}
 }
 
-// Tim kiem khong dau: nguoi choi go "nguyen bao" phai ra "Kim Cương".
+// Tim kiem khong dau: nguoi choi go "kim cuong" phai ra "Kim Cương" (doi thuat ngu tu
+// "Nguyên bảo" 2026-09-07 — test nay tung con giu tu khoa cu nen do mai).
 func TestBuildListSearchIgnoresDiacritics(t *testing.T) {
-	for _, q := range []string{"nguyen bao", "KIM CƯƠNG", "bao nguyen"} {
+	for _, q := range []string{"kim cuong", "KIM CƯƠNG", "cuong kim"} {
 		l := buildList(samplePackages(), parseStoreQuery(url.Values{"q": {q}}))
 		if !eq(ids(l), []string{"18001", "18002"}) {
 			t.Errorf("q=%q -> %v, muon [18001 18002]", q, ids(l))

@@ -22,6 +22,9 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -98,20 +101,28 @@ export function ChonQua({
 }) {
   const [tuKhoa, setTuKhoa] = useState("");
   const [loc, setLoc] = useState(0); // 0 = mọi nhóm
+  const [rong, setRong] = useState(60); // số dòng khi duyệt một nhóm không gõ gì
   const [suaTay, setSuaTay] = useState(false);
   const [tho, setTho] = useState("");
   const tre = useTre(tuKhoa);
 
+  // Chọn một nhóm mà chưa gõ gì = DUYỆT: danh sách của nhóm hiện ngay dưới ô tìm. Trước đây
+  // bấm "Thần trang" xong vẫn trống trơn cho tới khi gõ — người trực không biết nhóm có gì
+  // để mà gõ (2026-09-07). Gõ vào thì danh sách nhường chỗ cho kết quả tìm như cũ.
+  const duyet = loc > 0 && tre.trim() === "";
+  const gioiHan = duyet ? rong : 40;
+
   const tim = useQuery({
-    queryKey: ["gm-catalog", tre, loc],
+    queryKey: ["gm-catalog", tre, loc, gioiHan],
     queryFn: () =>
-      api.get<{ muc: MucQua[] }>(
-        `/admin-portal/api/catalog?q=${encodeURIComponent(tre)}&loai=${loc}&limit=40`,
+      api.get<{ muc: MucQua[]; tong?: number }>(
+        `/admin-portal/api/catalog?q=${encodeURIComponent(tre)}&loai=${loc}&limit=${gioiHan}`,
       ),
-    enabled: tre.trim().length > 0,
+    enabled: tre.trim().length > 0 || loc > 0,
     retry: false,
     staleTime: 5 * 60_000,
   });
+  const tong = tim.data?.tong ?? tim.data?.muc.length ?? 0;
 
   const chuoi = useMemo(() => ghepQua(dong), [dong]);
 
@@ -183,7 +194,7 @@ export function ChonQua({
       </Stack>
 
       <Autocomplete<MucQua>
-        options={tim.data?.muc ?? []}
+        options={duyet ? [] : (tim.data?.muc ?? [])}
         filterOptions={(x) => x} // máy chủ đã lọc và xếp hạng; lọc lại ở đây sẽ giấu mất kết quả
         getOptionLabel={(o) => o.ten}
         isOptionEqualToValue={(a, b) => a.loai === b.loai && a.ma === b.ma}
@@ -192,7 +203,13 @@ export function ChonQua({
         value={null}
         onChange={(_, v) => them(v)}
         loading={tim.isFetching}
-        noOptionsText={tuKhoa.trim() ? "Không có món nào tên hoặc mã như vậy." : "Gõ tên món hoặc mã."}
+        noOptionsText={
+          tuKhoa.trim()
+            ? "Không có món nào tên hoặc mã như vậy."
+            : loc > 0
+              ? "Danh sách của nhóm ở ngay dưới — bấm để thêm, hoặc gõ để thu hẹp."
+              : "Gõ tên món hoặc mã, hoặc chọn một nhóm ở trên để duyệt."
+        }
         renderOption={(props, o) => {
           const { key, ...rest } = props as { key?: string } & Record<string, unknown>;
           return (
@@ -231,6 +248,50 @@ export function ChonQua({
           />
         )}
       />
+
+      {duyet && (
+        <Paper variant="outlined" sx={{ mt: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", px: 1.5, py: 0.75 }}>
+            {nhanCua(nhom, loc)}
+            {tim.data
+              ? ` · ${formatInt(tim.data.muc.length)}/${formatInt(tong)} món — bấm để thêm, gõ để thu hẹp`
+              : tim.isError
+                ? " · không tải được danh sách"
+                : " · đang tải…"}
+          </Typography>
+          <Box sx={{ maxHeight: 320, overflowY: "auto", borderTop: 1, borderColor: "divider" }}>
+            <List dense disablePadding>
+              {(tim.data?.muc ?? []).map((o) => (
+                <ListItemButton key={`${o.loai}:${o.ma}`} onClick={() => them(o)} sx={{ py: 0.5 }}>
+                  <ListItemText
+                    disableTypography
+                    primary={
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {o.ten}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography variant="caption" color="text.secondary">
+                        {o.phu ? `${o.phu} · ` : ""}mã{" "}
+                        <span style={{ fontFamily: "ui-monospace, monospace" }}>
+                          {o.loai}:{o.ma}
+                        </span>
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          </Box>
+          {tim.data && tong > tim.data.muc.length && (
+            <Box sx={{ px: 1, py: 0.5, borderTop: 1, borderColor: "divider" }}>
+              <Button size="small" onClick={() => setRong(200)} disabled={rong >= 200}>
+                {rong >= 200 ? "Đã hiện tối đa 200 dòng — gõ để thu hẹp" : "Xem thêm (tới 200 dòng)"}
+              </Button>
+            </Box>
+          )}
+        </Paper>
+      )}
 
       {dong.length > 0 && (
         <Paper variant="outlined" sx={{ mt: 1.5 }}>
