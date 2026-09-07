@@ -413,8 +413,10 @@ Từ máy khác: mở `http://PUBLIC_HOST/play-game` — client phải nạp đ�
 Sửa Excel/PHP/config trên PC → `python tools/mask-secrets.py --check` → commit/push → trên server:
 
 ```bash
-cd /opt/tcg/src && git pull && git lfs pull && cd docker && docker compose -f docker-compose.image.yml up -d --build
+cd /opt/tcg/src && git pull && git lfs pull && cd docker && docker compose -f docker-compose.image.yml -f docker-compose.domain.yml up -d --build
 ```
+
+**Đã bật domain (`enable-domain.sh`) thì mọi lệnh `up` phải kèm `-f docker-compose.domain.yml`.** Overlay đó mount `/opt/tcg/nginx/*.conf` + `/etc/letsencrypt` vào nginx và mở 443; `up` thiếu nó là container nginx bị tạo lại theo cấu hình IP — mất 443, site không vào được (đã dính 2026-09-07). Kiểm tra container đang dùng file nào: `docker inspect docker-nginx-1 --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}'`. Chỉ sửa `website/` thì `up -d --build nginx php` là đủ, không cần build lại image Java.
 
 Chỉ sửa Excel thì không cần tạo lại container: copy file vào `/h5/server/excel/release/` trong container game rồi `POST /srv/game/cmd/excel/reload` (CLAUDE.md mục 6) — hoặc đơn giản là `--build` như trên.
 

@@ -223,7 +223,7 @@ Script cài Docker + git + git-lfs, clone repo vào `/opt/tcg/src` (kéo 8 JAR q
 ```bash
 cd /opt/tcg/src && git pull && git lfs pull
 docker run --rm -v /opt/tcg/src:/repo -w /repo/web node:22-alpine sh -c 'npm ci && npm run build'
-cd docker && docker compose -f docker-compose.image.yml up -d --build
+cd docker && docker compose -f docker-compose.image.yml up -d --build   # đã bật domain: thêm -f docker-compose.domain.yml, xem docs/deploy-runbook.md "Cập nhật về sau"
 ```
 
 Chọn cách nào: **build trên server** nếu chỉ có một server và không muốn quản lý GHCR; **CI + pull** nếu nhiều server hoặc muốn máy chạy game không cần git. Cả hai đều dùng `.env` + entrypoint để điền secrets/IP, nên image không bao giờ chứa mật khẩu.
