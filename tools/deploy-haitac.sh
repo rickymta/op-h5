@@ -52,7 +52,9 @@ for k, v in man.items():
 PY
 )
 REMOTE_RES=$(remote "ls $ASSETS/res 2>/dev/null" || true)
-MISSING=$(comm -23 <(printf '%s\n' "$LOCAL_RES" | sort -u) <(printf '%s\n' "$REMOTE_RES" | sort -u) || true)
+# python trên Windows in CRLF, và comm cần cùng thứ tự với sort -> bỏ \r, sort theo C
+MISSING=$(comm -23 <(printf '%s\n' "$LOCAL_RES" | tr -d '\r' | LC_ALL=C sort -u) \
+                   <(printf '%s\n' "$REMOTE_RES" | tr -d '\r' | LC_ALL=C sort -u) || true)
 if [ -z "$MISSING" ]; then echo "  không có res mới"; else printf '  thiếu trên máy chủ:\n%s\n' "$MISSING"; fi
 
 # --- 2. git ---
