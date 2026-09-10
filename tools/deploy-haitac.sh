@@ -5,6 +5,7 @@
 #   tools/deploy-haitac.sh             # git push + upload res mới theo manifest + build lại nginx/php trên máy chủ
 #   tools/deploy-haitac.sh --excel     # thêm: copy server/excel/release vào container game rồi restart game (~2 phút rớt mạng)
 #   tools/deploy-haitac.sh --no-push   # không git push (đã push rồi)
+#   tools/deploy-haitac.sh --only-excel # chỉ phần Excel + restart game, không đụng nginx/php/res
 #
 # Cần một lần: khoá ~/.ssh/haitac (tools/deploy-haitac.sh --check in ra cách cài) nằm trong
 # /root/.ssh/authorized_keys của máy chủ, và ~/.ssh/config có "Host haitac" (đã tạo 2026-09-10).
@@ -22,9 +23,9 @@ ASSETS=${ASSETS:-/opt/tcg/assets}
 SRC=${SRC:-/opt/tcg/src}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 MANIFEST="$ROOT/website/game/libs/2af72-f100c-2af72.json"
-CHECK=0; PUSH=1; EXCEL=0
+CHECK=0; PUSH=1; EXCEL=0; ONLY_EXCEL=0
 for a in "$@"; do case "$a" in
-  --check) CHECK=1;; --no-push) PUSH=0;; --excel) EXCEL=1;;
+  --check) CHECK=1;; --no-push) PUSH=0;; --excel) EXCEL=1;; --only-excel) EXCEL=1; ONLY_EXCEL=1;;
   *) echo "tham số lạ: $a" >&2; exit 2;;
 esac; done
 
@@ -69,17 +70,20 @@ echo "  nhánh $BR, đi trước origin $AHEAD commit"
 if [ "$CHECK" = 1 ]; then say "chỉ kiểm tra — dừng"; exit 0; fi
 
 # --- thực hiện ---
+if [ "$ONLY_EXCEL" = 1 ]; then MISSING=""; PUSH=0; fi
 if [ -n "$MISSING" ]; then
   say "upload res"
   for f in $MISSING; do scp -q "$ROOT/website/game/res/$f" "$HOST:$ASSETS/res/$f" && echo "  + $f"; done
 fi
 if [ "$PUSH" = 1 ]; then say "git push"; git -C "$ROOT" push origin "$BR"; fi
 
+if [ "$ONLY_EXCEL" = 0 ]; then
 say "máy chủ: git pull + build nginx/php"
 remote "set -e; cd $SRC && git pull --ff-only && git lfs pull; cd docker;
   OV=''; [ -f docker-compose.domain.yml ] && OV='-f docker-compose.domain.yml';
   docker compose -f docker-compose.image.yml \$OV up -d --build nginx php;
   docker compose -f docker-compose.image.yml \$OV ps nginx php"
+fi
 
 if [ "$EXCEL" = 1 ]; then
   say "excel -> container game + restart"
