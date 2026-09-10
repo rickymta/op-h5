@@ -36,6 +36,7 @@ sach, du 680 bang, va cac dong moi giai ma dung theo chi so cot. Khong qua -> kh
     python3 tools/templates-bin.py xuat   <file> 基础物品        # in bang ra JSON
     python3 tools/templates-bin.py tuong  <goc> <ra>            # 英雄基础/英雄高阶升星 theo server (excel-src/hero)
     python3 tools/templates-bin.py bang   <goc> <ra> [bang...]  # thay ca bang theo server (mac dinh: BANG_THEO_SERVER)
+    python3 tools/templates-bin.py sua    <goc> <ra> <sua.json> # sua o le {bang:{id:{cot:gia tri}}} (ra-soat-chu-client.py)
 """
 import argparse, json, os, struct, sys, zlib
 from importlib import util as _u
@@ -392,6 +393,39 @@ def thay_bang(d, ten_bang):
         if t not in tk: sys.exit(f"!! templates.bin khong co bang {t}")
     return ghi(ra), tk
 
+# ---------- sua o le: {bang: {id: {cot: gia tri}}} ----------
+# Cho cac ban sua CHU cua client (mo ta thu thach, ten tuong cu, o con chu Han...) — sinh boi
+# tools/ra-soat-chu-client.py. Chi doi o theo ten cot, dong ngan hon tieu de thi noi them o rong.
+def sua_o(d, sua):
+    tabs, ra, tk = doc(d), [], {}
+    for ten, rows in tabs:
+        if ten in sua and rows:
+            keys = [c.decode("utf-8") for c in o_cua(rows[0])]
+            thieu_cot = [c for m in sua[ten].values() for c in m if c not in keys]
+            if thieu_cot: sys.exit(f"!! bang {ten!r} khong co cot {sorted(set(thieu_cot))}")
+            moi, doi, con = [rows[0]], 0, set(sua[ten])
+            for pl in rows[1:]:
+                cs = o_cua(pl)
+                if cs is None: moi.append(pl); continue
+                id_ = cs[0].decode("utf-8", "replace").strip() if cs else ""
+                if id_ in sua[ten]:
+                    con.discard(id_)
+                    cells = [c.decode("utf-8", "replace") for c in cs]
+                    for cot, gt in sua[ten][id_].items():
+                        i = keys.index(cot)
+                        while len(cells) <= i: cells.append("")
+                        if cells[i] != gt: cells[i] = gt; doi += 1
+                    moi.append(dong_tu_o([x.encode("utf-8") for x in cells]))
+                else:
+                    moi.append(pl)
+            tk[ten] = {"o_doi": doi, "id_khong_thay": sorted(con)}
+            rows = moi
+        ra.append((ten, rows))
+    for t in sua:
+        if t not in tk: sys.exit(f"!! templates.bin khong co bang {t}")
+    return ghi(ra), tk
+
+
 # ---------- nen: byte 10 PHAI la 0x76 ----------
 # Client (uncompress2) ghi de byte thu 10 cua file nen thanh 0x76 roi moi inflate — mot kieu
 # chong sua file: file goc tinh co co byte 10 = 0x76 nen khong sao, file nen lai bang zlib
@@ -438,7 +472,7 @@ def kiem_nen(ra):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("lenh", choices=["kiem", "chu", "chen", "xuat", "tuong", "bang"])
+    ap.add_argument("lenh", choices=["kiem", "chu", "chen", "xuat", "tuong", "bang", "sua"])
     ap.add_argument("goc"); ap.add_argument("ra", nargs="?"); ap.add_argument("them", nargs="*")
     a = ap.parse_args()
     goc_nen = open(a.goc, "rb").read()
@@ -456,6 +490,11 @@ def main():
         json.dump(out, sys.stdout, ensure_ascii=False, indent=1); return
     if a.lenh == "chu":
         moi, n = ap_chu(d); print(f"  o doi: {n}")
+    elif a.lenh == "sua":
+        if len(a.them) != 1: sys.exit("dung: sua <goc> <ra> <sua.json>")
+        moi, tk = sua_o(d, json.load(open(a.them[0], encoding="utf-8")))
+        for ten, t in tk.items():
+            print(f"  {ten:14s} o doi {t['o_doi']:4d}" + (f" | id khong thay: {t['id_khong_thay'][:5]}" if t["id_khong_thay"] else ""))
     elif a.lenh == "bang":
         ten_bang = a.them or list(BANG_THEO_SERVER)
         moi, tk = thay_bang(d, ten_bang)

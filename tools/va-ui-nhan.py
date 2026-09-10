@@ -25,6 +25,12 @@ NHAN = {
     # Kết quả trận: tên vật phẩm dưới ô 150px (bước 140px vì spaceX -10); mặc định 24px Cafeta
     # "Nhân vật chính kinh nghiệm" = 202px, 18px = 151px.
     "BattleVictory": [({"name": "labName"}, {"fontSize": 18, "font": FONT})],
+    # Guild kỹ năng (2026-09-10): "Trí tuệ29Trọng thi(28/40)" — labLevelName 128px căn trái ở x=231 và
+    # labLevelMax "(28/40)" cố định ở x=353 đè nhau. Hai hoa văn ở 103–201 và 477–575 nên khoảng trống
+    # là 201..477. Nay tên ("Lực lượng tầng 16" = 116px @22, bundle ghép ' tầng ' — tools/va-nhan-ghep.py)
+    # căn PHẢI kết thúc ở 361, "(28/40)" căn trái từ 365.
+    "GuildSkill": [({"var": "labLevelName"}, {"x": 201, "width": 160, "align": "right", "fontSize": 22, "font": FONT}),
+                   ({"var": "labLevelMax"}, {"x": 365, "width": 100, "align": "left", "fontSize": 22, "font": FONT})],
 }
 
 

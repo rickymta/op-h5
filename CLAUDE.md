@@ -285,6 +285,15 @@ a3b31-4c087-1dc2f.js            → ydwxConfig (basePath, metaDataServer :12345,
 - 11 nguyên mẫu One Piece đặc biệt là **phe Hỗn độn (6) ở cả client lẫn server** (`tools/phe-hon-don.py`, quyết định 2026-09-07) — nhận Excel mới từ nhà phát hành thì chạy lại tool này trước khi `tuong`.
 - **Bảng tướng trong `templates.bin` phải theo server** (`server/excel-src/hero/`): server kiểm tra vật liệu thăng tinh bằng bảng của nó, lệch là toast 80026. Đồng bộ bằng `python3 tools/templates-bin.py tuong`, phát hành bằng `tools/phat-hanh-res.py` — xem [docs/thang-tinh-lech-bang.md](docs/thang-tinh-lech-bang.md).
 
+- **Thẻ màu `<mã chữ>` trong mọi bảng chữ** (2026-09-10): bộ phân tích của client (`str2HtmlUnitNoSize`
+  cho bảng, `lan2HtmlUnit` cho 文本库) vốn `split(' ')` lấy `[1]` nên "Sừng hươu trận" chỉ còn "Sừng", và
+  Laya `HTMLParse` cắt khoảng trắng mép text node nên chữ dính vào thẻ. `tools/va-nhan-ghep.py` vá cả hai
+  (nối lại phần sau mã, mép chữ thường → `&nbsp;`) cùng nhãn Thuyền/Guild và mấy chuỗi tiếng Trung bundle tự
+  ghép — 28 chỗ, chạy lại không vá hai lần. Chữ trong `templates.bin` sửa bằng `tools/ra-soat-chu-client.py`
+  (mô tả thử thách Bí cảnh/Thần điện **sinh từ cột luật**, tên tướng tra id, ô còn chữ Hán, viết cả sang
+  excel-src) rồi `templates-bin.py sua`; xem [docs/ra-soat-chu-client.md](docs/ra-soat-chu-client.md).
+  Thẻ viết dính mã (`<22188%>`) client không tô màu được — tool tự tách.
+
 Client gọi thẳng: `:9000` (login), `:12345/announce/one`, `:7788/client/error/log` và `/login/flow/add`, `:9999/status`, `/api/getSession.php`.
 
 ### Bỏ qua màn hình đăng nhập của client (từ 2026-09-05)
