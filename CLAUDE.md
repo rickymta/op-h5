@@ -521,6 +521,12 @@ Toàn bộ nằm trong `docker/` — đọc [docker/README.md](docker/README.md)
 - **`ADAPTER_PLATFORM_CODE` phải là `develop`.** Các mã khác làm login server trả `errorcode=0` nhưng `uid`/`token` đều `null` kèm `该登录方式目前不生效` — thành công giả, rất khó lần ra.
 - **Domain + HTTPS:** `docker/enable-domain.sh <domain>` chạy trên server sau bootstrap: certbot webroot qua nginx đang chạy (khối IP của `game.conf` phục vụ ACME), sinh `domains.conf`/`tls.conf` + `docker-compose.domain.yml`, sửa `.env` sang https (`PUBLIC_SCHEME`, `ADAPTER_TLS`, `ID_ISSUER`…), `up -d`, cập nhật `tcg.cloud_device.host_WAN`. Client đi qua 443 bằng tiền tố `/meta/ /stat/ /account/ /srv/ /game` nên chỉ cần mở 80/443. Chưa chạy thật với chứng chỉ thật.
 - **Build thẳng trên server:** `docker-compose.image.yml` có sẵn `build:` (chỉ ở `console`, `php`, `nginx`); `docker/server-bootstrap.sh` mặc định `MODE=build` — cài git+git-lfs, clone vào `/opt/tcg/src` (LFS 611 MB), `docker compose build`. Không cần GHCR/CI. `MODE=pull` để chỉ pull image.
+- **Deploy từ PC: `bash tools/deploy-haitac.sh [--check|--excel|--no-push]`** (2026-09-10). Máy chủ
+  157.66.218.20 = `Host haitac` trong `~/.ssh/config`, khoá `~/.ssh/haitac` (phải nằm trong
+  `authorized_keys` của root — script in lệnh cài khi chưa vào được). Script: push nhánh hiện tại,
+  scp mọi `res/<băm>` mà manifest trỏ tới nhưng máy chủ chưa có, rồi trên máy chủ `git pull` +
+  `up -d --build nginx php` (tự kèm `docker-compose.domain.yml` nếu có); `--excel` tar
+  `server/excel/release` → `docker cp` vào container game → `docker restart` (~2 phút rớt mạng).
 - **Sửa một file trong `res/` thì KHÔNG ghi đè tại chỗ.** nginx phục vụ `/res/` và `/libs/` với
   `immutable 30d`, URL không có tham số chống cache — ghi đè là người chơi cũ không thấy gì
   suốt 30 ngày (đã mất cả buổi vì tưởng bản sửa "đang chạy"). Dùng

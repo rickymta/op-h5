@@ -30,7 +30,7 @@ còn ô chữ Hán nào). 133 nguyên mẫu tướng đều có tên; kỹ năng
 | 藏品推荐.适用英雄 (12 ô, 49 tên) | "Nhân tộc: Na Tra; Tiên Tộc: Huyền Trang; …" (tên thần thoại của bản gốc, phe của bản gốc) | "Tân Binh: S.Sanji; Hải Tặc: Perospero; Dũng Sĩ: Gan Fall; Ngũ Hoàng: Mihawk, Jinbe, Marco" | tra `*原始文本` của 文本库 máy chủ (哪吒 → 102000) rồi lấy tên + phe hiện tại; bảng tra 49 tên nằm trong tool |
 | Biệt danh PVP Guild (全局变量 9231–9234) | "vô úy", "học thức", "bảo lũy", "tế thế" | viết hoa chữ đầu | |
 | Kỹ năng của vài đơn vị phụ | Y Sư: 3 kỹ năng đều tên "Y Sư"; Long Cát Công Chủ: 3 kỹ năng "Tiểu Long Nữ" (tên Kim Dung); Ace: đòn thường tên "Ace" | **chưa đổi** | đơn vị NPC/phụ, cần người vận hành đặt tên |
-| "Phổ Công" (普攻) làm tên đòn thường của mọi tướng | | **chưa đổi** | đổi sang "Đánh thường" là một dòng trong GLOSSARY của `chuan-hoa-dich.py` nếu muốn |
+| "Phổ Công" (普攻) làm tên đòn thường của mọi tướng | "Phổ Công" / "phổ công" (104 ô client: 49 tên kỹ năng, 52 tên/mô tả buff, 3 mô tả vật phẩm; 652 ô excel-src) | "Đánh thường" / "đánh thường" | một dòng GLOSSARY trong `chuan-hoa-dich.py` (quyết định 2026-09-10), áp bằng `templates-bin.py chu` và `chuan-hoa-dich.py --apply` |
 
 Không còn tên Kim Dung (bảng 文本库 trước đồng bộ, 3348 giá trị) ở bảng client nào khác; `神龙技能控制.标题`
 "Ứng Long Phá Giáp" khớp với 文本库 7150001 nên giữ.
@@ -69,19 +69,19 @@ chỉ ghi client.
 
 ## Phát hành đợt này
 
-Bản đã xuất: `ui/ui.bin → res/aace3-46ed5-baa8e`, `template/templates.bin → res/97cec-f37c6-5f56f`
-(manifest đã trỏ), bundle `libs/e228b-0b904-ac44c.js` (play.php bust cache theo mtime), 25 workbook
-trong `server/excel/release`. Máy này không có khoá SSH tới `haitac` (chỉ có `pgaming` của server cũ)
-nên chưa lên máy chủ:
+Bản đã xuất: `ui/ui.bin → res/aace3-46ed5-baa8e`, `template/templates.bin → res/97cec-0a229-5f56f`
+(manifest đã trỏ), bundle `libs/e228b-0b904-ac44c.js` (play.php bust cache theo mtime), 29 workbook
+trong `server/excel/release`. Deploy từ PC bằng `tools/deploy-haitac.sh` (push, upload res mới theo
+manifest, `up -d --build nginx php`; thêm `--excel` để copy Excel vào container game + restart game):
 
 ```bash
-# PC
-python tools/mask-secrets.py --check && git add -A && git commit && git push
-scp website/game/res/aace3-46ed5-baa8e website/game/res/97cec-f37c6-5f56f root@<haitac>:/opt/tcg/assets/res/
-# server (đã bật domain nên phải kèm docker-compose.domain.yml)
-cd /opt/tcg/src && git pull && cd docker && docker compose -f docker-compose.image.yml -f docker-compose.domain.yml up -d --build nginx php
-# Excel máy chủ chỉ để đồng bộ chữ (client tự vẽ từ bảng của nó) — cập nhật cùng lần build image Java kế tiếp là đủ
+bash tools/deploy-haitac.sh --check     # xem việc sẽ làm
+bash tools/deploy-haitac.sh --excel
 ```
+
+Cần một lần trước đó: đưa khoá `~/.ssh/haitac.pub` của PC vào `/root/.ssh/authorized_keys` của
+157.66.218.20 (script in sẵn lệnh khi không kết nối được). Excel máy chủ chỉ để đồng bộ chữ với client
+(client tự vẽ từ bảng của nó) — có thể để tới lần build image Java kế tiếp thay vì `--excel`.
 
 Lùi lại: manifest trỏ về `res/aace3-4b419-baa8e` / `res/97cec-60e97-5f56f` (hai file cũ vẫn nằm trên
 máy chủ), bundle từ `libs/e228b-0b904-ac44c.js.truoc-va-nhan-ghep`.

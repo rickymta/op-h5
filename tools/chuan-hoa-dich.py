@@ -93,6 +93,9 @@ GLOSSARY = [
     (r"số lần",                "lượt"),
     # 等级 — giu "cap", bo "dang cap" (dang cap = giai tang xa hoi)
     (r"đẳng cấp",              "cấp"),
+    # 普攻 — "Pho Cong" la am Han-Viet, nguoi choi doc khong ra; ten don thuong cua moi tuong
+    # (文本库), ten/mo ta buff, mo ta vat pham. Quyet dinh cua nguoi van hanh 2026-09-10.
+    (r"\bphổ công\b",          "đánh thường"),
 ]
 # Bo qua cac chuoi la TEN RIENG — thay trong ten ky nang/tuong se lam hong ten.
 BO_QUA = re.compile(r"Vạn (Pháp|Độc|Diệp|Hoa|Vật|Lý)|Ức Chế|Triệu (Lệ|Vân)")
